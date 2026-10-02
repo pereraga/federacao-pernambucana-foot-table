@@ -1,0 +1,13 @@
+{
+  "name": "federacao-pernambucana-foot-table",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Portal Oficial da Federação Pernambucana de Foot Table e FutMesa com Supabase e Vercel Keep-Alive",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1"
+  }
+}

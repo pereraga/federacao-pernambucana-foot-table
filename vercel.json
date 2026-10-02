@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "name": "federacao-pernambucana-foot-table",
+  "crons": [
+    {
+      "path": "/api/keep-alive",
+      "schedule": "0 12 * * *"
+    }
+  ]
+}
