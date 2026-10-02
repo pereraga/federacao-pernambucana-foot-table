@@ -95,6 +95,11 @@
         <a href="index.html" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-4 py-2 rounded-xl transition flex items-center gap-1.5">
           <span>🌐</span> Ver Site Público
         </a>
+
+        <!-- Botão Logout -->
+        <button onclick="handleLogout()" class="border border-red-500/40 hover:bg-red-950/40 text-red-400 font-bold text-xs uppercase px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 cursor-pointer" title="Sair do painel administrativo">
+          <span>🚪</span> Sair
+        </button>
       </div>
     </div>
   </header>
@@ -1265,9 +1270,27 @@
     }
 
     /* =========================================================
+       AUTENTICAÇÃO E SESSÃO DO ADMINISTRADOR
+       ========================================================= */
+    function checkAuth() {
+      const isLogged = sessionStorage.getItem('pe_admin_logged') === 'true' || localStorage.getItem('pe_admin_logged') === 'true';
+      if (!isLogged) {
+        window.location.href = 'login.html';
+      }
+    }
+
+    function handleLogout() {
+      sessionStorage.removeItem('pe_admin_logged');
+      localStorage.removeItem('pe_admin_logged');
+      window.location.href = 'login.html';
+    }
+
+    /* =========================================================
        INICIALIZAÇÃO GERAL
        ========================================================= */
     window.onload = function() {
+      checkAuth();
+
       // Carrega chaves salvas nos campos de config
       document.getElementById('adminCfgUrl').value = localStorage.getItem('pe_supabase_url') || DEFAULT_SUPABASE_URL;
       document.getElementById('adminCfgKey').value = localStorage.getItem('pe_supabase_anon_key') || '';
