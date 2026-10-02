@@ -503,8 +503,9 @@
     /* =======================================================
        CONFIGURAÇÃO SUPABASE
        ======================================================= */
-    // Chaves padrão ou salvas no navegador
-    let SUPABASE_URL = localStorage.getItem('pe_supabase_url') || "";
+    // URL oficial do projeto Supabase
+    const SUPABASE_PROJECT_URL = "https://qvnsahvdjhimlmtqrnif.supabase.co";
+    let SUPABASE_URL = localStorage.getItem('pe_supabase_url') || SUPABASE_PROJECT_URL;
     let SUPABASE_ANON_KEY = localStorage.getItem('pe_supabase_anon_key') || "";
     let supabaseClient = null;
 
