@@ -249,6 +249,9 @@
             </div>
           </div>
 
+          <!-- Textos e Áreas Customizadas do Estúdio -->
+          <div id="cardCustomTextsContainer" class="space-y-1 my-2"></div>
+
           <!-- Rodapé da Carteira -->
           <div class="bg-black/40 border-l-4 border-pe-gold p-3 rounded-lg flex items-center justify-between mt-4">
             <div>
@@ -421,58 +424,16 @@
         <span class="font-bold text-slate-400">Federação Pernambucana de FutMesa & Foot Table</span>
       </div>
       
-      <!-- Status do Supabase & Ping Keep-Alive -->
-      <div class="flex items-center gap-3">
-        <button id="btnOpenSupabaseModal" class="flex items-center gap-2 bg-[#0c1220] border border-pe-cardBorder hover:border-pe-gold/60 text-slate-400 hover:text-white px-3 py-1.5 rounded-lg transition text-[11px]">
-          <span id="supabaseStatusDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-          <span id="supabaseStatusText">Supabase: Verificando...</span>
-          <span class="text-pe-gold">⚙️</span>
-        </button>
+      <!-- Link para o Painel Administrativo -->
+      <div>
+        <a href="admin.html" class="text-[11px] text-slate-500 hover:text-pe-gold transition flex items-center gap-1.5 border border-pe-cardBorder hover:border-pe-gold/40 px-3 py-1.5 rounded-lg bg-black/30">
+          <span>🔒</span> Painel Administrativo
+        </a>
       </div>
 
       <p>© 2026 Todos os direitos reservados. Entidade estadual oficial de Foot Table em Pernambuco.</p>
     </div>
   </footer>
-
-  <!-- Modal de Configuração e Status do Supabase -->
-  <div id="supabaseModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-pe-card border border-pe-cardBorder rounded-2xl max-w-md w-full p-6 relative shadow-2xl">
-      <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0 rounded-t-2xl"></div>
-      
-      <div class="flex items-center justify-between mb-4 mt-2">
-        <div class="flex items-center gap-2 text-pe-gold font-oswald text-lg uppercase tracking-wide">
-          <span>⚡</span> Conexão Supabase & Keep-Alive
-        </div>
-        <button id="btnCloseSupabaseModal" class="text-slate-400 hover:text-white text-lg font-bold">✕</button>
-      </div>
-
-      <p class="text-xs text-slate-400 mb-4 leading-relaxed">
-        Configure as chaves do seu projeto Supabase para consultar atletas e notícias diretamente na nuvem.
-      </p>
-
-      <div class="space-y-3 text-xs">
-        <div>
-          <label class="block text-slate-300 font-bold mb-1">SUPABASE URL</label>
-          <input type="text" id="cfgSupabaseUrl" placeholder="https://xyzcompany.supabase.co" class="w-full bg-[#080b12] border border-pe-cardBorder rounded-lg px-3 py-2 text-slate-200 outline-none focus:border-pe-gold" />
-        </div>
-        <div>
-          <label class="block text-slate-300 font-bold mb-1">SUPABASE ANON KEY</label>
-          <input type="password" id="cfgSupabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full bg-[#080b12] border border-pe-cardBorder rounded-lg px-3 py-2 text-slate-200 outline-none focus:border-pe-gold" />
-        </div>
-      </div>
-
-      <div id="supabaseModalFeedback" class="mt-3 text-xs hidden"></div>
-
-      <div class="flex items-center gap-2 mt-5">
-        <button id="btnSaveSupabaseConfig" class="flex-1 bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase py-2.5 rounded-xl transition">
-          Salvar & Conectar
-        </button>
-        <button id="btnTestSupabasePing" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-1.5">
-          <span>📡</span> Testar Ping
-        </button>
-      </div>
-    </div>
-  </div>
 
   <!-- Script de Comportamento e Sincronização em Tempo Real -->
   <script>
@@ -746,76 +707,48 @@
     });
 
     /* =======================================================
-       MODAL DE CONFIGURAÇÃO DO SUPABASE
+       APLICAR PERSONALIZAÇÃO DE LAYOUT DA CARTEIRA (DO ADMIN)
        ======================================================= */
-    const modal = document.getElementById('supabaseModal');
-    const btnOpenModal = document.getElementById('btnOpenSupabaseModal');
-    const btnCloseModal = document.getElementById('btnCloseSupabaseModal');
-    const cfgUrlInput = document.getElementById('cfgSupabaseUrl');
-    const cfgKeyInput = document.getElementById('cfgSupabaseKey');
-    const modalFeedback = document.getElementById('supabaseModalFeedback');
+    function applySavedBadgeLayout() {
+      const savedLayout = JSON.parse(localStorage.getItem('pe_badge_layout_config'));
+      if (!savedLayout) return;
 
-    btnOpenModal.addEventListener('click', () => {
-      cfgUrlInput.value = localStorage.getItem('pe_supabase_url') || '';
-      cfgKeyInput.value = localStorage.getItem('pe_supabase_anon_key') || '';
-      modalFeedback.classList.add('hidden');
-      modal.classList.remove('hidden');
-    });
+      const card = document.getElementById('athleteCredentialCard');
+      const photo = document.getElementById('cardBadgePhoto');
+      const photoContainer = photo ? photo.parentElement : null;
 
-    btnCloseModal.addEventListener('click', () => {
-      modal.classList.add('hidden');
-    });
-
-    document.getElementById('btnSaveSupabaseConfig').addEventListener('click', () => {
-      const url = cfgUrlInput.value.trim();
-      const key = cfgKeyInput.value.trim();
-
-      if (url && key) {
-        localStorage.setItem('pe_supabase_url', url);
-        localStorage.setItem('pe_supabase_anon_key', key);
-        SUPABASE_URL = url;
-        SUPABASE_ANON_KEY = key;
-        initSupabase();
-        renderPublicNews();
-        modalFeedback.innerHTML = `<span class="text-emerald-400 font-bold">✓ Credenciais salvas com sucesso! Conexão ativada.</span>`;
-      } else {
-        localStorage.removeItem('pe_supabase_url');
-        localStorage.removeItem('pe_supabase_anon_key');
-        SUPABASE_URL = "";
-        SUPABASE_ANON_KEY = "";
-        supabaseClient = null;
-        initSupabase();
-        modalFeedback.innerHTML = `<span class="text-amber-400">Modo local ativado.</span>`;
-      }
-      modalFeedback.classList.remove('hidden');
-      setTimeout(() => modal.classList.add('hidden'), 1500);
-    });
-
-    document.getElementById('btnTestSupabasePing').addEventListener('click', async () => {
-      const url = cfgUrlInput.value.trim();
-      const key = cfgKeyInput.value.trim();
-
-      modalFeedback.classList.remove('hidden');
-      modalFeedback.innerHTML = `<span class="text-blue-400">Enviando ping de teste ao Supabase...</span>`;
-
-      if (!url || !key) {
-        modalFeedback.innerHTML = `<span class="text-red-400">Informe URL e Anon Key para testar.</span>`;
-        return;
+      if (card) {
+        if (savedLayout.cardWidth) card.style.maxWidth = savedLayout.cardWidth + 'px';
+        if (savedLayout.cardMinHeight) card.style.minHeight = savedLayout.cardMinHeight + 'px';
+        if (savedLayout.cardBorderRadius) card.style.borderRadius = savedLayout.cardBorderRadius + 'px';
+        if (savedLayout.cardPadding) card.style.padding = savedLayout.cardPadding + 'px';
+        if (savedLayout.borderColor) card.style.borderColor = savedLayout.borderColor;
       }
 
-      try {
-        const testClient = window.supabase.createClient(url, key);
-        const { data, error } = await testClient.from('atletas').select('id').limit(1);
+      if (photoContainer) {
+        if (savedLayout.photoWidth) photoContainer.style.width = savedLayout.photoWidth + 'px';
+        if (savedLayout.photoHeight) photoContainer.style.height = savedLayout.photoHeight + 'px';
+        if (savedLayout.photoRadius) photoContainer.style.borderRadius = savedLayout.photoRadius + 'px';
+      }
 
-        if (error) {
-          modalFeedback.innerHTML = `<span class="text-red-400">Erro: ${error.message}</span>`;
-        } else {
-          modalFeedback.innerHTML = `<span class="text-emerald-400 font-bold">✓ Ping com sucesso! O banco de dados respondeu perfeitamente.</span>`;
+      // Adiciona textos adicionais customizados configurados pelo admin
+      const customContainer = document.getElementById('cardCustomTextsContainer');
+      if (customContainer) {
+        customContainer.innerHTML = '';
+        if (savedLayout.customTexts && Array.isArray(savedLayout.customTexts)) {
+          savedLayout.customTexts.forEach(t => {
+            const div = document.createElement('div');
+            div.style.fontSize = (t.fontSize || 11) + 'px';
+            div.style.color = t.color || '#f5b800';
+            div.style.textAlign = t.align || 'left';
+            div.style.marginTop = (t.marginTop || 4) + 'px';
+            div.style.fontWeight = 'bold';
+            div.textContent = t.text;
+            customContainer.appendChild(div);
+          });
         }
-      } catch (err) {
-        modalFeedback.innerHTML = `<span class="text-red-400">Erro na requisição: ${err.message}</span>`;
       }
-    });
+    }
 
     /* =======================================================
        SINCRONIZAÇÃO EM TEMPO REAL
@@ -827,12 +760,16 @@
       if (e.key === 'pe_athletes_db' && !document.getElementById('publicBadgeResultArea').classList.contains('hidden')) {
         executePublicSearch();
       }
+      if (e.key === 'pe_badge_layout_config') {
+        applySavedBadgeLayout();
+      }
     });
 
     // Inicialização ao carregar página
     window.onload = function() {
       initSupabase();
       renderPublicNews();
+      applySavedBadgeLayout();
     };
   </script>
 </body>

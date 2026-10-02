@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel de Controle | Federação Pernambucana de Foot Table</title>
+  <link rel="icon" type="image/png" href="assets/images/logo-federacao.png" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Oswald:wght@500;600;700&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- html2canvas for instant HD PNG badge export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            pe: {
+              blue: '#0044cc',
+              darkblue: '#06173a',
+              gold: '#f5b800',
+              goldHover: '#e0a700',
+              red: '#d32f2f',
+              green: '#00a859',
+              dark: '#080b12',
+              card: '#0f1422',
+              cardBorder: '#1c253b',
+              accent: '#182238'
+            }
+          },
+          fontFamily: {
+            sans: ['Montserrat', 'sans-serif'],
+            oswald: ['Oswald', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    ::-webkit-scrollbar { width: 7px; height: 7px; }
+    ::-webkit-scrollbar-track { background: #080b12; }
+    ::-webkit-scrollbar-thumb { background: #1e2840; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #f5b800; }
+    .pe-stripe-bar {
+      background: linear-gradient(90deg, #0044cc 0%, #0044cc 40%, #f5b800 40%, #f5b800 70%, #d32f2f 70%, #d32f2f 100%);
+    }
+  </style>
+</head>
+<body class="bg-pe-dark text-slate-100 min-h-screen flex flex-col font-sans selection:bg-pe-gold selection:text-pe-dark">
+
+  <!-- Header Administrativo -->
+  <header class="bg-pe-dark/95 backdrop-blur border-b border-pe-cardBorder sticky top-0 z-40">
+    <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+      
+      <!-- Brand Admin -->
+      <div class="flex items-center gap-3">
+        <div class="rounded-full bg-pe-darkblue border-2 border-pe-gold p-0.5 overflow-hidden shrink-0" style="width: 44px; height: 44px;">
+          <img src="assets/images/logo-federacao.png" alt="Federação Pernambucana" class="w-full h-full object-contain rounded-full" />
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-oswald text-lg uppercase font-bold text-white tracking-wide">
+              Painel de Controle
+            </span>
+            <span class="bg-pe-gold text-pe-dark text-[10px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider">
+              ADMIN
+            </span>
+          </div>
+          <span class="block text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+            Federação Pernambucana de Foot Table
+          </span>
+        </div>
+      </div>
+
+      <!-- Ações do Topo -->
+      <div class="flex items-center gap-3">
+        <!-- Status da Conexão Supabase -->
+        <div class="flex items-center gap-2 bg-[#0c1220] border border-pe-cardBorder px-3 py-1.5 rounded-lg text-xs">
+          <span id="adminDbStatusDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+          <span id="adminDbStatusText" class="text-slate-300 font-mono text-[11px]">Conectando...</span>
+        </div>
+
+        <a href="index.html" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-4 py-2 rounded-xl transition flex items-center gap-1.5">
+          <span>🌐</span> Ver Site Público
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navegação de Abas Administrativas -->
+  <div class="bg-pe-card/80 border-b border-pe-cardBorder sticky top-[61px] z-30 backdrop-blur">
+    <div class="max-w-7xl mx-auto px-4 flex items-center gap-2 overflow-x-auto py-2.5">
+      <button onclick="switchTab('atletas')" id="tabBtn-atletas" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition flex items-center gap-2 bg-pe-gold text-pe-dark shadow-sm">
+        <span>🪪</span> Carteiras & Atletas
+      </button>
+      <button onclick="switchTab('estudio')" id="tabBtn-estudio" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition flex items-center gap-2 text-slate-400 hover:text-white hover:bg-pe-card">
+        <span>🎨</span> Estúdio da Carteira (Dimensões & Textos)
+      </button>
+      <button onclick="switchTab('noticias')" id="tabBtn-noticias" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition flex items-center gap-2 text-slate-400 hover:text-white hover:bg-pe-card">
+        <span>📰</span> Notícias & Torneios
+      </button>
+      <button onclick="switchTab('config')" id="tabBtn-config" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition flex items-center gap-2 text-slate-400 hover:text-white hover:bg-pe-card">
+        <span>⚙️</span> Banco de Dados & Keep-Alive
+      </button>
+    </div>
+  </div>
+
+  <!-- Conteúdo Principal -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+
+    <!-- ========================================================= -->
+    <!-- ABA 1: CARTEIRAS & ATLETAS FEDERADOS                      -->
+    <!-- ========================================================= -->
+    <div id="tabContent-atletas" class="space-y-8">
+      
+      <!-- Cabeçalho da Seção -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Registros Oficiais</span>
+          <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Emissão de Carteiras & Atletas</h2>
+        </div>
+        <button onclick="generateRandomAthleteCode()" class="bg-pe-card hover:bg-pe-accent border border-pe-cardBorder text-pe-gold font-mono font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2">
+          <span>🎲</span> Gerar Novo Código de 6 Dígitos
+        </button>
+      </div>
+
+      <!-- Grid: Formulário de Cadastro + Preview ao Vivo -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Formulário de Cadastro do Atleta -->
+        <div class="lg:col-span-6 bg-pe-card border border-pe-cardBorder rounded-2xl p-6 shadow-xl relative">
+          <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0 rounded-t-2xl"></div>
+
+          <h3 class="font-oswald text-lg uppercase font-bold text-white mb-4 flex items-center gap-2">
+            <span>📝</span> Dados da Filiação Federativa
+          </h3>
+
+          <form id="athleteForm" onsubmit="handleSaveAthlete(event)" class="space-y-4 text-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-slate-300 font-bold mb-1">Código Oficial (6 Dígitos) *</label>
+                <input type="text" id="athleteCode" required maxlength="6" placeholder="ex: 742918" inputmode="numeric" class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-pe-gold font-mono font-bold text-sm outline-none" />
+              </div>
+              <div>
+                <label class="block text-slate-300 font-bold mb-1">Status Federativo</label>
+                <select id="athleteStatus" class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 outline-none">
+                  <option value="REGULAR">REGULAR (Ativo)</option>
+                  <option value="HOMOLOGADO">HOMOLOGADO</option>
+                  <option value="PENDENTE">PENDENTE</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-slate-300 font-bold mb-1">Nome Completo do Atleta *</label>
+              <input type="text" id="athleteName" required placeholder="ex: João Silva de Carvalho" class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-white font-bold outline-none" />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-slate-300 font-bold mb-1">CPF</label>
+                <input type="text" id="athleteCpf" placeholder="000.000.000-00" class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 font-mono outline-none" />
+              </div>
+              <div>
+                <label class="block text-slate-300 font-bold mb-1">Data de Nascimento</label>
+                <input type="text" id="athleteBirth" placeholder="DD/MM/AAAA" class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 font-mono outline-none" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-slate-300 font-bold mb-1">Município - Estado</label>
+                <input type="text" id="athleteCity" placeholder="ex: Recife - PE" class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 outline-none" />
+              </div>
+              <div>
+                <label class="block text-slate-300 font-bold mb-1">Modalidade Homologada</label>
+                <select id="athleteModality" class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 outline-none">
+                  <option value="SOLO (INDIVIDUAL)">SOLO (INDIVIDUAL)</option>
+                  <option value="DUPLA (EQUIPE)">DUPLA (EQUIPE)</option>
+                  <option value="SOLO & DUPLA">SOLO & DUPLA</option>
+                  <option value="MASTER 40+">MASTER 40+</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Upload da Foto Oficial -->
+            <div>
+              <label class="block text-slate-300 font-bold mb-1">Foto Oficial do Atleta (Carteira)</label>
+              <div class="flex items-center gap-3">
+                <input type="file" id="athletePhotoFile" accept="image/*" onchange="handlePhotoUpload(event)" class="text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-pe-blue file:text-white hover:file:bg-blue-600 file:cursor-pointer" />
+              </div>
+              <input type="hidden" id="athletePhotoBase64" />
+            </div>
+
+            <div id="athleteFeedback" class="hidden text-xs p-3 rounded-xl"></div>
+
+            <div class="pt-2 flex items-center gap-3">
+              <button type="submit" class="flex-1 bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase tracking-wider py-3.5 rounded-xl transition shadow flex items-center justify-center gap-2">
+                <span>💾</span> Salvar Atleta no Banco de Dados
+              </button>
+              <button type="button" onclick="clearAthleteForm()" class="bg-pe-card border border-pe-cardBorder hover:border-slate-500 text-slate-400 font-bold text-xs uppercase px-4 py-3.5 rounded-xl transition">
+                Limpar
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Preview da Carteira em Tempo Real -->
+        <div class="lg:col-span-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              Visualização da Carteira Gerada
+            </span>
+            <button onclick="downloadLivePreviewBadge()" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
+              <span>💾</span> Baixar PNG HD
+            </button>
+          </div>
+
+          <!-- Credencial do Atleta Dinâmica -->
+          <div id="adminLiveCard" class="w-full bg-gradient-to-br from-[#06173a] to-[#040813] border-2 border-pe-gold rounded-2xl p-6 relative overflow-hidden shadow-2xl transition-all">
+            <!-- Marca d'água -->
+            <div class="absolute -right-6 -bottom-6 text-white/[0.03] font-oswald font-black text-7xl select-none pointer-events-none">
+              PERNAMBUCO
+            </div>
+
+            <!-- Topo da Carteira -->
+            <div class="flex items-center justify-between border-b border-pe-gold/25 pb-4 mb-4">
+              <div class="flex items-center gap-3">
+                <div class="rounded-full border border-pe-gold overflow-hidden bg-pe-darkblue p-0.5 flex items-center justify-center shrink-0" style="width: 42px; height: 42px;">
+                  <img src="assets/images/logo-federacao.png" alt="Federação Pernambucana" class="w-full h-full object-contain rounded-full" />
+                </div>
+                <div>
+                  <h4 class="font-oswald text-sm uppercase font-bold text-pe-gold tracking-wide leading-tight">Pernambuco FutMesa</h4>
+                  <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest block">Foot Table Federation</span>
+                </div>
+              </div>
+              
+              <div class="bg-pe-red text-white text-xs font-mono font-bold px-3 py-1 rounded shadow-md tracking-wider" id="previewBadgeCode">
+                ID: #000000
+              </div>
+            </div>
+
+            <!-- Conteúdo: Foto e Dados -->
+            <div class="grid grid-cols-[100px_1fr] gap-5 items-center my-4">
+              <div id="previewPhotoContainer" class="w-[100px] h-[125px] rounded-lg border-2 border-pe-gold overflow-hidden bg-slate-900 shadow-inner flex items-center justify-center shrink-0 transition-all">
+                <img id="previewBadgePhoto" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" alt="Foto Atleta" class="w-full h-full object-cover" />
+              </div>
+              <div class="space-y-1.5 text-xs">
+                <div>
+                  <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Nome do Atleta</span>
+                  <strong class="text-white text-base font-bold font-oswald uppercase tracking-wide block" id="previewBadgeName">Nome do Atleta</strong>
+                </div>
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                  <div>
+                    <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">CPF</span>
+                    <span class="text-slate-200 font-mono" id="previewBadgeCpf">000.000.000-00</span>
+                  </div>
+                  <div>
+                    <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Nascimento</span>
+                    <span class="text-slate-200 font-mono" id="previewBadgeBirth">--/--/----</span>
+                  </div>
+                </div>
+                <div class="pt-1">
+                  <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Município</span>
+                  <span class="text-slate-200 font-semibold" id="previewBadgeCity">Pernambuco</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Container de Textos Personalizados da Carteira -->
+            <div id="previewCustomTextsContainer" class="space-y-1 my-2"></div>
+
+            <!-- Rodapé da Carteira -->
+            <div class="bg-black/40 border-l-4 border-pe-gold p-3 rounded-lg flex items-center justify-between mt-4">
+              <div>
+                <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">Modalidade Homologada</span>
+                <span class="text-xs font-extrabold uppercase text-pe-gold tracking-wide" id="previewBadgeModality">SOLO (INDIVIDUAL)</span>
+              </div>
+              <div class="text-right">
+                <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">Status Federado</span>
+                <span class="text-[10px] font-bold uppercase text-emerald-400 flex items-center gap-1" id="previewBadgeStatus">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> REGULAR
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabela / Lista de Atletas Cadastrados -->
+      <div class="bg-pe-card border border-pe-cardBorder rounded-2xl p-6 shadow-xl">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <h3 class="font-oswald text-xl uppercase font-bold text-white flex items-center gap-2">
+            <span>📋</span> Atletas Federados Cadastrados no Banco
+          </h3>
+          <input type="text" id="searchAthleteTable" oninput="filterAthletesTable()" placeholder="Filtrar por nome ou código..." class="bg-[#080b12] border border-pe-cardBorder rounded-xl px-4 py-2 text-xs text-white outline-none focus:border-pe-gold" />
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-pe-dark/60 text-slate-400 uppercase text-[10px] font-mono border-b border-pe-cardBorder">
+              <tr>
+                <th class="py-3 px-4">Foto</th>
+                <th class="py-3 px-4">Código (6D)</th>
+                <th class="py-3 px-4">Nome do Atleta</th>
+                <th class="py-3 px-4">CPF</th>
+                <th class="py-3 px-4">Município</th>
+                <th class="py-3 px-4">Modalidade</th>
+                <th class="py-3 px-4">Status</th>
+                <th class="py-3 px-4 text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="athletesTableBody" class="divide-y divide-pe-cardBorder/60">
+              <!-- Inserido dinamicamente -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- ABA 2: ESTÚDIO DA CARTEIRA (PERSONALIZAÇÃO DE DIMENSÕES)  -->
+    <!-- ========================================================= -->
+    <div id="tabContent-estudio" class="space-y-8 hidden">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Customizador Visual</span>
+          <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Estúdio & Dimensões da Carteira</h2>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="saveBadgeStudioLayout()" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase px-5 py-2.5 rounded-xl transition shadow flex items-center gap-1.5">
+            <span>💾</span> Salvar Layout Oficial
+          </button>
+          <button onclick="resetBadgeStudioLayout()" class="bg-pe-card border border-pe-cardBorder text-slate-400 hover:text-white text-xs uppercase px-4 py-2.5 rounded-xl transition">
+            Padrão
+          </button>
+        </div>
+      </div>
+
+      <!-- Grid: Controles de Dimensão + Preview Interativo -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Painel de Controles -->
+        <div class="lg:col-span-5 bg-pe-card border border-pe-cardBorder rounded-2xl p-6 shadow-xl space-y-6 text-xs">
+          
+          <!-- Dimensões da Carteira -->
+          <div>
+            <h4 class="font-oswald text-base uppercase font-bold text-pe-gold mb-3 flex items-center gap-2">
+              <span>📐</span> Dimensões da Carteira
+            </h4>
+            <div class="space-y-3">
+              <div>
+                <div class="flex justify-between text-slate-300 font-bold mb-1">
+                  <span>Largura da Carteira:</span>
+                  <span id="valCardWidth" class="text-pe-gold font-mono">540px</span>
+                </div>
+                <input type="range" id="inputCardWidth" min="400" max="680" value="540" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
+              </div>
+
+              <div>
+                <div class="flex justify-between text-slate-300 font-bold mb-1">
+                  <span>Altura Mínima:</span>
+                  <span id="valCardHeight" class="text-pe-gold font-mono">300px</span>
+                </div>
+                <input type="range" id="inputCardHeight" min="250" max="480" value="300" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
+              </div>
+
+              <div>
+                <div class="flex justify-between text-slate-300 font-bold mb-1">
+                  <span>Espaçamento Interno (Padding):</span>
+                  <span id="valCardPadding" class="text-pe-gold font-mono">24px</span>
+                </div>
+                <input type="range" id="inputCardPadding" min="12" max="36" value="24" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
+              </div>
+
+              <div>
+                <div class="flex justify-between text-slate-300 font-bold mb-1">
+                  <span>Raio dos Cantos (Borda):</span>
+                  <span id="valCardRadius" class="text-pe-gold font-mono">16px</span>
+                </div>
+                <input type="range" id="inputCardRadius" min="4" max="32" value="16" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Dimensões da Foto do Atleta -->
+          <div class="border-t border-pe-cardBorder pt-4">
+            <h4 class="font-oswald text-base uppercase font-bold text-pe-gold mb-3 flex items-center gap-2">
+              <span>🖼️</span> Dimensões da Foto do Atleta
+            </h4>
+            <div class="space-y-3">
+              <div>
+                <div class="flex justify-between text-slate-300 font-bold mb-1">
+                  <span>Largura da Foto:</span>
+                  <span id="valPhotoWidth" class="text-pe-gold font-mono">100px</span>
+                </div>
+                <input type="range" id="inputPhotoWidth" min="70" max="150" value="100" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
+              </div>
+
+              <div>
+                <div class="flex justify-between text-slate-300 font-bold mb-1">
+                  <span>Altura da Foto:</span>
+                  <span id="valPhotoHeight" class="text-pe-gold font-mono">125px</span>
+                </div>
+                <input type="range" id="inputPhotoHeight" min="90" max="180" value="125" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
+              </div>
+
+              <div>
+                <div class="flex justify-between text-slate-300 font-bold mb-1">
+                  <span>Arredondamento da Foto:</span>
+                  <span id="valPhotoRadius" class="text-pe-gold font-mono">8px</span>
+                </div>
+                <input type="range" id="inputPhotoRadius" min="0" max="30" value="8" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Textos Personalizados Adicionais -->
+          <div class="border-t border-pe-cardBorder pt-4">
+            <div class="flex items-center justify-between mb-3">
+              <h4 class="font-oswald text-base uppercase font-bold text-pe-gold flex items-center gap-2">
+                <span>🔤</span> Textos Adicionais na Carteira
+              </h4>
+              <button onclick="addCustomTextItem()" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-[10px] uppercase px-2.5 py-1 rounded-lg transition">
+                + Adicionar Texto
+              </button>
+            </div>
+
+            <div id="customTextsList" class="space-y-3">
+              <!-- Itens de texto criados dinamicamente -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Preview no Estúdio -->
+        <div class="lg:col-span-7 sticky top-28 space-y-4">
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span>Visualização Dinâmica do Estúdio</span>
+            <span class="text-emerald-400 font-mono">● Atualizando ao vivo</span>
+          </div>
+
+          <!-- O cartão do estúdio usa o mesmo estilo que o preview da aba 1 -->
+          <div class="p-6 bg-black/40 border border-pe-cardBorder rounded-2xl flex items-center justify-center overflow-x-auto">
+            <div id="studioCardWrapper" class="transition-all">
+              <!-- Clonado ou sincronizado via script -->
+            </div>
+          </div>
+
+          <div id="studioSaveNotification" class="hidden p-3 bg-emerald-950/40 border border-emerald-500/40 rounded-xl text-xs text-emerald-300 text-center font-bold">
+            ✓ Configurações de Dimensões e Textos salvas com sucesso! O site público usará este padrão.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- ABA 3: NOTÍCIAS & TORNEIOS                                -->
+    <!-- ========================================================= -->
+    <div id="tabContent-noticias" class="space-y-8 hidden">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Boletins Oficiais</span>
+          <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Gerenciar Notícias & Torneios</h2>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- Formulário de Notícia -->
+        <div class="lg:col-span-5 bg-pe-card border border-pe-cardBorder rounded-2xl p-6 shadow-xl relative">
+          <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0 rounded-t-2xl"></div>
+
+          <h3 class="font-oswald text-lg uppercase font-bold text-white mb-4 flex items-center gap-2">
+            <span>✍️</span> Publicar Nova Notícia
+          </h3>
+
+          <form id="newsForm" onsubmit="handleSaveNews(event)" class="space-y-4 text-xs">
+            <div>
+              <label class="block text-slate-300 font-bold mb-1">Título da Matéria *</label>
+              <input type="text" id="newsTitle" required placeholder="ex: II Campeonato Mundial de Foot Table" class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-white font-bold outline-none" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-slate-300 font-bold mb-1">Categoria</label>
+                <select id="newsCategory" class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 outline-none">
+                  <option value="MUNDIAL ROMA">MUNDIAL ROMA</option>
+                  <option value="CAMPEONATO">CAMPEONATO</option>
+                  <option value="REGULAMENTO">REGULAMENTO</option>
+                  <option value="INFORMATIVO">INFORMATIVO</option>
+                  <option value="COMUNICADO">COMUNICADO</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-slate-300 font-bold mb-1">Data</label>
+                <input type="text" id="newsDate" placeholder="ex: 02/10/2026" class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 font-mono outline-none" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-slate-300 font-bold mb-1">Conteúdo / Resumo *</label>
+              <textarea id="newsContent" rows="4" required placeholder="Digite os detalhes da notícia oficial..." class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-300 outline-none"></textarea>
+            </div>
+
+            <div id="newsFeedback" class="hidden text-xs p-3 rounded-xl"></div>
+
+            <button type="submit" class="w-full bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition flex items-center justify-center gap-2">
+              <span>🚀</span> Publicar no Site & Supabase
+            </button>
+          </form>
+        </div>
+
+        <!-- Lista de Notícias Cadastradas -->
+        <div class="lg:col-span-7 space-y-4">
+          <h3 class="font-oswald text-xl uppercase font-bold text-white flex items-center gap-2">
+            <span>📰</span> Notícias no Ar
+          </h3>
+          <div id="adminNewsList" class="space-y-3">
+            <!-- Inserido dinamicamente -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- ABA 4: CONFIGURAÇÃO DO BANCO & KEEP-ALIVE                 -->
+    <!-- ========================================================= -->
+    <div id="tabContent-config" class="space-y-8 hidden">
+      <div>
+        <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Integração na Nuvem</span>
+        <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Configuração do Supabase & Keep-Alive</h2>
+      </div>
+
+      <div class="max-w-3xl bg-pe-card border border-pe-cardBorder rounded-2xl p-6 sm:p-8 space-y-6 shadow-xl relative">
+        <div class="pe-stripe-bar h-1.5 w-full absolute top-0 left-0 rounded-t-2xl"></div>
+
+        <div class="space-y-4 text-xs">
+          <div>
+            <label class="block text-slate-300 font-bold mb-1">URL do Supabase (Project URL)</label>
+            <input type="text" id="adminCfgUrl" value="https://qvnsahvdjhimlmtqrnif.supabase.co" class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-4 py-3 text-slate-200 font-mono outline-none" />
+          </div>
+
+          <div>
+            <label class="block text-slate-300 font-bold mb-1">Chave Anon (anon public key)</label>
+            <input type="password" id="adminCfgKey" placeholder="Cole sua chave eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-4 py-3 text-slate-200 font-mono outline-none" />
+          </div>
+
+          <div id="adminConfigFeedback" class="hidden p-3 rounded-xl text-xs font-bold"></div>
+
+          <div class="flex flex-wrap items-center gap-3 pt-2">
+            <button onclick="handleSaveAdminConfig()" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase px-6 py-3 rounded-xl transition">
+              Salvar Credenciais
+            </button>
+            <button onclick="testSupabaseConnection()" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-5 py-3 rounded-xl transition flex items-center gap-2">
+              <span>📡</span> Testar Conexão com o Banco
+            </button>
+          </div>
+        </div>
+
+        <!-- Explicação do Keep-Alive Ativo -->
+        <div class="bg-pe-dark/80 border border-pe-cardBorder rounded-xl p-4 text-xs space-y-2 mt-6">
+          <div class="flex items-center gap-2 text-pe-gold font-bold uppercase tracking-wider">
+            <span>🛡️</span> Sistema Anti-Pausa Automático (Vercel Keep-Alive)
+          </div>
+          <p class="text-slate-400 leading-relaxed">
+            A rota <code class="text-pe-gold bg-black/50 px-1.5 py-0.5 rounded">/api/keep-alive</code> foi agendada na Vercel para rodar diariamente de forma automática. Ela consulta a tabela <code class="text-slate-300">keep_alive_logs</code> do seu Supabase, garantindo que o banco de dados nunca seja pausado pelo limite de 7 dias de inatividade.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Rodapé do Admin -->
+  <footer class="bg-[#05070c] border-t border-pe-cardBorder py-6 px-4 text-center text-xs text-slate-500">
+    <p>Federação Pernambucana de FutMesa & Foot Table — Sistema de Gestão e Emissão Federativa © 2026</p>
+  </footer>
+
+  <!-- ========================================================= -->
+  <!-- SCRIPT DE COMPORTAMENTO E CONTROLE GERAL                  -->
+  <!-- ========================================================= -->
+  <script>
+    // Configurações Padrão
+    const DEFAULT_SUPABASE_URL = "https://qvnsahvdjhimlmtqrnif.supabase.co";
+    let SUPABASE_URL = localStorage.getItem('pe_supabase_url') || DEFAULT_SUPABASE_URL;
+    let SUPABASE_ANON_KEY = localStorage.getItem('pe_supabase_anon_key') || "";
+    let supabaseClient = null;
+
+    // Layout padrão da carteira
+    const DEFAULT_BADGE_LAYOUT = {
+      cardWidth: 540,
+      cardMinHeight: 300,
+      cardPadding: 24,
+      cardBorderRadius: 16,
+      borderColor: '#f5b800',
+      photoWidth: 100,
+      photoHeight: 125,
+      photoRadius: 8,
+      customTexts: [
+        { id: 1, text: "REGISTRO OFICIAL FEDERADO — PE", fontSize: 10, color: "#f5b800", align: "left", marginTop: 4 }
+      ]
+    };
+
+    let currentBadgeLayout = JSON.parse(localStorage.getItem('pe_badge_layout_config')) || DEFAULT_BADGE_LAYOUT;
+
+    // Atletas e Notícias Locais (Fallback)
+    const DEFAULT_ATHLETES = [
+      {
+        id: 101,
+        codigo: "742918",
+        nome: "Matheus Vinicius Ferraz",
+        cpf: "123.456.789-00",
+        nascimento: "14/05/1998",
+        municipio: "Recife - PE",
+        modalidade: "SOLO (INDIVIDUAL)",
+        status: "REGULAR",
+        foto: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80"
+      },
+      {
+        id: 102,
+        codigo: "581902",
+        nome: "Camila Duarte Silveira",
+        cpf: "987.654.321-11",
+        nascimento: "22/11/2001",
+        municipio: "Olinda - PE",
+        modalidade: "DUPLA (EQUIPE)",
+        status: "REGULAR",
+        foto: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80"
+      }
+    ];
+
+    const DEFAULT_NEWS = [
+      {
+        id: 1,
+        title: "II Campeonato Mundial de Futebol de Mesa — Roma aguarda seus novos campeões",
+        category: "MUNDIAL ROMA",
+        content: "O Campeonato Mundial começa de 1 a 4 de outubro em Roma, Itália, com mais de 50 países competindo em todas as categorias de Foot Table.",
+        date: "28/09/2026"
+      },
+      {
+        id: 2,
+        title: "Vitória Fernandes chega a Roma como a mulher a ser batida no circuito mundial",
+        category: "CAMPEONATO",
+        content: "A estrela brasileira lidera os rankings mundiais de simples e duplas femininas com 2.000 pontos acumulados na temporada.",
+        date: "25/09/2026"
+      }
+    ];
+
+    /* =========================================================
+       INICIALIZAÇÃO DO SUPABASE
+       ========================================================= */
+    function initSupabase() {
+      const dot = document.getElementById('adminDbStatusDot');
+      const text = document.getElementById('adminDbStatusText');
+
+      if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY) {
+        try {
+          supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
+          text.textContent = "Supabase Conectado";
+          return true;
+        } catch (e) {
+          console.warn("Erro ao instanciar Supabase:", e);
+        }
+      }
+      dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
+      text.textContent = "Modo Local (Offline)";
+      return false;
+    }
+
+    /* =========================================================
+       SISTEMA DE NAVEGAÇÃO ENTRE ABAS
+       ========================================================= */
+    function switchTab(tabName) {
+      const tabs = ['atletas', 'estudio', 'noticias', 'config'];
+      tabs.forEach(t => {
+        const content = document.getElementById(`tabContent-${t}`);
+        const btn = document.getElementById(`tabBtn-${t}`);
+        if (t === tabName) {
+          content.classList.remove('hidden');
+          btn.className = "tab-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition flex items-center gap-2 bg-pe-gold text-pe-dark shadow-sm";
+        } else {
+          content.classList.add('hidden');
+          btn.className = "tab-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition flex items-center gap-2 text-slate-400 hover:text-white hover:bg-pe-card";
+        }
+      });
+
+      if (tabName === 'estudio') {
+        syncStudioWithCurrentLayout();
+      }
+    }
+
+    /* =========================================================
+       GERENCIAMENTO DE ATLETAS (ABA 1)
+       ========================================================= */
+    function generateRandomAthleteCode() {
+      const code = String(Math.floor(100000 + Math.random() * 900000));
+      document.getElementById('athleteCode').value = code;
+      updateLivePreview();
+    }
+
+    function handlePhotoUpload(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const base64 = event.target.result;
+          document.getElementById('athletePhotoBase64').value = base64;
+          document.getElementById('previewBadgePhoto').src = base64;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // Atualiza o preview dinâmico enquanto o usuário digita no form
+    ['athleteCode', 'athleteName', 'athleteCpf', 'athleteBirth', 'athleteCity', 'athleteModality', 'athleteStatus'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', updateLivePreview);
+      }
+    });
+
+    function updateLivePreview() {
+      const code = document.getElementById('athleteCode').value || "000000";
+      const name = document.getElementById('athleteName').value || "Nome do Atleta";
+      const cpf = document.getElementById('athleteCpf').value || "000.000.000-00";
+      const birth = document.getElementById('athleteBirth').value || "--/--/----";
+      const city = document.getElementById('athleteCity').value || "Pernambuco";
+      const modality = document.getElementById('athleteModality').value;
+      const status = document.getElementById('athleteStatus').value;
+
+      document.getElementById('previewBadgeCode').textContent = `ID: #${code}`;
+      document.getElementById('previewBadgeName').textContent = name;
+      document.getElementById('previewBadgeCpf').textContent = cpf;
+      document.getElementById('previewBadgeBirth').textContent = birth;
+      document.getElementById('previewBadgeCity').textContent = city;
+      document.getElementById('previewBadgeModality').textContent = modality;
+      document.getElementById('previewBadgeStatus').innerHTML = `
+        <span class="w-2 h-2 rounded-full ${status === 'REGULAR' ? 'bg-emerald-400' : 'bg-amber-400'} animate-pulse"></span> ${status}
+      `;
+    }
+
+    async function handleSaveAthlete(e) {
+      e.preventDefault();
+      const code = document.getElementById('athleteCode').value.trim();
+      const name = document.getElementById('athleteName').value.trim();
+      const cpf = document.getElementById('athleteCpf').value.trim();
+      const birth = document.getElementById('athleteBirth').value.trim();
+      const city = document.getElementById('athleteCity').value.trim();
+      const modality = document.getElementById('athleteModality').value;
+      const status = document.getElementById('athleteStatus').value;
+      const photo = document.getElementById('athletePhotoBase64').value || document.getElementById('previewBadgePhoto').src;
+
+      const feedback = document.getElementById('athleteFeedback');
+      feedback.classList.remove('hidden');
+      feedback.className = "text-xs p-3 rounded-xl bg-blue-950/40 border border-blue-500/40 text-blue-300";
+      feedback.textContent = "Salvando atleta no banco de dados...";
+
+      const athleteObj = {
+        codigo: code,
+        nome: name,
+        cpf: cpf,
+        nascimento: birth,
+        municipio: city,
+        modalidade: modality,
+        status: status,
+        foto_url: photo
+      };
+
+      // 1. Tenta salvar no Supabase
+      let savedInSupabase = false;
+      if (supabaseClient) {
+        try {
+          const { data, error } = await supabaseClient
+            .from('atletas')
+            .upsert([athleteObj], { onConflict: 'codigo' });
+
+          if (!error) savedInSupabase = true;
+          else console.warn("Erro ao salvar no Supabase:", error);
+        } catch (err) {
+          console.warn("Falha de rede Supabase:", err);
+        }
+      }
+
+      // 2. Salva localmente (Garantia e Fallback)
+      let localAthletes = JSON.parse(localStorage.getItem('pe_athletes_db')) || DEFAULT_ATHLETES;
+      const existingIdx = localAthletes.findIndex(a => String(a.codigo) === String(code));
+      if (existingIdx >= 0) {
+        localAthletes[existingIdx] = { ...localAthletes[existingIdx], ...athleteObj, foto: photo };
+      } else {
+        localAthletes.unshift({ id: Date.now(), ...athleteObj, foto: photo });
+      }
+      localStorage.setItem('pe_athletes_db', JSON.stringify(localAthletes));
+
+      feedback.className = "text-xs p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 font-bold";
+      feedback.innerHTML = `✓ Atleta #${code} cadastrado com sucesso! ${savedInSupabase ? '(Sincronizado com Supabase)' : '(Salvo localmente)'}.`;
+
+      renderAthletesTable();
+    }
+
+    async function loadAthletes() {
+      let list = JSON.parse(localStorage.getItem('pe_athletes_db')) || DEFAULT_ATHLETES;
+      if (supabaseClient) {
+        try {
+          const { data, error } = await supabaseClient.from('atletas').select('*').order('created_at', { ascending: false });
+          if (!error && data && data.length > 0) {
+            list = data.map(d => ({
+              id: d.id,
+              codigo: d.codigo,
+              nome: d.nome,
+              cpf: d.cpf,
+              nascimento: d.nascimento,
+              municipio: d.municipio,
+              modalidade: d.modalidade,
+              status: d.status,
+              foto: d.foto_url
+            }));
+            localStorage.setItem('pe_athletes_db', JSON.stringify(list));
+          }
+        } catch (e) {
+          console.warn("Usando atletas locais:", e);
+        }
+      }
+      return list;
+    }
+
+    async function renderAthletesTable() {
+      const tbody = document.getElementById('athletesTableBody');
+      const athletes = await loadAthletes();
+      tbody.innerHTML = "";
+
+      athletes.forEach(a => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-pe-dark/40 transition";
+        tr.innerHTML = `
+          <td class="py-3 px-4">
+            <div class="w-9 h-11 rounded border border-pe-gold/40 overflow-hidden bg-slate-900">
+              <img src="${a.foto || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'}" class="w-full h-full object-cover" />
+            </div>
+          </td>
+          <td class="py-3 px-4 font-mono font-bold text-pe-gold">#${a.codigo}</td>
+          <td class="py-3 px-4 font-bold text-white uppercase">${a.nome}</td>
+          <td class="py-3 px-4 font-mono text-slate-300">${a.cpf || '-'}</td>
+          <td class="py-3 px-4 text-slate-300">${a.municipio || '-'}</td>
+          <td class="py-3 px-4 text-pe-gold">${a.modalidade || 'SOLO'}</td>
+          <td class="py-3 px-4">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${a.status === 'REGULAR' ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-500/30' : 'bg-amber-950/60 text-amber-400 border border-amber-500/30'}">
+              ${a.status || 'REGULAR'}
+            </span>
+          </td>
+          <td class="py-3 px-4 text-right">
+            <div class="flex items-center justify-end gap-2">
+              <button onclick="fillFormWithAthlete('${a.codigo}')" class="text-xs text-blue-400 hover:text-blue-300 font-bold p-1">Editar</button>
+              <button onclick="deleteAthlete('${a.codigo}')" class="text-xs text-red-400 hover:text-red-300 font-bold p-1">Excluir</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function deleteAthlete(codigo) {
+      if (!confirm(`Deseja realmente remover o atleta código #${codigo}?`)) return;
+
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from('atletas').delete().eq('codigo', codigo);
+        } catch (e) {
+          console.warn("Erro ao remover no Supabase:", e);
+        }
+      }
+
+      let localAthletes = JSON.parse(localStorage.getItem('pe_athletes_db')) || DEFAULT_ATHLETES;
+      localAthletes = localAthletes.filter(a => String(a.codigo) !== String(codigo));
+      localStorage.setItem('pe_athletes_db', JSON.stringify(localAthletes));
+
+      renderAthletesTable();
+    }
+
+    async function fillFormWithAthlete(codigo) {
+      const athletes = await loadAthletes();
+      const a = athletes.find(item => String(item.codigo) === String(codigo));
+      if (!a) return;
+
+      document.getElementById('athleteCode').value = a.codigo;
+      document.getElementById('athleteName').value = a.nome;
+      document.getElementById('athleteCpf').value = a.cpf || '';
+      document.getElementById('athleteBirth').value = a.nascimento || '';
+      document.getElementById('athleteCity').value = a.municipio || '';
+      document.getElementById('athleteModality').value = a.modalidade || 'SOLO (INDIVIDUAL)';
+      document.getElementById('athleteStatus').value = a.status || 'REGULAR';
+      if (a.foto) {
+        document.getElementById('previewBadgePhoto').src = a.foto;
+        document.getElementById('athletePhotoBase64').value = a.foto;
+      }
+      updateLivePreview();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function clearAthleteForm() {
+      document.getElementById('athleteForm').reset();
+      document.getElementById('athletePhotoBase64').value = '';
+      generateRandomAthleteCode();
+    }
+
+    function downloadLivePreviewBadge() {
+      const card = document.getElementById('adminLiveCard');
+      const name = document.getElementById('previewBadgeName').textContent || "Atleta";
+      html2canvas(card, { scale: 3, backgroundColor: null }).then(canvas => {
+        const a = document.createElement('a');
+        a.download = `Carteira_Oficial_${name.replace(/\s+/g, '_')}.png`;
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+      });
+    }
+
+    /* =========================================================
+       ESTÚDIO DA CARTEIRA: DIMENSÕES & TEXTOS CUSTOMIZADOS (ABA 2)
+       ========================================================= */
+    function syncStudioWithCurrentLayout() {
+      document.getElementById('inputCardWidth').value = currentBadgeLayout.cardWidth || 540;
+      document.getElementById('valCardWidth').textContent = (currentBadgeLayout.cardWidth || 540) + 'px';
+
+      document.getElementById('inputCardHeight').value = currentBadgeLayout.cardMinHeight || 300;
+      document.getElementById('valCardHeight').textContent = (currentBadgeLayout.cardMinHeight || 300) + 'px';
+
+      document.getElementById('inputCardPadding').value = currentBadgeLayout.cardPadding || 24;
+      document.getElementById('valCardPadding').textContent = (currentBadgeLayout.cardPadding || 24) + 'px';
+
+      document.getElementById('inputCardRadius').value = currentBadgeLayout.cardBorderRadius || 16;
+      document.getElementById('valCardRadius').textContent = (currentBadgeLayout.cardBorderRadius || 16) + 'px';
+
+      document.getElementById('inputPhotoWidth').value = currentBadgeLayout.photoWidth || 100;
+      document.getElementById('valPhotoWidth').textContent = (currentBadgeLayout.photoWidth || 100) + 'px';
+
+      document.getElementById('inputPhotoHeight').value = currentBadgeLayout.photoHeight || 125;
+      document.getElementById('valPhotoHeight').textContent = (currentBadgeLayout.photoHeight || 125) + 'px';
+
+      document.getElementById('inputPhotoRadius').value = currentBadgeLayout.photoRadius || 8;
+      document.getElementById('valPhotoRadius').textContent = (currentBadgeLayout.photoRadius || 8) + 'px';
+
+      renderCustomTextsList();
+      applyLayoutToCards();
+    }
+
+    function updateStudioLive() {
+      currentBadgeLayout.cardWidth = parseInt(document.getElementById('inputCardWidth').value);
+      document.getElementById('valCardWidth').textContent = currentBadgeLayout.cardWidth + 'px';
+
+      currentBadgeLayout.cardMinHeight = parseInt(document.getElementById('inputCardHeight').value);
+      document.getElementById('valCardHeight').textContent = currentBadgeLayout.cardMinHeight + 'px';
+
+      currentBadgeLayout.cardPadding = parseInt(document.getElementById('inputCardPadding').value);
+      document.getElementById('valCardPadding').textContent = currentBadgeLayout.cardPadding + 'px';
+
+      currentBadgeLayout.cardBorderRadius = parseInt(document.getElementById('inputCardRadius').value);
+      document.getElementById('valCardRadius').textContent = currentBadgeLayout.cardBorderRadius + 'px';
+
+      currentBadgeLayout.photoWidth = parseInt(document.getElementById('inputPhotoWidth').value);
+      document.getElementById('valPhotoWidth').textContent = currentBadgeLayout.photoWidth + 'px';
+
+      currentBadgeLayout.photoHeight = parseInt(document.getElementById('inputPhotoHeight').value);
+      document.getElementById('valPhotoHeight').textContent = currentBadgeLayout.photoHeight + 'px';
+
+      currentBadgeLayout.photoRadius = parseInt(document.getElementById('inputPhotoRadius').value);
+      document.getElementById('valPhotoRadius').textContent = currentBadgeLayout.photoRadius + 'px';
+
+      applyLayoutToCards();
+    }
+
+    function applyLayoutToCards() {
+      const card = document.getElementById('adminLiveCard');
+      const photoContainer = document.getElementById('previewPhotoContainer');
+
+      if (card) {
+        card.style.maxWidth = currentBadgeLayout.cardWidth + 'px';
+        card.style.minHeight = currentBadgeLayout.cardMinHeight + 'px';
+        card.style.padding = currentBadgeLayout.cardPadding + 'px';
+        card.style.borderRadius = currentBadgeLayout.cardBorderRadius + 'px';
+      }
+
+      if (photoContainer) {
+        photoContainer.style.width = currentBadgeLayout.photoWidth + 'px';
+        photoContainer.style.height = currentBadgeLayout.photoHeight + 'px';
+        photoContainer.style.borderRadius = currentBadgeLayout.photoRadius + 'px';
+      }
+
+      // Renderiza textos customizados na carteira
+      const customContainer = document.getElementById('previewCustomTextsContainer');
+      if (customContainer) {
+        customContainer.innerHTML = '';
+        if (currentBadgeLayout.customTexts) {
+          currentBadgeLayout.customTexts.forEach(t => {
+            const div = document.createElement('div');
+            div.style.fontSize = (t.fontSize || 10) + 'px';
+            div.style.color = t.color || '#f5b800';
+            div.style.textAlign = t.align || 'left';
+            div.style.marginTop = (t.marginTop || 4) + 'px';
+            div.style.fontWeight = 'bold';
+            div.textContent = t.text;
+            customContainer.appendChild(div);
+          });
+        }
+      }
+
+      // Clona para o wrapper do estúdio
+      const studioWrapper = document.getElementById('studioCardWrapper');
+      if (studioWrapper && card) {
+        studioWrapper.innerHTML = '';
+        studioWrapper.appendChild(card.cloneNode(true));
+      }
+    }
+
+    function addCustomTextItem() {
+      if (!currentBadgeLayout.customTexts) currentBadgeLayout.customTexts = [];
+      const newId = Date.now();
+      currentBadgeLayout.customTexts.push({
+        id: newId,
+        text: "TEXTO DA FEDERAÇÃO",
+        fontSize: 10,
+        color: "#f5b800",
+        align: "left",
+        marginTop: 4
+      });
+      renderCustomTextsList();
+      applyLayoutToCards();
+    }
+
+    function removeCustomTextItem(id) {
+      currentBadgeLayout.customTexts = currentBadgeLayout.customTexts.filter(t => t.id !== id);
+      renderCustomTextsList();
+      applyLayoutToCards();
+    }
+
+    function updateCustomTextItem(id, field, value) {
+      const item = currentBadgeLayout.customTexts.find(t => t.id === id);
+      if (item) {
+        item[field] = value;
+        applyLayoutToCards();
+      }
+    }
+
+    function renderCustomTextsList() {
+      const container = document.getElementById('customTextsList');
+      container.innerHTML = '';
+
+      if (!currentBadgeLayout.customTexts || currentBadgeLayout.customTexts.length === 0) {
+        container.innerHTML = `<span class="text-slate-500 text-[11px] block">Nenhum texto extra adicionado. Clique no botão acima para adicionar.</span>`;
+        return;
+      }
+
+      currentBadgeLayout.customTexts.forEach(t => {
+        const div = document.createElement('div');
+        div.className = "bg-[#080b12] border border-pe-cardBorder rounded-xl p-3 space-y-2";
+        div.innerHTML = `
+          <div class="flex items-center gap-2">
+            <input type="text" value="${t.text}" oninput="updateCustomTextItem(${t.id}, 'text', this.value)" class="flex-1 bg-transparent border-b border-pe-cardBorder text-white text-xs font-bold outline-none py-1 focus:border-pe-gold" />
+            <button onclick="removeCustomTextItem(${t.id})" class="text-red-400 hover:text-red-300 font-bold px-2 py-0.5">✕</button>
+          </div>
+          <div class="grid grid-cols-3 gap-2 text-[10px]">
+            <div>
+              <span class="text-slate-400 block">Fonte:</span>
+              <input type="number" min="8" max="22" value="${t.fontSize || 10}" oninput="updateCustomTextItem(${t.id}, 'fontSize', parseInt(this.value))" class="w-full bg-pe-card border border-pe-cardBorder rounded px-1.5 py-0.5 text-slate-200" />
+            </div>
+            <div>
+              <span class="text-slate-400 block">Cor:</span>
+              <input type="color" value="${t.color || '#f5b800'}" oninput="updateCustomTextItem(${t.id}, 'color', this.value)" class="w-full h-6 bg-transparent cursor-pointer rounded" />
+            </div>
+            <div>
+              <span class="text-slate-400 block">Alinhamento:</span>
+              <select onchange="updateCustomTextItem(${t.id}, 'align', this.value)" class="w-full bg-pe-card border border-pe-cardBorder rounded px-1 py-0.5 text-slate-200">
+                <option value="left" ${t.align === 'left' ? 'selected' : ''}>Esquerda</option>
+                <option value="center" ${t.align === 'center' ? 'selected' : ''}>Centro</option>
+                <option value="right" ${t.align === 'right' ? 'selected' : ''}>Direita</option>
+              </select>
+            </div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function saveBadgeStudioLayout() {
+      localStorage.setItem('pe_badge_layout_config', JSON.stringify(currentBadgeLayout));
+      const notif = document.getElementById('studioSaveNotification');
+      notif.classList.remove('hidden');
+      setTimeout(() => notif.classList.add('hidden'), 3500);
+    }
+
+    function resetBadgeStudioLayout() {
+      currentBadgeLayout = JSON.parse(JSON.stringify(DEFAULT_BADGE_LAYOUT));
+      syncStudioWithCurrentLayout();
+    }
+
+    /* =========================================================
+       GERENCIAMENTO DE NOTÍCIAS (ABA 3)
+       ========================================================= */
+    async function loadNews() {
+      let list = JSON.parse(localStorage.getItem('pe_news_db')) || DEFAULT_NEWS;
+      if (supabaseClient) {
+        try {
+          const { data, error } = await supabaseClient.from('noticias').select('*').order('created_at', { ascending: false });
+          if (!error && data && data.length > 0) {
+            list = data.map(d => ({
+              id: d.id,
+              title: d.titulo,
+              category: d.categoria,
+              content: d.conteudo,
+              date: d.data_publicacao
+            }));
+            localStorage.setItem('pe_news_db', JSON.stringify(list));
+          }
+        } catch (e) {
+          console.warn("Usando notícias locais:", e);
+        }
+      }
+      return list;
+    }
+
+    async function renderAdminNews() {
+      const container = document.getElementById('adminNewsList');
+      const news = await loadNews();
+      container.innerHTML = "";
+
+      news.forEach(item => {
+        const div = document.createElement('div');
+        div.className = "bg-pe-card border border-pe-cardBorder rounded-xl p-4 flex items-start justify-between gap-4";
+        div.innerHTML = `
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-pe-blue text-white uppercase">${item.category || 'INFORMATIVO'}</span>
+              <span class="text-[10px] text-slate-500 font-mono">${item.date || 'Recente'}</span>
+            </div>
+            <h4 class="font-oswald text-base font-bold text-white uppercase">${item.title}</h4>
+            <p class="text-xs text-slate-400 line-clamp-2">${item.content}</p>
+          </div>
+          <button onclick="deleteNews(${item.id})" class="text-red-400 hover:text-red-300 text-xs font-bold p-1">Excluir</button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    async function handleSaveNews(e) {
+      e.preventDefault();
+      const title = document.getElementById('newsTitle').value.trim();
+      const category = document.getElementById('newsCategory').value;
+      const date = document.getElementById('newsDate').value.trim() || new Date().toLocaleDateString('pt-BR');
+      const content = document.getElementById('newsContent').value.trim();
+
+      const feedback = document.getElementById('newsFeedback');
+      feedback.classList.remove('hidden');
+      feedback.className = "text-xs p-3 rounded-xl bg-blue-950/40 border border-blue-500/40 text-blue-300";
+      feedback.textContent = "Publicando notícia...";
+
+      const newsObj = {
+        titulo: title,
+        categoria: category,
+        conteudo: content,
+        data_publicacao: date
+      };
+
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from('noticias').insert([newsObj]);
+        } catch (err) {
+          console.warn("Erro ao publicar no Supabase:", err);
+        }
+      }
+
+      let localNews = JSON.parse(localStorage.getItem('pe_news_db')) || DEFAULT_NEWS;
+      localNews.unshift({ id: Date.now(), title, category, content, date });
+      localStorage.setItem('pe_news_db', JSON.stringify(localNews));
+
+      feedback.className = "text-xs p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 font-bold";
+      feedback.textContent = "✓ Notícia publicada com sucesso!";
+
+      document.getElementById('newsForm').reset();
+      renderAdminNews();
+    }
+
+    async function deleteNews(id) {
+      if (!confirm("Deseja realmente excluir esta notícia?")) return;
+
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from('noticias').delete().eq('id', id);
+        } catch (e) {
+          console.warn("Erro ao remover no Supabase:", e);
+        }
+      }
+
+      let localNews = JSON.parse(localStorage.getItem('pe_news_db')) || DEFAULT_NEWS;
+      localNews = localNews.filter(n => n.id !== id);
+      localStorage.setItem('pe_news_db', JSON.stringify(localNews));
+
+      renderAdminNews();
+    }
+
+    /* =========================================================
+       CONFIGURAÇÃO DO BANCO & KEEP-ALIVE (ABA 4)
+       ========================================================= */
+    function handleSaveAdminConfig() {
+      const url = document.getElementById('adminCfgUrl').value.trim();
+      const key = document.getElementById('adminCfgKey').value.trim();
+      const feedback = document.getElementById('adminConfigFeedback');
+
+      localStorage.setItem('pe_supabase_url', url);
+      localStorage.setItem('pe_supabase_anon_key', key);
+      SUPABASE_URL = url;
+      SUPABASE_ANON_KEY = key;
+
+      initSupabase();
+
+      feedback.classList.remove('hidden');
+      feedback.className = "p-3 rounded-xl text-xs font-bold bg-emerald-950/40 border border-emerald-500/40 text-emerald-300";
+      feedback.textContent = "✓ Credenciais salvas com sucesso no painel administrativo!";
+      setTimeout(() => feedback.classList.add('hidden'), 3500);
+    }
+
+    async function testSupabaseConnection() {
+      const url = document.getElementById('adminCfgUrl').value.trim();
+      const key = document.getElementById('adminCfgKey').value.trim();
+      const feedback = document.getElementById('adminConfigFeedback');
+
+      feedback.classList.remove('hidden');
+      feedback.className = "p-3 rounded-xl text-xs font-bold bg-blue-950/40 border border-blue-500/40 text-blue-300";
+      feedback.textContent = "Testando conexão com o banco de dados Supabase...";
+
+      if (!url || !key) {
+        feedback.className = "p-3 rounded-xl text-xs font-bold bg-amber-950/40 border border-amber-500/40 text-amber-300";
+        feedback.textContent = "Por favor, preencha a URL e a Anon Key antes de testar.";
+        return;
+      }
+
+      try {
+        const testClient = window.supabase.createClient(url, key);
+        const { data, error } = await testClient.from('atletas').select('id').limit(1);
+
+        if (error) {
+          feedback.className = "p-3 rounded-xl text-xs font-bold bg-red-950/40 border border-red-500/40 text-red-300";
+          feedback.textContent = `❌ Erro do Supabase: ${error.message}`;
+        } else {
+          feedback.className = "p-3 rounded-xl text-xs font-bold bg-emerald-950/40 border border-emerald-500/40 text-emerald-300";
+          feedback.textContent = "✓ Conexão bem-sucedida! O banco de dados Supabase respondeu com sucesso!";
+        }
+      } catch (err) {
+        feedback.className = "p-3 rounded-xl text-xs font-bold bg-red-950/40 border border-red-500/40 text-red-300";
+        feedback.textContent = `❌ Falha na conexão: ${err.message}`;
+      }
+    }
+
+    /* =========================================================
+       INICIALIZAÇÃO GERAL
+       ========================================================= */
+    window.onload = function() {
+      // Carrega chaves salvas nos campos de config
+      document.getElementById('adminCfgUrl').value = localStorage.getItem('pe_supabase_url') || DEFAULT_SUPABASE_URL;
+      document.getElementById('adminCfgKey').value = localStorage.getItem('pe_supabase_anon_key') || '';
+
+      initSupabase();
+      generateRandomAthleteCode();
+      renderAthletesTable();
+      renderAdminNews();
+      syncStudioWithCurrentLayout();
+    };
+  </script>
+</body>
+</html>
