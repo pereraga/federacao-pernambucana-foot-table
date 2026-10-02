@@ -2,6 +2,7 @@
   "name": "federacao-pernambucana-foot-table",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "Portal Oficial da Federação Pernambucana de Foot Table e FutMesa com Supabase e Vercel Keep-Alive",
   "main": "index.html",
   "scripts": {
