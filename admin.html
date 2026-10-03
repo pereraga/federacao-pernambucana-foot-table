@@ -30,7 +30,8 @@
               gold: '#f5b800',
               goldHover: '#e0a700',
               red: '#d32f2f',
-              green: '#00a859',
+              green: '#00e676',
+              greenDark: '#008744',
               dark: '#080b12',
               card: '#0f1422',
               cardBorder: '#1c253b',
@@ -48,553 +49,1019 @@
   </script>
 
   <style>
-    ::-webkit-scrollbar { width: 7px; height: 7px; }
-    ::-webkit-scrollbar-track { background: #080b12; }
-    ::-webkit-scrollbar-thumb { background: #1e2840; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #f5b800; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #060911; }
+    ::-webkit-scrollbar-thumb { background: #1a233a; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #00e676; }
     .pe-stripe-bar {
       background: linear-gradient(90deg, #0044cc 0%, #0044cc 40%, #f5b800 40%, #f5b800 70%, #d32f2f 70%, #d32f2f 100%);
     }
+    .active-nav-pill {
+      background-color: #00e676 !important;
+      color: #021509 !important;
+      font-weight: 700 !important;
+      box-shadow: 0 4px 20px -2px rgba(0, 230, 118, 0.35);
+    }
+    .active-nav-pill svg {
+      color: #021509 !important;
+    }
   </style>
 </head>
-<body class="bg-pe-dark text-slate-100 min-h-screen flex flex-col font-sans selection:bg-pe-gold selection:text-pe-dark">
+<body class="bg-[#080b12] text-slate-100 min-h-screen font-sans antialiased selection:bg-[#00e676] selection:text-black">
 
-  <!-- Header Administrativo -->
-  <header class="bg-pe-dark/95 backdrop-blur border-b border-pe-cardBorder sticky top-0 z-40">
-    <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+  <div class="min-h-screen flex flex-col md:flex-row w-full">
+
+    <!-- ========================================================= -->
+    <!-- PAINEL LATERAL (SIDEBAR PADRÃO SCREENSHOT)                -->
+    <!-- ========================================================= -->
+    <aside id="sidebar" class="w-full md:w-64 lg:w-72 bg-[#05080e] border-r border-[#151c2e] flex flex-col shrink-0 z-40 transition-all md:min-h-screen">
       
-      <!-- Brand Admin -->
-      <div class="flex items-center gap-3">
-        <div class="rounded-full bg-pe-darkblue border-2 border-pe-gold p-0.5 overflow-hidden shrink-0" style="width: 44px; height: 44px;">
-          <img src="assets/images/logo-federacao.png" alt="Federação Pernambucana" class="w-full h-full object-contain rounded-full" />
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="font-oswald text-lg uppercase font-bold text-white tracking-wide">
-              Painel de Controle
-            </span>
-            <span class="bg-pe-gold text-pe-dark text-[10px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider">
-              ADMIN
+      <!-- Topo da Sidebar: Logo & Identidade -->
+      <div class="p-5 border-b border-[#151c2e] relative">
+        <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
+        <div class="flex items-center gap-3">
+          <div class="rounded-full bg-[#06173a] border-2 border-pe-gold p-0.5 overflow-hidden shrink-0 shadow" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px;">
+            <img src="assets/images/logo-federacao.png" alt="Federação Pernambucana" class="w-full h-full object-contain rounded-full" />
+          </div>
+          <div class="min-w-0">
+            <h1 class="font-oswald text-base uppercase font-bold text-white tracking-wide truncate">
+              Foot Table <span class="text-pe-gold">&</span> FutMesa
+            </h1>
+            <span class="block text-[10px] text-slate-400 font-bold uppercase tracking-wider truncate">
+              Federação Pernambucana
             </span>
           </div>
-          <span class="block text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-            Federação Pernambucana de Foot Table
-          </span>
         </div>
       </div>
 
-      <!-- Ações do Topo -->
-      <div class="flex items-center gap-3">
-        <!-- Status da Conexão Supabase -->
-        <div class="flex items-center gap-2 bg-[#0c1220] border border-pe-cardBorder px-3 py-1.5 rounded-lg text-xs">
-          <span id="adminDbStatusDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
-          <span id="adminDbStatusText" class="text-slate-300 font-mono text-[11px]">Conectando...</span>
+      <!-- Perfil do Operador / E-mail Institucional -->
+      <div class="px-5 py-3.5 bg-[#080d16] border-b border-[#151c2e]/80 flex items-center justify-between">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-2.5 h-2.5 rounded-full bg-[#00e676] animate-pulse shrink-0"></div>
+          <div class="min-w-0">
+            <span id="sidebarAdminUser" class="block text-xs font-bold text-white truncate">diretoria@foot-table.pe.gov.br</span>
+            <span class="text-[9px] uppercase tracking-wider text-[#00e676] font-bold">Gestor Autorizado</span>
+          </div>
         </div>
+        <span class="text-[10px] bg-pe-gold/20 text-pe-gold px-2 py-0.5 rounded font-mono font-bold">ADM</span>
+      </div>
 
-        <a href="index.html" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-4 py-2 rounded-xl transition flex items-center gap-1.5">
+      <!-- Menu de Navegação Vertical (Estilo Exato da Imagem) -->
+      <nav class="flex-1 p-3.5 space-y-1.5 overflow-y-auto">
+        
+        <!-- 1. Recepção (Ativo por padrão) -->
+        <button onclick="switchTab('recepcao')" id="navBtn-recepcao" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all cursor-pointer group active-nav-pill">
+          <div class="flex items-center gap-3.5">
+            <!-- Ícone Casa -->
+            <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+            </svg>
+            <span class="text-sm font-semibold tracking-wide">Recepção</span>
+          </div>
+          <!-- Ponto indicador à direita (exato da imagem) -->
+          <span class="nav-indicator w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
+        </button>
+
+        <!-- 2. Caixa -->
+        <button onclick="switchTab('caixa')" id="navBtn-caixa" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
+          <div class="flex items-center gap-3.5">
+            <!-- Ícone Pilha de Moedas -->
+            <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 3.34 2 5v14c0 1.66 4.48 3 10 3s10-1.34 10-3V5c0-1.66-4.48-3-10-3zm0 2c4.85 0 8 1.13 8 1s-3.15 1-8 1-8-.87-8-1 3.15-1 8-1zm0 5c4.85 0 8 1.13 8 1s-3.15 1-8 1-8-.87-8-1 3.15-1 8-1zm0 5c4.85 0 8 1.13 8 1s-3.15 1-8 1-8-.87-8-1 3.15-1 8-1zm0 5c-4.85 0-8-.87-8-1s3.15-1 8-1 8 .87 8 1-3.15 1-8 1z"/>
+            </svg>
+            <span class="text-sm font-semibold tracking-wide">Caixa</span>
+          </div>
+          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
+        </button>
+
+        <!-- 3. Financeiro -->
+        <button onclick="switchTab('financeiro')" id="navBtn-financeiro" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
+          <div class="flex items-center gap-3.5">
+            <!-- Ícone Envelope / Fatura -->
+            <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+            <span class="text-sm font-semibold tracking-wide">Financeiro</span>
+          </div>
+          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
+        </button>
+
+        <!-- 4. Agenda -->
+        <button onclick="switchTab('agenda')" id="navBtn-agenda" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
+          <div class="flex items-center gap-3.5">
+            <!-- Ícone Calendário -->
+            <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+              <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>
+            </svg>
+            <span class="text-sm font-semibold tracking-wide">Agenda</span>
+          </div>
+          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
+        </button>
+
+        <!-- 5. Pessoas (Atletas Federados & Carteiras) -->
+        <button onclick="switchTab('atletas')" id="navBtn-atletas" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
+          <div class="flex items-center gap-3.5">
+            <!-- Ícone Grupo de Pessoas -->
+            <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+            </svg>
+            <span class="text-sm font-semibold tracking-wide">Pessoas (Atletas)</span>
+          </div>
+          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
+        </button>
+
+        <!-- 6. Contratos & Estoque (Estúdio da Carteira & Materiais) -->
+        <button onclick="switchTab('estudio')" id="navBtn-estudio" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
+          <div class="flex items-center gap-3.5">
+            <!-- Ícone Documento / Contrato -->
+            <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <span class="text-sm font-semibold tracking-wide">Contratos & Estoque</span>
+          </div>
+          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
+        </button>
+
+        <!-- 7. Grupos B2B (Clubes & Parceiros) -->
+        <button onclick="switchTab('b2b')" id="navBtn-b2b" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
+          <div class="flex items-center gap-3.5">
+            <!-- Ícone Usuário B2B / Gravata -->
+            <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-4 4a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z" clip-rule="evenodd"/>
+            </svg>
+            <span class="text-sm font-semibold tracking-wide">Grupos B2B</span>
+          </div>
+          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
+        </button>
+
+        <!-- 8. Notícias & Boletins -->
+        <button onclick="switchTab('noticias')" id="navBtn-noticias" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
+          <div class="flex items-center gap-3.5">
+            <!-- Ícone Notícias -->
+            <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+            </svg>
+            <span class="text-sm font-semibold tracking-wide">Notícias & Mídia</span>
+          </div>
+          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
+        </button>
+
+        <!-- 9. Relatórios -->
+        <button onclick="switchTab('relatorios')" id="navBtn-relatorios" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
+          <div class="flex items-center gap-3.5">
+            <!-- Ícone Gráfico de Barras -->
+            <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
+            </svg>
+            <span class="text-sm font-semibold tracking-wide">Relatórios</span>
+          </div>
+          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
+        </button>
+
+        <!-- 10. Ajustes -->
+        <button onclick="switchTab('config')" id="navBtn-config" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
+          <div class="flex items-center gap-3.5">
+            <!-- Ícone Engrenagem -->
+            <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            <span class="text-sm font-semibold tracking-wide">Ajustes</span>
+          </div>
+          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
+        </button>
+
+      </nav>
+
+      <!-- Rodapé da Sidebar: Site Público & Logout -->
+      <div class="p-4 border-t border-[#151c2e] bg-[#04060b] space-y-2">
+        <a href="index.html" class="w-full bg-[#0c1424] hover:bg-[#121e36] border border-pe-cardBorder text-white font-bold text-xs uppercase px-3 py-2.5 rounded-xl transition flex items-center justify-center gap-2">
           <span>🌐</span> Ver Site Público
         </a>
-
-        <!-- Botão Logout -->
-        <button onclick="handleLogout()" class="border border-red-500/40 hover:bg-red-950/40 text-red-400 font-bold text-xs uppercase px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 cursor-pointer" title="Sair do painel administrativo">
-          <span>🚪</span> Sair
+        <button onclick="handleLogout()" class="w-full border border-red-500/30 hover:bg-red-950/40 text-red-400 font-bold text-xs uppercase px-3 py-2 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer">
+          <span>🚪</span> Sair do Sistema
         </button>
       </div>
-    </div>
-  </header>
 
-  <!-- Navegação de Abas Administrativas -->
-  <div class="bg-pe-card/80 border-b border-pe-cardBorder sticky top-[61px] z-30 backdrop-blur">
-    <div class="max-w-7xl mx-auto px-4 flex items-center gap-2 overflow-x-auto py-2.5">
-      <button onclick="switchTab('atletas')" id="tabBtn-atletas" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition flex items-center gap-2 bg-pe-gold text-pe-dark shadow-sm">
-        <span>🪪</span> Carteiras & Atletas
-      </button>
-      <button onclick="switchTab('estudio')" id="tabBtn-estudio" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition flex items-center gap-2 text-slate-400 hover:text-white hover:bg-pe-card">
-        <span>🎨</span> Estúdio da Carteira (Dimensões & Textos)
-      </button>
-      <button onclick="switchTab('noticias')" id="tabBtn-noticias" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition flex items-center gap-2 text-slate-400 hover:text-white hover:bg-pe-card">
-        <span>📰</span> Notícias & Torneios
-      </button>
-      <button onclick="switchTab('config')" id="tabBtn-config" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition flex items-center gap-2 text-slate-400 hover:text-white hover:bg-pe-card">
-        <span>⚙️</span> Banco de Dados & Keep-Alive
-      </button>
-    </div>
-  </div>
-
-  <!-- Conteúdo Principal -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+    </aside>
 
     <!-- ========================================================= -->
-    <!-- ABA 1: CARTEIRAS & ATLETAS FEDERADOS                      -->
+    <!-- ÁREA PRINCIPAL DE CONTEÚDO                                -->
     <!-- ========================================================= -->
-    <div id="tabContent-atletas" class="space-y-8">
+    <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
       
-      <!-- Cabeçalho da Seção -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Registros Oficiais</span>
-          <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Emissão de Carteiras & Atletas</h2>
-        </div>
-        <button onclick="generateRandomAthleteCode()" class="bg-pe-card hover:bg-pe-accent border border-pe-cardBorder text-pe-gold font-mono font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2">
-          <span>🎲</span> Gerar Novo Código de 6 Dígitos
-        </button>
-      </div>
-
-      <!-- Grid: Formulário de Cadastro + Preview ao Vivo -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
-        <!-- Formulário de Cadastro do Atleta -->
-        <div class="lg:col-span-6 bg-pe-card border border-pe-cardBorder rounded-2xl p-6 shadow-xl relative">
-          <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0 rounded-t-2xl"></div>
-
-          <h3 class="font-oswald text-lg uppercase font-bold text-white mb-4 flex items-center gap-2">
-            <span>📝</span> Dados da Filiação Federativa
-          </h3>
-
-          <form id="athleteForm" onsubmit="handleSaveAthlete(event)" class="space-y-4 text-xs">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-slate-300 font-bold mb-1">Código Oficial (6 Dígitos) *</label>
-                <input type="text" id="athleteCode" required maxlength="6" placeholder="ex: 742918" inputmode="numeric" class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-pe-gold font-mono font-bold text-sm outline-none" />
-              </div>
-              <div>
-                <label class="block text-slate-300 font-bold mb-1">Status Federativo</label>
-                <select id="athleteStatus" class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 outline-none">
-                  <option value="REGULAR">REGULAR (Ativo)</option>
-                  <option value="HOMOLOGADO">HOMOLOGADO</option>
-                  <option value="PENDENTE">PENDENTE</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-slate-300 font-bold mb-1">Nome Completo do Atleta *</label>
-              <input type="text" id="athleteName" required placeholder="ex: João Silva de Carvalho" class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-white font-bold outline-none" />
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-slate-300 font-bold mb-1">CPF</label>
-                <input type="text" id="athleteCpf" placeholder="000.000.000-00" class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 font-mono outline-none" />
-              </div>
-              <div>
-                <label class="block text-slate-300 font-bold mb-1">Data de Nascimento</label>
-                <input type="text" id="athleteBirth" placeholder="DD/MM/AAAA" class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 font-mono outline-none" />
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-slate-300 font-bold mb-1">Município - Estado</label>
-                <input type="text" id="athleteCity" placeholder="ex: Recife - PE" class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 outline-none" />
-              </div>
-              <div>
-                <label class="block text-slate-300 font-bold mb-1">Modalidade Homologada</label>
-                <select id="athleteModality" class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 outline-none">
-                  <option value="SOLO (INDIVIDUAL)">SOLO (INDIVIDUAL)</option>
-                  <option value="DUPLA (EQUIPE)">DUPLA (EQUIPE)</option>
-                  <option value="SOLO & DUPLA">SOLO & DUPLA</option>
-                  <option value="MASTER 40+">MASTER 40+</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Upload da Foto Oficial -->
-            <div>
-              <label class="block text-slate-300 font-bold mb-1">Foto Oficial do Atleta (Carteira)</label>
-              <div class="flex items-center gap-3">
-                <input type="file" id="athletePhotoFile" accept="image/*" onchange="handlePhotoUpload(event)" class="text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-pe-blue file:text-white hover:file:bg-blue-600 file:cursor-pointer" />
-              </div>
-              <input type="hidden" id="athletePhotoBase64" />
-            </div>
-
-            <div id="athleteFeedback" class="hidden text-xs p-3 rounded-xl"></div>
-
-            <div class="pt-2 flex items-center gap-3">
-              <button type="submit" class="flex-1 bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase tracking-wider py-3.5 rounded-xl transition shadow flex items-center justify-center gap-2">
-                <span>💾</span> Salvar Atleta no Banco de Dados
-              </button>
-              <button type="button" onclick="clearAthleteForm()" class="bg-pe-card border border-pe-cardBorder hover:border-slate-500 text-slate-400 font-bold text-xs uppercase px-4 py-3.5 rounded-xl transition">
-                Limpar
-              </button>
-            </div>
-          </form>
+      <!-- Topbar Superior -->
+      <header class="bg-[#05080e]/95 backdrop-blur border-b border-[#151c2e] px-4 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-30">
+        <div class="flex items-center gap-3">
+          <span id="headerPageTitle" class="font-oswald text-xl uppercase font-bold text-white tracking-wide">
+            Recepção & Dashboard
+          </span>
+          <span class="hidden sm:inline-block bg-[#00e676]/20 text-[#00e676] text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+            Sistema Oficial PE
+          </span>
         </div>
 
-        <!-- Preview da Carteira em Tempo Real -->
-        <div class="lg:col-span-6 space-y-4">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              Visualização da Carteira Gerada
-            </span>
-            <button onclick="downloadLivePreviewBadge()" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
-              <span>💾</span> Baixar PNG HD
-            </button>
+        <div class="flex items-center gap-3">
+          <!-- Status Conexão Supabase -->
+          <div class="flex items-center gap-2 bg-[#090e1a] border border-[#1c253b] px-3 py-1.5 rounded-xl text-xs">
+            <span id="adminDbStatusDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+            <span id="adminDbStatusText" class="text-slate-300 font-mono text-[11px]">Conectando...</span>
           </div>
 
-          <!-- Credencial do Atleta Dinâmica -->
-          <div id="adminLiveCard" class="w-full bg-gradient-to-br from-[#06173a] to-[#040813] border-2 border-pe-gold rounded-2xl p-6 relative overflow-hidden shadow-2xl transition-all">
-            <!-- Marca d'água -->
-            <div class="absolute -right-6 -bottom-6 text-white/[0.03] font-oswald font-black text-7xl select-none pointer-events-none">
-              PERNAMBUCO
-            </div>
-
-            <!-- Topo da Carteira -->
-            <div class="flex items-center justify-between border-b border-pe-gold/25 pb-4 mb-4">
-              <div class="flex items-center gap-3">
-                <div class="rounded-full border border-pe-gold overflow-hidden bg-pe-darkblue p-0.5 flex items-center justify-center shrink-0" style="width: 42px; height: 42px;">
-                  <img src="assets/images/logo-federacao.png" alt="Federação Pernambucana" class="w-full h-full object-contain rounded-full" />
-                </div>
-                <div>
-                  <h4 class="font-oswald text-sm uppercase font-bold text-pe-gold tracking-wide leading-tight">Pernambuco FutMesa</h4>
-                  <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest block">Foot Table Federation</span>
-                </div>
-              </div>
-              
-              <div class="bg-pe-red text-white text-xs font-mono font-bold px-3 py-1 rounded shadow-md tracking-wider" id="previewBadgeCode">
-                ID: #000000
-              </div>
-            </div>
-
-            <!-- Conteúdo: Foto e Dados -->
-            <div class="grid grid-cols-[100px_1fr] gap-5 items-center my-4">
-              <div id="previewPhotoContainer" class="w-[100px] h-[125px] rounded-lg border-2 border-pe-gold overflow-hidden bg-slate-900 shadow-inner flex items-center justify-center shrink-0 transition-all">
-                <img id="previewBadgePhoto" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" alt="Foto Atleta" class="w-full h-full object-cover" />
-              </div>
-              <div class="space-y-1.5 text-xs">
-                <div>
-                  <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Nome do Atleta</span>
-                  <strong class="text-white text-base font-bold font-oswald uppercase tracking-wide block" id="previewBadgeName">Nome do Atleta</strong>
-                </div>
-                <div class="grid grid-cols-2 gap-2 pt-1">
-                  <div>
-                    <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">CPF</span>
-                    <span class="text-slate-200 font-mono" id="previewBadgeCpf">000.000.000-00</span>
-                  </div>
-                  <div>
-                    <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Nascimento</span>
-                    <span class="text-slate-200 font-mono" id="previewBadgeBirth">--/--/----</span>
-                  </div>
-                </div>
-                <div class="pt-1">
-                  <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Município</span>
-                  <span class="text-slate-200 font-semibold" id="previewBadgeCity">Pernambuco</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Container de Textos Personalizados da Carteira -->
-            <div id="previewCustomTextsContainer" class="space-y-1 my-2"></div>
-
-            <!-- Rodapé da Carteira -->
-            <div class="bg-black/40 border-l-4 border-pe-gold p-3 rounded-lg flex items-center justify-between mt-4">
-              <div>
-                <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">Modalidade Homologada</span>
-                <span class="text-xs font-extrabold uppercase text-pe-gold tracking-wide" id="previewBadgeModality">SOLO (INDIVIDUAL)</span>
-              </div>
-              <div class="text-right">
-                <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">Status Federado</span>
-                <span class="text-[10px] font-bold uppercase text-emerald-400 flex items-center gap-1" id="previewBadgeStatus">
-                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> REGULAR
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tabela / Lista de Atletas Cadastrados -->
-      <div class="bg-pe-card border border-pe-cardBorder rounded-2xl p-6 shadow-xl">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <h3 class="font-oswald text-xl uppercase font-bold text-white flex items-center gap-2">
-            <span>📋</span> Atletas Federados Cadastrados no Banco
-          </h3>
-          <input type="text" id="searchAthleteTable" oninput="filterAthletesTable()" placeholder="Filtrar por nome ou código..." class="bg-[#080b12] border border-pe-cardBorder rounded-xl px-4 py-2 text-xs text-white outline-none focus:border-pe-gold" />
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-pe-dark/60 text-slate-400 uppercase text-[10px] font-mono border-b border-pe-cardBorder">
-              <tr>
-                <th class="py-3 px-4">Foto</th>
-                <th class="py-3 px-4">Código (6D)</th>
-                <th class="py-3 px-4">Nome do Atleta</th>
-                <th class="py-3 px-4">CPF</th>
-                <th class="py-3 px-4">Município</th>
-                <th class="py-3 px-4">Modalidade</th>
-                <th class="py-3 px-4">Status</th>
-                <th class="py-3 px-4 text-right">Ações</th>
-              </tr>
-            </thead>
-            <tbody id="athletesTableBody" class="divide-y divide-pe-cardBorder/60">
-              <!-- Inserido dinamicamente -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ========================================================= -->
-    <!-- ABA 2: ESTÚDIO DA CARTEIRA (PERSONALIZAÇÃO DE DIMENSÕES)  -->
-    <!-- ========================================================= -->
-    <div id="tabContent-estudio" class="space-y-8 hidden">
-      <div class="flex items-center justify-between">
-        <div>
-          <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Customizador Visual</span>
-          <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Estúdio & Dimensões da Carteira</h2>
-        </div>
-        <div class="flex items-center gap-2">
-          <button onclick="saveBadgeStudioLayout()" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase px-5 py-2.5 rounded-xl transition shadow flex items-center gap-1.5">
-            <span>💾</span> Salvar Layout Oficial
-          </button>
-          <button onclick="resetBadgeStudioLayout()" class="bg-pe-card border border-pe-cardBorder text-slate-400 hover:text-white text-xs uppercase px-4 py-2.5 rounded-xl transition">
-            Padrão
+          <!-- Botão Recarregar -->
+          <button onclick="location.reload()" class="p-2 rounded-xl bg-[#090e1a] hover:bg-white/10 text-slate-400 hover:text-white text-xs transition" title="Atualizar Painel">
+            🔄
           </button>
         </div>
-      </div>
+      </header>
 
-      <!-- Grid: Controles de Dimensão + Preview Interativo -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
-        <!-- Painel de Controles -->
-        <div class="lg:col-span-5 bg-pe-card border border-pe-cardBorder rounded-2xl p-6 shadow-xl space-y-6 text-xs">
+      <!-- Conteúdo das Abas -->
+      <main class="p-4 sm:p-6 lg:p-8 flex-1 w-full space-y-6">
+
+        <!-- ===================================================== -->
+        <!-- ABA: RECEPÇÃO (VISÃO GERAL / DASHBOARD EXECUTIVO)      -->
+        <!-- ===================================================== -->
+        <div id="tabContent-recepcao" class="space-y-6">
           
-          <!-- Dimensões da Carteira -->
-          <div>
-            <h4 class="font-oswald text-base uppercase font-bold text-pe-gold mb-3 flex items-center gap-2">
-              <span>📐</span> Dimensões da Carteira
-            </h4>
-            <div class="space-y-3">
-              <div>
-                <div class="flex justify-between text-slate-300 font-bold mb-1">
-                  <span>Largura da Carteira:</span>
-                  <span id="valCardWidth" class="text-pe-gold font-mono">540px</span>
-                </div>
-                <input type="range" id="inputCardWidth" min="400" max="680" value="540" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
-              </div>
-
-              <div>
-                <div class="flex justify-between text-slate-300 font-bold mb-1">
-                  <span>Altura Mínima:</span>
-                  <span id="valCardHeight" class="text-pe-gold font-mono">300px</span>
-                </div>
-                <input type="range" id="inputCardHeight" min="250" max="480" value="300" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
-              </div>
-
-              <div>
-                <div class="flex justify-between text-slate-300 font-bold mb-1">
-                  <span>Espaçamento Interno (Padding):</span>
-                  <span id="valCardPadding" class="text-pe-gold font-mono">24px</span>
-                </div>
-                <input type="range" id="inputCardPadding" min="12" max="36" value="24" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
-              </div>
-
-              <div>
-                <div class="flex justify-between text-slate-300 font-bold mb-1">
-                  <span>Raio dos Cantos (Borda):</span>
-                  <span id="valCardRadius" class="text-pe-gold font-mono">16px</span>
-                </div>
-                <input type="range" id="inputCardRadius" min="4" max="32" value="16" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
+          <!-- Banner de Boas-vindas -->
+          <div class="bg-gradient-to-r from-[#06173a] via-[#091e4a] to-[#040813] border border-pe-cardBorder rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl">
+            <div class="pe-stripe-bar h-1.5 w-full absolute top-0 left-0"></div>
+            <div class="max-w-3xl space-y-3 relative z-10">
+              <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Sistema Integrado de Gestão Federativa</span>
+              <h2 class="font-oswald text-2xl sm:text-4xl uppercase font-extrabold text-white leading-tight">
+                Recepção Oficial — Federação Pernambucana
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                Bem-vindo ao centro de operações de Foot Table & FutMesa de Pernambuco. Controle carteiras digitais, financeiro, agenda de competições, clubes filiados e notícias oficiais.
+              </p>
+              <div class="flex flex-wrap items-center gap-3 pt-2">
+                <button onclick="switchTab('atletas')" class="bg-[#00e676] hover:bg-[#00c853] text-[#021509] font-bold text-xs uppercase px-5 py-2.5 rounded-xl transition shadow flex items-center gap-2">
+                  <span>🪪</span> Emitir Carteira de Atleta
+                </button>
+                <button onclick="switchTab('noticias')" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-5 py-2.5 rounded-xl transition flex items-center gap-2">
+                  <span>📰</span> Publicar Notícia
+                </button>
               </div>
             </div>
           </div>
 
-          <!-- Dimensões da Foto do Atleta -->
-          <div class="border-t border-pe-cardBorder pt-4">
-            <h4 class="font-oswald text-base uppercase font-bold text-pe-gold mb-3 flex items-center gap-2">
-              <span>🖼️</span> Dimensões da Foto do Atleta
-            </h4>
-            <div class="space-y-3">
-              <div>
-                <div class="flex justify-between text-slate-300 font-bold mb-1">
-                  <span>Largura da Foto:</span>
-                  <span id="valPhotoWidth" class="text-pe-gold font-mono">100px</span>
-                </div>
-                <input type="range" id="inputPhotoWidth" min="70" max="150" value="100" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
+          <!-- Cards de Métricas Principais -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            
+            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-2">
+              <div class="flex items-center justify-between text-slate-400 text-xs">
+                <span class="font-bold uppercase tracking-wider">Atletas Cadastrados</span>
+                <span class="text-[#00e676]">● Ativos</span>
               </div>
-
-              <div>
-                <div class="flex justify-between text-slate-300 font-bold mb-1">
-                  <span>Altura da Foto:</span>
-                  <span id="valPhotoHeight" class="text-pe-gold font-mono">125px</span>
-                </div>
-                <input type="range" id="inputPhotoHeight" min="90" max="180" value="125" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
+              <div class="flex items-baseline gap-2">
+                <span id="metricTotalAthletes" class="font-oswald text-3xl font-extrabold text-white">0</span>
+                <span class="text-xs text-slate-400">atletas</span>
               </div>
-
-              <div>
-                <div class="flex justify-between text-slate-300 font-bold mb-1">
-                  <span>Arredondamento da Foto:</span>
-                  <span id="valPhotoRadius" class="text-pe-gold font-mono">8px</span>
-                </div>
-                <input type="range" id="inputPhotoRadius" min="0" max="30" value="8" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
-              </div>
+              <span class="text-[11px] text-emerald-400 flex items-center gap-1 font-semibold">
+                ✓ Sincronizado no Supabase
+              </span>
             </div>
+
+            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-2">
+              <div class="flex items-center justify-between text-slate-400 text-xs">
+                <span class="font-bold uppercase tracking-wider">Saldo do Caixa</span>
+                <span class="text-pe-gold">BRL</span>
+              </div>
+              <div class="flex items-baseline gap-2">
+                <span class="font-oswald text-3xl font-extrabold text-pe-gold">R$ 4.820,00</span>
+              </div>
+              <span class="text-[11px] text-slate-400 font-semibold">
+                Taxas & inscrições 2026
+              </span>
+            </div>
+
+            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-2">
+              <div class="flex items-center justify-between text-slate-400 text-xs">
+                <span class="font-bold uppercase tracking-wider">Próximo Torneio</span>
+                <span class="text-pe-blue font-bold">ROMA 2026</span>
+              </div>
+              <div class="flex items-baseline gap-2">
+                <span class="font-oswald text-2xl font-extrabold text-white">Mundial Roma</span>
+              </div>
+              <span class="text-[11px] text-slate-400 font-semibold">
+                01 a 04 de Outubro
+              </span>
+            </div>
+
+            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-2">
+              <div class="flex items-center justify-between text-slate-400 text-xs">
+                <span class="font-bold uppercase tracking-wider">Keep-Alive Vercel</span>
+                <span class="text-emerald-400 font-mono text-[10px]">24/7 ATIVO</span>
+              </div>
+              <div class="flex items-baseline gap-2">
+                <span class="font-oswald text-2xl font-extrabold text-emerald-400">100% Online</span>
+              </div>
+              <span class="text-[11px] text-slate-400 font-semibold">
+                Sem pausa de inatividade
+              </span>
+            </div>
+
           </div>
 
-          <!-- Textos Personalizados Adicionais -->
-          <div class="border-t border-pe-cardBorder pt-4">
-            <div class="flex items-center justify-between mb-3">
-              <h4 class="font-oswald text-base uppercase font-bold text-pe-gold flex items-center gap-2">
-                <span>🔤</span> Textos Adicionais na Carteira
-              </h4>
-              <button onclick="addCustomTextItem()" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-[10px] uppercase px-2.5 py-1 rounded-lg transition">
-                + Adicionar Texto
+          <!-- Tabela Rápida de Atletas Recentes -->
+          <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 shadow-xl space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="font-oswald text-lg uppercase font-bold text-white flex items-center gap-2">
+                <span>📋</span> Últimos Atletas com Carteira Homologada
+              </h3>
+              <button onclick="switchTab('atletas')" class="text-xs text-[#00e676] hover:underline font-bold">
+                Ver todos os atletas →
               </button>
             </div>
-
-            <div id="customTextsList" class="space-y-3">
-              <!-- Itens de texto criados dinamicamente -->
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-[#05080e] text-slate-400 uppercase text-[10px] font-mono border-b border-[#1c253b]">
+                  <tr>
+                    <th class="py-2.5 px-3">Código Oficial</th>
+                    <th class="py-2.5 px-3">Nome</th>
+                    <th class="py-2.5 px-3">Município</th>
+                    <th class="py-2.5 px-3">Modalidade</th>
+                    <th class="py-2.5 px-3">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="quickAthletesList" class="divide-y divide-[#1c253b]/60">
+                  <!-- Inserido dinamicamente -->
+                </tbody>
+              </table>
             </div>
           </div>
 
         </div>
 
-        <!-- Preview no Estúdio -->
-        <div class="lg:col-span-7 sticky top-28 space-y-4">
-          <div class="flex items-center justify-between text-xs text-slate-400">
-            <span>Visualização Dinâmica do Estúdio</span>
-            <span class="text-emerald-400 font-mono">● Atualizando ao vivo</span>
-          </div>
-
-          <!-- O cartão do estúdio usa o mesmo estilo que o preview da aba 1 -->
-          <div class="p-6 bg-black/40 border border-pe-cardBorder rounded-2xl flex items-center justify-center overflow-x-auto">
-            <div id="studioCardWrapper" class="transition-all">
-              <!-- Clonado ou sincronizado via script -->
-            </div>
-          </div>
-
-          <div id="studioSaveNotification" class="hidden p-3 bg-emerald-950/40 border border-emerald-500/40 rounded-xl text-xs text-emerald-300 text-center font-bold">
-            ✓ Configurações de Dimensões e Textos salvas com sucesso! O site público usará este padrão.
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- ========================================================= -->
-    <!-- ABA 3: NOTÍCIAS & TORNEIOS                                -->
-    <!-- ========================================================= -->
-    <div id="tabContent-noticias" class="space-y-8 hidden">
-      <div class="flex items-center justify-between">
-        <div>
-          <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Boletins Oficiais</span>
-          <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Gerenciar Notícias & Torneios</h2>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        <!-- Formulário de Notícia -->
-        <div class="lg:col-span-5 bg-pe-card border border-pe-cardBorder rounded-2xl p-6 shadow-xl relative">
-          <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0 rounded-t-2xl"></div>
-
-          <h3 class="font-oswald text-lg uppercase font-bold text-white mb-4 flex items-center gap-2">
-            <span>✍️</span> Publicar Nova Notícia
-          </h3>
-
-          <form id="newsForm" onsubmit="handleSaveNews(event)" class="space-y-4 text-xs">
+        <!-- ===================================================== -->
+        <!-- ABA: CAIXA (FINANÇAS DO DIA A DIA)                     -->
+        <!-- ===================================================== -->
+        <div id="tabContent-caixa" class="space-y-6 hidden">
+          <div class="flex items-center justify-between">
             <div>
-              <label class="block text-slate-300 font-bold mb-1">Título da Matéria *</label>
-              <input type="text" id="newsTitle" required placeholder="ex: II Campeonato Mundial de Foot Table" class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-white font-bold outline-none" />
+              <span class="text-[#00e676] text-xs font-bold uppercase tracking-wider block">Fluxo de Caixa</span>
+              <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Controle de Caixa da Federação</h2>
             </div>
+            <button onclick="alert('Lançamento registrado com sucesso!')" class="bg-[#00e676] text-[#021509] font-bold text-xs uppercase px-4 py-2 rounded-xl transition">
+              + Novo Lançamento
+            </button>
+          </div>
 
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-slate-300 font-bold mb-1">Categoria</label>
-                <select id="newsCategory" class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 outline-none">
-                  <option value="MUNDIAL ROMA">MUNDIAL ROMA</option>
-                  <option value="CAMPEONATO">CAMPEONATO</option>
-                  <option value="REGULAMENTO">REGULAMENTO</option>
-                  <option value="INFORMATIVO">INFORMATIVO</option>
-                  <option value="COMUNICADO">COMUNICADO</option>
-                </select>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5">
+              <span class="text-xs text-slate-400 uppercase font-bold">Entradas do Mês</span>
+              <p class="font-oswald text-2xl font-bold text-emerald-400 mt-1">R$ 6.340,00</p>
+              <span class="text-[11px] text-slate-500">Filiações & Inscrições</span>
+            </div>
+            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5">
+              <span class="text-xs text-slate-400 uppercase font-bold">Saídas do Mês</span>
+              <p class="font-oswald text-2xl font-bold text-red-400 mt-1">R$ 1.520,00</p>
+              <span class="text-[11px] text-slate-500">Material de Quadra & Troféus</span>
+            </div>
+            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5">
+              <span class="text-xs text-slate-400 uppercase font-bold">Saldo Disponível</span>
+              <p class="font-oswald text-2xl font-bold text-pe-gold mt-1">R$ 4.820,00</p>
+              <span class="text-[11px] text-slate-500">Conta Institucional PE</span>
+            </div>
+          </div>
+
+          <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6">
+            <h3 class="font-oswald text-lg uppercase font-bold text-white mb-4">Extrato Recente do Caixa</h3>
+            <div class="divide-y divide-[#1c253b] text-xs">
+              <div class="py-3 flex items-center justify-between">
+                <div>
+                  <span class="font-bold text-white block">Taxa de Filiação — Atleta Matheus Ferraz (#742918)</span>
+                  <span class="text-slate-400 text-[11px]">02/10/2026 • PIX Institucional</span>
+                </div>
+                <span class="font-mono font-bold text-emerald-400">+ R$ 80,00</span>
               </div>
-              <div>
-                <label class="block text-slate-300 font-bold mb-1">Data</label>
-                <input type="text" id="newsDate" placeholder="ex: 02/10/2026" class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 font-mono outline-none" />
+              <div class="py-3 flex items-center justify-between">
+                <div>
+                  <span class="font-bold text-white block">Emissão de Carteira Física com Chip — Camila Duarte (#581902)</span>
+                  <span class="text-slate-400 text-[11px]">01/10/2026 • Cartão de Débito</span>
+                </div>
+                <span class="font-mono font-bold text-emerald-400">+ R$ 40,00</span>
+              </div>
+              <div class="py-3 flex items-center justify-between">
+                <div>
+                  <span class="font-bold text-white block">Compra de Bolas Homologadas Foot Table Match Ball</span>
+                  <span class="text-slate-400 text-[11px]">30/09/2026 • Fornecedor Oficial</span>
+                </div>
+                <span class="font-mono font-bold text-red-400">- R$ 350,00</span>
               </div>
             </div>
+          </div>
+        </div>
 
+        <!-- ===================================================== -->
+        <!-- ABA: FINANCEIRO (TAXAS & ANUIDADES)                    -->
+        <!-- ===================================================== -->
+        <div id="tabContent-financeiro" class="space-y-6 hidden">
+          <div>
+            <span class="text-[#00e676] text-xs font-bold uppercase tracking-wider block">Prestação de Contas</span>
+            <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Gestão Financeira & Anuidades</h2>
+          </div>
+
+          <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 space-y-4">
+            <h3 class="font-oswald text-lg uppercase font-bold text-white">Tabela de Anuidades 2026</h3>
+            <p class="text-xs text-slate-400">Controle das anuidades ativas dos atletas federados para o circuito estadual e nacional.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+              <div class="bg-[#070b14] border border-[#1c253b] p-4 rounded-xl text-center">
+                <span class="text-slate-400 text-xs block">Anuidades Quitadas</span>
+                <span class="font-oswald text-3xl font-bold text-emerald-400">92%</span>
+              </div>
+              <div class="bg-[#070b14] border border-[#1c253b] p-4 rounded-xl text-center">
+                <span class="text-slate-400 text-xs block">Pendências</span>
+                <span class="font-oswald text-3xl font-bold text-amber-400">8%</span>
+              </div>
+              <div class="bg-[#070b14] border border-[#1c253b] p-4 rounded-xl text-center">
+                <span class="text-slate-400 text-xs block">Total Arrecadado Anual</span>
+                <span class="font-oswald text-3xl font-bold text-white">R$ 28.400,00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===================================================== -->
+        <!-- ABA: AGENDA & CALENDÁRIO                               -->
+        <!-- ===================================================== -->
+        <div id="tabContent-agenda" class="space-y-6 hidden">
+          <div class="flex items-center justify-between">
             <div>
-              <label class="block text-slate-300 font-bold mb-1">Conteúdo / Resumo *</label>
-              <textarea id="newsContent" rows="4" required placeholder="Digite os detalhes da notícia oficial..." class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-300 outline-none"></textarea>
+              <span class="text-[#00e676] text-xs font-bold uppercase tracking-wider block">Calendário Oficial</span>
+              <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Agenda de Torneios & Etapas</h2>
+            </div>
+            <button onclick="alert('Evento agendado com sucesso!')" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-4 py-2 rounded-xl transition">
+              + Agendar Competição
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-3 relative overflow-hidden">
+              <div class="bg-pe-gold text-pe-dark text-[10px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider inline-block">Mundial</div>
+              <h3 class="font-oswald text-lg font-bold text-white">II Campeonato Mundial Foot Table</h3>
+              <p class="text-xs text-slate-400">Roma, Itália — Delegação Oficial de Pernambuco confirmada.</p>
+              <div class="text-xs font-mono text-[#00e676] font-bold">📅 01 a 04 de Outubro de 2026</div>
             </div>
 
-            <div id="newsFeedback" class="hidden text-xs p-3 rounded-xl"></div>
+            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-3 relative overflow-hidden">
+              <div class="bg-pe-blue text-white text-[10px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider inline-block">Estadual</div>
+              <h3 class="font-oswald text-lg font-bold text-white">Open Recife de Foot Table</h3>
+              <p class="text-xs text-slate-400">Praia de Boa Viagem — Etapa classificatória estadual.</p>
+              <div class="text-xs font-mono text-[#00e676] font-bold">📅 18 e 19 de Outubro de 2026</div>
+            </div>
 
-            <button type="submit" class="w-full bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition flex items-center justify-center gap-2">
-              <span>🚀</span> Publicar no Site & Supabase
-            </button>
-          </form>
-        </div>
-
-        <!-- Lista de Notícias Cadastradas -->
-        <div class="lg:col-span-7 space-y-4">
-          <h3 class="font-oswald text-xl uppercase font-bold text-white flex items-center gap-2">
-            <span>📰</span> Notícias no Ar
-          </h3>
-          <div id="adminNewsList" class="space-y-3">
-            <!-- Inserido dinamicamente -->
+            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-3 relative overflow-hidden">
+              <div class="bg-emerald-500 text-black text-[10px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider inline-block">Interior</div>
+              <h3 class="font-oswald text-lg font-bold text-white">Copa Agreste de FutMesa</h3>
+              <p class="text-xs text-slate-400">Caruaru / PE — Categorias Solo, Dupla e Master 40+.</p>
+              <div class="text-xs font-mono text-[#00e676] font-bold">📅 07 e 08 de Novembro de 2026</div>
+            </div>
           </div>
         </div>
-      </div>
+
+        <!-- ===================================================== -->
+        <!-- ABA: PESSOAS (ATLETAS & CARTEIRAS FEDERADAS)           -->
+        <!-- ===================================================== -->
+        <div id="tabContent-atletas" class="space-y-8 hidden">
+          
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <span class="text-[#00e676] text-xs font-bold uppercase tracking-wider block">Registros Oficiais</span>
+              <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Emissão de Carteiras & Atletas</h2>
+            </div>
+            <button onclick="generateRandomAthleteCode()" class="bg-[#0b101d] hover:bg-[#121a30] border border-[#1c253b] text-pe-gold font-mono font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2">
+              <span>🎲</span> Gerar Novo Código de 6 Dígitos
+            </button>
+          </div>
+
+          <!-- Grid: Formulário + Preview Carteira -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- Formulário de Cadastro -->
+            <div class="lg:col-span-6 bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 shadow-xl relative">
+              <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0 rounded-t-2xl"></div>
+
+              <h3 class="font-oswald text-lg uppercase font-bold text-white mb-4 flex items-center gap-2">
+                <span>📝</span> Dados da Filiação Federativa
+              </h3>
+
+              <form id="athleteForm" onsubmit="handleSaveAthlete(event)" class="space-y-4 text-xs">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-slate-300 font-bold mb-1">Código Oficial (6 Dígitos) *</label>
+                    <input type="text" id="athleteCode" required maxlength="6" placeholder="ex: 742918" inputmode="numeric" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-3 py-2.5 text-pe-gold font-mono font-bold text-sm outline-none" />
+                  </div>
+                  <div>
+                    <label class="block text-slate-300 font-bold mb-1">Status Federativo</label>
+                    <select id="athleteStatus" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-3 py-2.5 text-slate-200 outline-none">
+                      <option value="REGULAR">REGULAR (Ativo)</option>
+                      <option value="HOMOLOGADO">HOMOLOGADO</option>
+                      <option value="PENDENTE">PENDENTE</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-slate-300 font-bold mb-1">Nome Completo do Atleta *</label>
+                  <input type="text" id="athleteName" required placeholder="ex: João Silva de Carvalho" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-3 py-2.5 text-white font-bold outline-none" />
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-slate-300 font-bold mb-1">CPF</label>
+                    <input type="text" id="athleteCpf" placeholder="000.000.000-00" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-3 py-2.5 text-slate-200 font-mono outline-none" />
+                  </div>
+                  <div>
+                    <label class="block text-slate-300 font-bold mb-1">Data de Nascimento</label>
+                    <input type="text" id="athleteBirth" placeholder="DD/MM/AAAA" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-3 py-2.5 text-slate-200 font-mono outline-none" />
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-slate-300 font-bold mb-1">Município - Estado</label>
+                    <input type="text" id="athleteCity" placeholder="ex: Recife - PE" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-3 py-2.5 text-slate-200 outline-none" />
+                  </div>
+                  <div>
+                    <label class="block text-slate-300 font-bold mb-1">Modalidade Homologada</label>
+                    <select id="athleteModality" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-3 py-2.5 text-slate-200 outline-none">
+                      <option value="SOLO (INDIVIDUAL)">SOLO (INDIVIDUAL)</option>
+                      <option value="DUPLA (EQUIPE)">DUPLA (EQUIPE)</option>
+                      <option value="SOLO & DUPLA">SOLO & DUPLA</option>
+                      <option value="MASTER 40+">MASTER 40+</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Upload de Foto -->
+                <div>
+                  <label class="block text-slate-300 font-bold mb-1">Foto Oficial do Atleta (Carteira)</label>
+                  <div class="flex items-center gap-3">
+                    <input type="file" id="athletePhotoFile" accept="image/*" onchange="handlePhotoUpload(event)" class="text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#00e676] file:text-[#021509] hover:file:bg-[#00c853] file:cursor-pointer" />
+                  </div>
+                  <input type="hidden" id="athletePhotoBase64" />
+                </div>
+
+                <div id="athleteFeedback" class="hidden text-xs p-3 rounded-xl"></div>
+
+                <div class="pt-2 flex items-center gap-3">
+                  <button type="submit" class="flex-1 bg-[#00e676] hover:bg-[#00c853] text-[#021509] font-extrabold text-xs uppercase tracking-wider py-3.5 rounded-xl transition shadow flex items-center justify-center gap-2">
+                    <span>💾</span> Salvar Atleta no Banco de Dados
+                  </button>
+                  <button type="button" onclick="clearAthleteForm()" class="bg-[#0b101d] border border-[#1c253b] hover:border-slate-500 text-slate-400 font-bold text-xs uppercase px-4 py-3.5 rounded-xl transition">
+                    Limpar
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Preview da Carteira ao Vivo -->
+            <div class="lg:col-span-6 space-y-4">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-[#00e676] animate-pulse"></span>
+                  Visualização da Carteira Gerada
+                </span>
+                <button onclick="downloadLivePreviewBadge()" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
+                  <span>💾</span> Baixar PNG HD
+                </button>
+              </div>
+
+              <!-- Credencial Dinâmica -->
+              <div id="adminLiveCard" class="w-full bg-gradient-to-br from-[#06173a] to-[#040813] border-2 border-pe-gold rounded-2xl p-6 relative overflow-hidden shadow-2xl transition-all">
+                <div class="absolute -right-6 -bottom-6 text-white/[0.03] font-oswald font-black text-7xl select-none pointer-events-none">
+                  PERNAMBUCO
+                </div>
+
+                <!-- Topo Carteira -->
+                <div class="flex items-center justify-between border-b border-pe-gold/25 pb-4 mb-4">
+                  <div class="flex items-center gap-3">
+                    <div class="rounded-full border border-pe-gold overflow-hidden bg-pe-darkblue p-0.5 flex items-center justify-center shrink-0" style="width: 42px; height: 42px;">
+                      <img src="assets/images/logo-federacao.png" alt="Federação Pernambucana" class="w-full h-full object-contain rounded-full" />
+                    </div>
+                    <div>
+                      <h4 class="font-oswald text-sm uppercase font-bold text-pe-gold tracking-wide leading-tight">Pernambuco FutMesa</h4>
+                      <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest block">Foot Table Federation</span>
+                    </div>
+                  </div>
+                  
+                  <div class="bg-pe-red text-white text-xs font-mono font-bold px-3 py-1 rounded shadow-md tracking-wider" id="previewBadgeCode">
+                    ID: #000000
+                  </div>
+                </div>
+
+                <!-- Foto e Dados -->
+                <div class="grid grid-cols-[100px_1fr] gap-5 items-center my-4">
+                  <div id="previewPhotoContainer" class="w-[100px] h-[125px] rounded-lg border-2 border-pe-gold overflow-hidden bg-slate-900 shadow-inner flex items-center justify-center shrink-0 transition-all">
+                    <img id="previewBadgePhoto" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" alt="Foto Atleta" class="w-full h-full object-cover" />
+                  </div>
+                  <div class="space-y-1.5 text-xs">
+                    <div>
+                      <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Nome do Atleta</span>
+                      <strong class="text-white text-base font-bold font-oswald uppercase tracking-wide block" id="previewBadgeName">Nome do Atleta</strong>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                      <div>
+                        <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">CPF</span>
+                        <span class="text-slate-200 font-mono" id="previewBadgeCpf">000.000.000-00</span>
+                      </div>
+                      <div>
+                        <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Nascimento</span>
+                        <span class="text-slate-200 font-mono" id="previewBadgeBirth">--/--/----</span>
+                      </div>
+                    </div>
+                    <div class="pt-1">
+                      <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Município</span>
+                      <span class="text-slate-200 font-semibold" id="previewBadgeCity">Pernambuco</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Textos Personalizados da Carteira -->
+                <div id="previewCustomTextsContainer" class="space-y-1 my-2"></div>
+
+                <!-- Rodapé Carteira -->
+                <div class="bg-black/40 border-l-4 border-pe-gold p-3 rounded-lg flex items-center justify-between mt-4">
+                  <div>
+                    <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">Modalidade Homologada</span>
+                    <span class="text-xs font-extrabold uppercase text-pe-gold tracking-wide" id="previewBadgeModality">SOLO (INDIVIDUAL)</span>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">Status Federado</span>
+                    <span class="text-[10px] font-bold uppercase text-emerald-400 flex items-center gap-1" id="previewBadgeStatus">
+                      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> REGULAR
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Tabela de Atletas -->
+          <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 shadow-xl">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <h3 class="font-oswald text-xl uppercase font-bold text-white flex items-center gap-2">
+                <span>📋</span> Atletas Federados Cadastrados no Banco
+              </h3>
+              <input type="text" id="searchAthleteTable" oninput="filterAthletesTable()" placeholder="Filtrar por nome ou código..." class="bg-[#05080e] border border-[#1c253b] rounded-xl px-4 py-2 text-xs text-white outline-none focus:border-[#00e676]" />
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-[#05080e] text-slate-400 uppercase text-[10px] font-mono border-b border-[#1c253b]">
+                  <tr>
+                    <th class="py-3 px-4">Foto</th>
+                    <th class="py-3 px-4">Código (6D)</th>
+                    <th class="py-3 px-4">Nome do Atleta</th>
+                    <th class="py-3 px-4">CPF</th>
+                    <th class="py-3 px-4">Município</th>
+                    <th class="py-3 px-4">Modalidade</th>
+                    <th class="py-3 px-4">Status</th>
+                    <th class="py-3 px-4 text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="athletesTableBody" class="divide-y divide-[#1c253b]/60">
+                  <!-- Inserido dinamicamente -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ===================================================== -->
+        <!-- ABA: CONTRATOS & ESTOQUE (ESTÚDIO DA CARTEIRA)         -->
+        <!-- ===================================================== -->
+        <div id="tabContent-estudio" class="space-y-8 hidden">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-[#00e676] text-xs font-bold uppercase tracking-wider block">Customizador Visual</span>
+              <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Estúdio da Carteira & Equipamentos</h2>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="saveBadgeStudioLayout()" class="bg-[#00e676] hover:bg-[#00c853] text-[#021509] font-extrabold text-xs uppercase px-5 py-2.5 rounded-xl transition shadow flex items-center gap-1.5">
+                <span>💾</span> Salvar Layout Oficial
+              </button>
+              <button onclick="resetBadgeStudioLayout()" class="bg-[#0b101d] border border-[#1c253b] text-slate-400 hover:text-white text-xs uppercase px-4 py-2.5 rounded-xl transition">
+                Padrão
+              </button>
+            </div>
+          </div>
+
+          <!-- Grid: Controles de Dimensões + Preview -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <div class="lg:col-span-5 bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 shadow-xl space-y-6 text-xs">
+              
+              <!-- Dimensões da Carteira -->
+              <div>
+                <h4 class="font-oswald text-base uppercase font-bold text-pe-gold mb-3 flex items-center gap-2">
+                  <span>📐</span> Dimensões da Carteira
+                </h4>
+                <div class="space-y-3">
+                  <div>
+                    <div class="flex justify-between text-slate-300 font-bold mb-1">
+                      <span>Largura da Carteira:</span>
+                      <span id="valCardWidth" class="text-pe-gold font-mono">540px</span>
+                    </div>
+                    <input type="range" id="inputCardWidth" min="400" max="680" value="540" oninput="updateStudioLive()" class="w-full accent-[#00e676]" />
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-slate-300 font-bold mb-1">
+                      <span>Altura Mínima:</span>
+                      <span id="valCardHeight" class="text-pe-gold font-mono">300px</span>
+                    </div>
+                    <input type="range" id="inputCardHeight" min="250" max="480" value="300" oninput="updateStudioLive()" class="w-full accent-[#00e676]" />
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-slate-300 font-bold mb-1">
+                      <span>Espaçamento Interno (Padding):</span>
+                      <span id="valCardPadding" class="text-pe-gold font-mono">24px</span>
+                    </div>
+                    <input type="range" id="inputCardPadding" min="12" max="36" value="24" oninput="updateStudioLive()" class="w-full accent-[#00e676]" />
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-slate-300 font-bold mb-1">
+                      <span>Raio dos Cantos (Borda):</span>
+                      <span id="valCardRadius" class="text-pe-gold font-mono">16px</span>
+                    </div>
+                    <input type="range" id="inputCardRadius" min="4" max="32" value="16" oninput="updateStudioLive()" class="w-full accent-[#00e676]" />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Dimensões da Foto do Atleta -->
+              <div class="border-t border-[#1c253b] pt-4">
+                <h4 class="font-oswald text-base uppercase font-bold text-pe-gold mb-3 flex items-center gap-2">
+                  <span>🖼️</span> Dimensões da Foto do Atleta
+                </h4>
+                <div class="space-y-3">
+                  <div>
+                    <div class="flex justify-between text-slate-300 font-bold mb-1">
+                      <span>Largura da Foto:</span>
+                      <span id="valPhotoWidth" class="text-pe-gold font-mono">100px</span>
+                    </div>
+                    <input type="range" id="inputPhotoWidth" min="70" max="150" value="100" oninput="updateStudioLive()" class="w-full accent-[#00e676]" />
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-slate-300 font-bold mb-1">
+                      <span>Altura da Foto:</span>
+                      <span id="valPhotoHeight" class="text-pe-gold font-mono">125px</span>
+                    </div>
+                    <input type="range" id="inputPhotoHeight" min="90" max="180" value="125" oninput="updateStudioLive()" class="w-full accent-[#00e676]" />
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-slate-300 font-bold mb-1">
+                      <span>Arredondamento da Foto:</span>
+                      <span id="valPhotoRadius" class="text-pe-gold font-mono">8px</span>
+                    </div>
+                    <input type="range" id="inputPhotoRadius" min="0" max="30" value="8" oninput="updateStudioLive()" class="w-full accent-[#00e676]" />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Textos Personalizados Adicionais -->
+              <div class="border-t border-[#1c253b] pt-4">
+                <div class="flex items-center justify-between mb-3">
+                  <h4 class="font-oswald text-base uppercase font-bold text-pe-gold flex items-center gap-2">
+                    <span>🔤</span> Textos Adicionais na Carteira
+                  </h4>
+                  <button onclick="addCustomTextItem()" class="bg-[#00e676] text-[#021509] font-bold text-[10px] uppercase px-2.5 py-1 rounded-lg transition">
+                    + Adicionar Texto
+                  </button>
+                </div>
+
+                <div id="customTextsList" class="space-y-3"></div>
+              </div>
+
+            </div>
+
+            <!-- Preview no Estúdio -->
+            <div class="lg:col-span-7 sticky top-20 space-y-4">
+              <div class="flex items-center justify-between text-xs text-slate-400">
+                <span>Visualização Dinâmica do Estúdio</span>
+                <span class="text-[#00e676] font-mono">● Atualizando ao vivo</span>
+              </div>
+
+              <div class="p-6 bg-[#05080e] border border-[#1c253b] rounded-2xl flex items-center justify-center overflow-x-auto">
+                <div id="studioCardWrapper" class="transition-all"></div>
+              </div>
+
+              <div id="studioSaveNotification" class="hidden p-3 bg-emerald-950/40 border border-emerald-500/40 rounded-xl text-xs text-emerald-300 text-center font-bold">
+                ✓ Configurações de Dimensões e Textos salvas com sucesso! O site público usará este padrão.
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ===================================================== -->
+        <!-- ABA: GRUPOS B2B (CLUBES & PARCEIROS)                   -->
+        <!-- ===================================================== -->
+        <div id="tabContent-b2b" class="space-y-6 hidden">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-[#00e676] text-xs font-bold uppercase tracking-wider block">Parcerias Institucionais</span>
+              <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Grupos B2B, Clubes & Federações</h2>
+            </div>
+            <button onclick="alert('Clube parceiro cadastrado!')" class="bg-[#00e676] text-[#021509] font-bold text-xs uppercase px-4 py-2 rounded-xl transition">
+              + Cadastrar Clube / Parceiro
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-pe-gold uppercase">Clube Filiado</span>
+                <span class="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">ATIVO</span>
+              </div>
+              <h3 class="font-oswald text-lg font-bold text-white">Associação Boa Viagem de Foot Table</h3>
+              <p class="text-xs text-slate-400">Recife - PE • 24 atletas filiados • Responsável: Carlos Alberto</p>
+              <div class="text-[11px] text-slate-500 font-mono">CNPJ: 34.891.002/0001-90</div>
+            </div>
+
+            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-pe-gold uppercase">Clube Filiado</span>
+                <span class="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">ATIVO</span>
+              </div>
+              <h3 class="font-oswald text-lg font-bold text-white">FutMesa Olinda Clube</h3>
+              <p class="text-xs text-slate-400">Olinda - PE • 18 atletas filiados • Responsável: Rodrigo Mendes</p>
+              <div class="text-[11px] text-slate-500 font-mono">CNPJ: 41.229.110/0001-14</div>
+            </div>
+
+            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-pe-gold uppercase">Clube Filiado</span>
+                <span class="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">ATIVO</span>
+              </div>
+              <h3 class="font-oswald text-lg font-bold text-white">Caruaru Foot Table Team</h3>
+              <p class="text-xs text-slate-400">Caruaru - PE • 15 atletas filiados • Responsável: Fernando Sales</p>
+              <div class="text-[11px] text-slate-500 font-mono">CNPJ: 28.110.874/0001-88</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===================================================== -->
+        <!-- ABA: NOTÍCIAS & MÍDIA                                  -->
+        <!-- ===================================================== -->
+        <div id="tabContent-noticias" class="space-y-8 hidden">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-[#00e676] text-xs font-bold uppercase tracking-wider block">Boletins Oficiais</span>
+              <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Gerenciar Notícias & Torneios</h2>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div class="lg:col-span-5 bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 shadow-xl relative">
+              <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0 rounded-t-2xl"></div>
+
+              <h3 class="font-oswald text-lg uppercase font-bold text-white mb-4 flex items-center gap-2">
+                <span>✍️</span> Publicar Nova Notícia
+              </h3>
+
+              <form id="newsForm" onsubmit="handleSaveNews(event)" class="space-y-4 text-xs">
+                <div>
+                  <label class="block text-slate-300 font-bold mb-1">Título da Matéria *</label>
+                  <input type="text" id="newsTitle" required placeholder="ex: II Campeonato Mundial de Foot Table" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-3 py-2.5 text-white font-bold outline-none" />
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-slate-300 font-bold mb-1">Categoria</label>
+                    <select id="newsCategory" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-3 py-2.5 text-slate-200 outline-none">
+                      <option value="MUNDIAL ROMA">MUNDIAL ROMA</option>
+                      <option value="CAMPEONATO">CAMPEONATO</option>
+                      <option value="REGULAMENTO">REGULAMENTO</option>
+                      <option value="INFORMATIVO">INFORMATIVO</option>
+                      <option value="COMUNICADO">COMUNICADO</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-slate-300 font-bold mb-1">Data</label>
+                    <input type="text" id="newsDate" placeholder="ex: 02/10/2026" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-3 py-2.5 text-slate-200 font-mono outline-none" />
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-slate-300 font-bold mb-1">Conteúdo / Resumo *</label>
+                  <textarea id="newsContent" rows="4" required placeholder="Digite os detalhes da notícia oficial..." class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-3 py-2.5 text-slate-300 outline-none"></textarea>
+                </div>
+
+                <div id="newsFeedback" class="hidden text-xs p-3 rounded-xl"></div>
+
+                <button type="submit" class="w-full bg-[#00e676] hover:bg-[#00c853] text-[#021509] font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition flex items-center justify-center gap-2">
+                  <span>🚀</span> Publicar no Site & Supabase
+                </button>
+              </form>
+            </div>
+
+            <!-- Lista de Notícias -->
+            <div class="lg:col-span-7 space-y-4">
+              <h3 class="font-oswald text-xl uppercase font-bold text-white flex items-center gap-2">
+                <span>📰</span> Notícias no Ar
+              </h3>
+              <div id="adminNewsList" class="space-y-3"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===================================================== -->
+        <!-- ABA: RELATÓRIOS & ESTATÍSTICAS                         -->
+        <!-- ===================================================== -->
+        <div id="tabContent-relatorios" class="space-y-6 hidden">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-[#00e676] text-xs font-bold uppercase tracking-wider block">Auditoria & Estatísticas</span>
+              <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Relatórios Oficiais de Atletas</h2>
+            </div>
+            <button onclick="window.print()" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-4 py-2 rounded-xl transition flex items-center gap-2">
+              <span>🖨️</span> Imprimir Relatório Oficial
+            </button>
+          </div>
+
+          <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 space-y-4">
+            <h3 class="font-oswald text-lg uppercase font-bold text-white">Exportação de Dados Federativos</h3>
+            <p class="text-xs text-slate-400">Emita a listagem completa dos atletas homologados em folha timbrada para mesas de arbitragem.</p>
+            <div class="flex flex-wrap gap-3 pt-2">
+              <button onclick="alert('Exportando CSV de atletas homologados...')" class="bg-[#070b14] border border-[#1c253b] hover:border-[#00e676] text-white px-4 py-2.5 rounded-xl text-xs font-bold transition">
+                📥 Exportar Planilha de Atletas (.CSV)
+              </button>
+              <button onclick="alert('Gerando documento PDF timbrado da Federação...')" class="bg-[#070b14] border border-[#1c253b] hover:border-[#00e676] text-white px-4 py-2.5 rounded-xl text-xs font-bold transition">
+                📄 Gerar Caderno de Árbitros (.PDF)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===================================================== -->
+        <!-- ABA: AJUSTES (CONFIGURAÇÃO SUPABASE & KEEP-ALIVE)      -->
+        <!-- ===================================================== -->
+        <div id="tabContent-config" class="space-y-8 hidden">
+          <div>
+            <span class="text-[#00e676] text-xs font-bold uppercase tracking-wider block">Integração na Nuvem</span>
+            <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Ajustes do Sistema, Supabase & Keep-Alive</h2>
+          </div>
+
+          <div class="max-w-3xl bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 sm:p-8 space-y-6 shadow-xl relative">
+            <div class="pe-stripe-bar h-1.5 w-full absolute top-0 left-0 rounded-t-2xl"></div>
+
+            <div class="space-y-4 text-xs">
+              <div>
+                <label class="block text-slate-300 font-bold mb-1">URL do Supabase (Project URL)</label>
+                <input type="text" id="adminCfgUrl" value="https://qvnsahvdjhimlmtqrnif.supabase.co" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-4 py-3 text-slate-200 font-mono outline-none" />
+              </div>
+
+              <div>
+                <label class="block text-slate-300 font-bold mb-1">Chave Anon (anon public key)</label>
+                <input type="password" id="adminCfgKey" placeholder="Cole sua chave eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-4 py-3 text-slate-200 font-mono outline-none" />
+              </div>
+
+              <div id="adminConfigFeedback" class="hidden p-3 rounded-xl text-xs font-bold"></div>
+
+              <div class="flex flex-wrap items-center gap-3 pt-2">
+                <button onclick="handleSaveAdminConfig()" class="bg-[#00e676] hover:bg-[#00c853] text-[#021509] font-extrabold text-xs uppercase px-6 py-3 rounded-xl transition">
+                  Salvar Credenciais
+                </button>
+                <button onclick="testSupabaseConnection()" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-5 py-3 rounded-xl transition flex items-center gap-2">
+                  <span>📡</span> Testar Conexão com o Banco
+                </button>
+              </div>
+            </div>
+
+            <div class="bg-[#05080e] border border-[#1c253b] rounded-xl p-4 text-xs space-y-2 mt-6">
+              <div class="flex items-center gap-2 text-pe-gold font-bold uppercase tracking-wider">
+                <span>🛡️</span> Sistema Anti-Pausa Automático (Vercel Keep-Alive)
+              </div>
+              <p class="text-slate-400 leading-relaxed">
+                A rota <code class="text-pe-gold bg-black/50 px-1.5 py-0.5 rounded">/api/keep-alive</code> foi agendada na Vercel diariamente. Ela consulta a tabela <code class="text-slate-300">keep_alive_logs</code> do seu Supabase, garantindo que o banco de dados nunca seja pausado por inatividade.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </main>
+
+      <!-- Rodapé -->
+      <footer class="bg-[#04060b] border-t border-[#151c2e] py-4 px-6 text-center text-xs text-slate-500">
+        <p>Federação Pernambucana de FutMesa & Foot Table — Sistema de Gestão e Emissão Federativa © 2026</p>
+      </footer>
+
     </div>
 
-    <!-- ========================================================= -->
-    <!-- ABA 4: CONFIGURAÇÃO DO BANCO & KEEP-ALIVE                 -->
-    <!-- ========================================================= -->
-    <div id="tabContent-config" class="space-y-8 hidden">
-      <div>
-        <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Integração na Nuvem</span>
-        <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Configuração do Supabase & Keep-Alive</h2>
-      </div>
-
-      <div class="max-w-3xl bg-pe-card border border-pe-cardBorder rounded-2xl p-6 sm:p-8 space-y-6 shadow-xl relative">
-        <div class="pe-stripe-bar h-1.5 w-full absolute top-0 left-0 rounded-t-2xl"></div>
-
-        <div class="space-y-4 text-xs">
-          <div>
-            <label class="block text-slate-300 font-bold mb-1">URL do Supabase (Project URL)</label>
-            <input type="text" id="adminCfgUrl" value="https://qvnsahvdjhimlmtqrnif.supabase.co" class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-4 py-3 text-slate-200 font-mono outline-none" />
-          </div>
-
-          <div>
-            <label class="block text-slate-300 font-bold mb-1">Chave Anon (anon public key)</label>
-            <input type="password" id="adminCfgKey" placeholder="Cole sua chave eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl px-4 py-3 text-slate-200 font-mono outline-none" />
-          </div>
-
-          <div id="adminConfigFeedback" class="hidden p-3 rounded-xl text-xs font-bold"></div>
-
-          <div class="flex flex-wrap items-center gap-3 pt-2">
-            <button onclick="handleSaveAdminConfig()" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase px-6 py-3 rounded-xl transition">
-              Salvar Credenciais
-            </button>
-            <button onclick="testSupabaseConnection()" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-5 py-3 rounded-xl transition flex items-center gap-2">
-              <span>📡</span> Testar Conexão com o Banco
-            </button>
-          </div>
-        </div>
-
-        <!-- Explicação do Keep-Alive Ativo -->
-        <div class="bg-pe-dark/80 border border-pe-cardBorder rounded-xl p-4 text-xs space-y-2 mt-6">
-          <div class="flex items-center gap-2 text-pe-gold font-bold uppercase tracking-wider">
-            <span>🛡️</span> Sistema Anti-Pausa Automático (Vercel Keep-Alive)
-          </div>
-          <p class="text-slate-400 leading-relaxed">
-            A rota <code class="text-pe-gold bg-black/50 px-1.5 py-0.5 rounded">/api/keep-alive</code> foi agendada na Vercel para rodar diariamente de forma automática. Ela consulta a tabela <code class="text-slate-300">keep_alive_logs</code> do seu Supabase, garantindo que o banco de dados nunca seja pausado pelo limite de 7 dias de inatividade.
-          </p>
-        </div>
-      </div>
-    </div>
-
-  </main>
-
-  <!-- Rodapé do Admin -->
-  <footer class="bg-[#05070c] border-t border-pe-cardBorder py-6 px-4 text-center text-xs text-slate-500">
-    <p>Federação Pernambucana de FutMesa & Foot Table — Sistema de Gestão e Emissão Federativa © 2026</p>
-  </footer>
+  </div>
 
   <!-- ========================================================= -->
   <!-- SCRIPT DE COMPORTAMENTO E CONTROLE GERAL                  -->
@@ -676,7 +1143,7 @@
       if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY) {
         try {
           supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-          dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
+          dot.className = "w-2.5 h-2.5 rounded-full bg-[#00e676]";
           text.textContent = "Supabase Conectado";
           return true;
         } catch (e) {
@@ -689,21 +1156,45 @@
     }
 
     /* =========================================================
-       SISTEMA DE NAVEGAÇÃO ENTRE ABAS
+       SISTEMA DE NAVEGAÇÃO LATERAL (ESTILO EXATO SCREENSHOT)
        ========================================================= */
+    const ALL_TABS = ['recepcao', 'caixa', 'financeiro', 'agenda', 'atletas', 'estudio', 'b2b', 'noticias', 'relatorios', 'config'];
+    const TAB_TITLES = {
+      recepcao: 'Recepção & Dashboard',
+      caixa: 'Controle de Caixa da Federação',
+      financeiro: 'Gestão Financeira & Anuidades',
+      agenda: 'Agenda de Torneios & Competições',
+      atletas: 'Pessoas (Atletas Federados & Carteiras)',
+      estudio: 'Contratos & Estoque (Estúdio da Carteira)',
+      b2b: 'Grupos B2B, Clubes & Parceiros',
+      noticias: 'Notícias & Boletins Oficiais',
+      relatorios: 'Relatórios Oficiais & Auditoria',
+      config: 'Ajustes, Supabase & Keep-Alive'
+    };
+
     function switchTab(tabName) {
-      const tabs = ['atletas', 'estudio', 'noticias', 'config'];
-      tabs.forEach(t => {
+      ALL_TABS.forEach(t => {
         const content = document.getElementById(`tabContent-${t}`);
-        const btn = document.getElementById(`tabBtn-${t}`);
+        const btn = document.getElementById(`navBtn-${t}`);
+        if (!content || !btn) return;
+
+        const indicator = btn.querySelector('.nav-indicator');
+
         if (t === tabName) {
           content.classList.remove('hidden');
-          btn.className = "tab-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition flex items-center gap-2 bg-pe-gold text-pe-dark shadow-sm";
+          btn.className = "nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all cursor-pointer group active-nav-pill";
+          if (indicator) indicator.classList.remove('hidden');
         } else {
           content.classList.add('hidden');
-          btn.className = "tab-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition flex items-center gap-2 text-slate-400 hover:text-white hover:bg-pe-card";
+          btn.className = "nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group";
+          if (indicator) indicator.classList.add('hidden');
         }
       });
+
+      const titleEl = document.getElementById('headerPageTitle');
+      if (titleEl && TAB_TITLES[tabName]) {
+        titleEl.textContent = TAB_TITLES[tabName];
+      }
 
       if (tabName === 'estudio') {
         syncStudioWithCurrentLayout();
@@ -711,7 +1202,7 @@
     }
 
     /* =========================================================
-       GERENCIAMENTO DE ATLETAS (ABA 1)
+       GERENCIAMENTO DE ATLETAS (ABA 1 / PESSOAS)
        ========================================================= */
     function generateRandomAthleteCode() {
       const code = String(Math.floor(100000 + Math.random() * 900000));
@@ -732,7 +1223,6 @@
       }
     }
 
-    // Atualiza o preview dinâmico enquanto o usuário digita no form
     ['athleteCode', 'athleteName', 'athleteCpf', 'athleteBirth', 'athleteCity', 'athleteModality', 'athleteStatus'].forEach(id => {
       const el = document.getElementById(id);
       if (el) {
@@ -756,7 +1246,7 @@
       document.getElementById('previewBadgeCity').textContent = city;
       document.getElementById('previewBadgeModality').textContent = modality;
       document.getElementById('previewBadgeStatus').innerHTML = `
-        <span class="w-2 h-2 rounded-full ${status === 'REGULAR' ? 'bg-emerald-400' : 'bg-amber-400'} animate-pulse"></span> ${status}
+        <span class="w-2 h-2 rounded-full ${status === 'REGULAR' ? 'bg-[#00e676]' : 'bg-amber-400'} animate-pulse"></span> ${status}
       `;
     }
 
@@ -787,7 +1277,6 @@
         foto_url: photo
       };
 
-      // 1. Tenta salvar no Supabase
       let savedInSupabase = false;
       if (supabaseClient) {
         try {
@@ -802,7 +1291,6 @@
         }
       }
 
-      // 2. Salva localmente (Garantia e Fallback)
       let localAthletes = JSON.parse(localStorage.getItem('pe_athletes_db')) || DEFAULT_ATHLETES;
       const existingIdx = localAthletes.findIndex(a => String(a.codigo) === String(code));
       if (existingIdx >= 0) {
@@ -816,6 +1304,7 @@
       feedback.innerHTML = `✓ Atleta #${code} cadastrado com sucesso! ${savedInSupabase ? '(Sincronizado com Supabase)' : '(Salvo localmente)'}.`;
 
       renderAthletesTable();
+      updateDashboardMetrics();
     }
 
     async function loadAthletes() {
@@ -851,20 +1340,20 @@
 
       athletes.forEach(a => {
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-pe-dark/40 transition";
+        tr.className = "hover:bg-[#070b14] transition";
         tr.innerHTML = `
           <td class="py-3 px-4">
             <div class="w-9 h-11 rounded border border-pe-gold/40 overflow-hidden bg-slate-900">
               <img src="${a.foto || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'}" class="w-full h-full object-cover" />
             </div>
           </td>
-          <td class="py-3 px-4 font-mono font-bold text-pe-gold">#${a.codigo}</td>
+          <td class="py-3 px-4 font-mono font-bold text-[#00e676]">#${a.codigo}</td>
           <td class="py-3 px-4 font-bold text-white uppercase">${a.nome}</td>
           <td class="py-3 px-4 font-mono text-slate-300">${a.cpf || '-'}</td>
           <td class="py-3 px-4 text-slate-300">${a.municipio || '-'}</td>
           <td class="py-3 px-4 text-pe-gold">${a.modalidade || 'SOLO'}</td>
           <td class="py-3 px-4">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${a.status === 'REGULAR' ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-500/30' : 'bg-amber-950/60 text-amber-400 border border-amber-500/30'}">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${a.status === 'REGULAR' ? 'bg-emerald-950/60 text-[#00e676] border border-emerald-500/30' : 'bg-amber-950/60 text-amber-400 border border-amber-500/30'}">
               ${a.status || 'REGULAR'}
             </span>
           </td>
@@ -877,6 +1366,37 @@
         `;
         tbody.appendChild(tr);
       });
+
+      renderQuickAthletesList(athletes);
+    }
+
+    function renderQuickAthletesList(athletes) {
+      const quick = document.getElementById('quickAthletesList');
+      if (!quick) return;
+      quick.innerHTML = '';
+      const topAthletes = athletes.slice(0, 5);
+      topAthletes.forEach(a => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-[#070b14] transition";
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 font-mono font-bold text-[#00e676]">#${a.codigo}</td>
+          <td class="py-2.5 px-3 font-bold text-white uppercase">${a.nome}</td>
+          <td class="py-2.5 px-3 text-slate-300">${a.municipio || 'Pernambuco'}</td>
+          <td class="py-2.5 px-3 text-pe-gold font-bold">${a.modalidade || 'SOLO'}</td>
+          <td class="py-2.5 px-3">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950/60 text-[#00e676] border border-emerald-500/30">
+              ${a.status || 'REGULAR'}
+            </span>
+          </td>
+        `;
+        quick.appendChild(tr);
+      });
+    }
+
+    async function updateDashboardMetrics() {
+      const athletes = await loadAthletes();
+      const el = document.getElementById('metricTotalAthletes');
+      if (el) el.textContent = athletes.length;
     }
 
     async function deleteAthlete(codigo) {
@@ -895,6 +1415,7 @@
       localStorage.setItem('pe_athletes_db', JSON.stringify(localAthletes));
 
       renderAthletesTable();
+      updateDashboardMetrics();
     }
 
     async function fillFormWithAthlete(codigo) {
@@ -902,6 +1423,7 @@
       const a = athletes.find(item => String(item.codigo) === String(codigo));
       if (!a) return;
 
+      switchTab('atletas');
       document.getElementById('athleteCode').value = a.codigo;
       document.getElementById('athleteName').value = a.nome;
       document.getElementById('athleteCpf').value = a.cpf || '';
@@ -935,7 +1457,7 @@
     }
 
     /* =========================================================
-       ESTÚDIO DA CARTEIRA: DIMENSÕES & TEXTOS CUSTOMIZADOS (ABA 2)
+       ESTÚDIO DA CARTEIRA: DIMENSÕES & TEXTOS CUSTOMIZADOS
        ========================================================= */
     function syncStudioWithCurrentLayout() {
       document.getElementById('inputCardWidth').value = currentBadgeLayout.cardWidth || 540;
@@ -1005,7 +1527,6 @@
         photoContainer.style.borderRadius = currentBadgeLayout.photoRadius + 'px';
       }
 
-      // Renderiza textos customizados na carteira
       const customContainer = document.getElementById('previewCustomTextsContainer');
       if (customContainer) {
         customContainer.innerHTML = '';
@@ -1023,7 +1544,6 @@
         }
       }
 
-      // Clona para o wrapper do estúdio
       const studioWrapper = document.getElementById('studioCardWrapper');
       if (studioWrapper && card) {
         studioWrapper.innerHTML = '';
@@ -1071,16 +1591,16 @@
 
       currentBadgeLayout.customTexts.forEach(t => {
         const div = document.createElement('div');
-        div.className = "bg-[#080b12] border border-pe-cardBorder rounded-xl p-3 space-y-2";
+        div.className = "bg-[#05080e] border border-[#1c253b] rounded-xl p-3 space-y-2";
         div.innerHTML = `
           <div class="flex items-center gap-2">
-            <input type="text" value="${t.text}" oninput="updateCustomTextItem(${t.id}, 'text', this.value)" class="flex-1 bg-transparent border-b border-pe-cardBorder text-white text-xs font-bold outline-none py-1 focus:border-pe-gold" />
+            <input type="text" value="${t.text}" oninput="updateCustomTextItem(${t.id}, 'text', this.value)" class="flex-1 bg-transparent border-b border-[#1c253b] text-white text-xs font-bold outline-none py-1 focus:border-[#00e676]" />
             <button onclick="removeCustomTextItem(${t.id})" class="text-red-400 hover:text-red-300 font-bold px-2 py-0.5">✕</button>
           </div>
           <div class="grid grid-cols-3 gap-2 text-[10px]">
             <div>
               <span class="text-slate-400 block">Fonte:</span>
-              <input type="number" min="8" max="22" value="${t.fontSize || 10}" oninput="updateCustomTextItem(${t.id}, 'fontSize', parseInt(this.value))" class="w-full bg-pe-card border border-pe-cardBorder rounded px-1.5 py-0.5 text-slate-200" />
+              <input type="number" min="8" max="22" value="${t.fontSize || 10}" oninput="updateCustomTextItem(${t.id}, 'fontSize', parseInt(this.value))" class="w-full bg-[#0b101d] border border-[#1c253b] rounded px-1.5 py-0.5 text-slate-200" />
             </div>
             <div>
               <span class="text-slate-400 block">Cor:</span>
@@ -1088,7 +1608,7 @@
             </div>
             <div>
               <span class="text-slate-400 block">Alinhamento:</span>
-              <select onchange="updateCustomTextItem(${t.id}, 'align', this.value)" class="w-full bg-pe-card border border-pe-cardBorder rounded px-1 py-0.5 text-slate-200">
+              <select onchange="updateCustomTextItem(${t.id}, 'align', this.value)" class="w-full bg-[#0b101d] border border-[#1c253b] rounded px-1 py-0.5 text-slate-200">
                 <option value="left" ${t.align === 'left' ? 'selected' : ''}>Esquerda</option>
                 <option value="center" ${t.align === 'center' ? 'selected' : ''}>Centro</option>
                 <option value="right" ${t.align === 'right' ? 'selected' : ''}>Direita</option>
@@ -1113,7 +1633,7 @@
     }
 
     /* =========================================================
-       GERENCIAMENTO DE NOTÍCIAS (ABA 3)
+       GERENCIAMENTO DE NOTÍCIAS
        ========================================================= */
     async function loadNews() {
       let list = JSON.parse(localStorage.getItem('pe_news_db')) || DEFAULT_NEWS;
@@ -1144,7 +1664,7 @@
 
       news.forEach(item => {
         const div = document.createElement('div');
-        div.className = "bg-pe-card border border-pe-cardBorder rounded-xl p-4 flex items-start justify-between gap-4";
+        div.className = "bg-[#0b101d] border border-[#1c253b] rounded-xl p-4 flex items-start justify-between gap-4";
         div.innerHTML = `
           <div class="space-y-1">
             <div class="flex items-center gap-2">
@@ -1217,7 +1737,7 @@
     }
 
     /* =========================================================
-       CONFIGURAÇÃO DO BANCO & KEEP-ALIVE (ABA 4)
+       CONFIGURAÇÃO DO BANCO & KEEP-ALIVE
        ========================================================= */
     function handleSaveAdminConfig() {
       const url = document.getElementById('adminCfgUrl').value.trim();
@@ -1276,6 +1796,11 @@
       const isLogged = sessionStorage.getItem('pe_admin_logged') === 'true' || localStorage.getItem('pe_admin_logged') === 'true';
       if (!isLogged) {
         window.location.href = 'login.html';
+      } else {
+        const user = sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user');
+        if (user && document.getElementById('sidebarAdminUser')) {
+          document.getElementById('sidebarAdminUser').textContent = user;
+        }
       }
     }
 
@@ -1291,7 +1816,6 @@
     window.onload = function() {
       checkAuth();
 
-      // Carrega chaves salvas nos campos de config
       document.getElementById('adminCfgUrl').value = localStorage.getItem('pe_supabase_url') || DEFAULT_SUPABASE_URL;
       document.getElementById('adminCfgKey').value = localStorage.getItem('pe_supabase_anon_key') || '';
 
@@ -1300,6 +1824,7 @@
       renderAthletesTable();
       renderAdminNews();
       syncStudioWithCurrentLayout();
+      updateDashboardMetrics();
     };
   </script>
 </body>
