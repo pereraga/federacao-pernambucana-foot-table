@@ -40,6 +40,16 @@ CREATE TABLE IF NOT EXISTS public.keep_alive_logs (
     status TEXT DEFAULT 'active'
 );
 
+-- 4. TABELA DE GESTORES E E-MAILS INSTITUCIONAIS
+CREATE TABLE IF NOT EXISTS public.admin_users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    nome TEXT NOT NULL,
+    cargo TEXT DEFAULT 'Diretoria',
+    email TEXT UNIQUE NOT NULL,
+    senha TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 -- ========================================================
 -- POLÍTICAS DE SEGURANÇA (ROW LEVEL SECURITY - RLS)
 -- ========================================================
@@ -47,6 +57,7 @@ CREATE TABLE IF NOT EXISTS public.keep_alive_logs (
 ALTER TABLE public.atletas ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.noticias ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.keep_alive_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
 
 -- Permite consulta pública aos dados de atletas (por código)
 CREATE POLICY "Permitir leitura pública de atletas"
@@ -59,6 +70,13 @@ CREATE POLICY "Permitir leitura pública de notícias"
 ON public.noticias FOR SELECT
 TO anon, authenticated
 USING (true);
+
+-- Permite autenticação e criação de usuários institucionais
+CREATE POLICY "Permitir acesso administradores"
+ON public.admin_users FOR ALL
+TO anon, authenticated
+USING (true)
+WITH CHECK (true);
 
 -- Permite ping automático (INSERT e SELECT) no keep_alive_logs
 CREATE POLICY "Permitir ping keep-alive"

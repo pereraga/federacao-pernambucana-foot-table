@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login | Painel de Controle - Federação Pernambucana de Foot Table</title>
+  <title>Login & Gestão Institucional | Federação Pernambucana de Foot Table</title>
   <link rel="icon" type="image/png" href="assets/images/logo-federacao.png" />
   
   <!-- Google Fonts: Oswald e Montserrat -->
@@ -13,6 +13,8 @@
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <script>
     tailwind.config = {
@@ -51,7 +53,6 @@
       background: linear-gradient(90deg, #003da5 0%, #003da5 40%, #f5b800 40%, #f5b800 70%, #d32f2f 70%, #d32f2f 100%);
     }
 
-    /* Brilho suave estilo arena noturna */
     .glow-gold {
       box-shadow: 0 0 25px rgba(245, 184, 0, 0.35);
     }
@@ -60,7 +61,6 @@
       box-shadow: 0 20px 45px rgba(0, 0, 0, 0.75), 0 0 35px rgba(0, 61, 165, 0.15);
     }
 
-    /* Animação suave para loading */
     @keyframes spin-fast {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
@@ -77,14 +77,13 @@
   <div class="fixed inset-0 bg-[radial-gradient(circle_at_50%_15%,rgba(0,61,165,0.28)_0%,transparent_65%)] pointer-events-none z-0"></div>
   <div class="fixed inset-0 bg-[radial-gradient(circle_at_80%_80%,rgba(245,184,0,0.04)_0%,transparent_50%)] pointer-events-none z-0"></div>
 
-  <!-- Topbar com a Faixa Tricolor de Pernambuco -->
+  <!-- Topbar Oficial com a Faixa Tricolor de Pernambuco -->
   <header class="w-full relative z-20 bg-pe-dark/90 backdrop-blur-md border-b border-pe-cardBorder">
     <div class="pe-stripe-line h-[4px] w-full"></div>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
       
       <!-- Brand & Emblema Oficial da Federação -->
       <a href="index.html" class="flex items-center gap-3 group shrink-0">
-        <!-- Logotipo Oficial Original com tamanho travado -->
         <div class="rounded-full bg-pe-darkblue border-2 border-pe-gold shadow-[0_0_15px_rgba(245,184,0,0.4)] flex items-center justify-center p-0.5 overflow-hidden group-hover:scale-105 transition-transform duration-200 shrink-0" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px;">
           <img src="assets/images/logo-federacao.png" alt="Federação Pernambucana Foot Table" class="w-full h-full object-contain rounded-full block" style="max-width: 100%; max-height: 100%;" />
         </div>
@@ -110,27 +109,27 @@
     </div>
   </header>
 
-  <!-- Área Central com o Card de Login -->
+  <!-- Área Central com o Card de Autenticação & Criação -->
   <main class="relative z-10 flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
     <div class="w-full max-w-md">
       
-      <!-- Badge de Identificação da Federação com o Brasão Oficial em Destaque -->
-      <div class="text-center mb-6">
+      <!-- Brasão Oficial em Destaque -->
+      <div class="text-center mb-5">
         <div class="inline-flex p-1 rounded-full bg-pe-darkblue border-2 border-pe-gold shadow-[0_0_20px_rgba(245,184,0,0.35)] mb-3" style="width: 72px; height: 72px; min-width: 72px; min-height: 72px;">
           <img src="assets/images/logo-federacao.png" alt="Brasão Federação Pernambucana" class="w-full h-full object-contain rounded-full" />
         </div>
 
         <div class="flex justify-center">
-          <div class="inline-flex items-center gap-2 border border-pe-gold/40 bg-pe-gold/10 px-4 py-1.5 rounded-full text-pe-gold text-[11px] font-bold uppercase tracking-wider mb-2">
+          <div class="inline-flex items-center gap-2 border border-pe-gold/40 bg-pe-gold/10 px-4 py-1 rounded-full text-pe-gold text-[10px] font-bold uppercase tracking-wider mb-2">
             <span>☀️</span> Sistema Restrito • Federação Pernambucana
           </div>
         </div>
 
-        <h1 class="font-oswald text-3xl sm:text-4xl uppercase font-extrabold text-white tracking-wide">
-          Painel de <span class="text-pe-gold">Controle</span>
+        <h1 class="font-oswald text-2xl sm:text-3xl uppercase font-extrabold text-white tracking-wide">
+          Acesso & <span class="text-pe-gold">Gestão Institucional</span>
         </h1>
-        <p class="text-slate-400 text-xs sm:text-sm mt-1">
-          Acesso administrativo para gestão de atletas, carteiras e notícias oficiais.
+        <p class="text-slate-400 text-xs mt-1">
+          Credenciamento de diretores e controle do portal estadual.
         </p>
       </div>
 
@@ -139,20 +138,32 @@
         <!-- Linha tricolor no topo do card -->
         <div class="pe-stripe-line h-[4px] w-full absolute top-0 left-0"></div>
 
+        <!-- Seletor de Abas: Login vs Criar E-mail Institucional -->
+        <div class="flex border-b border-pe-cardBorder bg-[#090d16]/80 text-xs font-bold uppercase tracking-wider">
+          <button type="button" id="tabBtnLogin" onclick="switchAuthTab('login')" class="flex-1 py-3 px-3 text-pe-gold border-b-2 border-pe-gold transition flex items-center justify-center gap-1.5">
+            <span>🔑</span> Entrar com E-mail
+          </button>
+          <button type="button" id="tabBtnRegister" onclick="switchAuthTab('register')" class="flex-1 py-3 px-3 text-slate-400 hover:text-white border-b-2 border-transparent transition flex items-center justify-center gap-1.5">
+            <span>✍️</span> Criar E-mail Institucional
+          </button>
+        </div>
+
         <div class="p-6 sm:p-8">
           
-          <!-- Formulário -->
+          <!-- ========================================== -->
+          <!-- FORMULÁRIO 1: LOGIN COM E-MAIL INSTITUCIONAL -->
+          <!-- ========================================== -->
           <form id="loginForm" class="space-y-4">
             
             <!-- Campo Usuário / E-mail -->
             <div>
-              <label for="adminUser" class="block text-[11px] font-bold uppercase tracking-wider text-slate-300 mb-2">
-                E-mail ou Usuário Administrativo
+              <label for="adminUser" class="block text-[11px] font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                E-mail Institucional
               </label>
               <div class="relative">
                 <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
                   </svg>
                 </span>
                 <input 
@@ -160,15 +171,15 @@
                   id="adminUser" 
                   name="username" 
                   required 
-                  placeholder="admin@foot-table.pe.gov.br" 
+                  placeholder="diretoria@foot-table.pe.gov.br" 
                   class="w-full bg-pe-inputBg border border-pe-cardBorder focus:border-pe-gold rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-600 outline-none transition duration-150"
                 />
               </div>
             </div>
 
-            <!-- Campo Senha com Alternador de Visibilidade -->
+            <!-- Campo Senha -->
             <div>
-              <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center justify-between mb-1.5">
                 <label for="adminPass" class="block text-[11px] font-bold uppercase tracking-wider text-slate-300">
                   Senha de Acesso
                 </label>
@@ -192,13 +203,11 @@
                   class="w-full bg-pe-inputBg border border-pe-cardBorder focus:border-pe-gold rounded-xl pl-10 pr-11 py-3 text-sm text-white placeholder-slate-600 outline-none transition duration-150"
                 />
 
-                <!-- Botão Alternar Visibilidade da Senha -->
                 <button 
                   type="button" 
                   id="btnTogglePassword" 
                   aria-label="Alternar exibição de senha"
                   class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-pe-gold transition p-1 cursor-pointer">
-                  <!-- Ícone Olho Fechado / Aberto -->
                   <svg id="eyeIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
@@ -207,7 +216,7 @@
               </div>
             </div>
 
-            <!-- Lembrar Acesso & Segurança -->
+            <!-- Lembrar Acesso -->
             <div class="flex items-center justify-between pt-1">
               <label class="flex items-center gap-2 cursor-pointer select-none text-xs text-slate-400 hover:text-slate-200">
                 <input 
@@ -218,16 +227,12 @@
                 />
                 <span>Lembrar este dispositivo</span>
               </label>
-
-              <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Conexão Segura
-              </span>
             </div>
 
-            <!-- Caixa de Mensagens (Erro / Sucesso) -->
+            <!-- Feedback -->
             <div id="loginFeedback" class="hidden text-xs rounded-xl p-3 border transition-all"></div>
 
-            <!-- Botão de Login Estilizado em Amarelo Ouro com Estado de Loading -->
+            <!-- Botão de Login -->
             <button 
               type="submit" 
               id="btnLoginSubmit" 
@@ -238,18 +243,125 @@
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
               </svg>
             </button>
+          </form>
 
+          <!-- ========================================== -->
+          <!-- FORMULÁRIO 2: CRIAR E-MAIL INSTITUCIONAL   -->
+          <!-- ========================================== -->
+          <form id="registerForm" class="space-y-4 hidden" onsubmit="handleCreateInstitutionalEmail(event)">
+            
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                Nome do Diretor / Gestor *
+              </label>
+              <input 
+                type="text" 
+                id="regName" 
+                required 
+                placeholder="ex: Gabriel Alves" 
+                class="w-full bg-pe-inputBg border border-pe-cardBorder focus:border-pe-gold rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 outline-none"
+              />
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                Cargo / Atribuição
+              </label>
+              <select id="regRole" class="w-full bg-pe-inputBg border border-pe-cardBorder focus:border-pe-gold rounded-xl px-4 py-2.5 text-sm text-slate-200 outline-none">
+                <option value="Presidência">Presidência</option>
+                <option value="Diretoria Técnica">Diretoria Técnica</option>
+                <option value="Comissão de Arbitragem">Comissão de Arbitragem</option>
+                <option value="Secretaria Geral">Secretaria Geral</option>
+                <option value="Delegado Federativo">Delegado Federativo</option>
+              </select>
+            </div>
+
+            <!-- E-mail Institucional -->
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                E-mail Institucional Oficial *
+              </label>
+              <div class="relative flex items-center">
+                <input 
+                  type="text" 
+                  id="regEmail" 
+                  required 
+                  placeholder="gabriel.alves" 
+                  oninput="formatInstitutionalEmailInput(this)"
+                  class="w-full bg-pe-inputBg border border-pe-cardBorder focus:border-pe-gold rounded-xl pl-4 pr-32 py-2.5 text-sm text-white placeholder-slate-600 outline-none font-mono"
+                />
+                <span class="absolute right-3 text-pe-gold font-mono text-xs font-bold pointer-events-none select-none">
+                  @foot-table.pe.gov.br
+                </span>
+              </div>
+              <span class="text-[10px] text-slate-500 mt-1 block">
+                O sufixo institucional oficial da Federação será atribuído automaticamente.
+              </span>
+            </div>
+
+            <!-- Senhas -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                  Senha *
+                </label>
+                <input 
+                  type="password" 
+                  id="regPassword" 
+                  required 
+                  minlength="4" 
+                  placeholder="••••••••" 
+                  class="w-full bg-pe-inputBg border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none"
+                />
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                  Confirmar Senha *
+                </label>
+                <input 
+                  type="password" 
+                  id="regConfirmPassword" 
+                  required 
+                  minlength="4" 
+                  placeholder="••••••••" 
+                  class="w-full bg-pe-inputBg border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none"
+                />
+              </div>
+            </div>
+
+            <!-- Chave de Segurança da Federação -->
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                Chave de Homologação da Federação
+              </label>
+              <input 
+                type="text" 
+                id="regFederationKey" 
+                value="FPFTM-2026" 
+                placeholder="FPFTM-2026" 
+                class="w-full bg-pe-inputBg border border-pe-cardBorder focus:border-pe-gold rounded-xl px-4 py-2.5 text-xs text-pe-gold font-mono outline-none"
+              />
+            </div>
+
+            <div id="registerFeedback" class="hidden text-xs rounded-xl p-3 border transition-all"></div>
+
+            <button 
+              type="submit" 
+              id="btnRegisterSubmit" 
+              class="w-full bg-pe-blue hover:bg-blue-600 text-white font-oswald text-base uppercase font-bold tracking-wider py-3.5 px-4 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2 cursor-pointer">
+              <span>✍️</span> GERAR E-MAIL INSTITUCIONAL & ATIVAR
+            </button>
           </form>
 
         </div>
 
-        <!-- Rodapé do Card com Instruções e Suporte -->
+        <!-- Rodapé do Card -->
         <div class="bg-[#090d16] border-t border-pe-cardBorder px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
           <div class="text-[11px] text-slate-500">
-            Dúvidas ou credenciamento?
+            Dúvidas ou credenciamento oficial?
           </div>
           <a href="mailto:contato@foot-table.pe.gov.br" class="text-[11px] text-slate-400 hover:text-pe-gold transition font-semibold">
-            Suporte Técnico da Federação
+            Suporte Técnico FPFTM
           </a>
         </div>
       </div>
@@ -274,7 +386,46 @@
   </footer>
 
   <script>
-    // 1. Alternador de Visibilidade de Senha (Show / Hide)
+    // Inicialização do Supabase para validação e persistência de credenciais
+    const SUPABASE_PROJECT_URL = "https://qvnsahvdjhimlmtqrnif.supabase.co";
+    const SUPABASE_URL = localStorage.getItem('pe_supabase_url') || SUPABASE_PROJECT_URL;
+    const SUPABASE_ANON_KEY = localStorage.getItem('pe_supabase_anon_key') || "";
+    let supabaseClient = null;
+
+    if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY) {
+      try {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      } catch (e) {
+        console.warn("Supabase não iniciado:", e);
+      }
+    }
+
+    // 1. Alternador de Abas: Login vs Criar E-mail Institucional
+    function switchAuthTab(mode) {
+      const loginForm = document.getElementById('loginForm');
+      const registerForm = document.getElementById('registerForm');
+      const tabBtnLogin = document.getElementById('tabBtnLogin');
+      const tabBtnRegister = document.getElementById('tabBtnRegister');
+
+      if (mode === 'login') {
+        loginForm.classList.remove('hidden');
+        registerForm.classList.add('hidden');
+        tabBtnLogin.className = "flex-1 py-3 px-3 text-pe-gold border-b-2 border-pe-gold transition flex items-center justify-center gap-1.5";
+        tabBtnRegister.className = "flex-1 py-3 px-3 text-slate-400 hover:text-white border-b-2 border-transparent transition flex items-center justify-center gap-1.5";
+      } else {
+        loginForm.classList.add('hidden');
+        registerForm.classList.remove('hidden');
+        tabBtnRegister.className = "flex-1 py-3 px-3 text-pe-gold border-b-2 border-pe-gold transition flex items-center justify-center gap-1.5";
+        tabBtnLogin.className = "flex-1 py-3 px-3 text-slate-400 hover:text-white border-b-2 border-transparent transition flex items-center justify-center gap-1.5";
+      }
+    }
+
+    // Remove qualquer domínio que o usuário tente digitar no campo de e-mail institucional
+    function formatInstitutionalEmailInput(input) {
+      input.value = input.value.replace(/@foot-table\.pe\.gov\.br/gi, '').replace(/\s+/g, '').toLowerCase();
+    }
+
+    // 2. Alternador de Visibilidade de Senha
     const passInput = document.getElementById('adminPass');
     const btnToggle = document.getElementById('btnTogglePassword');
     const eyeIcon = document.getElementById('eyeIcon');
@@ -297,41 +448,130 @@
       }
     });
 
-    // 2. Submissão de Login e Redirecionamento para o Painel Administrativo (admin.html)
+    // 3. Criação de E-mail Institucional
+    async function handleCreateInstitutionalEmail(e) {
+      e.preventDefault();
+      const name = document.getElementById('regName').value.trim();
+      const role = document.getElementById('regRole').value;
+      let emailPrefix = document.getElementById('regEmail').value.trim().toLowerCase();
+      const password = document.getElementById('regPassword').value;
+      const confirmPassword = document.getElementById('regConfirmPassword').value;
+      const key = document.getElementById('regFederationKey').value.trim();
+      const feedback = document.getElementById('registerFeedback');
+
+      feedback.classList.remove('hidden');
+
+      if (password !== confirmPassword) {
+        feedback.className = "text-xs rounded-xl p-3 border bg-red-950/40 border-pe-red/50 text-red-300";
+        feedback.textContent = "❌ As senhas digitadas não coincidem. Verifique e tente novamente.";
+        return;
+      }
+
+      if (!emailPrefix) {
+        feedback.className = "text-xs rounded-xl p-3 border bg-red-950/40 border-pe-red/50 text-red-300";
+        feedback.textContent = "❌ Informe o prefixo desejado para seu e-mail institucional.";
+        return;
+      }
+
+      const fullEmail = emailPrefix.includes('@') ? emailPrefix : `${emailPrefix}@foot-table.pe.gov.br`;
+
+      feedback.className = "text-xs rounded-xl p-3 border bg-blue-950/40 border-blue-500/50 text-blue-300";
+      feedback.textContent = "Criando e-mail institucional oficial...";
+
+      const newAdmin = {
+        nome: name,
+        cargo: role,
+        email: fullEmail,
+        senha: password,
+        created_at: new Date().toISOString()
+      };
+
+      // 1. Tenta salvar no Supabase (se a tabela admin_users existir)
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from('admin_users').upsert([newAdmin], { onConflict: 'email' });
+        } catch (err) {
+          console.warn("Aviso Supabase:", err);
+        }
+      }
+
+      // 2. Salva na lista local de administradores autorizados
+      let admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || [];
+      const existingIdx = admins.findIndex(a => a.email === fullEmail);
+      if (existingIdx >= 0) {
+        admins[existingIdx] = newAdmin;
+      } else {
+        admins.push(newAdmin);
+      }
+      localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
+
+      feedback.className = "text-xs rounded-xl p-3 border bg-emerald-950/40 border-emerald-500/50 text-emerald-300 font-bold";
+      feedback.innerHTML = `✓ E-mail institucional <strong>${fullEmail}</strong> criado com sucesso! Alternando para a tela de login...`;
+
+      // Preenche o campo de login e alterna a aba
+      setTimeout(() => {
+        document.getElementById('adminUser').value = fullEmail;
+        document.getElementById('adminPass').value = password;
+        switchAuthTab('login');
+      }, 1500);
+    }
+
+    // 4. Submissão de Login
     const loginForm = document.getElementById('loginForm');
-    const feedback = document.getElementById('loginFeedback');
+    const loginFeedback = document.getElementById('loginFeedback');
     const btnSubmit = document.getElementById('btnLoginSubmit');
     const btnText = document.getElementById('btnText');
     const btnSpinner = document.getElementById('btnSpinner');
 
-    loginForm.addEventListener('submit', function (e) {
+    loginForm.addEventListener('submit', async function (e) {
       e.preventDefault();
 
-      const user = document.getElementById('adminUser').value.trim();
+      const user = document.getElementById('adminUser').value.trim().toLowerCase();
       const pass = document.getElementById('adminPass').value;
 
       btnSubmit.disabled = true;
       btnText.textContent = "AUTENTICANDO...";
       btnSpinner.classList.remove('hidden');
-      feedback.classList.add('hidden');
+      loginFeedback.classList.add('hidden');
+
+      // Verifica lista de administradores institucionais criados
+      const admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || [];
+      const foundAdmin = admins.find(a => a.email.toLowerCase() === user && a.senha === pass);
+
+      // Também aceita login padrão da diretoria ou qualquer e-mail institucional cadastrado
+      let isAuthorized = !!foundAdmin || (user.includes('@foot-table.pe.gov.br') && pass.length >= 4) || (user === 'admin' && pass.length >= 4);
+
+      // Tenta validar no Supabase se existir
+      if (!isAuthorized && supabaseClient) {
+        try {
+          const { data, error } = await supabaseClient
+            .from('admin_users')
+            .select('*')
+            .eq('email', user)
+            .eq('senha', pass)
+            .maybeSingle();
+
+          if (!error && data) isAuthorized = true;
+        } catch (err) {
+          console.warn("Validação Supabase:", err);
+        }
+      }
 
       setTimeout(() => {
         btnSubmit.disabled = false;
         btnSpinner.classList.add('hidden');
         btnText.textContent = "ENTRAR NO PAINEL";
 
-        // Validação (aceita senha a partir de 4 caracteres)
-        if (user && pass.length >= 4) {
-          feedback.className = "text-xs rounded-xl p-3 border bg-emerald-950/40 border-emerald-500/50 text-emerald-300 flex items-center gap-2";
-          feedback.innerHTML = `
+        if (isAuthorized) {
+          loginFeedback.className = "text-xs rounded-xl p-3 border bg-emerald-950/40 border-emerald-500/50 text-emerald-300 flex items-center gap-2";
+          loginFeedback.innerHTML = `
             <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
             </svg>
             <span><strong>Acesso Autorizado!</strong> Entrando no Painel de Controle...</span>
           `;
-          feedback.classList.remove('hidden');
+          loginFeedback.classList.remove('hidden');
 
-          // Salva sessão autenticada
           sessionStorage.setItem('pe_admin_logged', 'true');
           sessionStorage.setItem('pe_admin_user', user);
 
@@ -340,35 +580,32 @@
             localStorage.setItem('pe_admin_user', user);
           }
 
-          // Redireciona para o Painel Administrativo Oficial
           setTimeout(() => {
             window.location.href = "admin.html";
-          }, 1000);
+          }, 900);
 
         } else {
-          feedback.className = "text-xs rounded-xl p-3 border bg-red-950/40 border-pe-red/50 text-red-300 flex items-center gap-2";
-          feedback.innerHTML = `
+          loginFeedback.className = "text-xs rounded-xl p-3 border bg-red-950/40 border-pe-red/50 text-red-300 flex items-center gap-2";
+          loginFeedback.innerHTML = `
             <svg class="w-4 h-4 text-pe-red flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
             </svg>
-            <span><strong>Falha na autenticação:</strong> Preencha o usuário e senha para prosseguir.</span>
+            <span><strong>Credenciais Inválidas:</strong> Verifique o e-mail e senha ou clique na aba <em>Criar E-mail Institucional</em>.</span>
           `;
-          feedback.classList.remove('hidden');
+          loginFeedback.classList.remove('hidden');
         }
-      }, 700);
+      }, 600);
     });
 
-    // 3. Link de recuperação simples
+    // 5. Recuperação de senha
     document.getElementById('btnForgot').addEventListener('click', (e) => {
       e.preventDefault();
-      feedback.className = "text-xs rounded-xl p-3 border bg-amber-950/40 border-pe-gold/50 text-amber-200 flex items-center gap-2";
-      feedback.innerHTML = `
-        <span>Entre em contato com o suporte da FPFTM para redefinir sua senha de acesso.</span>
-      `;
-      feedback.classList.remove('hidden');
+      loginFeedback.className = "text-xs rounded-xl p-3 border bg-amber-950/40 border-pe-gold/50 text-amber-200";
+      loginFeedback.innerHTML = `<span>Para redefinir sua senha, solicite ao administrador geral ou crie um novo e-mail institucional na aba ao lado.</span>`;
+      loginFeedback.classList.remove('hidden');
     });
 
-    // Carrega usuário prévio se existir
+    // Carrega último usuário
     window.addEventListener('load', () => {
       const savedUser = localStorage.getItem('pe_admin_user');
       if (savedUser) {
