@@ -23,6 +23,8 @@
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <!-- html2canvas for instant HD PNG badge export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- Supabase JS Client -->
@@ -73,6 +75,65 @@
     .active-nav-pill svg {
       color: #080b12 !important;
     }
+    /* Estilos do Studio CR80 Interativo */
+    .font-fpeft {
+      font-family: 'Montserrat', sans-serif;
+    }
+    .checkered-canvas-bg {
+      background-color: #070b14;
+      background-image: 
+        radial-gradient(#1e293b 1px, transparent 1px),
+        radial-gradient(#1e293b 1px, #070b14 1px);
+      background-size: 24px 24px;
+      background-position: 0 0, 12px 12px;
+    }
+    .selectable-item {
+      position: absolute;
+      touch-action: none;
+      cursor: move;
+      transition: box-shadow 0.15s ease;
+    }
+    .selectable-item.is-selected {
+      outline: 2px dashed #f5b800 !important;
+      outline-offset: 1px;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(245, 184, 0, 0.35);
+      z-index: 50 !important;
+    }
+    .resize-handle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #ffffff;
+      border: 2px solid #f5b800;
+      border-radius: 2px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+      display: none;
+      z-index: 60;
+    }
+    .selectable-item.is-selected .resize-handle {
+      display: block;
+    }
+    .h-nw { top: -5px; left: -5px; cursor: nwse-resize; }
+    .h-n  { top: -5px; left: calc(50% - 5px); cursor: ns-resize; }
+    .h-ne { top: -5px; right: -5px; cursor: nesw-resize; }
+    .h-e  { top: calc(50% - 5px); right: -5px; cursor: ew-resize; }
+    .h-se { bottom: -5px; right: -5px; cursor: nwse-resize; }
+    .h-s  { bottom: -5px; left: calc(50% - 5px); cursor: ns-resize; }
+    .h-sw { bottom: -5px; left: -5px; cursor: nesw-resize; }
+    .h-w  { top: calc(50% - 5px); left: -5px; cursor: ew-resize; }
+    .win-resizer { position: absolute; z-index: 60; }
+    .win-resizer-t { top: -4px; left: 8px; right: 8px; height: 8px; cursor: ns-resize; }
+    .win-resizer-b { bottom: -4px; left: 8px; right: 8px; height: 8px; cursor: ns-resize; }
+    .win-resizer-l { top: 8px; bottom: 8px; left: -4px; width: 8px; cursor: ew-resize; }
+    .win-resizer-r { top: 8px; bottom: 8px; right: -4px; width: 8px; cursor: ew-resize; }
+    .win-resizer-tl { top: -4px; left: -4px; width: 12px; height: 12px; cursor: nwse-resize; }
+    .win-resizer-tr { top: -4px; right: -4px; width: 12px; height: 12px; cursor: nesw-resize; }
+    .win-resizer-bl { bottom: -4px; left: -4px; width: 12px; height: 12px; cursor: nesw-resize; }
+    .win-resizer-br { bottom: -4px; right: -4px; width: 12px; height: 12px; cursor: nwse-resize; }
+    input[type=range] { accent-color: #f5b800; }
+    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
     /* Previne fundo branco/amarelo gerado pelo autofill do navegador */
     input:-webkit-autofill,
     input:-webkit-autofill:hover, 
@@ -398,228 +459,515 @@
         <!-- ===================================================== -->
         <!-- 1. 🪪 ABA CARTEIRAS & ATLETAS                          -->
         <!-- ===================================================== -->
+        <!-- ===================================================== -->
+        <!-- 1. 🪪 ABA CARTEIRAS & ATLETAS (STUDIO OFICIAL CR80)   -->
+        <!-- ===================================================== -->
         <div id="tabContent-atletas" class="space-y-8 hidden">
           
-          <!-- Box Informativo: O que você encontra na Aba Carteiras & Atletas -->
+          <!-- Box Informativo: Tecnologia Vetorial CR80 -->
           <div class="bg-gradient-to-r from-[#06173a] via-[#091e4a] to-[#040813] border border-[#1c253b] rounded-2xl p-5 sm:p-6 relative overflow-hidden shadow-xl">
             <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
             <div class="flex items-start gap-4">
               <span class="text-3xl">🪪</span>
               <div class="space-y-2 text-xs">
-                <h3 class="font-oswald text-lg uppercase font-bold text-white tracking-wide">
-                  O que você encontra na Aba Carteiras & Atletas:
-                </h3>
+                <div class="flex flex-wrap items-center gap-2">
+                  <h3 class="font-oswald text-lg uppercase font-bold text-white tracking-wide">
+                    Studio Oficial CR80 FPEFT • Carteiras & Atletas
+                  </h3>
+                  <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-pe-gold/20 text-pe-gold border border-pe-gold/40">
+                    Padrão CR80 (85.6mm × 53.98mm) • 300 DPI
+                  </span>
+                </div>
                 <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-slate-300">
                   <li class="flex items-start gap-1.5">
                     <span class="text-pe-gold font-bold">●</span>
-                    <span><strong>Gerador de Código:</strong> Botão para gerar automaticamente um código oficial de 6 dígitos numéricos.</span>
+                    <span><strong>Edição Visual Direta:</strong> Arraste caixas, use as alças para redimensionar ou utilize o painel flutuante com setas direcionais e controle de curvatura.</span>
                   </li>
                   <li class="flex items-start gap-1.5">
                     <span class="text-pe-gold font-bold">●</span>
-                    <span><strong>Upload da Foto Oficial:</strong> Você seleciona a foto do atleta direto do seu computador, que é inserida instantaneamente na carteirinha.</span>
+                    <span><strong>Fundo SVG & Auto-Ajuste:</strong> Template oficial FPEFT ou upload de imagem/SVG próprio com preenchimento 100% automático sem cortes.</span>
                   </li>
                   <li class="flex items-start gap-1.5">
                     <span class="text-pe-gold font-bold">●</span>
-                    <span><strong>Preview ao Vivo:</strong> Enquanto você preenche os dados do atleta (Nome, CPF, Nascimento, Município, Modalidade), a carteirinha oficial é renderizada ao lado em tempo real.</span>
+                    <span><strong>Exportação Gráfica:</strong> Baixe o SVG Puro vetorizado (para Corel/Illustrator) ou gere PNG HD a 300 DPI pronto para impressão gráfica.</span>
                   </li>
                   <li class="flex items-start gap-1.5">
                     <span class="text-pe-gold font-bold">●</span>
-                    <span><strong>Envio para o Banco de Dados:</strong> Ao clicar em "Salvar Atleta no Banco de Dados", as informações e a foto são gravadas no Supabase. Assim, quando o atleta digitar os 6 dígitos dele no site público, ele recebe a carteira oficial dele imediatamente!</span>
-                  </li>
-                  <li class="flex items-start gap-1.5">
-                    <span class="text-pe-gold font-bold">●</span>
-                    <span><strong>Botão Baixar PNG HD:</strong> Exporta a carteirinha em altíssima resolução.</span>
-                  </li>
-                  <li class="flex items-start gap-1.5">
-                    <span class="text-pe-gold font-bold">●</span>
-                    <span><strong>Tabela de Atletas:</strong> Lista com todos os atletas cadastrados, filtro de busca, edição e exclusão.</span>
+                    <span><strong>Banco de Dados Conectado:</strong> Salve o atleta para que ele possa consultar e emitir a carteira no portal público com o código de 6 dígitos.</span>
                   </li>
                 </ul>
               </div>
             </div>
           </div>
 
-          <!-- Cabeçalho de Ação -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Registros Oficiais</span>
-              <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Emissão de Carteiras & Atletas</h2>
+          <!-- Cabeçalho de Ações do Studio -->
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-[#070b14] border border-[#1c253b] p-4 rounded-2xl shadow-lg">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-700 via-pe-blue to-pe-gold p-0.5 shadow-lg shadow-pe-gold/20 shrink-0">
+                <div class="w-full h-full bg-[#070b14] rounded-[10px] flex items-center justify-center">
+                  <i class="fa-solid fa-address-card text-pe-gold text-base"></i>
+                </div>
+              </div>
+              <div>
+                <h2 class="font-oswald text-xl uppercase font-bold text-white leading-tight">Studio de Emissão & Diagramação</h2>
+                <p class="text-xs text-slate-400">Edite visualmente, preencha os dados e exporte em alta definição</p>
+              </div>
             </div>
-            <button onclick="generateRandomAthleteCode()" class="bg-[#0b101d] hover:bg-[#121a30] border border-[#1c253b] text-pe-gold font-mono font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer">
-              <span>🎲</span> Gerar Novo Código de 6 Dígitos
-            </button>
+
+            <!-- Botões de Ação do Cabeçalho -->
+            <div class="flex flex-wrap items-center gap-2">
+              <button type="button" onclick="generateRandomAthleteCode()" class="bg-[#0b101d] hover:bg-[#121a30] border border-[#1c253b] text-pe-gold font-mono font-bold text-xs uppercase px-3.5 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer shadow">
+                <span>🎲</span> Gerar Código 6D
+              </button>
+              <button type="button" id="btnExportSVG" class="bg-[#0c1424] hover:bg-[#13203c] border border-sky-500/30 hover:border-sky-400 text-sky-300 font-bold text-xs uppercase px-3.5 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer shadow">
+                <i class="fa-solid fa-bezier-curve text-sky-400"></i> Exportar SVG Puro
+              </button>
+              <button type="button" id="btnExportPNG" class="bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow-lg shadow-sky-600/25 cursor-pointer">
+                <i class="fa-solid fa-file-image"></i> Exportar PNG HD (300 DPI)
+              </button>
+              <button type="button" onclick="document.getElementById('athleteForm').requestSubmit()" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow cursor-pointer">
+                <span>💾</span> Salvar no Banco
+              </button>
+            </div>
           </div>
 
-          <!-- Grid: Formulário + Preview Carteira -->
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <!-- WORKSPACE DO STUDIO: Split View Formulário + Canvas CR80 -->
+          <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
             
-            <!-- Formulário de Cadastro do Atleta -->
-            <div class="lg:col-span-6 bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 shadow-xl relative">
-              <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0 rounded-t-2xl"></div>
+            <!-- COLUNA ESQUERDA: Formulário de Dados, Fundo e Camadas (420px) -->
+            <div class="xl:col-span-5 space-y-6">
+              
+              <!-- 1. Formulário Oficial de Preenchimento -->
+              <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 sm:p-6 shadow-xl relative">
+                <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0 rounded-t-2xl"></div>
 
-              <h3 class="font-oswald text-lg uppercase font-bold text-white mb-4 flex items-center gap-2">
-                <span>📝</span> Dados da Filiação Federativa
-              </h3>
-
-              <form id="athleteForm" onsubmit="handleSaveAthlete(event)" class="space-y-4 text-xs">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-slate-300 font-bold mb-1">Código Oficial (6 Dígitos) *</label>
-                    <input type="text" id="athleteCode" required maxlength="6" placeholder="ex: 742918" inputmode="numeric" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-pe-gold font-mono font-bold text-sm outline-none" />
-                  </div>
-                  <div>
-                    <label class="block text-slate-300 font-bold mb-1">Status Federativo</label>
-                    <select id="athleteStatus" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 outline-none">
-                      <option value="REGULAR">REGULAR (Ativo)</option>
-                      <option value="HOMOLOGADO">HOMOLOGADO</option>
-                      <option value="PENDENTE">PENDENTE</option>
-                    </select>
-                  </div>
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="font-oswald text-base uppercase font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-user-pen text-pe-gold"></i> Dados do Atleta (Atualiza ao Vivo)
+                  </h3>
+                  <span class="text-[10px] text-slate-400 font-mono">Sincronizado</span>
                 </div>
 
-                <div>
-                  <label class="block text-slate-300 font-bold mb-1">Nome Completo do Atleta *</label>
-                  <input type="text" id="athleteName" required placeholder="ex: João Silva de Carvalho" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-white font-bold outline-none" />
+                <form id="athleteForm" onsubmit="handleSaveAthlete(event)" class="space-y-3.5 text-xs">
+                  <!-- Código e Status -->
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-slate-300 font-bold mb-1">Código Oficial (6D) *</label>
+                      <input type="text" id="athleteCode" required maxlength="6" value="742918" inputmode="numeric" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-pe-gold font-mono font-bold text-sm outline-none" />
+                    </div>
+                    <div>
+                      <label class="block text-slate-300 font-bold mb-1">Status Federativo</label>
+                      <select id="athleteStatus" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 outline-none">
+                        <option value="REGULAR">REGULAR (Ativo)</option>
+                        <option value="HOMOLOGADO">HOMOLOGADO</option>
+                        <option value="PENDENTE">PENDENTE</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Nome do Atleta -->
+                  <div>
+                    <div class="flex items-center justify-between mb-1">
+                      <label class="block text-slate-300 font-bold">Nome do Atleta *</label>
+                      <button type="button" class="text-sky-400 hover:underline text-[10px]" onclick="selectElement('field-nome')">Selecionar no cartão</button>
+                    </div>
+                    <input type="text" id="athleteName" required value="CARLOS EDUARDO SILVA LIMA" placeholder="Nome Completo" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-white uppercase font-bold outline-none font-fpeft" />
+                  </div>
+
+                  <!-- CPF e Data de Nascimento -->
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-slate-300 font-bold mb-1">CPF</label>
+                      <input type="text" id="athleteCpf" maxlength="14" value="123.456.789-00" placeholder="000.000.000-00" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-slate-200 font-mono outline-none" />
+                    </div>
+                    <div>
+                      <label class="block text-slate-300 font-bold mb-1">Nascimento</label>
+                      <input type="text" id="athleteBirth" value="18/05/1996" placeholder="DD/MM/AAAA" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-slate-200 font-mono outline-none" />
+                    </div>
+                  </div>
+
+                  <!-- Telefone / WhatsApp -->
+                  <div>
+                    <label class="block text-slate-300 font-bold mb-1">Telefone / WhatsApp</label>
+                    <input type="text" id="athletePhone" value="(81) 98765-4321" placeholder="(81) 90000-0000" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-slate-200 font-mono outline-none" />
+                  </div>
+
+                  <!-- Categoria & Filiação / Clube -->
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-slate-300 font-bold mb-1">Categoria</label>
+                      <input type="text" id="athleteModality" value="MASTER / PRINCIPAL" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 uppercase text-white font-bold outline-none font-fpeft" />
+                    </div>
+                    <div>
+                      <label class="block text-slate-300 font-bold mb-1">Filiação / Clube</label>
+                      <input type="text" id="athleteClub" value="SPORT CLUB DO RECIFE" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 uppercase text-white font-bold outline-none font-fpeft" />
+                    </div>
+                  </div>
+
+                  <!-- Nº Federado, Município e Validade -->
+                  <div class="grid grid-cols-3 gap-2.5">
+                    <div>
+                      <label class="block text-slate-300 font-bold mb-1 text-[10px]">Nº Federado</label>
+                      <input type="text" id="athleteFederatedNum" value="PE-2026/048" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-2.5 py-2 font-mono text-white text-xs outline-none" />
+                    </div>
+                    <div>
+                      <label class="block text-slate-300 font-bold mb-1 text-[10px]">Município</label>
+                      <input type="text" id="athleteCity" value="RECIFE - PE" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-2.5 py-2 uppercase text-white font-bold text-xs outline-none font-fpeft" />
+                    </div>
+                    <div>
+                      <label class="block text-slate-300 font-bold mb-1 text-[10px]">Validade</label>
+                      <input type="text" id="athleteValidity" value="12/2026" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-2.5 py-2 font-mono text-white text-xs outline-none" />
+                    </div>
+                  </div>
+
+                  <!-- Upload da Foto 3x4 Oficial -->
+                  <div class="pt-2 border-t border-[#1c253b]">
+                    <label class="block text-slate-300 font-bold mb-1.5">Foto 3x4 Oficial do Atleta</label>
+                    <div class="flex items-center gap-2">
+                      <label class="flex-1 flex items-center justify-center gap-2 bg-[#05080e] hover:bg-[#121c32] text-slate-200 border border-[#1c253b] rounded-xl py-2 px-3 text-xs cursor-pointer hover:border-pe-gold transition">
+                        <i class="fa-solid fa-camera text-pe-gold"></i>
+                        <span>Carregar Foto do Computador</span>
+                        <input type="file" id="uploadFotoInput" accept="image/*" class="hidden">
+                      </label>
+                      <button type="button" id="btnResetFoto" title="Restaurar Silhueta Padrão" class="p-2.5 bg-[#05080e] hover:bg-[#121c32] border border-[#1c253b] rounded-xl text-xs text-slate-400 hover:text-white transition cursor-pointer">
+                        <i class="fa-solid fa-user"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- QR Code e Assinatura -->
+                  <div class="grid grid-cols-2 gap-3 pt-2 border-t border-[#1c253b]">
+                    <div>
+                      <label class="block text-slate-400 font-bold mb-1 text-[10px]">Texto / Link do QR Code</label>
+                      <input type="text" id="inputQrText" value="https://fpeft.vercel.app/" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-2.5 py-1.5 text-[11px] font-mono text-white outline-none" />
+                    </div>
+                    <div>
+                      <label class="block text-slate-400 font-bold mb-1 text-[10px]">Assinatura Presidente</label>
+                      <input type="text" id="inputAssinatura" value="ASSINATURA DO PRESIDENTE FPEFT" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-2.5 py-1.5 text-[10px] uppercase text-white outline-none font-fpeft" />
+                    </div>
+                  </div>
+
+                  <!-- Feedback de Salvamento -->
+                  <div id="athleteFeedback" class="hidden text-xs p-3 rounded-xl"></div>
+
+                  <!-- Botões de Ação do Formulário -->
+                  <div class="pt-2 flex items-center gap-3">
+                    <button type="submit" class="flex-1 bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase tracking-wider py-3 rounded-xl transition shadow flex items-center justify-center gap-2 cursor-pointer">
+                      <span>💾</span> Salvar Atleta no Banco de Dados
+                    </button>
+                    <button type="button" onclick="clearAthleteForm()" class="bg-[#05080e] border border-[#1c253b] hover:border-slate-500 text-slate-400 font-bold text-xs uppercase px-4 py-3 rounded-xl transition cursor-pointer">
+                      Limpar
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- 2. Fundo da Carteirinha (CR80) & Calibração -->
+              <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 shadow-xl space-y-3.5">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold uppercase tracking-wider text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-layer-group text-sky-400"></i> Fundo da Carteirinha
+                  </span>
+                  <span class="text-[10px] text-slate-400">Padrão CR80 Horizontal</span>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-slate-300 font-bold mb-1">CPF</label>
-                    <input type="text" id="athleteCpf" placeholder="000.000.000-00" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 font-mono outline-none" />
-                  </div>
-                  <div>
-                    <label class="block text-slate-300 font-bold mb-1">Data de Nascimento</label>
-                    <input type="text" id="athleteBirth" placeholder="DD/MM/AAAA" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 font-mono outline-none" />
-                  </div>
-                </div>
+                <div class="space-y-2">
+                  <label class="w-full flex items-center justify-center gap-2 bg-[#05080e] hover:bg-[#10192e] text-sky-300 hover:text-white border border-dashed border-sky-500/40 hover:border-sky-400 rounded-xl py-2.5 px-3 text-xs cursor-pointer font-medium transition shadow-sm">
+                    <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
+                    <span>Upload SVG Próprio ou Imagem de Fundo</span>
+                    <input type="file" id="uploadSvgInput" accept=".svg,image/svg+xml,image/png,image/jpeg" class="hidden">
+                  </label>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-slate-300 font-bold mb-1">Município - Estado</label>
-                    <input type="text" id="athleteCity" placeholder="ex: Recife - PE" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 outline-none" />
+                  <div class="p-2.5 bg-sky-950/40 border border-sky-500/30 rounded-xl flex items-start gap-2.5 text-[10px] text-sky-200">
+                    <i class="fa-solid fa-wand-magic-sparkles text-sky-400 mt-0.5 shrink-0 text-xs"></i>
+                    <p class="text-slate-300 leading-tight">
+                      <strong>Auto-Ajuste 100% Automático:</strong> Imagens e vetores importados se adaptam para cobrir toda a área do cartão (1050×662 px) sem cortes nem barras pretas.
+                    </p>
                   </div>
-                  <div>
-                    <label class="block text-slate-300 font-bold mb-1">Modalidade Homologada</label>
-                    <select id="athleteModality" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 outline-none">
-                      <option value="SOLO (INDIVIDUAL)">SOLO (INDIVIDUAL)</option>
-                      <option value="DUPLA (EQUIPE)">DUPLA (EQUIPE)</option>
-                      <option value="SOLO & DUPLA">SOLO & DUPLA</option>
-                      <option value="MASTER 40+">MASTER 40+</option>
-                    </select>
-                  </div>
-                </div>
 
-                <!-- Upload de Foto Oficial -->
-                <div>
-                  <label class="block text-slate-300 font-bold mb-1">Foto Oficial do Atleta (Carteira)</label>
-                  <div class="flex items-center gap-3">
-                    <input type="file" id="athletePhotoFile" accept="image/*" onchange="handlePhotoUpload(event)" class="text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-pe-gold file:text-pe-dark hover:file:bg-pe-goldHover file:cursor-pointer" />
-                  </div>
-                  <input type="hidden" id="athletePhotoBase64" />
-                </div>
-
-                <div id="athleteFeedback" class="hidden text-xs p-3 rounded-xl"></div>
-
-                <div class="pt-2 flex items-center gap-3">
-                  <button type="submit" class="flex-1 bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase tracking-wider py-3.5 rounded-xl transition shadow flex items-center justify-center gap-2 cursor-pointer">
-                    <span>💾</span> Salvar Atleta no Banco de Dados
+                  <button type="button" id="btnAutoFitFullArea" class="w-full py-2 px-3 bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 shadow transition cursor-pointer">
+                    <i class="fa-solid fa-expand text-[10px]"></i> Preencher Toda a Área Automaticamente (100%)
                   </button>
-                  <button type="button" onclick="clearAthleteForm()" class="bg-[#0b101d] border border-[#1c253b] hover:border-slate-500 text-slate-400 font-bold text-xs uppercase px-4 py-3.5 rounded-xl transition cursor-pointer">
-                    Limpar
-                  </button>
+
+                  <div class="flex items-center justify-between gap-2 pt-1">
+                    <button type="button" id="btnRestoreFpeftTemplate" class="flex-1 py-1.5 px-2 bg-[#05080e] hover:bg-[#121c32] text-slate-300 hover:text-white border border-[#1c253b] rounded-lg text-xs flex items-center justify-center gap-1.5 transition cursor-pointer">
+                      <i class="fa-solid fa-rotate-left text-sky-400"></i> Restaurar Template FPEFT
+                    </button>
+                    <button type="button" id="btnToggleBGLabels" class="py-1.5 px-3 bg-[#05080e] hover:bg-[#121c32] text-slate-300 hover:text-white border border-[#1c253b] rounded-lg text-xs flex items-center gap-1 transition cursor-pointer">
+                      <i class="fa-solid fa-eye-slash text-xs"></i> <span>Rótulos Fundo</span>
+                    </button>
+                  </div>
                 </div>
-              </form>
+
+                <!-- Painel de Calibração / Ajuste Fino do Fundo -->
+                <div id="bgAdjustControls" class="mt-3 pt-3 border-t border-[#1c253b] space-y-2.5">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-bold text-sky-300 flex items-center gap-1.5">
+                      <i class="fa-solid fa-sliders text-sky-400"></i> Enquadramento do Fundo (CR80)
+                    </span>
+                    <button type="button" id="btnResetBgTransform" class="text-[10px] text-slate-400 hover:text-sky-300 transition cursor-pointer">Resetar</button>
+                  </div>
+
+                  <div class="grid grid-cols-3 gap-1 bg-[#05080e] p-1 rounded-lg border border-[#1c253b] text-[10px]">
+                    <button type="button" id="btnBgFitCover" class="py-1 rounded bg-sky-600 text-white font-medium text-center transition cursor-pointer">Preencher</button>
+                    <button type="button" id="btnBgFitContain" class="py-1 rounded hover:bg-slate-800 text-slate-300 text-center transition cursor-pointer">Conter</button>
+                    <button type="button" id="btnBgFitExact" class="py-1 rounded hover:bg-slate-800 text-slate-300 text-center transition cursor-pointer">100% Cartão</button>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between items-center text-[10px] text-slate-400 mb-1">
+                      <span>Zoom / Escala Manual</span>
+                      <div class="flex items-center gap-1">
+                        <input type="number" id="inputBgPercent" min="20" max="300" value="100" class="w-12 bg-[#05080e] border border-slate-700 rounded px-1 py-0.5 text-center font-mono text-[10px] text-sky-300 focus:outline-none">
+                        <span class="text-sky-300 font-mono">%</span>
+                      </div>
+                    </div>
+                    <input type="range" id="inputBgScale" min="20" max="300" value="100" class="w-full h-1.5 bg-slate-800 rounded appearance-none cursor-pointer">
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-2">
+                    <div>
+                      <div class="flex justify-between text-[10px] text-slate-400 mb-1">
+                        <span>Posição X</span>
+                        <span id="bgPosXLabel" class="font-mono text-sky-300">0px</span>
+                      </div>
+                      <input type="range" id="inputBgPosX" min="-300" max="300" value="0" class="w-full h-1.5 bg-slate-800 rounded appearance-none cursor-pointer">
+                    </div>
+                    <div>
+                      <div class="flex justify-between text-[10px] text-slate-400 mb-1">
+                        <span>Posição Y</span>
+                        <span id="bgPosYLabel" class="font-mono text-sky-300">0px</span>
+                      </div>
+                      <input type="range" id="inputBgPosY" min="-200" max="200" value="0" class="w-full h-1.5 bg-slate-800 rounded appearance-none cursor-pointer">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3. Lista de Camadas Diagramáveis -->
+              <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 shadow-xl">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center justify-between mb-2.5">
+                  <span class="flex items-center gap-2"><i class="fa-solid fa-layer-group text-pe-gold"></i> Camadas e Caixas</span>
+                  <span class="text-[10px] text-slate-400">Clique para selecionar</span>
+                </span>
+                <div id="elementsLayersList" class="space-y-1 max-h-56 overflow-y-auto custom-scroll">
+                  <!-- Renderizado via JavaScript -->
+                </div>
+              </div>
+
             </div>
 
-            <!-- Preview da Carteira ao Vivo -->
-            <div class="lg:col-span-6 space-y-4">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                  <span class="w-2 h-2 rounded-full bg-pe-gold animate-pulse"></span>
-                  Visualização da Carteira Gerada
-                </span>
-                <button onclick="downloadLivePreviewBadge()" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer">
-                  <span>💾</span> Baixar PNG HD
-                </button>
-              </div>
-
-              <!-- Credencial Dinâmica -->
-              <div id="adminLiveCard" class="w-full bg-gradient-to-br from-[#06173a] to-[#040813] border-2 border-pe-gold rounded-2xl p-6 relative overflow-hidden shadow-2xl transition-all">
-                <div class="absolute -right-6 -bottom-6 text-white/[0.03] font-oswald font-black text-7xl select-none pointer-events-none">
-                  PERNAMBUCO
+            <!-- COLUNA DIREITA: Canvas do Studio CR80 & Painel Flutuante -->
+            <div class="xl:col-span-7 flex flex-col space-y-4">
+              
+              <!-- Toolbar Superior do Canvas (Zoom e Padrão CR80) -->
+              <div class="flex items-center justify-between bg-[#0b101d] border border-[#1c253b] px-4 py-3 rounded-2xl shadow">
+                <div class="flex items-center gap-2 text-xs">
+                  <span class="w-2.5 h-2.5 rounded-full bg-pe-gold animate-pulse"></span>
+                  <span class="font-bold text-white uppercase tracking-wide">Padrão CR80 Oficial</span>
+                  <span class="text-slate-400 hidden sm:inline">(85.6mm × 53.98mm • 1050 × 662 px)</span>
                 </div>
 
-                <!-- Topo da Carteira -->
-                <div class="flex items-center justify-between border-b border-pe-gold/25 pb-4 mb-4">
-                  <div class="flex items-center gap-3">
-                    <div class="rounded-full border border-pe-gold overflow-hidden bg-pe-darkblue p-0.5 flex items-center justify-center shrink-0" style="width: 42px; height: 42px;">
-                      <img src="assets/images/logo-federacao.png" alt="Federação Pernambucana" class="w-full h-full object-contain rounded-full" />
-                    </div>
-                    <div>
-                      <h4 class="font-oswald text-sm uppercase font-bold text-pe-gold tracking-wide leading-tight">Pernambuco FutMesa</h4>
-                      <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest block">Foot Table Federation</span>
-                    </div>
-                  </div>
+                <!-- Zoom Controls -->
+                <div class="flex items-center space-x-1.5 bg-[#05080e] px-2 py-1 rounded-xl border border-[#1c253b]">
+                  <button type="button" id="zoomOutBtn" title="Reduzir Visualização" class="w-7 h-7 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition text-xs cursor-pointer">
+                    <i class="fa-solid fa-minus"></i>
+                  </button>
+                  <span id="zoomDisplay" class="text-xs font-mono font-medium text-pe-gold w-12 text-center">80%</span>
+                  <button type="button" id="zoomInBtn" title="Aumentar Visualização" class="w-7 h-7 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition text-xs cursor-pointer">
+                    <i class="fa-solid fa-plus"></i>
+                  </button>
+                  <div class="w-[1px] h-4 bg-slate-700 mx-1"></div>
+                  <button type="button" id="zoomFitBtn" title="Enquadrar à Tela" class="px-2 py-1 text-xs text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-expand text-[10px]"></i> <span>Enquadrar</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Viewport do Canvas CR80 Central -->
+              <div id="viewportArea" class="checkered-canvas-bg border border-[#1c253b] rounded-2xl relative flex items-center justify-center p-6 sm:p-10 min-h-[600px] overflow-auto custom-scroll shadow-2xl">
+                
+                <!-- Wrapper com Zoom Dinâmico -->
+                <div id="cardScaleWrapper" class="relative transition-transform duration-100 ease-out origin-center" style="transform: scale(0.8);">
                   
-                  <div class="bg-pe-red text-white text-xs font-mono font-bold px-3 py-1 rounded shadow-md tracking-wider" id="previewBadgeCode">
-                    ID: #000000
+                  <!-- Canvas CR80 (1050 x 662 px) -->
+                  <div id="creditCardCanvas" class="relative w-[1050px] h-[662px] bg-slate-950 rounded-[34px] shadow-2xl overflow-hidden border border-slate-700/80 select-none">
+                    
+                    <!-- Camada de Fundo SVG Vetorial Oficial FPEFT -->
+                    <div id="svgBackgroundContainer" class="absolute inset-0 w-full h-full pointer-events-none">
+                      <!-- Template SVG embutido ou custom -->
+                    </div>
+
+                    <!-- Camada de Elementos Editáveis (Foto, Caixas Brancas, QR, Assinatura) -->
+                    <div id="interactiveElementsLayer" class="absolute inset-0 w-full h-full">
+                      <!-- Renderizado via JavaScript com drag e resize handles -->
+                    </div>
+
                   </div>
+
                 </div>
 
-                <!-- Foto e Dados -->
-                <div class="grid grid-cols-[100px_1fr] gap-5 items-center my-4">
-                  <div id="previewPhotoContainer" class="w-[100px] h-[125px] rounded-lg border-2 border-pe-gold overflow-hidden bg-slate-900 shadow-inner flex items-center justify-center shrink-0 transition-all">
-                    <img id="previewBadgePhoto" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" alt="Foto Atleta" class="w-full h-full object-cover" />
-                  </div>
-                  <div class="space-y-1.5 text-xs">
-                    <div>
-                      <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Nome do Atleta</span>
-                      <strong class="text-white text-base font-bold font-oswald uppercase tracking-wide block" id="previewBadgeName">Nome do Atleta</strong>
+                <!-- CONTROLE FLUTUANTE DE AJUSTE DIRETO, CURVAS E SETAS DIRECIONAIS -->
+                <div id="floatingControlPanel" class="absolute z-50 bg-[#090e1a]/95 backdrop-blur-md border border-pe-gold/40 rounded-2xl shadow-2xl flex flex-col text-xs transition-shadow duration-200 pointer-events-auto select-none" style="display: none; width: 330px; min-width: 270px; max-width: 580px; min-height: 120px; max-height: calc(100vh - 120px); left: 30px; top: 30px;">
+                  
+                  <!-- Alças de Redimensionamento das 8 Bordas da Janela Flutuante -->
+                  <div class="win-resizer win-resizer-t" data-edge="n"></div>
+                  <div class="win-resizer win-resizer-b" data-edge="s"></div>
+                  <div class="win-resizer win-resizer-l" data-edge="w"></div>
+                  <div class="win-resizer win-resizer-r" data-edge="e"></div>
+                  <div class="win-resizer win-resizer-tl" data-edge="nw"></div>
+                  <div class="win-resizer win-resizer-tr" data-edge="ne"></div>
+                  <div class="win-resizer win-resizer-bl" data-edge="sw"></div>
+                  <div class="win-resizer win-resizer-br" data-edge="se"></div>
+
+                  <!-- Header da Janela Flutuante (Arrastável) -->
+                  <div id="floatingHeader" class="p-3 border-b border-[#1c253b] flex items-center justify-between cursor-move shrink-0 bg-[#060a12]/90 rounded-t-2xl">
+                    <div class="flex items-center gap-2 truncate pr-2">
+                      <span class="w-2.5 h-2.5 rounded-full bg-pe-gold shrink-0 shadow-sm shadow-pe-gold/50 animate-pulse"></span>
+                      <span id="floatingItemLabel" class="font-bold text-white text-xs truncate">Nome do Atleta</span>
                     </div>
-                    <div class="grid grid-cols-2 gap-2 pt-1">
+                    <div class="flex items-center gap-1 shrink-0">
+                      <button type="button" id="btnPinFloating" title="Fixar / Manter no Local" class="w-6 h-6 flex items-center justify-center rounded hover:bg-slate-800 text-slate-400 hover:text-pe-gold transition text-xs cursor-pointer">
+                        <i class="fa-solid fa-thumbtack text-[11px]"></i>
+                      </button>
+                      <button type="button" id="btnMinimizeFloating" title="Minimizar / Expandir" class="w-6 h-6 flex items-center justify-center rounded hover:bg-slate-800 text-slate-400 hover:text-white transition text-xs cursor-pointer">
+                        <i class="fa-solid fa-minus text-[10px]"></i>
+                      </button>
+                      <button type="button" id="btnCloseFloating" title="Fechar Janela" class="w-6 h-6 flex items-center justify-center rounded hover:bg-slate-800 text-slate-400 hover:text-rose-400 transition text-xs cursor-pointer">
+                        <i class="fa-solid fa-xmark text-xs"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Conteúdo Interno com Scrollbar -->
+                  <div id="floatingBody" class="p-3.5 space-y-3 overflow-y-auto flex-1 custom-scroll">
+                    
+                    <!-- Setas de Posição com D-PAD -->
+                    <div class="bg-[#05080e] p-3 rounded-xl border border-[#1c253b] flex flex-col items-center">
+                      <div class="flex items-center justify-between w-full mb-2">
+                        <span class="text-[10px] text-slate-300 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                          <i class="fa-solid fa-arrows-up-down-left-right text-pe-gold"></i> SETAS DE POSIÇÃO
+                        </span>
+                        <button type="button" id="btnCycleStep" class="text-[10px] bg-slate-800 hover:bg-pe-darkblue text-pe-gold font-mono px-2 py-0.5 rounded border border-slate-700 hover:border-pe-gold/50 transition cursor-pointer">
+                          Passo: <span id="nudgeStepValue">1px</span>
+                        </button>
+                      </div>
+
+                      <!-- D-PAD Direcional -->
+                      <div class="grid grid-cols-3 gap-1.5 w-full max-w-[170px] items-center justify-center">
+                        <div></div>
+                        <button type="button" id="btnNudgeUp" class="h-8 bg-slate-800/90 hover:bg-pe-blue active:scale-95 text-slate-200 hover:text-white rounded-lg flex items-center justify-center transition shadow border border-slate-700 cursor-pointer">
+                          <i class="fa-solid fa-chevron-up text-xs"></i>
+                        </button>
+                        <div></div>
+
+                        <button type="button" id="btnNudgeLeft" class="h-8 bg-slate-800/90 hover:bg-pe-blue active:scale-95 text-slate-200 hover:text-white rounded-lg flex items-center justify-center transition shadow border border-slate-700 cursor-pointer">
+                          <i class="fa-solid fa-chevron-left text-xs"></i>
+                        </button>
+                        <button type="button" id="btnFloatingResetPos" title="Centralizar Horizontalmente no Cartão" class="h-8 bg-[#070b14] hover:bg-slate-800 text-pe-gold rounded-lg flex items-center justify-center transition border border-pe-gold/40 active:scale-95 cursor-pointer">
+                          <i class="fa-solid fa-compass text-xs"></i>
+                        </button>
+                        <button type="button" id="btnNudgeRight" class="h-8 bg-slate-800/90 hover:bg-pe-blue active:scale-95 text-slate-200 hover:text-white rounded-lg flex items-center justify-center transition shadow border border-slate-700 cursor-pointer">
+                          <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+
+                        <div></div>
+                        <button type="button" id="btnNudgeDown" class="h-8 bg-slate-800/90 hover:bg-pe-blue active:scale-95 text-slate-200 hover:text-white rounded-lg flex items-center justify-center transition shadow border border-slate-700 cursor-pointer">
+                          <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </button>
+                        <div></div>
+                      </div>
+                      <p class="text-[9px] text-slate-500 mt-2 text-center">Dica: você também pode usar as setas do teclado</p>
+                    </div>
+
+                    <!-- Curvatura (Cantos) com Presets -->
+                    <div class="bg-[#05080e] p-3 rounded-xl border border-[#1c253b]">
+                      <div class="flex items-center justify-between text-[11px] mb-2">
+                        <span class="text-slate-300 font-semibold flex items-center gap-1.5">
+                          <i class="fa-solid fa-vector-square text-pe-gold"></i> Curvatura (Cantos)
+                        </span>
+                        <span id="radiusLabel" class="font-mono text-pe-gold font-bold text-[10px] bg-slate-800 px-2 py-0.5 rounded border border-slate-700">17px</span>
+                      </div>
+                      <input type="range" id="inputCurveRadius" min="0" max="40" value="17" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer">
+                      <div class="flex justify-between items-center text-[9px] text-slate-400 mt-2 font-medium">
+                        <button type="button" class="hover:text-pe-gold transition cursor-pointer" onclick="setRadiusPreset(0)">Reto [0]</button>
+                        <button type="button" class="hover:text-pe-gold transition cursor-pointer" onclick="setRadiusPreset(8)">Suave [8]</button>
+                        <button type="button" class="hover:text-pe-gold transition cursor-pointer" onclick="setRadiusPreset(20)">Pílula [Total]</button>
+                      </div>
+                    </div>
+
+                    <!-- Largura e Altura Diretas -->
+                    <div class="grid grid-cols-2 gap-2.5">
                       <div>
-                        <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">CPF</span>
-                        <span class="text-slate-200 font-mono" id="previewBadgeCpf">000.000.000-00</span>
+                        <label class="text-[10px] text-slate-400 block mb-1">Largura [Width]</label>
+                        <div class="flex items-center bg-[#05080e] border border-slate-800 rounded-lg px-2.5 py-1.5 focus-within:border-pe-gold">
+                          <input type="number" id="inputDirectWidth" class="w-full bg-transparent text-white font-mono text-xs focus:outline-none">
+                          <span class="text-[10px] text-slate-500 ml-1">px</span>
+                        </div>
                       </div>
                       <div>
-                        <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Nascimento</span>
-                        <span class="text-slate-200 font-mono" id="previewBadgeBirth">--/--/----</span>
+                        <label class="text-[10px] text-slate-400 block mb-1">Altura [Height]</label>
+                        <div class="flex items-center bg-[#05080e] border border-slate-800 rounded-lg px-2.5 py-1.5 focus-within:border-pe-gold">
+                          <input type="number" id="inputDirectHeight" class="w-full bg-transparent text-white font-mono text-xs focus:outline-none">
+                          <span class="text-[10px] text-slate-500 ml-1">px</span>
+                        </div>
                       </div>
                     </div>
-                    <div class="pt-1">
-                      <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Município</span>
-                      <span class="text-slate-200 font-semibold" id="previewBadgeCity">Pernambuco</span>
+
+                    <!-- Tipografia e Alinhamento -->
+                    <div id="typographyControls" class="space-y-2.5 pt-2 border-t border-[#1c253b]">
+                      <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                          <label class="text-[10px] text-slate-400 block mb-1">Tamanho Fonte</label>
+                          <div class="flex items-center bg-[#05080e] border border-slate-800 rounded-lg px-2.5 py-1.5 focus-within:border-pe-gold">
+                            <input type="number" id="inputFontSize" min="10" max="64" class="w-full bg-transparent text-white font-mono text-xs focus:outline-none">
+                            <span class="text-[10px] text-slate-500 ml-1">px</span>
+                          </div>
+                        </div>
+                        <div>
+                          <label class="text-[10px] text-slate-400 block mb-1">Cor do Texto</label>
+                          <div class="flex items-center gap-2 bg-[#05080e] border border-slate-800 rounded-lg px-2 py-1 focus-within:border-pe-gold">
+                            <input type="color" id="inputTextColor" class="w-6 h-6 bg-transparent cursor-pointer rounded border-0 p-0">
+                            <span id="textColorHex" class="text-[11px] font-mono text-slate-300 uppercase">#00204A</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="flex items-center justify-between pt-1">
+                        <span class="text-[10px] text-slate-400">Alinhamento</span>
+                        <div class="flex bg-[#05080e] border border-slate-800 rounded-lg p-0.5 gap-0.5">
+                          <button type="button" id="btnAlignLeft" title="Esquerda" class="w-7 h-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer">
+                            <i class="fa-solid fa-align-left text-[11px]"></i>
+                          </button>
+                          <button type="button" id="btnAlignCenter" title="Centralizado" class="w-7 h-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer">
+                            <i class="fa-solid fa-align-center text-[11px]"></i>
+                          </button>
+                          <button type="button" id="btnAlignRight" title="Direita" class="w-7 h-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer">
+                            <i class="fa-solid fa-align-right text-[11px]"></i>
+                          </button>
+                        </div>
+                      </div>
                     </div>
+
                   </div>
+
                 </div>
 
-                <!-- Textos Personalizados da Carteira -->
-                <div id="previewCustomTextsContainer" class="space-y-1 my-2"></div>
-
-                <!-- Rodapé da Carteira -->
-                <div class="bg-black/40 border-l-4 border-pe-gold p-3 rounded-lg flex items-center justify-between mt-4">
-                  <div>
-                    <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">Modalidade Homologada</span>
-                    <span class="text-xs font-extrabold uppercase text-pe-gold tracking-wide" id="previewBadgeModality">SOLO (INDIVIDUAL)</span>
-                  </div>
-                  <div class="text-right">
-                    <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">Status Federado</span>
-                    <span class="text-[10px] font-bold uppercase text-emerald-400 flex items-center gap-1" id="previewBadgeStatus">
-                      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> REGULAR
-                    </span>
-                  </div>
-                </div>
               </div>
+
             </div>
 
           </div>
 
-          <!-- Tabela Completa de Atletas -->
+          <!-- TABELA DE ATLETAS CADASTRADOS NO BANCO -->
           <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 shadow-xl">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <h3 class="font-oswald text-xl uppercase font-bold text-white flex items-center gap-2">
-                <span>📋</span> Tabela de Atletas Cadastrados no Banco
-              </h3>
+              <div>
+                <h3 class="font-oswald text-xl uppercase font-bold text-white flex items-center gap-2">
+                  <span>📋</span> Tabela de Atletas Homologados no Banco
+                </h3>
+                <p class="text-xs text-slate-400">Clique em "Ver no Studio" para carregar a carteira do atleta diretamente no editor</p>
+              </div>
               <input type="text" id="searchAthleteTable" oninput="filterAthletesTable()" placeholder="Filtrar por nome ou código..." class="bg-[#05080e] border border-[#1c253b] rounded-xl px-4 py-2 text-xs text-white outline-none focus:border-pe-gold" />
             </div>
 
@@ -643,6 +991,17 @@
               </table>
             </div>
           </div>
+
+          <!-- Toast Flutuante de Notificação -->
+          <div id="toastNotification" class="fixed bottom-6 right-6 bg-[#070b14] border border-pe-gold/40 text-white px-4 py-3 rounded-xl shadow-2xl text-xs font-medium flex items-center gap-3 transform translate-y-24 opacity-0 transition-all duration-300 z-50">
+            <div class="w-6 h-6 rounded-full bg-pe-gold/20 text-pe-gold flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-check text-xs"></i>
+            </div>
+            <span id="toastMessage">Operação realizada com sucesso!</span>
+          </div>
+
+          <!-- Canvas Invisível para Renderização em Alta Resolução 300 DPI -->
+          <canvas id="hdRenderCanvas" class="hidden"></canvas>
 
         </div>
 
@@ -1443,6 +1802,9 @@
           updateDashboardData();
         } else if (tabName === 'atletas') {
           renderAthletesTable();
+          applyCurrentSvgBackground();
+          renderInteractiveElements();
+          setTimeout(() => updateFloatingPanelPosition(), 50);
         } else if (tabName === 'estudio') {
           syncStudioWithCurrentLayout();
         } else if (tabName === 'noticias') {
@@ -1456,78 +1818,1726 @@
     }
 
     /* =========================================================
-       GERENCIAMENTO DE ATLETAS (ABA 1)
+       STUDIO CR80 OFICIAL & GERENCIAMENTO DE ATLETAS (ABA 1)
+       Tamanho CR80: 85.60 mm x 53.98 mm | Resolução: 1050px x 662px
        ========================================================= */
-    function generateRandomAthleteCode() {
-      const code = String(Math.floor(100000 + Math.random() * 900000));
-      document.getElementById('athleteCode').value = code;
-      updateLivePreview();
-    }
+    const studioState = {
+      zoom: 0.8,
+      selectedId: 'field-nome',
+      nudgeStep: 1, // 1px, 5px, 10px
+      showBgLabels: true,
+      customSvgContent: null,
+      customImageUrl: null,
+      bgTransform: {
+        mode: 'cover',
+        scale: 1,
+        x: 0,
+        y: 0
+      },
+      floatingPinned: false,
+      floatingMinimized: false,
+      elements: [
+        {
+          id: 'field-foto',
+          label: 'Foto 3x4 do Atleta',
+          type: 'photo',
+          x: 62,
+          y: 236,
+          width: 194,
+          height: 234,
+          borderRadius: 24,
+          borderWidth: 4,
+          borderColor: '#ffffff',
+          backgroundColor: '#0c2340',
+          photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+          locked: false
+        },
+        {
+          id: 'field-nome',
+          label: 'Nome do Atleta (Caixa Branca)',
+          type: 'text-box',
+          targetKey: 'nome',
+          text: 'CARLOS EDUARDO SILVA LIMA',
+          x: 278,
+          y: 304,
+          width: 700,
+          height: 34,
+          borderRadius: 17,
+          backgroundColor: '#ffffff',
+          textColor: '#00204a',
+          fontSize: 18,
+          fontWeight: '800',
+          fontFamily: 'Montserrat',
+          textAlign: 'left',
+          paddingLeft: 18,
+          paddingRight: 18,
+          locked: false
+        },
+        {
+          id: 'field-cpf',
+          label: 'CPF (Caixa Branca)',
+          type: 'text-box',
+          targetKey: 'cpf',
+          text: '123.456.789-00',
+          x: 278,
+          y: 348,
+          width: 700,
+          height: 34,
+          borderRadius: 17,
+          backgroundColor: '#ffffff',
+          textColor: '#00204a',
+          fontSize: 16,
+          fontWeight: '800',
+          fontFamily: 'Montserrat',
+          textAlign: 'left',
+          paddingLeft: 18,
+          paddingRight: 18,
+          locked: false
+        },
+        {
+          id: 'field-nasc',
+          label: 'Data de Nascimento (Caixa Branca)',
+          type: 'text-box',
+          targetKey: 'nasc',
+          text: '18/05/1996',
+          x: 278,
+          y: 390,
+          width: 700,
+          height: 34,
+          borderRadius: 17,
+          backgroundColor: '#ffffff',
+          textColor: '#00204a',
+          fontSize: 16,
+          fontWeight: '800',
+          fontFamily: 'Montserrat',
+          textAlign: 'left',
+          paddingLeft: 18,
+          paddingRight: 18,
+          locked: false
+        },
+        {
+          id: 'field-fone',
+          label: 'Telefone / WhatsApp (Caixa Branca)',
+          type: 'text-box',
+          targetKey: 'fone',
+          text: '(81) 98765-4321',
+          x: 278,
+          y: 434,
+          width: 700,
+          height: 34,
+          borderRadius: 17,
+          backgroundColor: '#ffffff',
+          textColor: '#00204a',
+          fontSize: 16,
+          fontWeight: '800',
+          fontFamily: 'Montserrat',
+          textAlign: 'left',
+          paddingLeft: 18,
+          paddingRight: 18,
+          locked: false
+        },
+        {
+          id: 'field-categoria',
+          label: 'Categoria (Caixa Branca)',
+          type: 'text-box',
+          targetKey: 'categoria',
+          text: 'MASTER / PRINCIPAL',
+          x: 278,
+          y: 476,
+          width: 520,
+          height: 32,
+          borderRadius: 16,
+          backgroundColor: '#ffffff',
+          textColor: '#00204a',
+          fontSize: 15,
+          fontWeight: '800',
+          fontFamily: 'Montserrat',
+          textAlign: 'left',
+          paddingLeft: 16,
+          paddingRight: 16,
+          locked: false
+        },
+        {
+          id: 'field-filiacao',
+          label: 'Filiação / Clube (Caixa Branca)',
+          type: 'text-box',
+          targetKey: 'filiacao',
+          text: 'SPORT CLUB DO RECIFE',
+          x: 278,
+          y: 518,
+          width: 520,
+          height: 32,
+          borderRadius: 16,
+          backgroundColor: '#ffffff',
+          textColor: '#00204a',
+          fontSize: 15,
+          fontWeight: '800',
+          fontFamily: 'Montserrat',
+          textAlign: 'left',
+          paddingLeft: 16,
+          paddingRight: 16,
+          locked: false
+        },
+        {
+          id: 'field-federado',
+          label: 'Nº do Federado (Caixa Branca)',
+          type: 'text-box',
+          targetKey: 'federado',
+          text: 'PE-2026/048',
+          x: 62,
+          y: 494,
+          width: 194,
+          height: 28,
+          borderRadius: 14,
+          backgroundColor: '#ffffff',
+          textColor: '#00204a',
+          fontSize: 14,
+          fontWeight: '800',
+          fontFamily: 'Montserrat',
+          textAlign: 'center',
+          paddingLeft: 8,
+          paddingRight: 8,
+          locked: false
+        },
+        {
+          id: 'field-municipio',
+          label: 'Município (Caixa Branca)',
+          type: 'text-box',
+          targetKey: 'municipio',
+          text: 'RECIFE - PE',
+          x: 62,
+          y: 540,
+          width: 194,
+          height: 28,
+          borderRadius: 14,
+          backgroundColor: '#ffffff',
+          textColor: '#00204a',
+          fontSize: 13,
+          fontWeight: '800',
+          fontFamily: 'Montserrat',
+          textAlign: 'center',
+          paddingLeft: 8,
+          paddingRight: 8,
+          locked: false
+        },
+        {
+          id: 'field-validade',
+          label: 'Validade (Caixa Branca)',
+          type: 'text-box',
+          targetKey: 'validade',
+          text: '12/2026',
+          x: 150,
+          y: 574,
+          width: 106,
+          height: 26,
+          borderRadius: 13,
+          backgroundColor: '#ffffff',
+          textColor: '#00204a',
+          fontSize: 13,
+          fontWeight: '800',
+          fontFamily: 'Montserrat',
+          textAlign: 'center',
+          paddingLeft: 6,
+          paddingRight: 6,
+          locked: false
+        },
+        {
+          id: 'field-qrcode',
+          label: 'QR Code de Autenticidade',
+          type: 'qrcode',
+          targetKey: 'qr',
+          x: 852,
+          y: 472,
+          width: 96,
+          height: 96,
+          borderRadius: 8,
+          backgroundColor: '#ffffff',
+          locked: false
+        },
+        {
+          id: 'field-assinatura',
+          label: 'Linha / Assinatura do Presidente',
+          type: 'text-line',
+          targetKey: 'assinatura',
+          text: 'ASSINATURA DO PRESIDENTE FPEFT',
+          x: 440,
+          y: 585,
+          width: 300,
+          height: 24,
+          textColor: '#ffffff',
+          fontSize: 11,
+          fontWeight: '700',
+          textAlign: 'center',
+          locked: false
+        }
+      ]
+    };
 
-    function handlePhotoUpload(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-          const base64 = event.target.result;
-          document.getElementById('athletePhotoBase64').value = base64;
-          document.getElementById('previewBadgePhoto').src = base64;
-        };
-        reader.readAsDataURL(file);
-      }
-    }
+    /* =========================================================
+       TEMPLATE VETORIAL SVG OFICIAL DA FPEFT (1050x662)
+       ========================================================= */
+    function getFpeftTemplateSvg(showLabels = true) {
+      return `
+      <svg id="fpeftSvgTemplate" width="1050" height="662" viewBox="0 0 1050 662" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#00183b"/>
+            <stop offset="45%" stop-color="#003580"/>
+            <stop offset="100%" stop-color="#001a42"/>
+          </linearGradient>
+          <linearGradient id="glowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#0066d6" stop-opacity="0"/>
+            <stop offset="50%" stop-color="#00aaff" stop-opacity="0.6"/>
+            <stop offset="100%" stop-color="#0066d6" stop-opacity="0"/>
+          </linearGradient>
+          <linearGradient id="sunGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#ffd000"/>
+            <stop offset="100%" stop-color="#ff9900"/>
+          </linearGradient>
+          <clipPath id="cardRoundedClip">
+            <rect width="1050" height="662" rx="34" />
+          </clipPath>
+        </defs>
 
-    ['athleteCode', 'athleteName', 'athleteCpf', 'athleteBirth', 'athleteCity', 'athleteModality', 'athleteStatus'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.addEventListener('input', updateLivePreview);
-      }
-    });
+        <g clip-path="url(#cardRoundedClip)">
+          <!-- Fundo Principal Azul Profundo -->
+          <rect width="1050" height="662" fill="url(#bgGrad)"/>
 
-    function updateLivePreview() {
-      const code = document.getElementById('athleteCode').value || "000000";
-      const name = document.getElementById('athleteName').value || "Nome do Atleta";
-      const cpf = document.getElementById('athleteCpf').value || "000.000.000-00";
-      const birth = document.getElementById('athleteBirth').value || "--/--/----";
-      const city = document.getElementById('athleteCity').value || "Pernambuco";
-      const modality = document.getElementById('athleteModality').value;
-      const status = document.getElementById('athleteStatus').value;
+          <!-- Linhas de Luz e Brilho High-Tech Dinâmico -->
+          <ellipse cx="650" cy="220" rx="420" ry="14" fill="url(#glowGrad)"/>
+          <path d="M 0 540 Q 300 480 600 580 T 1050 560" stroke="#0284c7" stroke-width="1.5" opacity="0.25" fill="none"/>
+          <path d="M 0 565 Q 400 520 800 620 T 1050 600" stroke="#38bdf8" stroke-width="1" opacity="0.2" fill="none"/>
 
-      document.getElementById('previewBadgeCode').textContent = `ID: #${code}`;
-      document.getElementById('previewBadgeName').textContent = name;
-      document.getElementById('previewBadgeCpf').textContent = cpf;
-      document.getElementById('previewBadgeBirth').textContent = birth;
-      document.getElementById('previewBadgeCity').textContent = city;
-      document.getElementById('previewBadgeModality').textContent = modality;
-      document.getElementById('previewBadgeStatus').innerHTML = `
-        <span class="w-2 h-2 rounded-full ${status === 'REGULAR' ? 'bg-emerald-400' : 'bg-amber-400'} animate-pulse"></span> ${status}
+          <!-- Faixa Ondulada Superior Direita (Bandeira PE estilizada) -->
+          <g transform="translate(850, 0)">
+            <path d="M 0 0 L 200 0 L 200 130 Q 120 70 0 110 Z" fill="#002b66" opacity="0.6"/>
+            <path d="M 30 0 L 200 0 L 200 90 Q 110 50 30 80 Z" fill="#e63946" opacity="0.9"/>
+            <path d="M 70 0 L 200 0 L 200 60 Q 130 30 70 50 Z" fill="#ffd000" opacity="0.95"/>
+            <path d="M 120 0 L 200 0 L 200 30 Q 160 15 120 25 Z" fill="#008000" opacity="0.95"/>
+          </g>
+
+          <!-- Detalhe Inferior Esquerdo (Bandeira PE) -->
+          <g transform="translate(0, 560)">
+            <path d="M 0 0 L 110 80 L 0 102 Z" fill="#e63946"/>
+            <path d="M 0 25 L 90 85 L 0 102 Z" fill="#ffd000"/>
+            <path d="M 0 55 L 70 95 L 0 102 Z" fill="#008000"/>
+          </g>
+
+          <!-- Selo Circular da Federação / Pernambuco (Canto Superior Esquerdo) -->
+          <g transform="translate(62, 22)">
+            <circle cx="85" cy="85" r="76" stroke="#ffffff" stroke-width="3" stroke-dasharray="6,4" opacity="0.4" fill="none"/>
+            <circle cx="85" cy="85" r="70" stroke="#00aaff" stroke-width="2" fill="#00183b"/>
+            <!-- Estilização do Arco-íris e Sol de PE -->
+            <path d="M 35 90 A 50 50 0 0 1 135 90" stroke="#e63946" stroke-width="6" fill="none"/>
+            <path d="M 40 90 A 45 45 0 0 1 130 90" stroke="#ffd000" stroke-width="5" fill="none"/>
+            <path d="M 45 90 A 40 40 0 0 1 125 90" stroke="#009944" stroke-width="4" fill="none"/>
+            <!-- Sol -->
+            <circle cx="85" cy="62" r="14" fill="url(#sunGrad)"/>
+            <!-- Cruz Vermelha -->
+            <rect x="83" y="78" width="4" height="18" fill="#e63946"/>
+            <rect x="76" y="83" width="18" height="4" fill="#e63946"/>
+            
+            <!-- Tipografia do Escudo -->
+            <text x="85" y="112" font-family="'Montserrat', sans-serif" font-size="14" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="1">PERNAMBUCO</text>
+            <text x="85" y="126" font-family="'Montserrat', sans-serif" font-size="10" font-weight="800" fill="#ffd000" text-anchor="middle" letter-spacing="0.5">FUTMESA</text>
+            <text x="85" y="138" font-family="'Montserrat', sans-serif" font-size="9" font-weight="700" fill="#cbd5e1" text-anchor="middle">FOOT TABLE</text>
+          </g>
+
+          <!-- Cabeçalho Principal: FPEFT & Descrição -->
+          <g transform="translate(288, 32)">
+            <text x="0" y="54" font-family="'Montserrat', sans-serif" font-size="58" font-weight="900" fill="#ffffff" letter-spacing="2">FPEFT</text>
+            <text x="2" y="80" font-family="'Montserrat', sans-serif" font-size="16" font-weight="800" fill="#ffffff" letter-spacing="0.8">FEDERAÇÃO PERNAMBUCANA</text>
+            <text x="2" y="102" font-family="'Montserrat', sans-serif" font-size="16" font-weight="800" fill="#ffffff" letter-spacing="0.8">DE FOOT TABLE</text>
+            <text x="2" y="122" font-family="'Montserrat', sans-serif" font-size="11" font-weight="700" fill="#94a3b8" letter-spacing="2.5">DISCIPLINA  •  ESPORTE  •  UNIÃO</text>
+          </g>
+
+          <!-- Slogan Direita: "O FOOT TABLE É DE PERNAMBUCO" -->
+          <g transform="translate(650, 40)">
+            <text x="0" y="24" font-family="'Montserrat', sans-serif" font-size="18" font-weight="900" fill="#ffffff" letter-spacing="0.5">O FOOT TABLE</text>
+            <text x="0" y="44" font-family="'Montserrat', sans-serif" font-size="18" font-weight="900" fill="#ffffff" letter-spacing="0.5">É DE</text>
+            <text x="0" y="66" font-family="'Montserrat', sans-serif" font-size="18" font-weight="900" fill="#ffffff" letter-spacing="0.5">PERNAMBUCO</text>
+            <!-- Faixa estilizada PE -->
+            <rect x="0" y="76" width="130" height="4" fill="#e63946"/>
+            <rect x="0" y="80" width="130" height="4" fill="#ffd000"/>
+            <rect x="0" y="84" width="130" height="4" fill="#008000"/>
+          </g>
+
+          <!-- Mini Arco-Íris PE Canto Superior Direito -->
+          <g transform="translate(930, 75)">
+            <path d="M 0 45 A 35 35 0 0 1 70 45" stroke="#e63946" stroke-width="4" fill="none"/>
+            <path d="M 5 45 A 30 30 0 0 1 65 45" stroke="#ffd000" stroke-width="3" fill="none"/>
+            <circle cx="35" cy="26" r="8" fill="#ffd000"/>
+            <rect x="33" y="38" width="4" height="12" fill="#e63946"/>
+            <rect x="29" y="42" width="12" height="4" fill="#e63946"/>
+          </g>
+
+          <!-- Título da Carteira: CARTEIRA DO ATLETA -->
+          <g transform="translate(288, 192)">
+            <text x="0" y="30" font-family="'Montserrat', sans-serif" font-size="34" font-weight="900" fill="#ffffff" letter-spacing="1">CARTEIRA DO ATLETA</text>
+            <text x="0" y="52" font-family="'Montserrat', sans-serif" font-size="16" font-weight="800" fill="#38bdf8" letter-spacing="1.5">ATLETA OFICIAL</text>
+          </g>
+
+          <!-- Ícone do Foot Table (Mesa Curva e Jogador) -->
+          <g transform="translate(830, 168)">
+            <circle cx="48" cy="18" r="8" fill="#ffffff"/>
+            <path d="M 40 28 Q 50 24 64 36 L 56 46 L 44 38 Z" fill="#ffffff"/>
+            <path d="M 12 56 Q 50 44 88 56" stroke="#ffffff" stroke-width="5" stroke-linecap="round" fill="none"/>
+            <rect x="24" y="56" width="4" height="16" fill="#ffffff"/>
+            <rect x="72" y="56" width="4" height="16" fill="#ffffff"/>
+            <text x="50" y="86" font-family="'Montserrat', sans-serif" font-size="12" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="1.5">FOOT TABLE</text>
+          </g>
+
+          ${showLabels ? `
+          <!-- Rótulos Fixos da Carteira (Nome dos Campos) -->
+          <g id="svgFixedLabels" font-family="'Montserrat', sans-serif" font-size="11" font-weight="800" fill="#ffffff" letter-spacing="0.5">
+            <text x="62" y="488" font-size="10">Nº DO FEDERADO</text>
+            <text x="62" y="534" font-size="10">MUNICÍPIO</text>
+            <text x="62" y="584" font-size="10">VALIDADE</text>
+            <text x="175" y="585" fill="#38bdf8" font-size="11">___/___</text>
+
+            <text x="284" y="298">NOME DO ATLETA</text>
+            <text x="284" y="342">CPF</text>
+            <text x="284" y="384">DATA DE NASCIMENTO</text>
+            <text x="495" y="384" fill="#38bdf8">____/____/________</text>
+            <text x="284" y="428">TELEFONE / WHATSAPP</text>
+            <text x="284" y="470">CATEGORIA</text>
+            <text x="284" y="512">FILIAÇÃO</text>
+
+            <line x1="440" y1="578" x2="740" y2="578" stroke="#ffffff" stroke-width="1.5"/>
+            <text x="590" y="602" font-size="10" fill="#e2e8f0" text-anchor="middle">ASSINATURA DO PRESIDENTE</text>
+            <text x="590" y="616" font-size="10" fill="#38bdf8" text-anchor="middle">FPEFT</text>
+
+            <text x="900" y="584" font-size="9" fill="#94a3b8" text-anchor="middle">VERIFICAÇÃO DE AUTENTICIDADE</text>
+          </g>
+          ` : ''}
+
+        </g>
+      </svg>
       `;
     }
 
+    /* =========================================================
+       FUNDO VETORIAL & CALIBRAÇÃO (CR80)
+       ========================================================= */
+    function applyCurrentSvgBackground() {
+      const container = document.getElementById('svgBackgroundContainer');
+      if (!container) return;
+
+      const { scale, x, y, mode } = studioState.bgTransform;
+      const transformStyle = `transform: translate(${x}px, ${y}px) scale(${scale}); transform-origin: center center; transition: transform 0.05s ease-out;`;
+
+      if (studioState.customImageUrl) {
+        let objectFit = 'cover';
+        if (mode === 'contain') objectFit = 'contain';
+        if (mode === 'exact') objectFit = 'fill';
+
+        container.innerHTML = `
+          <div class="w-full h-full overflow-hidden flex items-center justify-center">
+            <img src="${studioState.customImageUrl}" class="w-full h-full pointer-events-none select-none" style="object-fit: ${objectFit}; ${transformStyle}" />
+          </div>
+        `;
+      } else if (studioState.customSvgContent) {
+        let preserveAspect = 'xMidYMid slice';
+        if (mode === 'contain') preserveAspect = 'xMidYMid meet';
+        if (mode === 'exact') preserveAspect = 'none';
+
+        let svgStr = studioState.customSvgContent;
+        if (!svgStr.includes('preserveAspectRatio')) {
+          svgStr = svgStr.replace(/<svg\b([^>]*)>/i, `<svg $1 preserveAspectRatio="${preserveAspect}">`);
+        } else {
+          svgStr = svgStr.replace(/preserveAspectRatio="[^"]*"/i, `preserveAspectRatio="${preserveAspect}"`);
+        }
+
+        container.innerHTML = `
+          <div class="w-full h-full overflow-hidden flex items-center justify-center" style="${transformStyle}">
+            ${svgStr}
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div class="w-full h-full overflow-hidden" style="${transformStyle}">
+            ${getFpeftTemplateSvg(studioState.showBgLabels)}
+          </div>
+        `;
+      }
+    }
+
+    function triggerAutoFitFullArea() {
+      studioState.bgTransform = { mode: 'exact', scale: 1, x: 0, y: 0 };
+      const scaleInp = document.getElementById('inputBgScale');
+      const percInp = document.getElementById('inputBgPercent');
+      const posX = document.getElementById('inputBgPosX');
+      const posY = document.getElementById('inputBgPosY');
+      const posXLabel = document.getElementById('bgPosXLabel');
+      const posYLabel = document.getElementById('bgPosYLabel');
+
+      if (scaleInp) scaleInp.value = 100;
+      if (percInp) percInp.value = 100;
+      if (posX) posX.value = 0;
+      if (posY) posY.value = 0;
+      if (posXLabel) posXLabel.innerText = '0px';
+      if (posYLabel) posYLabel.innerText = '0px';
+
+      updateBgFitButtons();
+      applyCurrentSvgBackground();
+      showToast('Arte ajustada 100% preenchendo toda a área do cartão!');
+    }
+
+    function updateBgFitButtons() {
+      const btnCover = document.getElementById('btnBgFitCover');
+      const btnContain = document.getElementById('btnBgFitContain');
+      const btnExact = document.getElementById('btnBgFitExact');
+
+      [btnCover, btnContain, btnExact].forEach(btn => {
+        if (!btn) return;
+        btn.classList.remove('bg-sky-600', 'text-white');
+        btn.classList.add('text-slate-300');
+      });
+
+      if (studioState.bgTransform.mode === 'cover' && btnCover) {
+        btnCover.classList.add('bg-sky-600', 'text-white');
+      } else if (studioState.bgTransform.mode === 'contain' && btnContain) {
+        btnContain.classList.add('bg-sky-600', 'text-white');
+      } else if (studioState.bgTransform.mode === 'exact' && btnExact) {
+        btnExact.classList.add('bg-sky-600', 'text-white');
+      }
+    }
+
+    /* =========================================================
+       RENDERIZAÇÃO DOS ELEMENTOS INTERATIVOS NO CANVAS CR80
+       ========================================================= */
+    function renderInteractiveElements() {
+      const interactiveLayer = document.getElementById('interactiveElementsLayer');
+      if (!interactiveLayer) return;
+
+      interactiveLayer.innerHTML = '';
+
+      studioState.elements.forEach(item => {
+        const div = document.createElement('div');
+        div.id = item.id;
+        const isSelected = item.id === studioState.selectedId;
+        div.className = `selectable-item ${isSelected ? 'is-selected' : ''}`;
+        
+        div.style.left = `${item.x}px`;
+        div.style.top = `${item.y}px`;
+        div.style.width = `${item.width}px`;
+        div.style.height = `${item.height}px`;
+        div.style.borderRadius = `${item.borderRadius || 0}px`;
+        div.style.zIndex = isSelected ? 50 : 20;
+
+        if (item.type === 'photo') {
+          div.style.backgroundColor = item.backgroundColor || '#0c2340';
+          div.style.border = `${item.borderWidth || 4}px solid ${item.borderColor || '#ffffff'}`;
+          div.style.overflow = 'hidden';
+
+          if (item.photoUrl) {
+            div.innerHTML = `<img src="${item.photoUrl}" class="w-full h-full object-cover pointer-events-none select-none" />`;
+          } else {
+            div.innerHTML = `
+              <div class="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-slate-900/80 pointer-events-none select-none">
+                <i class="fa-solid fa-user text-4xl mb-1 text-slate-400"></i>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Foto 3x4</span>
+              </div>
+            `;
+          }
+        } else if (item.type === 'qrcode') {
+          div.style.backgroundColor = item.backgroundColor || '#ffffff';
+          div.style.overflow = 'hidden';
+          div.style.padding = '6px';
+          div.innerHTML = `
+            <div class="w-full h-full flex flex-col items-center justify-center bg-white pointer-events-none">
+              <i class="fa-solid fa-qrcode text-slate-950 text-5xl"></i>
+            </div>
+          `;
+        } else {
+          if (item.backgroundColor) {
+            div.style.backgroundColor = item.backgroundColor;
+          }
+          div.style.color = item.textColor || '#00204a';
+          div.style.fontFamily = "'Montserrat', sans-serif";
+          div.style.fontSize = `${item.fontSize || 16}px`;
+          div.style.fontWeight = item.fontWeight || '800';
+          div.style.display = 'flex';
+          div.style.alignItems = 'center';
+          div.style.whiteSpace = 'nowrap';
+          div.style.overflow = 'hidden';
+          div.style.paddingLeft = `${item.paddingLeft || 0}px`;
+          div.style.paddingRight = `${item.paddingRight || 0}px`;
+
+          if (item.textAlign === 'center') {
+            div.style.justifyContent = 'center';
+          } else if (item.textAlign === 'right') {
+            div.style.justifyContent = 'flex-end';
+          } else {
+            div.style.justifyContent = 'flex-start';
+          }
+
+          div.innerHTML = `<span class="truncate pointer-events-none select-none">${escapeHtml(item.text || '')}</span>`;
+        }
+
+        // 8 Alças de Redimensionamento quando selecionado
+        if (isSelected) {
+          const handles = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
+          handles.forEach(dir => {
+            const h = document.createElement('div');
+            h.className = `resize-handle h-${dir}`;
+            h.dataset.direction = dir;
+            div.appendChild(h);
+          });
+        }
+
+        // Eventos de Seleção e Arrastar
+        div.addEventListener('pointerdown', (e) => onElementPointerDown(e, item.id));
+
+        interactiveLayer.appendChild(div);
+      });
+
+      renderLayersSidebar();
+      if (!studioState.floatingPinned) {
+        updateFloatingPanelPosition();
+      }
+    }
+
+    /* =========================================================
+       ARRASTAR E REDIMENSIONAR ELEMENTOS (DRAG & RESIZE)
+       ========================================================= */
+    let isDragging = false;
+    let isResizing = false;
+    let currentResizeDir = null;
+    let startX = 0;
+    let startY = 0;
+    let startItem = { x: 0, y: 0, w: 0, h: 0 };
+
+    function selectElement(id) {
+      studioState.selectedId = id;
+      renderInteractiveElements();
+      syncFloatingPanel();
+    }
+
+    function onElementPointerDown(e, id) {
+      e.stopPropagation();
+      const item = studioState.elements.find(i => i.id === id);
+      if (!item) return;
+
+      studioState.selectedId = id;
+      startX = e.clientX;
+      startY = e.clientY;
+      startItem = { x: item.x, y: item.y, w: item.width, h: item.height };
+
+      if (e.target.classList.contains('resize-handle')) {
+        isResizing = true;
+        currentResizeDir = e.target.dataset.direction;
+      } else {
+        isDragging = true;
+      }
+
+      renderInteractiveElements();
+      syncFloatingPanel();
+
+      window.addEventListener('pointermove', onGlobalPointerMove);
+      window.addEventListener('pointerup', onGlobalPointerUp);
+    }
+
+    function onGlobalPointerMove(e) {
+      if (!studioState.selectedId) return;
+      const item = studioState.elements.find(i => i.id === studioState.selectedId);
+      if (!item) return;
+
+      const deltaX = (e.clientX - startX) / studioState.zoom;
+      const deltaY = (e.clientY - startY) / studioState.zoom;
+
+      if (isDragging) {
+        item.x = Math.round(startItem.x + deltaX);
+        item.y = Math.round(startItem.y + deltaY);
+        updateItemStyle(item);
+      } else if (isResizing) {
+        let newX = startItem.x;
+        let newY = startItem.y;
+        let newW = startItem.w;
+        let newH = startItem.h;
+        const minW = 20;
+        const minH = 15;
+
+        if (currentResizeDir.includes('e')) {
+          newW = Math.max(minW, startItem.w + deltaX);
+        }
+        if (currentResizeDir.includes('s')) {
+          newH = Math.max(minH, startItem.h + deltaY);
+        }
+        if (currentResizeDir.includes('w')) {
+          const w = startItem.w - deltaX;
+          if (w >= minW) {
+            newW = w;
+            newX = startItem.x + deltaX;
+          }
+        }
+        if (currentResizeDir.includes('n')) {
+          const h = startItem.h - deltaY;
+          if (h >= minH) {
+            newH = h;
+            newY = startItem.y + deltaY;
+          }
+        }
+
+        item.x = Math.round(newX);
+        item.y = Math.round(newY);
+        item.width = Math.round(newW);
+        item.height = Math.round(newH);
+        updateItemStyle(item);
+      }
+    }
+
+    function onGlobalPointerUp() {
+      isDragging = false;
+      isResizing = false;
+      window.removeEventListener('pointermove', onGlobalPointerMove);
+      window.removeEventListener('pointerup', onGlobalPointerUp);
+      if (!studioState.floatingPinned) {
+        updateFloatingPanelPosition();
+      }
+    }
+
+    function updateItemStyle(item) {
+      const el = document.getElementById(item.id);
+      if (el) {
+        el.style.left = `${item.x}px`;
+        el.style.top = `${item.y}px`;
+        el.style.width = `${item.width}px`;
+        el.style.height = `${item.height}px`;
+      }
+      const dirW = document.getElementById('inputDirectWidth');
+      const dirH = document.getElementById('inputDirectHeight');
+      if (dirW) dirW.value = item.width;
+      if (dirH) dirH.value = item.height;
+      updateFloatingPanelPosition();
+    }
+
+    /* =========================================================
+       PAINEL FLUTUANTE DE AJUSTE DIRETO
+       ========================================================= */
+    function syncFloatingPanel() {
+      const panel = document.getElementById('floatingControlPanel');
+      if (!panel) return;
+
+      const item = studioState.elements.find(i => i.id === studioState.selectedId);
+      if (!item) {
+        panel.style.display = 'none';
+        return;
+      }
+
+      panel.style.display = 'block';
+      const labelEl = document.getElementById('floatingItemLabel');
+      if (labelEl) labelEl.innerText = item.label || 'Item';
+
+      const inputCurve = document.getElementById('inputCurveRadius');
+      const radiusLabel = document.getElementById('radiusLabel');
+      if (inputCurve) inputCurve.value = item.borderRadius || 0;
+      if (radiusLabel) radiusLabel.innerText = `${item.borderRadius || 0}px`;
+
+      const dirW = document.getElementById('inputDirectWidth');
+      const dirH = document.getElementById('inputDirectHeight');
+      if (dirW) dirW.value = item.width;
+      if (dirH) dirH.value = item.height;
+
+      const typoBox = document.getElementById('typographyControls');
+      if (typoBox) {
+        if (item.type === 'text-box' || item.type === 'text-line') {
+          typoBox.style.display = 'block';
+          const fontInp = document.getElementById('inputFontSize');
+          const colorInp = document.getElementById('inputTextColor');
+          const hexEl = document.getElementById('textColorHex');
+          if (fontInp) fontInp.value = item.fontSize || 16;
+          if (colorInp) colorInp.value = item.textColor || '#00204a';
+          if (hexEl) hexEl.innerText = (item.textColor || '#000').toUpperCase();
+        } else {
+          typoBox.style.display = 'none';
+        }
+      }
+
+      updateFloatingPanelPosition();
+    }
+
+    function updateFloatingPanelPosition() {
+      const panel = document.getElementById('floatingControlPanel');
+      if (!panel || panel.style.display === 'none') return;
+      if (studioState.floatingPinned) return;
+
+      const viewportEl = document.getElementById('viewportArea');
+      if (!viewportEl) return;
+      const viewport = viewportEl.getBoundingClientRect();
+
+      const el = document.getElementById(studioState.selectedId);
+      if (!el) return;
+
+      const elRect = el.getBoundingClientRect();
+      const winW = panel.offsetWidth || 330;
+      let left = elRect.right - viewport.left + 24;
+      let top = elRect.top - viewport.top;
+
+      if (left + winW > viewport.width) {
+        left = elRect.left - viewport.left - winW - 20;
+      }
+      if (left < 10) {
+        left = Math.max(10, (viewport.width - winW) / 2);
+        top = Math.min(viewport.height - 380, elRect.bottom - viewport.top + 16);
+      }
+      top = Math.max(10, Math.min(top, viewport.height - (panel.offsetHeight || 380) - 10));
+
+      panel.style.left = `${left}px`;
+      panel.style.top = `${top}px`;
+    }
+
+    function setRadiusPreset(val) {
+      const item = studioState.elements.find(i => i.id === studioState.selectedId);
+      if (!item) return;
+      item.borderRadius = val;
+      const inputCurve = document.getElementById('inputCurveRadius');
+      const radiusLabel = document.getElementById('radiusLabel');
+      if (inputCurve) inputCurve.value = val;
+      if (radiusLabel) radiusLabel.innerText = `${val}px`;
+      const el = document.getElementById(item.id);
+      if (el) el.style.borderRadius = `${val}px`;
+    }
+
+    function nudgeSelected(dx, dy) {
+      const item = studioState.elements.find(i => i.id === studioState.selectedId);
+      if (!item) return;
+      item.x += dx * studioState.nudgeStep;
+      item.y += dy * studioState.nudgeStep;
+      updateItemStyle(item);
+    }
+
+    function renderLayersSidebar() {
+      const list = document.getElementById('elementsLayersList');
+      if (!list) return;
+
+      list.innerHTML = '';
+      studioState.elements.forEach(item => {
+        const row = document.createElement('div');
+        const isSelected = studioState.selectedId === item.id;
+        row.className = `flex items-center justify-between px-2.5 py-1.5 rounded-lg cursor-pointer text-xs transition ${isSelected ? 'bg-pe-gold/20 border border-pe-gold/60 text-white font-medium' : 'bg-[#05080e] hover:bg-[#121c32] text-slate-300 border border-[#1c253b]'}`;
+        
+        let icon = 'fa-square-check text-sky-400';
+        if (item.type === 'photo') icon = 'fa-camera text-emerald-400';
+        if (item.type === 'qrcode') icon = 'fa-qrcode text-amber-400';
+
+        row.innerHTML = `
+          <div class="flex items-center gap-2 truncate">
+            <i class="fa-solid ${icon} text-[11px]"></i>
+            <span class="truncate">${escapeHtml(item.label)}</span>
+          </div>
+          <span class="text-[9px] font-mono text-slate-500">${item.width}x${item.height}</span>
+        `;
+        row.addEventListener('click', () => selectElement(item.id));
+        list.appendChild(row);
+      });
+    }
+
+    function setZoom(val) {
+      const wrapper = document.getElementById('cardScaleWrapper');
+      const display = document.getElementById('zoomDisplay');
+      if (!wrapper || !display) return;
+
+      studioState.zoom = Math.min(1.8, Math.max(0.35, val));
+      wrapper.style.transform = `scale(${studioState.zoom})`;
+      display.innerText = `${Math.round(studioState.zoom * 100)}%`;
+      updateFloatingPanelPosition();
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastNotification');
+      const msgEl = document.getElementById('toastMessage');
+      if (!toast || !msgEl) return;
+
+      msgEl.innerText = msg;
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 3000);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[s]);
+    }
+
+    /* =========================================================
+       EXPORTAÇÃO 1: SVG PURO VETORIZADO (COREL / ILLUSTRATOR)
+       ========================================================= */
+    function exportPureSvg() {
+      showToast('Gerando SVG puro com curvas e dados vetorizados...');
+
+      const currentBgSvg = studioState.customSvgContent || getFpeftTemplateSvg(studioState.showBgLabels);
+      const parser = new DOMParser();
+      const svgDoc = parser.parseFromString(currentBgSvg, 'image/svg+xml');
+      const rootSvg = svgDoc.documentElement;
+
+      const overlayGroup = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+      overlayGroup.setAttribute('id', 'FPEFT_Dados_Atleta');
+
+      studioState.elements.forEach(item => {
+        if (item.type === 'photo') {
+          const gPhoto = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+          const clipId = `clip_foto_${Date.now()}`;
+          
+          const defs = rootSvg.querySelector('defs') || rootSvg.insertBefore(svgDoc.createElementNS('http://www.w3.org/2000/svg', 'defs'), rootSvg.firstChild);
+          const clipPath = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
+          clipPath.setAttribute('id', clipId);
+
+          const clipRect = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          clipRect.setAttribute('x', item.x);
+          clipRect.setAttribute('y', item.y);
+          clipRect.setAttribute('width', item.width);
+          clipRect.setAttribute('height', item.height);
+          clipRect.setAttribute('rx', item.borderRadius || 0);
+          clipPath.appendChild(clipRect);
+          defs.appendChild(clipPath);
+
+          if (item.photoUrl) {
+            const img = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'image');
+            img.setAttribute('href', item.photoUrl);
+            img.setAttribute('x', item.x);
+            img.setAttribute('y', item.y);
+            img.setAttribute('width', item.width);
+            img.setAttribute('height', item.height);
+            img.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+            img.setAttribute('clip-path', `url(#${clipId})`);
+            gPhoto.appendChild(img);
+          } else {
+            const rect = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', item.x);
+            rect.setAttribute('y', item.y);
+            rect.setAttribute('width', item.width);
+            rect.setAttribute('height', item.height);
+            rect.setAttribute('rx', item.borderRadius || 0);
+            rect.setAttribute('fill', '#0c2340');
+            gPhoto.appendChild(rect);
+          }
+
+          if (item.borderWidth > 0) {
+            const borderRect = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            borderRect.setAttribute('x', item.x);
+            borderRect.setAttribute('y', item.y);
+            borderRect.setAttribute('width', item.width);
+            borderRect.setAttribute('height', item.height);
+            borderRect.setAttribute('rx', item.borderRadius || 0);
+            borderRect.setAttribute('fill', 'none');
+            borderRect.setAttribute('stroke', item.borderColor || '#ffffff');
+            borderRect.setAttribute('stroke-width', item.borderWidth);
+            gPhoto.appendChild(borderRect);
+          }
+
+          overlayGroup.appendChild(gPhoto);
+        } else if (item.type === 'qrcode') {
+          const gQr = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+          const bg = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          bg.setAttribute('x', item.x);
+          bg.setAttribute('y', item.y);
+          bg.setAttribute('width', item.width);
+          bg.setAttribute('height', item.height);
+          bg.setAttribute('rx', item.borderRadius || 6);
+          bg.setAttribute('fill', '#ffffff');
+          gQr.appendChild(bg);
+
+          const qrInner = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+          qrInner.setAttribute('transform', `translate(${item.x + 8}, ${item.y + 8}) scale(${(item.width - 16) / 100})`);
+          qrInner.setAttribute('fill', '#000000');
+          qrInner.innerHTML = `
+            <rect x="5" y="5" width="28" height="28" rx="2" fill="none" stroke="#000" stroke-width="7"/>
+            <rect x="13" y="13" width="12" height="12"/>
+            <rect x="67" y="5" width="28" height="28" rx="2" fill="none" stroke="#000" stroke-width="7"/>
+            <rect x="75" y="13" width="12" height="12"/>
+            <rect x="5" y="67" width="28" height="28" rx="2" fill="none" stroke="#000" stroke-width="7"/>
+            <rect x="13" y="75" width="12" height="12"/>
+            <rect x="42" y="10" width="8" height="18"/>
+            <rect x="55" y="15" width="6" height="6"/>
+            <rect x="42" y="38" width="16" height="8"/>
+            <rect x="65" y="42" width="12" height="12"/>
+            <rect x="45" y="55" width="10" height="24"/>
+            <rect x="65" y="65" width="20" height="8"/>
+            <rect x="75" y="80" width="15" height="15"/>
+          `;
+          gQr.appendChild(qrInner);
+          overlayGroup.appendChild(gQr);
+        } else {
+          const gBox = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+          if (item.backgroundColor) {
+            const rect = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', item.x);
+            rect.setAttribute('y', item.y);
+            rect.setAttribute('width', item.width);
+            rect.setAttribute('height', item.height);
+            rect.setAttribute('rx', item.borderRadius || 0);
+            rect.setAttribute('fill', item.backgroundColor);
+            gBox.appendChild(rect);
+          }
+
+          if (item.text) {
+            const textEl = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'text');
+            textEl.setAttribute('fill', item.textColor || '#00204a');
+            textEl.setAttribute('font-family', "'Montserrat', 'Inter', sans-serif");
+            textEl.setAttribute('font-size', item.fontSize || 16);
+            textEl.setAttribute('font-weight', item.fontWeight || '800');
+            textEl.setAttribute('dominant-baseline', 'central');
+
+            let tx = item.x + (item.paddingLeft || 16);
+            if (item.textAlign === 'center') {
+              tx = item.x + item.width / 2;
+              textEl.setAttribute('text-anchor', 'middle');
+            } else if (item.textAlign === 'right') {
+              tx = item.x + item.width - (item.paddingRight || 16);
+              textEl.setAttribute('text-anchor', 'end');
+            } else {
+              textEl.setAttribute('text-anchor', 'start');
+            }
+
+            textEl.setAttribute('x', tx);
+            textEl.setAttribute('y', item.y + item.height / 2);
+            textEl.textContent = item.text;
+            gBox.appendChild(textEl);
+          }
+
+          overlayGroup.appendChild(gBox);
+        }
+      });
+
+      rootSvg.appendChild(overlayGroup);
+
+      const serializer = new XMLSerializer();
+      const finalSvgString = serializer.serializeToString(svgDoc);
+      const blob = new Blob([finalSvgString], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      const code = document.getElementById('athleteCode').value || 'atleta';
+      link.download = `carteira-atleta-fpeft-${code}.svg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showToast('SVG Puro Vetorizado baixado com sucesso!');
+    }
+
+    /* =========================================================
+       EXPORTAÇÃO 2: PNG ALTA DEFINIÇÃO (300 DPI)
+       ========================================================= */
+    function exportHdPng() {
+      showToast('Processando imagem HD para gráfica (300 DPI)...');
+
+      const currentBgSvg = studioState.customSvgContent || getFpeftTemplateSvg(studioState.showBgLabels);
+      const parser = new DOMParser();
+      const svgDoc = parser.parseFromString(currentBgSvg, 'image/svg+xml');
+      const rootSvg = svgDoc.documentElement;
+
+      const overlayGroup = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+      overlayGroup.setAttribute('id', 'FPEFT_Overlay');
+
+      const styleNode = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'style');
+      styleNode.textContent = `
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&display=swap');
+        text { font-family: 'Montserrat', sans-serif; }
+      `;
+      rootSvg.insertBefore(styleNode, rootSvg.firstChild);
+
+      studioState.elements.forEach(item => {
+        if (item.type === 'photo') {
+          const gPhoto = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+          const clipId = `png_clip_${Math.random().toString(36).substr(2, 9)}`;
+          const defs = rootSvg.querySelector('defs') || rootSvg.insertBefore(svgDoc.createElementNS('http://www.w3.org/2000/svg', 'defs'), rootSvg.firstChild);
+          const clipPath = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
+          clipPath.setAttribute('id', clipId);
+
+          const clipRect = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          clipRect.setAttribute('x', item.x);
+          clipRect.setAttribute('y', item.y);
+          clipRect.setAttribute('width', item.width);
+          clipRect.setAttribute('height', item.height);
+          clipRect.setAttribute('rx', item.borderRadius || 0);
+          clipPath.appendChild(clipRect);
+          defs.appendChild(clipPath);
+
+          if (item.photoUrl) {
+            const img = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'image');
+            img.setAttribute('href', item.photoUrl);
+            img.setAttribute('x', item.x);
+            img.setAttribute('y', item.y);
+            img.setAttribute('width', item.width);
+            img.setAttribute('height', item.height);
+            img.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+            img.setAttribute('clip-path', `url(#${clipId})`);
+            gPhoto.appendChild(img);
+          } else {
+            const rect = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', item.x);
+            rect.setAttribute('y', item.y);
+            rect.setAttribute('width', item.width);
+            rect.setAttribute('height', item.height);
+            rect.setAttribute('rx', item.borderRadius || 0);
+            rect.setAttribute('fill', '#0c2340');
+            gPhoto.appendChild(rect);
+          }
+
+          if (item.borderWidth > 0) {
+            const borderRect = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            borderRect.setAttribute('x', item.x);
+            borderRect.setAttribute('y', item.y);
+            borderRect.setAttribute('width', item.width);
+            borderRect.setAttribute('height', item.height);
+            borderRect.setAttribute('rx', item.borderRadius || 0);
+            borderRect.setAttribute('fill', 'none');
+            borderRect.setAttribute('stroke', item.borderColor || '#ffffff');
+            borderRect.setAttribute('stroke-width', item.borderWidth);
+            gPhoto.appendChild(borderRect);
+          }
+
+          overlayGroup.appendChild(gPhoto);
+        } else if (item.type === 'qrcode') {
+          const gQr = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+          const bg = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          bg.setAttribute('x', item.x);
+          bg.setAttribute('y', item.y);
+          bg.setAttribute('width', item.width);
+          bg.setAttribute('height', item.height);
+          bg.setAttribute('rx', item.borderRadius || 6);
+          bg.setAttribute('fill', '#ffffff');
+          gQr.appendChild(bg);
+
+          const qrInner = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+          qrInner.setAttribute('transform', `translate(${item.x + 8}, ${item.y + 8}) scale(${(item.width - 16) / 100})`);
+          qrInner.setAttribute('fill', '#000000');
+          qrInner.innerHTML = `
+            <rect x="5" y="5" width="28" height="28" rx="2" fill="none" stroke="#000" stroke-width="7"/>
+            <rect x="13" y="13" width="12" height="12"/>
+            <rect x="67" y="5" width="28" height="28" rx="2" fill="none" stroke="#000" stroke-width="7"/>
+            <rect x="75" y="13" width="12" height="12"/>
+            <rect x="5" y="67" width="28" height="28" rx="2" fill="none" stroke="#000" stroke-width="7"/>
+            <rect x="13" y="75" width="12" height="12"/>
+            <rect x="42" y="10" width="8" height="18"/>
+            <rect x="55" y="15" width="6" height="6"/>
+            <rect x="42" y="38" width="16" height="8"/>
+            <rect x="65" y="42" width="12" height="12"/>
+            <rect x="45" y="55" width="10" height="24"/>
+            <rect x="65" y="65" width="20" height="8"/>
+            <rect x="75" y="80" width="15" height="15"/>
+          `;
+          gQr.appendChild(qrInner);
+          overlayGroup.appendChild(gQr);
+        } else {
+          const gBox = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+          if (item.backgroundColor) {
+            const rect = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', item.x);
+            rect.setAttribute('y', item.y);
+            rect.setAttribute('width', item.width);
+            rect.setAttribute('height', item.height);
+            rect.setAttribute('rx', item.borderRadius || 0);
+            rect.setAttribute('fill', item.backgroundColor);
+            gBox.appendChild(rect);
+          }
+
+          if (item.text) {
+            const textEl = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'text');
+            textEl.setAttribute('fill', item.textColor || '#00204a');
+            textEl.setAttribute('font-family', "'Montserrat', 'Inter', sans-serif");
+            textEl.setAttribute('font-size', item.fontSize || 16);
+            textEl.setAttribute('font-weight', item.fontWeight || '800');
+            textEl.setAttribute('dominant-baseline', 'central');
+
+            let tx = item.x + (item.paddingLeft || 16);
+            if (item.textAlign === 'center') {
+              tx = item.x + item.width / 2;
+              textEl.setAttribute('text-anchor', 'middle');
+            } else if (item.textAlign === 'right') {
+              tx = item.x + item.width - (item.paddingRight || 16);
+              textEl.setAttribute('text-anchor', 'end');
+            } else {
+              textEl.setAttribute('text-anchor', 'start');
+            }
+
+            textEl.setAttribute('x', tx);
+            textEl.setAttribute('y', item.y + item.height / 2);
+            textEl.textContent = item.text;
+            gBox.appendChild(textEl);
+          }
+          overlayGroup.appendChild(gBox);
+        }
+      });
+
+      rootSvg.appendChild(overlayGroup);
+
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(svgDoc);
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const blobUrl = URL.createObjectURL(svgBlob);
+
+      const img = new Image();
+      img.onload = () => {
+        const hdCanvas = document.getElementById('hdRenderCanvas');
+        const scale = 3; // 3x = ~3150 x 1986 px (Offset 300 DPI)
+        hdCanvas.width = 1050 * scale;
+        hdCanvas.height = 662 * scale;
+        
+        const ctx = hdCanvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.scale(scale, scale);
+        ctx.drawImage(img, 0, 0, 1050, 662);
+
+        const pngUrl = hdCanvas.toDataURL('image/png');
+        const downloadLink = document.createElement('a');
+        downloadLink.href = pngUrl;
+        const code = document.getElementById('athleteCode').value || 'atleta';
+        downloadLink.download = `carteira-atleta-fpeft-HD-${code}.png`;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        URL.revokeObjectURL(blobUrl);
+        showToast('PNG HD 300 DPI exportado com sucesso!');
+      };
+      img.src = blobUrl;
+    }
+
+    /* =========================================================
+       INICIALIZAÇÃO DOS EVENTOS DO STUDIO CR80
+       ========================================================= */
+    function initStudioEvents() {
+      // Sincronização dos campos do formulário com o Studio
+      const bindSync = (id, targetKey, uppercase = false) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', (e) => {
+          let val = e.target.value;
+          if (uppercase) val = val.toUpperCase();
+          const target = studioState.elements.find(item => item.targetKey === targetKey);
+          if (target) {
+            target.text = val;
+            renderInteractiveElements();
+          }
+        });
+      };
+
+      bindSync('athleteName', 'nome', true);
+      bindSync('athleteModality', 'categoria', true);
+      bindSync('athleteClub', 'filiacao', true);
+      bindSync('athleteFederatedNum', 'federado', true);
+      bindSync('athleteCity', 'municipio', true);
+      bindSync('athleteValidity', 'validade', false);
+      bindSync('athletePhone', 'fone', false);
+      bindSync('athleteBirth', 'nasc', false);
+      bindSync('inputAssinatura', 'assinatura', true);
+      bindSync('inputQrText', 'qr', false);
+
+      // Máscara do CPF
+      const cpfInp = document.getElementById('athleteCpf');
+      if (cpfInp) {
+        cpfInp.addEventListener('input', (e) => {
+          let v = e.target.value.replace(/\D/g, '');
+          if (v.length > 11) v = v.substring(0, 11);
+          v = v.replace(/(\d{3})(\d)/, '$1.$2');
+          v = v.replace(/(\d{3})(\d)/, '$1.$2');
+          v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+          e.target.value = v;
+
+          const target = studioState.elements.find(item => item.targetKey === 'cpf');
+          if (target) {
+            target.text = v;
+            renderInteractiveElements();
+          }
+        });
+      }
+
+      // Upload de Foto 3x4
+      const fotoInp = document.getElementById('uploadFotoInput');
+      if (fotoInp) {
+        fotoInp.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
+              if (photoTarget) {
+                photoTarget.photoUrl = event.target.result;
+                renderInteractiveElements();
+                showToast('Foto 3x4 do atleta carregada no Studio!');
+              }
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      }
+
+      const btnResetFoto = document.getElementById('btnResetFoto');
+      if (btnResetFoto) {
+        btnResetFoto.addEventListener('click', () => {
+          const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
+          if (photoTarget) {
+            photoTarget.photoUrl = '';
+            renderInteractiveElements();
+            showToast('Foto restaurada para a silhueta padrão.');
+          }
+        });
+      }
+
+      // Upload de SVG / Imagem de Fundo
+      const svgInp = document.getElementById('uploadSvgInput');
+      if (svgInp) {
+        svgInp.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+
+          if (file.name.toLowerCase().endsWith('.svg') || file.type === 'image/svg+xml') {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              let svgContent = event.target.result;
+              const parser = new DOMParser();
+              const doc = parser.parseFromString(svgContent, 'image/svg+xml');
+              const rootSvg = doc.documentElement;
+
+              if (rootSvg.tagName.toLowerCase() === 'svg') {
+                if (!rootSvg.getAttribute('viewBox')) {
+                  const origW = parseFloat(rootSvg.getAttribute('width')) || 1050;
+                  const origH = parseFloat(rootSvg.getAttribute('height')) || 662;
+                  rootSvg.setAttribute('viewBox', `0 0 ${origW} ${origH}`);
+                }
+                rootSvg.setAttribute('width', '100%');
+                rootSvg.setAttribute('height', '100%');
+                rootSvg.setAttribute('preserveAspectRatio', 'none');
+                svgContent = new XMLSerializer().serializeToString(doc);
+              }
+
+              studioState.customSvgContent = svgContent;
+              studioState.customImageUrl = null;
+              triggerAutoFitFullArea();
+            };
+            reader.readAsText(file);
+          } else {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              studioState.customImageUrl = event.target.result;
+              studioState.customSvgContent = null;
+              triggerAutoFitFullArea();
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      }
+
+      const btnAutoFit = document.getElementById('btnAutoFitFullArea');
+      if (btnAutoFit) btnAutoFit.addEventListener('click', triggerAutoFitFullArea);
+
+      const btnRestoreTpl = document.getElementById('btnRestoreFpeftTemplate');
+      if (btnRestoreTpl) {
+        btnRestoreTpl.addEventListener('click', () => {
+          studioState.customSvgContent = null;
+          studioState.customImageUrl = null;
+          applyCurrentSvgBackground();
+          showToast('Template Oficial FPEFT restaurado!');
+        });
+      }
+
+      const btnToggleLabels = document.getElementById('btnToggleBGLabels');
+      if (btnToggleLabels) {
+        btnToggleLabels.addEventListener('click', () => {
+          studioState.showBgLabels = !studioState.showBgLabels;
+          applyCurrentSvgBackground();
+          showToast(studioState.showBgLabels ? 'Rótulos do fundo ativados' : 'Rótulos do fundo ocultados');
+        });
+      }
+
+      // Modos de Encaixe do Fundo
+      const btnFitCover = document.getElementById('btnBgFitCover');
+      const btnFitContain = document.getElementById('btnBgFitContain');
+      const btnFitExact = document.getElementById('btnBgFitExact');
+
+      if (btnFitCover) {
+        btnFitCover.addEventListener('click', () => {
+          studioState.bgTransform.mode = 'cover';
+          updateBgFitButtons();
+          applyCurrentSvgBackground();
+          showToast('Fundo ajustado: Preenchimento sem bordas');
+        });
+      }
+      if (btnFitContain) {
+        btnFitContain.addEventListener('click', () => {
+          studioState.bgTransform.mode = 'contain';
+          updateBgFitButtons();
+          applyCurrentSvgBackground();
+          showToast('Fundo ajustado: Imagem inteira contida');
+        });
+      }
+      if (btnFitExact) {
+        btnFitExact.addEventListener('click', triggerAutoFitFullArea);
+      }
+
+      // Zoom
+      const zIn = document.getElementById('zoomInBtn');
+      const zOut = document.getElementById('zoomOutBtn');
+      const zFit = document.getElementById('zoomFitBtn');
+
+      if (zIn) zIn.addEventListener('click', () => setZoom(studioState.zoom + 0.1));
+      if (zOut) zOut.addEventListener('click', () => setZoom(studioState.zoom - 0.1));
+      if (zFit) {
+        zFit.addEventListener('click', () => {
+          const viewport = document.getElementById('viewportArea');
+          if (!viewport) return;
+          const scaleX = (viewport.clientWidth - 80) / 1050;
+          const scaleY = (viewport.clientHeight - 80) / 662;
+          setZoom(Math.min(scaleX, scaleY, 0.9));
+        });
+      }
+
+      // Deselecionar ao clicar fora
+      const vArea = document.getElementById('viewportArea');
+      if (vArea) {
+        vArea.addEventListener('pointerdown', (e) => {
+          if (e.target === vArea || e.target.id === 'creditCardCanvas') {
+            studioState.selectedId = null;
+            renderInteractiveElements();
+            const panel = document.getElementById('floatingControlPanel');
+            if (panel) panel.style.display = 'none';
+          }
+        });
+      }
+
+      // Setas Direcionais D-PAD
+      const nUp = document.getElementById('btnNudgeUp');
+      const nDown = document.getElementById('btnNudgeDown');
+      const nLeft = document.getElementById('btnNudgeLeft');
+      const nRight = document.getElementById('btnNudgeRight');
+      const cycleStep = document.getElementById('btnCycleStep');
+      const resetPos = document.getElementById('btnFloatingResetPos');
+
+      if (nUp) nUp.addEventListener('click', () => nudgeSelected(0, -1));
+      if (nDown) nDown.addEventListener('click', () => nudgeSelected(0, 1));
+      if (nLeft) nLeft.addEventListener('click', () => nudgeSelected(-1, 0));
+      if (nRight) nRight.addEventListener('click', () => nudgeSelected(1, 0));
+
+      if (cycleStep) {
+        cycleStep.addEventListener('click', () => {
+          if (studioState.nudgeStep === 1) studioState.nudgeStep = 5;
+          else if (studioState.nudgeStep === 5) studioState.nudgeStep = 10;
+          else studioState.nudgeStep = 1;
+          const stepVal = document.getElementById('nudgeStepValue');
+          if (stepVal) stepVal.innerText = `${studioState.nudgeStep}px`;
+        });
+      }
+
+      if (resetPos) {
+        resetPos.addEventListener('click', () => {
+          const item = studioState.elements.find(i => i.id === studioState.selectedId);
+          if (!item) return;
+          item.x = Math.round((1050 - item.width) / 2);
+          updateItemStyle(item);
+          showToast('Elemento centralizado no cartão');
+        });
+      }
+
+      // Curvatura
+      const curveInp = document.getElementById('inputCurveRadius');
+      if (curveInp) {
+        curveInp.addEventListener('input', (e) => {
+          const item = studioState.elements.find(i => i.id === studioState.selectedId);
+          if (!item) return;
+          item.borderRadius = parseInt(e.target.value);
+          const rLbl = document.getElementById('radiusLabel');
+          if (rLbl) rLbl.innerText = `${item.borderRadius}px`;
+          const el = document.getElementById(item.id);
+          if (el) el.style.borderRadius = `${item.borderRadius}px`;
+        });
+      }
+
+      // Largura e Altura
+      const dirW = document.getElementById('inputDirectWidth');
+      const dirH = document.getElementById('inputDirectHeight');
+      if (dirW) {
+        dirW.addEventListener('change', (e) => {
+          const item = studioState.elements.find(i => i.id === studioState.selectedId);
+          if (!item) return;
+          item.width = Math.max(20, parseInt(e.target.value) || item.width);
+          renderInteractiveElements();
+        });
+      }
+      if (dirH) {
+        dirH.addEventListener('change', (e) => {
+          const item = studioState.elements.find(i => i.id === studioState.selectedId);
+          if (!item) return;
+          item.height = Math.max(15, parseInt(e.target.value) || item.height);
+          renderInteractiveElements();
+        });
+      }
+
+      // Tipografia
+      const fontInp = document.getElementById('inputFontSize');
+      const colorInp = document.getElementById('inputTextColor');
+      if (fontInp) {
+        fontInp.addEventListener('input', (e) => {
+          const item = studioState.elements.find(i => i.id === studioState.selectedId);
+          if (!item) return;
+          item.fontSize = parseInt(e.target.value) || 16;
+          renderInteractiveElements();
+        });
+      }
+      if (colorInp) {
+        colorInp.addEventListener('input', (e) => {
+          const item = studioState.elements.find(i => i.id === studioState.selectedId);
+          if (!item) return;
+          item.textColor = e.target.value;
+          const hexEl = document.getElementById('textColorHex');
+          if (hexEl) hexEl.innerText = item.textColor.toUpperCase();
+          renderInteractiveElements();
+        });
+      }
+
+      ['Left', 'Center', 'Right'].forEach(align => {
+        const btn = document.getElementById(`btnAlign${align}`);
+        if (btn) {
+          btn.addEventListener('click', () => {
+            const item = studioState.elements.find(i => i.id === studioState.selectedId);
+            if (!item) return;
+            item.textAlign = align.toLowerCase();
+            renderInteractiveElements();
+          });
+        }
+      });
+
+      // Exportações
+      const expSvg = document.getElementById('btnExportSVG');
+      const expPng = document.getElementById('btnExportPNG');
+      if (expSvg) expSvg.addEventListener('click', exportPureSvg);
+      if (expPng) expPng.addEventListener('click', exportHdPng);
+
+      // Teclas do Teclado para Setas
+      window.addEventListener('keydown', (e) => {
+        if (!studioState.selectedId) return;
+        if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
+
+        const step = e.shiftKey ? 10 : (e.altKey ? 5 : 1);
+        let handled = true;
+        switch(e.key) {
+          case 'ArrowUp': nudgeSelected(0, -step); break;
+          case 'ArrowDown': nudgeSelected(0, step); break;
+          case 'ArrowLeft': nudgeSelected(-step, 0); break;
+          case 'ArrowRight': nudgeSelected(step, 0); break;
+          default: handled = false;
+        }
+        if (handled) e.preventDefault();
+      });
+
+      // Fechar e Fixar Janela Flutuante
+      const btnCloseFloating = document.getElementById('btnCloseFloating');
+      if (btnCloseFloating) {
+        btnCloseFloating.addEventListener('click', () => {
+          studioState.selectedId = null;
+          renderInteractiveElements();
+          const p = document.getElementById('floatingControlPanel');
+          if (p) p.style.display = 'none';
+        });
+      }
+
+      const btnPinFloating = document.getElementById('btnPinFloating');
+      if (btnPinFloating) {
+        btnPinFloating.addEventListener('click', () => {
+          studioState.floatingPinned = !studioState.floatingPinned;
+          if (studioState.floatingPinned) {
+            btnPinFloating.classList.add('text-pe-gold');
+            showToast('Janela fixada na posição');
+          } else {
+            btnPinFloating.classList.remove('text-pe-gold');
+            updateFloatingPanelPosition();
+            showToast('Auto-posicionamento ativado');
+          }
+        });
+      }
+
+      const btnMinFloating = document.getElementById('btnMinimizeFloating');
+      if (btnMinFloating) {
+        btnMinFloating.addEventListener('click', () => {
+          studioState.floatingMinimized = !studioState.floatingMinimized;
+          const body = document.getElementById('floatingBody');
+          const panel = document.getElementById('floatingControlPanel');
+          if (!body || !panel) return;
+          if (studioState.floatingMinimized) {
+            body.style.display = 'none';
+            panel.style.minHeight = '52px';
+            panel.style.height = '52px';
+            btnMinFloating.innerHTML = '<i class="fa-solid fa-expand text-[10px]"></i>';
+          } else {
+            body.style.display = 'block';
+            panel.style.minHeight = '140px';
+            panel.style.height = '';
+            btnMinFloating.innerHTML = '<i class="fa-solid fa-minus text-[10px]"></i>';
+          }
+        });
+      }
+
+      // Arraste e Redimensionamento Manual da Janela Flutuante
+      const floatingHeader = document.getElementById('floatingHeader');
+      const floatingControlPanel = document.getElementById('floatingControlPanel');
+      let isWinDragging = false;
+      let isWinResizing = false;
+      let winResizeEdge = '';
+      let winStartX = 0, winStartY = 0;
+      let winStartRect = { x: 0, y: 0, w: 0, h: 0 };
+
+      const onWinPointerMove = (e) => {
+        if (!floatingControlPanel || !floatingControlPanel.offsetParent) return;
+        if (isWinDragging) {
+          const dx = e.clientX - winStartX;
+          const dy = e.clientY - winStartY;
+          const parentRect = floatingControlPanel.offsetParent.getBoundingClientRect();
+          let newX = Math.max(10, Math.min(parentRect.width - floatingControlPanel.offsetWidth - 10, winStartRect.x + dx));
+          let newY = Math.max(10, Math.min(parentRect.height - 60, winStartRect.y + dy));
+          floatingControlPanel.style.left = `${newX}px`;
+          floatingControlPanel.style.top = `${newY}px`;
+        } else if (isWinResizing) {
+          const dx = e.clientX - winStartX;
+          const dy = e.clientY - winStartY;
+          let newW = winStartRect.w;
+          let newH = winStartRect.h;
+          let newX = winStartRect.x;
+          let newY = winStartRect.y;
+
+          const minW = 270;
+          const maxW = 580;
+          const minH = studioState.floatingMinimized ? 52 : 140;
+          const maxH = window.innerHeight - 100;
+
+          if (winResizeEdge.includes('e')) {
+            newW = Math.max(minW, Math.min(maxW, winStartRect.w + dx));
+          }
+          if (winResizeEdge.includes('w')) {
+            const calcW = winStartRect.w - dx;
+            if (calcW >= minW && calcW <= maxW) {
+              newW = calcW;
+              newX = winStartRect.x + dx;
+            }
+          }
+          if (winResizeEdge.includes('s')) {
+            newH = Math.max(minH, Math.min(maxH, winStartRect.h + dy));
+          }
+          if (winResizeEdge.includes('n')) {
+            const calcH = winStartRect.h - dy;
+            if (calcH >= minH && calcH <= maxH) {
+              newH = calcH;
+              newY = winStartRect.y + dy;
+            }
+          }
+
+          floatingControlPanel.style.width = `${newW}px`;
+          floatingControlPanel.style.height = `${newH}px`;
+          floatingControlPanel.style.left = `${newX}px`;
+          floatingControlPanel.style.top = `${newY}px`;
+        }
+      };
+
+      const onWinPointerUp = () => {
+        isWinDragging = false;
+        isWinResizing = false;
+        window.removeEventListener('pointermove', onWinPointerMove);
+        window.removeEventListener('pointerup', onWinPointerUp);
+      };
+
+      if (floatingHeader && floatingControlPanel) {
+        floatingHeader.addEventListener('pointerdown', (e) => {
+          if (e.target.closest('button')) return;
+          isWinDragging = true;
+          studioState.floatingPinned = true;
+          const pinBtn = document.getElementById('btnPinFloating');
+          if (pinBtn) pinBtn.classList.add('text-pe-gold');
+          winStartX = e.clientX;
+          winStartY = e.clientY;
+          const rect = floatingControlPanel.getBoundingClientRect();
+          const parentRect = floatingControlPanel.offsetParent.getBoundingClientRect();
+          winStartRect = {
+            x: rect.left - parentRect.left,
+            y: rect.top - parentRect.top,
+            w: rect.width,
+            h: rect.height
+          };
+          window.addEventListener('pointermove', onWinPointerMove);
+          window.addEventListener('pointerup', onWinPointerUp);
+        });
+      }
+
+      document.querySelectorAll('.win-resizer').forEach(resizer => {
+        resizer.addEventListener('pointerdown', (e) => {
+          e.stopPropagation();
+          isWinResizing = true;
+          winResizeEdge = resizer.dataset.edge || '';
+          winStartX = e.clientX;
+          winStartY = e.clientY;
+          if (!floatingControlPanel || !floatingControlPanel.offsetParent) return;
+          const rect = floatingControlPanel.getBoundingClientRect();
+          const parentRect = floatingControlPanel.offsetParent.getBoundingClientRect();
+          winStartRect = {
+            x: rect.left - parentRect.left,
+            y: rect.top - parentRect.top,
+            w: rect.width,
+            h: rect.height
+          };
+          studioState.floatingPinned = true;
+          const pinBtn = document.getElementById('btnPinFloating');
+          if (pinBtn) pinBtn.classList.add('text-pe-gold');
+          window.addEventListener('pointermove', onWinPointerMove);
+          window.addEventListener('pointerup', onWinPointerUp);
+        });
+      });
+    }
+
+    /* =========================================================
+       BANCO DE DADOS & TABELA DE ATLETAS
+       ========================================================= */
+    function generateRandomAthleteCode() {
+      const code = String(Math.floor(100000 + Math.random() * 900000));
+      const codeInput = document.getElementById('athleteCode');
+      const fedInput = document.getElementById('athleteFederatedNum');
+      if (codeInput) codeInput.value = code;
+      if (fedInput) fedInput.value = `PE-2026/${code.slice(-3)}`;
+
+      const fedTarget = studioState.elements.find(item => item.targetKey === 'federado');
+      if (fedTarget) fedTarget.text = `PE-2026/${code.slice(-3)}`;
+      renderInteractiveElements();
+      showToast(`Código #${code} gerado com sucesso!`);
+    }
+
     async function handleSaveAthlete(e) {
-      e.preventDefault();
-      const code = document.getElementById('athleteCode').value.trim();
-      const name = document.getElementById('athleteName').value.trim();
-      const cpf = document.getElementById('athleteCpf').value.trim();
-      const birth = document.getElementById('athleteBirth').value.trim();
-      const city = document.getElementById('athleteCity').value.trim();
+      if (e) e.preventDefault();
+      const code = (document.getElementById('athleteCode').value || '').trim();
+      const name = (document.getElementById('athleteName').value || '').trim();
+      const cpf = (document.getElementById('athleteCpf').value || '').trim();
+      const birth = (document.getElementById('athleteBirth').value || '').trim();
+      const phone = (document.getElementById('athletePhone').value || '').trim();
+      const city = (document.getElementById('athleteCity').value || '').trim();
       const modality = document.getElementById('athleteModality').value;
       const status = document.getElementById('athleteStatus').value;
-      const photo = document.getElementById('athletePhotoBase64').value || document.getElementById('previewBadgePhoto').src;
+      const club = (document.getElementById('athleteClub').value || '').trim();
+      const fedNum = (document.getElementById('athleteFederatedNum').value || '').trim();
+      const validity = (document.getElementById('athleteValidity').value || '').trim();
+
+      const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
+      const photo = (photoTarget && photoTarget.photoUrl) ? photoTarget.photoUrl : '';
 
       const feedback = document.getElementById('athleteFeedback');
-      feedback.classList.remove('hidden');
-      feedback.className = "text-xs p-3 rounded-xl bg-blue-950/40 border border-blue-500/40 text-blue-300";
-      feedback.textContent = "Salvando atleta no banco de dados...";
+      if (feedback) {
+        feedback.classList.remove('hidden');
+        feedback.className = "text-xs p-3 rounded-xl bg-blue-950/40 border border-blue-500/40 text-blue-300";
+        feedback.textContent = "Salvando atleta no banco de dados...";
+      }
 
       const athleteObj = {
         codigo: code,
         nome: name,
         cpf: cpf,
         nascimento: birth,
+        telefone: phone,
         municipio: city,
         modalidade: modality,
         status: status,
+        clube: club,
+        federado: fedNum,
+        validade: validity,
         foto_url: photo
       };
 
@@ -1537,9 +3547,8 @@
           const { data, error } = await supabaseClient
             .from('atletas')
             .upsert([athleteObj], { onConflict: 'codigo' });
-
           if (!error) savedInSupabase = true;
-          else console.warn("Erro ao salvar no Supabase:", error);
+          else console.warn("Supabase aviso:", error);
         } catch (err) {
           console.warn("Falha de rede Supabase:", err);
         }
@@ -1554,9 +3563,12 @@
       }
       localStorage.setItem('pe_athletes_db', JSON.stringify(localAthletes));
 
-      feedback.className = "text-xs p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 font-bold";
-      feedback.innerHTML = `✓ Atleta #${code} cadastrado com sucesso! ${savedInSupabase ? '(Sincronizado com Supabase)' : '(Salvo localmente)'}.`;
+      if (feedback) {
+        feedback.className = "text-xs p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 font-bold";
+        feedback.innerHTML = `✓ Atleta #${code} cadastrado com sucesso! ${savedInSupabase ? '(Sincronizado com Supabase)' : '(Salvo localmente)'}.`;
+      }
 
+      showToast(`✓ Atleta #${code} (${name}) salvo com sucesso!`);
       renderAthletesTable();
       updateDashboardData();
     }
@@ -1579,9 +3591,13 @@
               nome: d.nome,
               cpf: d.cpf,
               nascimento: d.nascimento,
+              telefone: d.telefone,
               municipio: d.municipio,
               modalidade: d.modalidade,
               status: d.status,
+              clube: d.clube,
+              federado: d.federado,
+              validade: d.validade,
               foto: d.foto_url
             }));
             localStorage.setItem('pe_athletes_db', JSON.stringify(list));
@@ -1595,6 +3611,7 @@
 
     async function renderAthletesTable() {
       const tbody = document.getElementById('athletesTableBody');
+      if (!tbody) return;
       const athletes = await loadAthletes();
       tbody.innerHTML = "";
 
@@ -1619,7 +3636,7 @@
           </td>
           <td class="py-3 px-4 text-right">
             <div class="flex items-center justify-end gap-2">
-              <button onclick="fillFormWithAthlete('${a.codigo}')" class="text-xs text-blue-400 hover:text-blue-300 font-bold p-1 cursor-pointer">Editar</button>
+              <button onclick="fillFormWithAthlete('${a.codigo}')" class="text-xs text-sky-400 hover:text-white bg-slate-800/80 hover:bg-sky-600 px-2.5 py-1 rounded-lg border border-sky-500/30 font-bold transition cursor-pointer">Ver no Studio</button>
               <button onclick="deleteAthlete('${a.codigo}')" class="text-xs text-red-400 hover:text-red-300 font-bold p-1 cursor-pointer">Excluir</button>
             </div>
           </td>
@@ -1629,7 +3646,7 @@
     }
 
     async function filterAthletesTable() {
-      const q = document.getElementById('searchAthleteTable').value.toLowerCase();
+      const q = (document.getElementById('searchAthleteTable').value || '').toLowerCase();
       const athletes = await loadAthletes();
       const filtered = athletes.filter(a => 
         (a.nome && a.nome.toLowerCase().includes(q)) || 
@@ -1638,6 +3655,7 @@
       );
 
       const tbody = document.getElementById('athletesTableBody');
+      if (!tbody) return;
       tbody.innerHTML = "";
       filtered.forEach(a => {
         const tr = document.createElement('tr');
@@ -1660,7 +3678,7 @@
           </td>
           <td class="py-3 px-4 text-right">
             <div class="flex items-center justify-end gap-2">
-              <button onclick="fillFormWithAthlete('${a.codigo}')" class="text-xs text-blue-400 hover:text-blue-300 font-bold p-1 cursor-pointer">Editar</button>
+              <button onclick="fillFormWithAthlete('${a.codigo}')" class="text-xs text-sky-400 hover:text-white bg-slate-800/80 hover:bg-sky-600 px-2.5 py-1 rounded-lg border border-sky-500/30 font-bold transition cursor-pointer">Ver no Studio</button>
               <button onclick="deleteAthlete('${a.codigo}')" class="text-xs text-red-400 hover:text-red-300 font-bold p-1 cursor-pointer">Excluir</button>
             </div>
           </td>
@@ -1686,6 +3704,7 @@
 
       renderAthletesTable();
       updateDashboardData();
+      showToast(`Atleta #${codigo} excluído.`);
     }
 
     async function fillFormWithAthlete(codigo) {
@@ -1694,36 +3713,56 @@
       if (!a) return;
 
       switchTab('atletas');
+
+      // Preenche os inputs do formulário
       document.getElementById('athleteCode').value = a.codigo;
       document.getElementById('athleteName').value = a.nome;
       document.getElementById('athleteCpf').value = a.cpf || '';
       document.getElementById('athleteBirth').value = a.nascimento || '';
-      document.getElementById('athleteCity').value = a.municipio || '';
+      document.getElementById('athletePhone').value = a.telefone || '(81) 98765-4321';
+      document.getElementById('athleteCity').value = a.municipio || 'RECIFE - PE';
       document.getElementById('athleteModality').value = a.modalidade || 'SOLO (INDIVIDUAL)';
       document.getElementById('athleteStatus').value = a.status || 'REGULAR';
-      if (a.foto) {
-        document.getElementById('previewBadgePhoto').src = a.foto;
-        document.getElementById('athletePhotoBase64').value = a.foto;
+      document.getElementById('athleteClub').value = a.clube || 'SPORT CLUB DO RECIFE';
+      document.getElementById('athleteFederatedNum').value = a.federado || `PE-2026/${String(a.codigo).slice(-3)}`;
+      document.getElementById('athleteValidity').value = a.validade || '12/2026';
+
+      // Sincroniza com os elementos do Studio CR80
+      const setElText = (key, text) => {
+        const item = studioState.elements.find(i => i.targetKey === key);
+        if (item) item.text = text;
+      };
+
+      setElText('nome', a.nome.toUpperCase());
+      setElText('cpf', a.cpf || '123.456.789-00');
+      setElText('nasc', a.nascimento || '18/05/1996');
+      setElText('fone', a.telefone || '(81) 98765-4321');
+      setElText('categoria', (a.modalidade || 'SOLO').toUpperCase());
+      setElText('filiacao', (a.clube || 'FEDERAÇÃO PERNAMBUCANA').toUpperCase());
+      setElText('federado', a.federado || `PE-2026/${String(a.codigo).slice(-3)}`);
+      setElText('municipio', (a.municipio || 'RECIFE - PE').toUpperCase());
+      setElText('validade', a.validade || '12/2026');
+
+      const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
+      if (photoTarget && a.foto) {
+        photoTarget.photoUrl = a.foto;
       }
-      updateLivePreview();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      renderInteractiveElements();
+      selectElement('field-nome');
+      showToast(`Atleta #${a.codigo} (${a.nome}) carregado no Studio!`);
+
+      const vArea = document.getElementById('viewportArea');
+      if (vArea) vArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     function clearAthleteForm() {
       document.getElementById('athleteForm').reset();
-      document.getElementById('athletePhotoBase64').value = '';
       generateRandomAthleteCode();
-    }
-
-    function downloadLivePreviewBadge() {
-      const card = document.getElementById('adminLiveCard');
-      const name = document.getElementById('previewBadgeName').textContent || "Atleta";
-      html2canvas(card, { scale: 3, backgroundColor: null }).then(canvas => {
-        const a = document.createElement('a');
-        a.download = `Carteira_Oficial_${name.replace(/\s+/g, '_')}.png`;
-        a.href = canvas.toDataURL('image/png');
-        a.click();
-      });
+      const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
+      if (photoTarget) photoTarget.photoUrl = '';
+      renderInteractiveElements();
+      showToast('Formulário limpo. Pronto para novo atleta.');
     }
 
     /* =========================================================
@@ -2574,6 +4613,12 @@
         syncStudioWithCurrentLayout();
         updateDashboardData();
         renderInstitutionalAdminsTable();
+
+        // Inicialização do Studio CR80 Interativo Oficial
+        initStudioEvents();
+        applyCurrentSvgBackground();
+        renderInteractiveElements();
+        selectElement('field-nome');
 
         // Previne que o navegador insira emails de login automaticamente no campo de busca de atletas
         setTimeout(() => {
