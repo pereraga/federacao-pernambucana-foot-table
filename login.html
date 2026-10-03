@@ -163,7 +163,7 @@
                   id="adminUser" 
                   name="username" 
                   required 
-                  placeholder="gabrielacessor@foot-table.pe.gov.br" 
+                  placeholder="usuario@foot-table.pe.gov.br" 
                   class="w-full bg-pe-inputBg border border-pe-cardBorder focus:border-pe-gold rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-600 outline-none transition duration-150"
                 />
               </div>
@@ -408,14 +408,17 @@
     document.getElementById('btnForgot').addEventListener('click', (e) => {
       e.preventDefault();
       loginFeedback.className = "text-xs rounded-xl p-3 border bg-amber-950/40 border-pe-gold/50 text-amber-200";
-      loginFeedback.innerHTML = `<span>Para redefinir sua senha ou solicitar credenciamento oficial, contate a Presidência FPFTM via ADM MASTER (gabrielacessor@foot-table.pe.gov.br).</span>`;
+      loginFeedback.innerHTML = `<span>Para redefinir sua senha ou solicitar credenciamento oficial, contate a Presidência ou a Administração Geral da Federação.</span>`;
       loginFeedback.classList.remove('hidden');
     });
 
-    // Carrega último usuário ou ADM MASTER padrão
+    // Carrega último usuário se salvo com "Lembrar este dispositivo"
     window.addEventListener('load', () => {
-      const savedUser = localStorage.getItem('pe_admin_user') || 'gabrielacessor@foot-table.pe.gov.br';
-      if (document.getElementById('adminUser')) {
+      if (localStorage.getItem('pe_admin_user') === 'gabrielacessor@foot-table.pe.gov.br') {
+        localStorage.removeItem('pe_admin_user');
+      }
+      const savedUser = localStorage.getItem('pe_admin_user');
+      if (savedUser && document.getElementById('adminUser')) {
         document.getElementById('adminUser').value = savedUser;
       }
     });
