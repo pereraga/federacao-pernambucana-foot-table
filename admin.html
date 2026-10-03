@@ -30,8 +30,6 @@
               gold: '#f5b800',
               goldHover: '#e0a700',
               red: '#d32f2f',
-              green: '#00e676',
-              greenDark: '#008744',
               dark: '#080b12',
               card: '#0f1422',
               cardBorder: '#1c253b',
@@ -52,22 +50,22 @@
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #060911; }
     ::-webkit-scrollbar-thumb { background: #1a233a; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #00e676; }
+    ::-webkit-scrollbar-thumb:hover { background: #f5b800; }
     .pe-stripe-bar {
       background: linear-gradient(90deg, #0044cc 0%, #0044cc 40%, #f5b800 40%, #f5b800 70%, #d32f2f 70%, #d32f2f 100%);
     }
     .active-nav-pill {
-      background-color: #00e676 !important;
-      color: #021509 !important;
+      background-color: #f5b800 !important;
+      color: #080b12 !important;
       font-weight: 700 !important;
-      box-shadow: 0 4px 20px -2px rgba(0, 230, 118, 0.35);
+      box-shadow: 0 4px 20px -2px rgba(245, 184, 0, 0.45);
     }
     .active-nav-pill svg {
-      color: #021509 !important;
+      color: #080b12 !important;
     }
   </style>
 </head>
-<body class="bg-[#080b12] text-slate-100 min-h-screen font-sans antialiased selection:bg-[#00e676] selection:text-black">
+<body class="bg-[#080b12] text-slate-100 min-h-screen font-sans antialiased selection:bg-pe-gold selection:text-pe-dark">
 
   <div class="min-h-screen flex flex-col md:flex-row w-full">
 
@@ -97,10 +95,10 @@
       <!-- Perfil do Administrador Logado -->
       <div class="px-5 py-3.5 bg-[#080d16] border-b border-[#151c2e]/80 flex items-center justify-between">
         <div class="flex items-center gap-2.5 min-w-0">
-          <div class="w-2.5 h-2.5 rounded-full bg-[#00e676] animate-pulse shrink-0"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-pe-gold animate-pulse shrink-0"></div>
           <div class="min-w-0">
             <span id="sidebarAdminUser" class="block text-xs font-bold text-white truncate">diretoria@foot-table.pe.gov.br</span>
-            <span class="text-[9px] uppercase tracking-wider text-[#00e676] font-bold">Gestor Autorizado</span>
+            <span class="text-[9px] uppercase tracking-wider text-pe-gold font-bold">Gestor Autorizado</span>
           </div>
         </div>
         <span class="text-[10px] bg-pe-gold/20 text-pe-gold px-2 py-0.5 rounded font-mono font-bold">ADM</span>
@@ -113,7 +111,7 @@
           Abas do Sistema
         </div>
 
-        <!-- 1. Aba Carteiras & Atletas (Ativo por padrão) -->
+        <!-- 1. Aba Carteiras & Atletas (Ativo por padrão com Amarelo do Sistema) -->
         <button onclick="switchTab('atletas')" id="navBtn-atletas" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all cursor-pointer group active-nav-pill">
           <div class="flex items-center gap-3.5">
             <!-- Ícone Carteira / Badge -->
@@ -122,7 +120,7 @@
             </svg>
             <span class="text-sm font-semibold tracking-wide">Carteiras & Atletas</span>
           </div>
-          <span class="nav-indicator w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
+          <span class="nav-indicator w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0"></span>
         </button>
 
         <!-- 2. Aba Estúdio da Carteira -->
@@ -134,7 +132,7 @@
             </svg>
             <span class="text-sm font-semibold tracking-wide">Estúdio da Carteira</span>
           </div>
-          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
+          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0"></span>
         </button>
 
         <!-- 3. Aba Notícias & Torneios -->
@@ -146,7 +144,7 @@
             </svg>
             <span class="text-sm font-semibold tracking-wide">Notícias & Torneios</span>
           </div>
-          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
+          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0"></span>
         </button>
 
         <!-- 4. Aba Banco de Dados & Ajustes (Keep-Alive) -->
@@ -159,7 +157,7 @@
             </svg>
             <span class="text-sm font-semibold tracking-wide">Banco & Ajustes</span>
           </div>
-          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
+          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0"></span>
         </button>
 
         <!-- 5. Guia Completo do Painel -->
@@ -171,7 +169,7 @@
             </svg>
             <span class="text-sm font-semibold tracking-wide">Guia do Painel</span>
           </div>
-          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
+          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0"></span>
         </button>
 
       </nav>
@@ -199,7 +197,7 @@
           <span id="headerPageTitle" class="font-oswald text-xl uppercase font-bold text-white tracking-wide">
             Carteiras & Atletas
           </span>
-          <span class="hidden sm:inline-block bg-[#00e676]/20 text-[#00e676] text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+          <span class="hidden sm:inline-block bg-pe-gold/20 text-pe-gold text-[10px] font-bold px-2 py-0.5 rounded uppercase">
             Sistema Oficial PE
           </span>
         </div>
@@ -237,27 +235,27 @@
                 </h3>
                 <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-slate-300">
                   <li class="flex items-start gap-1.5">
-                    <span class="text-[#00e676] font-bold">●</span>
+                    <span class="text-pe-gold font-bold">●</span>
                     <span><strong>Gerador de Código:</strong> Botão para gerar automaticamente um código oficial de 6 dígitos numéricos.</span>
                   </li>
                   <li class="flex items-start gap-1.5">
-                    <span class="text-[#00e676] font-bold">●</span>
+                    <span class="text-pe-gold font-bold">●</span>
                     <span><strong>Upload da Foto Oficial:</strong> Você seleciona a foto do atleta direto do seu computador, que é inserida instantaneamente na carteirinha.</span>
                   </li>
                   <li class="flex items-start gap-1.5">
-                    <span class="text-[#00e676] font-bold">●</span>
+                    <span class="text-pe-gold font-bold">●</span>
                     <span><strong>Preview ao Vivo:</strong> Enquanto você preenche os dados do atleta (Nome, CPF, Nascimento, Município, Modalidade), a carteirinha oficial é renderizada ao lado em tempo real.</span>
                   </li>
                   <li class="flex items-start gap-1.5">
-                    <span class="text-[#00e676] font-bold">●</span>
+                    <span class="text-pe-gold font-bold">●</span>
                     <span><strong>Envio para o Banco de Dados:</strong> Ao clicar em "Salvar Atleta no Banco de Dados", as informações e a foto são gravadas no Supabase. Assim, quando o atleta digitar os 6 dígitos dele no site público, ele recebe a carteira oficial dele imediatamente!</span>
                   </li>
                   <li class="flex items-start gap-1.5">
-                    <span class="text-[#00e676] font-bold">●</span>
+                    <span class="text-pe-gold font-bold">●</span>
                     <span><strong>Botão Baixar PNG HD:</strong> Exporta a carteirinha em altíssima resolução.</span>
                   </li>
                   <li class="flex items-start gap-1.5">
-                    <span class="text-[#00e676] font-bold">●</span>
+                    <span class="text-pe-gold font-bold">●</span>
                     <span><strong>Tabela de Atletas:</strong> Lista com todos os atletas cadastrados, filtro de busca, edição e exclusão.</span>
                   </li>
                 </ul>
@@ -268,7 +266,7 @@
           <!-- Cabeçalho de Ação -->
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <span class="text-[#00e676] text-xs font-bold uppercase tracking-wider block">Registros Oficiais</span>
+              <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Registros Oficiais</span>
               <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Emissão de Carteiras & Atletas</h2>
             </div>
             <button onclick="generateRandomAthleteCode()" class="bg-[#0b101d] hover:bg-[#121a30] border border-[#1c253b] text-pe-gold font-mono font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2">
@@ -291,11 +289,11 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label class="block text-slate-300 font-bold mb-1">Código Oficial (6 Dígitos) *</label>
-                    <input type="text" id="athleteCode" required maxlength="6" placeholder="ex: 742918" inputmode="numeric" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-3 py-2.5 text-pe-gold font-mono font-bold text-sm outline-none" />
+                    <input type="text" id="athleteCode" required maxlength="6" placeholder="ex: 742918" inputmode="numeric" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-pe-gold font-mono font-bold text-sm outline-none" />
                   </div>
                   <div>
                     <label class="block text-slate-300 font-bold mb-1">Status Federativo</label>
-                    <select id="athleteStatus" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-3 py-2.5 text-slate-200 outline-none">
+                    <select id="athleteStatus" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 outline-none">
                       <option value="REGULAR">REGULAR (Ativo)</option>
                       <option value="HOMOLOGADO">HOMOLOGADO</option>
                       <option value="PENDENTE">PENDENTE</option>
@@ -305,28 +303,28 @@
 
                 <div>
                   <label class="block text-slate-300 font-bold mb-1">Nome Completo do Atleta *</label>
-                  <input type="text" id="athleteName" required placeholder="ex: João Silva de Carvalho" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-3 py-2.5 text-white font-bold outline-none" />
+                  <input type="text" id="athleteName" required placeholder="ex: João Silva de Carvalho" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-white font-bold outline-none" />
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label class="block text-slate-300 font-bold mb-1">CPF</label>
-                    <input type="text" id="athleteCpf" placeholder="000.000.000-00" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-3 py-2.5 text-slate-200 font-mono outline-none" />
+                    <input type="text" id="athleteCpf" placeholder="000.000.000-00" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 font-mono outline-none" />
                   </div>
                   <div>
                     <label class="block text-slate-300 font-bold mb-1">Data de Nascimento</label>
-                    <input type="text" id="athleteBirth" placeholder="DD/MM/AAAA" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-3 py-2.5 text-slate-200 font-mono outline-none" />
+                    <input type="text" id="athleteBirth" placeholder="DD/MM/AAAA" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 font-mono outline-none" />
                   </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label class="block text-slate-300 font-bold mb-1">Município - Estado</label>
-                    <input type="text" id="athleteCity" placeholder="ex: Recife - PE" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-3 py-2.5 text-slate-200 outline-none" />
+                    <input type="text" id="athleteCity" placeholder="ex: Recife - PE" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 outline-none" />
                   </div>
                   <div>
                     <label class="block text-slate-300 font-bold mb-1">Modalidade Homologada</label>
-                    <select id="athleteModality" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-3 py-2.5 text-slate-200 outline-none">
+                    <select id="athleteModality" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 outline-none">
                       <option value="SOLO (INDIVIDUAL)">SOLO (INDIVIDUAL)</option>
                       <option value="DUPLA (EQUIPE)">DUPLA (EQUIPE)</option>
                       <option value="SOLO & DUPLA">SOLO & DUPLA</option>
@@ -339,7 +337,7 @@
                 <div>
                   <label class="block text-slate-300 font-bold mb-1">Foto Oficial do Atleta (Carteira)</label>
                   <div class="flex items-center gap-3">
-                    <input type="file" id="athletePhotoFile" accept="image/*" onchange="handlePhotoUpload(event)" class="text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#00e676] file:text-[#021509] hover:file:bg-[#00c853] file:cursor-pointer" />
+                    <input type="file" id="athletePhotoFile" accept="image/*" onchange="handlePhotoUpload(event)" class="text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-pe-gold file:text-pe-dark hover:file:bg-pe-goldHover file:cursor-pointer" />
                   </div>
                   <input type="hidden" id="athletePhotoBase64" />
                 </div>
@@ -347,7 +345,7 @@
                 <div id="athleteFeedback" class="hidden text-xs p-3 rounded-xl"></div>
 
                 <div class="pt-2 flex items-center gap-3">
-                  <button type="submit" class="flex-1 bg-[#00e676] hover:bg-[#00c853] text-[#021509] font-extrabold text-xs uppercase tracking-wider py-3.5 rounded-xl transition shadow flex items-center justify-center gap-2 cursor-pointer">
+                  <button type="submit" class="flex-1 bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase tracking-wider py-3.5 rounded-xl transition shadow flex items-center justify-center gap-2 cursor-pointer">
                     <span>💾</span> Salvar Atleta no Banco de Dados
                   </button>
                   <button type="button" onclick="clearAthleteForm()" class="bg-[#0b101d] border border-[#1c253b] hover:border-slate-500 text-slate-400 font-bold text-xs uppercase px-4 py-3.5 rounded-xl transition cursor-pointer">
@@ -361,7 +359,7 @@
             <div class="lg:col-span-6 space-y-4">
               <div class="flex items-center justify-between">
                 <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                  <span class="w-2 h-2 rounded-full bg-[#00e676] animate-pulse"></span>
+                  <span class="w-2 h-2 rounded-full bg-pe-gold animate-pulse"></span>
                   Visualização da Carteira Gerada
                 </span>
                 <button onclick="downloadLivePreviewBadge()" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer">
@@ -446,7 +444,7 @@
               <h3 class="font-oswald text-xl uppercase font-bold text-white flex items-center gap-2">
                 <span>📋</span> Tabela de Atletas Cadastrados no Banco
               </h3>
-              <input type="text" id="searchAthleteTable" oninput="filterAthletesTable()" placeholder="Filtrar por nome ou código..." class="bg-[#05080e] border border-[#1c253b] rounded-xl px-4 py-2 text-xs text-white outline-none focus:border-[#00e676]" />
+              <input type="text" id="searchAthleteTable" oninput="filterAthletesTable()" placeholder="Filtrar por nome ou código..." class="bg-[#05080e] border border-[#1c253b] rounded-xl px-4 py-2 text-xs text-white outline-none focus:border-pe-gold" />
             </div>
 
             <div class="overflow-x-auto">
@@ -488,19 +486,19 @@
                 </h3>
                 <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-slate-300">
                   <li class="flex items-start gap-1.5">
-                    <span class="text-[#00e676] font-bold">●</span>
+                    <span class="text-pe-gold font-bold">●</span>
                     <span><strong>Controle de Dimensões:</strong> Largura/Comprimento (slider para aumentar ou diminuir a largura total da carteira), Altura Mínima, Espaçamento Interno (Padding) e Arredondamento das Bordas (Border Radius).</span>
                   </li>
                   <li class="flex items-start gap-1.5">
-                    <span class="text-[#00e676] font-bold">●</span>
+                    <span class="text-pe-gold font-bold">●</span>
                     <span><strong>Dimensões da Foto do Atleta:</strong> Sliders para regular Largura, Altura e Arredondamento da moldura da foto.</span>
                   </li>
                   <li class="flex items-start gap-1.5">
-                    <span class="text-[#00e676] font-bold">●</span>
+                    <span class="text-pe-gold font-bold">●</span>
                     <span><strong>Textos Adicionais na Carteira:</strong> Botão <em>+ Adicionar Texto</em> permite adicionar novos blocos de texto na carteira (ex: "VALIDADE 2026/2027", "CHANCELA CBFT", "CATEGORIA MASTER"), com controle de tamanho da fonte, cor do texto e alinhamento.</span>
                   </li>
                   <li class="flex items-start gap-1.5">
-                    <span class="text-[#00e676] font-bold">●</span>
+                    <span class="text-pe-gold font-bold">●</span>
                     <span><strong>Salvar Layout Oficial:</strong> Ao clicar em salvar, o site público passa a emitir as carteiras exatamente com as dimensões e textos que você definiu!</span>
                   </li>
                 </ul>
@@ -511,11 +509,11 @@
           <!-- Cabeçalho de Ação -->
           <div class="flex items-center justify-between">
             <div>
-              <span class="text-[#00e676] text-xs font-bold uppercase tracking-wider block">Customizador Visual</span>
+              <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Customizador Visual</span>
               <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Estúdio da Carteira & Dimensões</h2>
             </div>
             <div class="flex items-center gap-2">
-              <button onclick="saveBadgeStudioLayout()" class="bg-[#00e676] hover:bg-[#00c853] text-[#021509] font-extrabold text-xs uppercase px-5 py-2.5 rounded-xl transition shadow flex items-center gap-1.5 cursor-pointer">
+              <button onclick="saveBadgeStudioLayout()" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase px-5 py-2.5 rounded-xl transition shadow flex items-center gap-1.5 cursor-pointer">
                 <span>💾</span> Salvar Layout Oficial
               </button>
               <button onclick="resetBadgeStudioLayout()" class="bg-[#0b101d] border border-[#1c253b] text-slate-400 hover:text-white text-xs uppercase px-4 py-2.5 rounded-xl transition cursor-pointer">
@@ -540,7 +538,7 @@
                       <span>Largura / Comprimento:</span>
                       <span id="valCardWidth" class="text-pe-gold font-mono">540px</span>
                     </div>
-                    <input type="range" id="inputCardWidth" min="400" max="680" value="540" oninput="updateStudioLive()" class="w-full accent-[#00e676]" />
+                    <input type="range" id="inputCardWidth" min="400" max="680" value="540" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
                   </div>
 
                   <div>
@@ -548,7 +546,7 @@
                       <span>Altura Mínima:</span>
                       <span id="valCardHeight" class="text-pe-gold font-mono">300px</span>
                     </div>
-                    <input type="range" id="inputCardHeight" min="250" max="480" value="300" oninput="updateStudioLive()" class="w-full accent-[#00e676]" />
+                    <input type="range" id="inputCardHeight" min="250" max="480" value="300" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
                   </div>
 
                   <div>
@@ -556,7 +554,7 @@
                       <span>Espaçamento Interno (Padding):</span>
                       <span id="valCardPadding" class="text-pe-gold font-mono">24px</span>
                     </div>
-                    <input type="range" id="inputCardPadding" min="12" max="36" value="24" oninput="updateStudioLive()" class="w-full accent-[#00e676]" />
+                    <input type="range" id="inputCardPadding" min="12" max="36" value="24" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
                   </div>
 
                   <div>
@@ -564,7 +562,7 @@
                       <span>Arredondamento das Bordas (Border Radius):</span>
                       <span id="valCardRadius" class="text-pe-gold font-mono">16px</span>
                     </div>
-                    <input type="range" id="inputCardRadius" min="4" max="32" value="16" oninput="updateStudioLive()" class="w-full accent-[#00e676]" />
+                    <input type="range" id="inputCardRadius" min="4" max="32" value="16" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
                   </div>
                 </div>
               </div>
@@ -580,7 +578,7 @@
                       <span>Largura da Foto:</span>
                       <span id="valPhotoWidth" class="text-pe-gold font-mono">100px</span>
                     </div>
-                    <input type="range" id="inputPhotoWidth" min="70" max="150" value="100" oninput="updateStudioLive()" class="w-full accent-[#00e676]" />
+                    <input type="range" id="inputPhotoWidth" min="70" max="150" value="100" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
                   </div>
 
                   <div>
@@ -588,7 +586,7 @@
                       <span>Altura da Foto:</span>
                       <span id="valPhotoHeight" class="text-pe-gold font-mono">125px</span>
                     </div>
-                    <input type="range" id="inputPhotoHeight" min="90" max="180" value="125" oninput="updateStudioLive()" class="w-full accent-[#00e676]" />
+                    <input type="range" id="inputPhotoHeight" min="90" max="180" value="125" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
                   </div>
 
                   <div>
@@ -596,7 +594,7 @@
                       <span>Arredondamento da Moldura da Foto:</span>
                       <span id="valPhotoRadius" class="text-pe-gold font-mono">8px</span>
                     </div>
-                    <input type="range" id="inputPhotoRadius" min="0" max="30" value="8" oninput="updateStudioLive()" class="w-full accent-[#00e676]" />
+                    <input type="range" id="inputPhotoRadius" min="0" max="30" value="8" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
                   </div>
                 </div>
               </div>
@@ -607,7 +605,7 @@
                   <h4 class="font-oswald text-base uppercase font-bold text-pe-gold flex items-center gap-2">
                     <span>🔤</span> Textos Adicionais na Carteira
                   </h4>
-                  <button onclick="addCustomTextItem()" class="bg-[#00e676] text-[#021509] font-bold text-[10px] uppercase px-2.5 py-1 rounded-lg transition cursor-pointer">
+                  <button onclick="addCustomTextItem()" class="bg-pe-gold text-pe-dark font-bold text-[10px] uppercase px-2.5 py-1 rounded-lg transition cursor-pointer">
                     + Adicionar Texto
                   </button>
                 </div>
@@ -621,7 +619,7 @@
             <div class="lg:col-span-7 sticky top-20 space-y-4">
               <div class="flex items-center justify-between text-xs text-slate-400">
                 <span>Visualização Dinâmica do Estúdio</span>
-                <span class="text-[#00e676] font-mono">● Atualizando ao vivo</span>
+                <span class="text-pe-gold font-mono">● Atualizando ao vivo</span>
               </div>
 
               <div class="p-6 bg-[#05080e] border border-[#1c253b] rounded-2xl flex items-center justify-center overflow-x-auto">
@@ -652,15 +650,15 @@
                 </h3>
                 <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-slate-300">
                   <li class="flex items-start gap-1.5">
-                    <span class="text-[#00e676] font-bold">●</span>
+                    <span class="text-pe-gold font-bold">●</span>
                     <span><strong>Publicação de Novas Matérias:</strong> Com Título, Categoria (Mundial Roma, Campeonato, Regulamento, Informativo, Comunicado), Data e Conteúdo.</span>
                   </li>
                   <li class="flex items-start gap-1.5">
-                    <span class="text-[#00e676] font-bold">●</span>
+                    <span class="text-pe-gold font-bold">●</span>
                     <span><strong>Sincronização no Supabase:</strong> As matérias salvas vão para o banco de dados Supabase e aparecem instantaneamente na página inicial pública.</span>
                   </li>
                   <li class="flex items-start gap-1.5">
-                    <span class="text-[#00e676] font-bold">●</span>
+                    <span class="text-pe-gold font-bold">●</span>
                     <span><strong>Gerenciamento e Exclusão:</strong> Controle total e remoção de comunicados antigos com um clique.</span>
                   </li>
                 </ul>
@@ -670,7 +668,7 @@
 
           <div class="flex items-center justify-between">
             <div>
-              <span class="text-[#00e676] text-xs font-bold uppercase tracking-wider block">Boletins Oficiais</span>
+              <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Boletins Oficiais</span>
               <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Gerenciar Notícias & Torneios</h2>
             </div>
           </div>
@@ -686,13 +684,13 @@
               <form id="newsForm" onsubmit="handleSaveNews(event)" class="space-y-4 text-xs">
                 <div>
                   <label class="block text-slate-300 font-bold mb-1">Título da Matéria *</label>
-                  <input type="text" id="newsTitle" required placeholder="ex: II Campeonato Mundial de Foot Table" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-3 py-2.5 text-white font-bold outline-none" />
+                  <input type="text" id="newsTitle" required placeholder="ex: II Campeonato Mundial de Foot Table" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-white font-bold outline-none" />
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                   <div>
                     <label class="block text-slate-300 font-bold mb-1">Categoria</label>
-                    <select id="newsCategory" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-3 py-2.5 text-slate-200 outline-none">
+                    <select id="newsCategory" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 outline-none">
                       <option value="MUNDIAL ROMA">MUNDIAL ROMA</option>
                       <option value="CAMPEONATO">CAMPEONATO</option>
                       <option value="REGULAMENTO">REGULAMENTO</option>
@@ -702,18 +700,18 @@
                   </div>
                   <div>
                     <label class="block text-slate-300 font-bold mb-1">Data</label>
-                    <input type="text" id="newsDate" placeholder="ex: 02/10/2026" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-3 py-2.5 text-slate-200 font-mono outline-none" />
+                    <input type="text" id="newsDate" placeholder="ex: 02/10/2026" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 font-mono outline-none" />
                   </div>
                 </div>
 
                 <div>
                   <label class="block text-slate-300 font-bold mb-1">Conteúdo / Resumo *</label>
-                  <textarea id="newsContent" rows="4" required placeholder="Digite os detalhes da notícia oficial..." class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-3 py-2.5 text-slate-300 outline-none"></textarea>
+                  <textarea id="newsContent" rows="4" required placeholder="Digite os detalhes da notícia oficial..." class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-300 outline-none"></textarea>
                 </div>
 
                 <div id="newsFeedback" class="hidden text-xs p-3 rounded-xl"></div>
 
-                <button type="submit" class="w-full bg-[#00e676] hover:bg-[#00c853] text-[#021509] font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer">
+                <button type="submit" class="w-full bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase tracking-wider py-3 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer">
                   <span>🚀</span> Publicar no Site & Supabase
                 </button>
               </form>
@@ -734,7 +732,7 @@
         <!-- ===================================================== -->
         <div id="tabContent-config" class="space-y-8 hidden">
           <div>
-            <span class="text-[#00e676] text-xs font-bold uppercase tracking-wider block">Integração na Nuvem</span>
+            <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Integração na Nuvem</span>
             <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Configuração do Supabase & Keep-Alive</h2>
           </div>
 
@@ -744,18 +742,18 @@
             <div class="space-y-4 text-xs">
               <div>
                 <label class="block text-slate-300 font-bold mb-1">URL do Supabase (Project URL)</label>
-                <input type="text" id="adminCfgUrl" value="https://qvnsahvdjhimlmtqrnif.supabase.co" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-4 py-3 text-slate-200 font-mono outline-none" />
+                <input type="text" id="adminCfgUrl" value="https://qvnsahvdjhimlmtqrnif.supabase.co" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-4 py-3 text-slate-200 font-mono outline-none" />
               </div>
 
               <div>
                 <label class="block text-slate-300 font-bold mb-1">Chave Anon (anon public key)</label>
-                <input type="password" id="adminCfgKey" placeholder="Cole sua chave eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full bg-[#05080e] border border-[#1c253b] focus:border-[#00e676] rounded-xl px-4 py-3 text-slate-200 font-mono outline-none" />
+                <input type="password" id="adminCfgKey" placeholder="Cole sua chave eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-4 py-3 text-slate-200 font-mono outline-none" />
               </div>
 
               <div id="adminConfigFeedback" class="hidden p-3 rounded-xl text-xs font-bold"></div>
 
               <div class="flex flex-wrap items-center gap-3 pt-2">
-                <button onclick="handleSaveAdminConfig()" class="bg-[#00e676] hover:bg-[#00c853] text-[#021509] font-extrabold text-xs uppercase px-6 py-3 rounded-xl transition cursor-pointer">
+                <button onclick="handleSaveAdminConfig()" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase px-6 py-3 rounded-xl transition cursor-pointer">
                   Salvar Credenciais
                 </button>
                 <button onclick="testSupabaseConnection()" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-5 py-3 rounded-xl transition flex items-center gap-2 cursor-pointer">
@@ -781,7 +779,7 @@
         <div id="tabContent-guia" class="space-y-6 hidden">
           <div class="flex items-center justify-between">
             <div>
-              <span class="text-[#00e676] text-xs font-bold uppercase tracking-wider block">Documentação Oficial</span>
+              <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Documentação Oficial</span>
               <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">O que você encontra no Painel Administrativo</h2>
             </div>
           </div>
@@ -797,27 +795,27 @@
               </div>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-300">
                 <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
-                  <strong class="text-white block mb-1 text-sm text-[#00e676]">🎲 Gerador de Código:</strong>
+                  <strong class="text-white block mb-1 text-sm text-pe-gold">🎲 Gerador de Código:</strong>
                   Botão para gerar automaticamente um código oficial de 6 dígitos numéricos.
                 </div>
                 <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
-                  <strong class="text-white block mb-1 text-sm text-[#00e676]">📸 Upload da Foto Oficial:</strong>
+                  <strong class="text-white block mb-1 text-sm text-pe-gold">📸 Upload da Foto Oficial:</strong>
                   Você seleciona a foto do atleta direto do seu computador, que é inserida instantaneamente na carteirinha.
                 </div>
                 <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
-                  <strong class="text-white block mb-1 text-sm text-[#00e676]">👁️ Preview ao Vivo:</strong>
+                  <strong class="text-white block mb-1 text-sm text-pe-gold">👁️ Preview ao Vivo:</strong>
                   Enquanto você preenche os dados do atleta (Nome, CPF, Nascimento, Município, Modalidade), a carteirinha oficial é renderizada ao lado em tempo real.
                 </div>
                 <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
-                  <strong class="text-white block mb-1 text-sm text-[#00e676]">☁️ Envio para o Banco de Dados:</strong>
+                  <strong class="text-white block mb-1 text-sm text-pe-gold">☁️ Envio para o Banco de Dados:</strong>
                   Ao clicar em "Salvar Atleta no Banco de Dados", as informações e a foto são gravadas no Supabase. Assim, quando o atleta digitar os 6 dígitos dele no site público, ele recebe a carteira oficial dele imediatamente!
                 </div>
                 <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
-                  <strong class="text-white block mb-1 text-sm text-[#00e676]">💾 Botão Baixar PNG HD:</strong>
+                  <strong class="text-white block mb-1 text-sm text-pe-gold">💾 Botão Baixar PNG HD:</strong>
                   Exporta a carteirinha em altíssima resolução para impressão ou envio.
                 </div>
                 <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
-                  <strong class="text-white block mb-1 text-sm text-[#00e676]">📋 Tabela de Atletas:</strong>
+                  <strong class="text-white block mb-1 text-sm text-pe-gold">📋 Tabela de Atletas:</strong>
                   Lista com todos os atletas cadastrados, filtro de busca, edição e exclusão rápida.
                 </div>
               </div>
@@ -863,15 +861,15 @@
               </div>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-300">
                 <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
-                  <strong class="text-white block mb-1 text-sm text-pe-blue">🚀 Publicação de Matérias:</strong>
+                  <strong class="text-white block mb-1 text-sm text-pe-gold">🚀 Publicação de Matérias:</strong>
                   Publicação de novas matérias com Título, Categoria (Mundial Roma, Campeonato, Regulamento, Informativo, Comunicado), Data e Conteúdo.
                 </div>
                 <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
-                  <strong class="text-white block mb-1 text-sm text-pe-blue">⚡ Sincronização Automática:</strong>
+                  <strong class="text-white block mb-1 text-sm text-pe-gold">⚡ Sincronização Automática:</strong>
                   As matérias salvas vão para o Supabase e aparecem instantaneamente na página inicial.
                 </div>
                 <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
-                  <strong class="text-white block mb-1 text-sm text-pe-blue">🗑️ Gerenciamento Rápido:</strong>
+                  <strong class="text-white block mb-1 text-sm text-pe-gold">🗑️ Gerenciamento Rápido:</strong>
                   Gerenciamento e exclusão de comunicados antigos com apenas um clique.
                 </div>
               </div>
@@ -971,7 +969,7 @@
       if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY) {
         try {
           supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-          dot.className = "w-2.5 h-2.5 rounded-full bg-[#00e676]";
+          dot.className = "w-2.5 h-2.5 rounded-full bg-pe-gold";
           text.textContent = "Supabase Conectado";
           return true;
         } catch (e) {
@@ -1069,7 +1067,7 @@
       document.getElementById('previewBadgeCity').textContent = city;
       document.getElementById('previewBadgeModality').textContent = modality;
       document.getElementById('previewBadgeStatus').innerHTML = `
-        <span class="w-2 h-2 rounded-full ${status === 'REGULAR' ? 'bg-[#00e676]' : 'bg-amber-400'} animate-pulse"></span> ${status}
+        <span class="w-2 h-2 rounded-full ${status === 'REGULAR' ? 'bg-emerald-400' : 'bg-amber-400'} animate-pulse"></span> ${status}
       `;
     }
 
@@ -1169,13 +1167,13 @@
               <img src="${a.foto || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'}" class="w-full h-full object-cover" />
             </div>
           </td>
-          <td class="py-3 px-4 font-mono font-bold text-[#00e676]">#${a.codigo}</td>
+          <td class="py-3 px-4 font-mono font-bold text-pe-gold">#${a.codigo}</td>
           <td class="py-3 px-4 font-bold text-white uppercase">${a.nome}</td>
           <td class="py-3 px-4 font-mono text-slate-300">${a.cpf || '-'}</td>
           <td class="py-3 px-4 text-slate-300">${a.municipio || '-'}</td>
           <td class="py-3 px-4 text-pe-gold">${a.modalidade || 'SOLO'}</td>
           <td class="py-3 px-4">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${a.status === 'REGULAR' ? 'bg-emerald-950/60 text-[#00e676] border border-emerald-500/30' : 'bg-amber-950/60 text-amber-400 border border-amber-500/30'}">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${a.status === 'REGULAR' ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-500/30' : 'bg-amber-950/60 text-amber-400 border border-amber-500/30'}">
               ${a.status || 'REGULAR'}
             </span>
           </td>
@@ -1210,13 +1208,13 @@
               <img src="${a.foto || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'}" class="w-full h-full object-cover" />
             </div>
           </td>
-          <td class="py-3 px-4 font-mono font-bold text-[#00e676]">#${a.codigo}</td>
+          <td class="py-3 px-4 font-mono font-bold text-pe-gold">#${a.codigo}</td>
           <td class="py-3 px-4 font-bold text-white uppercase">${a.nome}</td>
           <td class="py-3 px-4 font-mono text-slate-300">${a.cpf || '-'}</td>
           <td class="py-3 px-4 text-slate-300">${a.municipio || '-'}</td>
           <td class="py-3 px-4 text-pe-gold">${a.modalidade || 'SOLO'}</td>
           <td class="py-3 px-4">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${a.status === 'REGULAR' ? 'bg-emerald-950/60 text-[#00e676] border border-emerald-500/30' : 'bg-amber-950/60 text-amber-400 border border-amber-500/30'}">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${a.status === 'REGULAR' ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-500/30' : 'bg-amber-950/60 text-amber-400 border border-amber-500/30'}">
               ${a.status || 'REGULAR'}
             </span>
           </td>
@@ -1425,7 +1423,7 @@
         div.className = "bg-[#05080e] border border-[#1c253b] rounded-xl p-3 space-y-2";
         div.innerHTML = `
           <div class="flex items-center gap-2">
-            <input type="text" value="${t.text}" oninput="updateCustomTextItem(${t.id}, 'text', this.value)" class="flex-1 bg-transparent border-b border-[#1c253b] text-white text-xs font-bold outline-none py-1 focus:border-[#00e676]" />
+            <input type="text" value="${t.text}" oninput="updateCustomTextItem(${t.id}, 'text', this.value)" class="flex-1 bg-transparent border-b border-[#1c253b] text-white text-xs font-bold outline-none py-1 focus:border-pe-gold" />
             <button onclick="removeCustomTextItem(${t.id})" class="text-red-400 hover:text-red-300 font-bold px-2 py-0.5 cursor-pointer">✕</button>
           </div>
           <div class="grid grid-cols-3 gap-2 text-[10px]">
