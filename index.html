@@ -465,18 +465,18 @@
       if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY) {
         try {
           supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-          dot.className = "w-2 h-2 rounded-full bg-emerald-400";
-          text.textContent = "Supabase: Conectado";
+          if (dot) dot.className = "w-2 h-2 rounded-full bg-emerald-400";
+          if (text) text.textContent = "Supabase: Conectado";
           return true;
         } catch (err) {
           console.warn("Erro ao instanciar Supabase:", err);
-          dot.className = "w-2 h-2 rounded-full bg-amber-400";
-          text.textContent = "Supabase: Modo Local";
+          if (dot) dot.className = "w-2 h-2 rounded-full bg-amber-400";
+          if (text) text.textContent = "Supabase: Modo Local";
           return false;
         }
       } else {
-        dot.className = "w-2 h-2 rounded-full bg-amber-400";
-        text.textContent = "Supabase: Modo Local";
+        if (dot) dot.className = "w-2 h-2 rounded-full bg-amber-400";
+        if (text) text.textContent = "Supabase: Modo Local";
         return false;
       }
     }

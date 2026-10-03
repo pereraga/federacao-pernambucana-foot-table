@@ -1387,15 +1387,15 @@
       if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY) {
         try {
           supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-          dot.className = "w-2.5 h-2.5 rounded-full bg-pe-gold";
-          text.textContent = "Supabase Conectado";
+          if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-pe-gold";
+          if (text) text.textContent = "Supabase Conectado";
           return true;
         } catch (e) {
           console.warn("Erro ao instanciar Supabase:", e);
         }
       }
-      dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
-      text.textContent = "Modo Local (Offline)";
+      if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
+      if (text) text.textContent = "Modo Local (Offline)";
       return false;
     }
 
@@ -1438,16 +1438,20 @@
       }
 
       // Atualiza os dados da aba selecionada instantaneamente
-      if (tabName === 'inicio') {
-        updateDashboardData();
-      } else if (tabName === 'atletas') {
-        renderAthletesTable();
-      } else if (tabName === 'estudio') {
-        syncStudioWithCurrentLayout();
-      } else if (tabName === 'noticias') {
-        renderAdminNews();
-      } else if (tabName === 'emails') {
-        renderInstitutionalAdminsTable();
+      try {
+        if (tabName === 'inicio') {
+          updateDashboardData();
+        } else if (tabName === 'atletas') {
+          renderAthletesTable();
+        } else if (tabName === 'estudio') {
+          syncStudioWithCurrentLayout();
+        } else if (tabName === 'noticias') {
+          renderAdminNews();
+        } else if (tabName === 'emails') {
+          renderInstitutionalAdminsTable();
+        }
+      } catch (err) {
+        console.warn("Aviso ao atualizar dados da aba:", err);
       }
     }
 
@@ -1984,6 +1988,8 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
     }
+
+    /* =========================================================
        ESTÚDIO DA CARTEIRA: DIMENSÕES & TEXTOS CUSTOMIZADOS (ABA 2)
        ========================================================= */
     function syncStudioWithCurrentLayout() {
@@ -2553,29 +2559,33 @@
        INICIALIZAÇÃO GERAL
        ========================================================= */
     function initApp() {
-      checkAuth();
+      try {
+        checkAuth();
 
-      const urlInput = document.getElementById('adminCfgUrl');
-      if (urlInput) urlInput.value = localStorage.getItem('pe_supabase_url') || DEFAULT_SUPABASE_URL;
-      const keyInput = document.getElementById('adminCfgKey');
-      if (keyInput) keyInput.value = localStorage.getItem('pe_supabase_anon_key') || '';
+        const urlInput = document.getElementById('adminCfgUrl');
+        if (urlInput) urlInput.value = localStorage.getItem('pe_supabase_url') || DEFAULT_SUPABASE_URL;
+        const keyInput = document.getElementById('adminCfgKey');
+        if (keyInput) keyInput.value = localStorage.getItem('pe_supabase_anon_key') || '';
 
-      initSupabase();
-      generateRandomAthleteCode();
-      renderAthletesTable();
-      renderAdminNews();
-      syncStudioWithCurrentLayout();
-      updateDashboardData();
-      renderInstitutionalAdminsTable();
+        initSupabase();
+        generateRandomAthleteCode();
+        renderAthletesTable();
+        renderAdminNews();
+        syncStudioWithCurrentLayout();
+        updateDashboardData();
+        renderInstitutionalAdminsTable();
 
-      // Previne que o navegador insira emails de login automaticamente no campo de busca de atletas
-      setTimeout(() => {
-        const searchInp = document.getElementById('quickSearchAthleteInput');
-        if (searchInp && searchInp.value && searchInp.value.includes('@')) {
-          searchInp.value = '';
-          clearQuickAthleteSearch();
-        }
-      }, 50);
+        // Previne que o navegador insira emails de login automaticamente no campo de busca de atletas
+        setTimeout(() => {
+          const searchInp = document.getElementById('quickSearchAthleteInput');
+          if (searchInp && searchInp.value && searchInp.value.includes('@')) {
+            searchInp.value = '';
+            clearQuickAthleteSearch();
+          }
+        }, 50);
+      } catch (e) {
+        console.warn("Aviso na inicialização do painel:", e);
+      }
     }
 
     if (document.readyState === 'loading') {
