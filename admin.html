@@ -106,11 +106,11 @@
         <div class="flex items-center gap-2.5 min-w-0">
           <div class="w-2.5 h-2.5 rounded-full bg-pe-gold animate-pulse shrink-0"></div>
           <div class="min-w-0">
-            <span id="sidebarAdminUser" class="block text-xs font-bold text-white truncate">diretoria@foot-table.pe.gov.br</span>
-            <span class="text-[9px] uppercase tracking-wider text-pe-gold font-bold">Gestor Autorizado</span>
+            <span id="sidebarAdminUser" class="block text-xs font-bold text-white truncate">gabrielacessor@foot-table.pe.gov.br</span>
+            <span id="sidebarAdminRole" class="text-[9px] uppercase tracking-wider text-pe-gold font-bold">👑 ADM MASTER • Presidência</span>
           </div>
         </div>
-        <span class="text-[10px] bg-pe-gold/20 text-pe-gold px-2 py-0.5 rounded font-mono font-bold">ADM</span>
+        <span class="text-[10px] bg-pe-gold/20 text-pe-gold px-2 py-0.5 rounded font-mono font-bold">MASTER</span>
       </div>
 
       <!-- Menu de Navegação Vertical -->
@@ -168,7 +168,19 @@
           <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0"></span>
         </button>
 
-        <!-- 5. Aba Banco de Dados & Ajustes (Keep-Alive) -->
+        <!-- 5. Aba E-mails Institucionais & Gestão -->
+        <button onclick="switchTab('emails')" id="navBtn-emails" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
+          <div class="flex items-center gap-3.5">
+            <!-- Ícone Envelope / E-mail Institucional -->
+            <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+            </svg>
+            <span class="text-sm font-semibold tracking-wide">E-mail Institucional</span>
+          </div>
+          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0"></span>
+        </button>
+
+        <!-- 6. Aba Banco de Dados & Ajustes (Keep-Alive) -->
         <button onclick="switchTab('config')" id="navBtn-config" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
           <div class="flex items-center gap-3.5">
             <!-- Ícone Engrenagem / Banco -->
@@ -882,7 +894,169 @@
         </div>
 
         <!-- ===================================================== -->
-        <!-- 4. ⚙️ ABA BANCO DE DADOS & AJUSTES                     -->
+        <!-- 5. 📧 ABA E-MAILS INSTITUCIONAIS & GESTÃO              -->
+        <!-- ===================================================== -->
+        <div id="tabContent-emails" class="space-y-8 hidden">
+          
+          <!-- Banner Informativo -->
+          <div class="bg-gradient-to-r from-[#06173a] via-[#091e4a] to-[#040813] border border-[#1c253b] rounded-2xl p-5 sm:p-6 relative overflow-hidden shadow-xl">
+            <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="flex items-start gap-4">
+                <span class="text-3xl">📧</span>
+                <div class="space-y-1">
+                  <h3 class="font-oswald text-lg sm:text-xl uppercase font-bold text-white tracking-wide">
+                    Criação de E-mails Institucionais & Gestão
+                  </h3>
+                  <p class="text-xs text-slate-300">
+                    Gere e gerencie contas de e-mail oficiais com domínio institucional <code class="text-pe-gold bg-black/40 px-1.5 py-0.5 rounded font-mono font-bold">@foot-table.pe.gov.br</code> para login da diretoria.
+                  </p>
+                </div>
+              </div>
+              <div class="inline-flex items-center gap-2 bg-[#05080e] border border-pe-gold/40 px-3.5 py-2 rounded-xl text-xs shrink-0">
+                <span class="text-pe-gold font-bold">👑 ADM MASTER:</span>
+                <span class="font-mono text-white font-bold">gabrielacessor@foot-table.pe.gov.br</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cabeçalho de Ação -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Diretoria & Credenciamento</span>
+              <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Gerador de E-mail Institucional</h2>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span class="text-xs font-mono text-emerald-400 font-bold">CHAVE DE HOMOLOGAÇÃO: FPFTM-2026</span>
+            </div>
+          </div>
+
+          <!-- Grid: Formulário de Criação + Lista de E-mails -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- Formulário de Criação (Exato da Imagem) -->
+            <div class="lg:col-span-5 bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 shadow-xl relative">
+              <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0 rounded-t-2xl"></div>
+
+              <h3 class="font-oswald text-lg uppercase font-bold text-white mb-4 flex items-center gap-2">
+                <span>✍️</span> Criar E-mail Institucional
+              </h3>
+
+              <form id="adminCreateEmailForm" onsubmit="handleAdminCreateEmail(event)" class="space-y-4 text-xs">
+                
+                <!-- Nome do Diretor / Gestor -->
+                <div>
+                  <label class="block text-slate-300 font-bold mb-1.5 uppercase tracking-wider text-[11px]">
+                    Nome do Diretor / Gestor *
+                  </label>
+                  <input type="text" id="panelRegName" required placeholder="ex: Gabriel Alves" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-4 py-2.5 text-white font-bold outline-none" />
+                </div>
+
+                <!-- Cargo / Atribuição -->
+                <div>
+                  <label class="block text-slate-300 font-bold mb-1.5 uppercase tracking-wider text-[11px]">
+                    Cargo / Atribuição
+                  </label>
+                  <select id="panelRegRole" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-4 py-2.5 text-slate-200 outline-none">
+                    <option value="Presidência">Presidência</option>
+                    <option value="Diretoria Técnica">Diretoria Técnica</option>
+                    <option value="Comissão de Arbitragem">Comissão de Arbitragem</option>
+                    <option value="Secretaria Geral">Secretaria Geral</option>
+                    <option value="Delegado Federativo">Delegado Federativo</option>
+                    <option value="Coordenação de Eventos">Coordenação de Eventos</option>
+                  </select>
+                </div>
+
+                <!-- E-mail Institucional Oficial -->
+                <div>
+                  <label class="block text-slate-300 font-bold mb-1.5 uppercase tracking-wider text-[11px]">
+                    E-mail Institucional Oficial *
+                  </label>
+                  <div class="relative flex items-center">
+                    <input type="text" id="panelRegEmail" required placeholder="gabriel.alves" oninput="formatPanelEmailInput(this)" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl pl-4 pr-36 py-2.5 text-white font-mono text-xs outline-none" />
+                    <span class="absolute right-3 text-pe-gold font-mono text-xs font-bold pointer-events-none select-none">
+                      @foot-table.pe.gov.br
+                    </span>
+                  </div>
+                  <span class="text-[10px] text-slate-500 mt-1 block">
+                    O sufixo institucional oficial da Federação será atribuído automaticamente.
+                  </span>
+                </div>
+
+                <!-- Senhas -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-slate-300 font-bold mb-1.5 uppercase tracking-wider text-[11px]">
+                      Senha *
+                    </label>
+                    <input type="password" id="panelRegPassword" required minlength="4" placeholder="••••••••" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3.5 py-2.5 text-white outline-none font-mono" />
+                  </div>
+                  <div>
+                    <label class="block text-slate-300 font-bold mb-1.5 uppercase tracking-wider text-[11px]">
+                      Confirmar Senha *
+                    </label>
+                    <input type="password" id="panelRegConfirmPassword" required minlength="4" placeholder="••••••••" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3.5 py-2.5 text-white outline-none font-mono" />
+                  </div>
+                </div>
+
+                <!-- Chave de Homologação da Federação -->
+                <div>
+                  <label class="block text-slate-300 font-bold mb-1.5 uppercase tracking-wider text-[11px]">
+                    Chave de Homologação da Federação
+                  </label>
+                  <input type="text" id="panelRegFederationKey" value="FPFTM-2026" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-4 py-2.5 text-xs text-pe-gold font-mono outline-none" />
+                </div>
+
+                <div id="panelRegFeedback" class="hidden text-xs rounded-xl p-3 border"></div>
+
+                <button type="submit" class="w-full bg-pe-blue hover:bg-blue-600 text-white font-oswald text-base uppercase font-bold tracking-wider py-3.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
+                  <span>✍️</span> GERAR E-MAIL INSTITUCIONAL & ATIVAR
+                </button>
+              </form>
+            </div>
+
+            <!-- Tabela de E-mails Institucionais Cadastrados -->
+            <div class="lg:col-span-7 space-y-4">
+              <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 shadow-xl space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <h3 class="font-oswald text-lg uppercase font-bold text-white flex items-center gap-2">
+                    <span>👥</span> E-mails Institucionais Autorizados (<span id="totalInstitutionalCount" class="text-pe-gold">0</span>)
+                  </h3>
+                  <span class="text-[10px] text-pe-gold font-mono font-bold bg-pe-gold/10 border border-pe-gold/30 px-2 py-0.5 rounded">
+                    DOMÍNIO: @foot-table.pe.gov.br
+                  </span>
+                </div>
+
+                <div class="overflow-x-auto">
+                  <table class="w-full text-left text-xs">
+                    <thead class="bg-[#05080e] text-slate-400 uppercase text-[10px] font-mono border-b border-[#1c253b]">
+                      <tr>
+                        <th class="py-3 px-3">Gestor</th>
+                        <th class="py-3 px-3">E-mail Institucional</th>
+                        <th class="py-3 px-3">Cargo</th>
+                        <th class="py-3 px-3 text-right">Ação</th>
+                      </tr>
+                    </thead>
+                    <tbody id="institutionalTableBody" class="divide-y divide-[#1c253b]/60">
+                      <!-- Preenchido via JavaScript -->
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="bg-[#05080e] border border-[#1c253b] rounded-xl p-3 text-[11px] text-slate-400 flex items-center gap-2">
+                  <span class="text-pe-gold text-base">🛡️</span>
+                  <span>Os e-mails institucionais criados aqui podem ser utilizados imediatamente na página de login com sua respectiva senha.</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- ===================================================== -->
+        <!-- 6. ⚙️ ABA BANCO DE DADOS & AJUSTES                     -->
         <!-- ===================================================== -->
         <div id="tabContent-config" class="space-y-8 hidden">
           <div>
@@ -1138,13 +1312,14 @@
     /* =========================================================
        SISTEMA DE NAVEGAÇÃO LATERAL (ABAS OFICIAIS)
        ========================================================= */
-    const ALL_TABS = ['inicio', 'atletas', 'estudio', 'noticias', 'config', 'guia'];
+    const ALL_TABS = ['inicio', 'atletas', 'estudio', 'noticias', 'emails', 'config', 'guia'];
     const TAB_TITLES = {
       inicio: '🏠 Início & Carteiras Homologadas',
       atletas: '1. 🪪 Aba Carteiras & Atletas',
       estudio: '2. 🎨 Aba Estúdio da Carteira (Dimensões & Textos)',
       noticias: '3. 📰 Aba Notícias & Torneios',
-      config: '4. ⚙️ Banco de Dados & Ajustes',
+      emails: '5. 📧 Aba E-mails Institucionais & Gestão',
+      config: '6. ⚙️ Banco de Dados & Ajustes',
       guia: '📋 Guia do Painel Administrativo'
     };
 
@@ -2037,6 +2212,202 @@
     }
 
     /* =========================================================
+       GESTÃO DE E-MAILS INSTITUCIONAIS (@foot-table.pe.gov.br)
+       ========================================================= */
+    const DEFAULT_INSTITUTIONAL_ADMINS = [
+      {
+        nome: "Gabriel Alves",
+        cargo: "Presidência (ADM MASTER)",
+        email: "gabrielacessor@foot-table.pe.gov.br",
+        senha: "admin",
+        isMaster: true,
+        created_at: "2026-01-01T00:00:00Z"
+      },
+      {
+        nome: "Diretoria Geral",
+        cargo: "Diretoria Executiva",
+        email: "diretoria@foot-table.pe.gov.br",
+        senha: "admin",
+        isMaster: false,
+        created_at: "2026-01-15T00:00:00Z"
+      }
+    ];
+
+    function formatPanelEmailInput(input) {
+      input.value = input.value.replace(/@foot-table\.pe\.gov\.br/gi, '').replace(/\s+/g, '').toLowerCase();
+    }
+
+    async function loadInstitutionalAdmins() {
+      let list = JSON.parse(localStorage.getItem('pe_institutional_admins'));
+      if (!list || !Array.isArray(list) || list.length === 0) {
+        list = DEFAULT_INSTITUTIONAL_ADMINS;
+        localStorage.setItem('pe_institutional_admins', JSON.stringify(list));
+      }
+
+      // Garante que o ADM MASTER gabrielacessor@foot-table.pe.gov.br esteja sempre presente e protegido
+      const hasMaster = list.some(a => a.email && a.email.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br');
+      if (!hasMaster) {
+        list.unshift(DEFAULT_INSTITUTIONAL_ADMINS[0]);
+        localStorage.setItem('pe_institutional_admins', JSON.stringify(list));
+      }
+
+      if (supabaseClient) {
+        try {
+          const { data, error } = await supabaseClient.from('admin_users').select('*').order('created_at', { ascending: false });
+          if (!error && data && data.length > 0) {
+            data.forEach(dbItem => {
+              if (!list.some(l => l.email.toLowerCase() === dbItem.email.toLowerCase())) {
+                list.push({
+                  nome: dbItem.nome,
+                  cargo: dbItem.cargo,
+                  email: dbItem.email,
+                  senha: dbItem.senha || '••••••',
+                  isMaster: dbItem.email.toLowerCase().includes('gabrielacessor'),
+                  created_at: dbItem.created_at
+                });
+              }
+            });
+            localStorage.setItem('pe_institutional_admins', JSON.stringify(list));
+          }
+        } catch (e) {
+          console.warn("Supabase admin_users sync:", e);
+        }
+      }
+
+      return list;
+    }
+
+    async function renderInstitutionalAdminsTable() {
+      const tbody = document.getElementById('institutionalTableBody');
+      const counter = document.getElementById('totalInstitutionalCount');
+      if (!tbody) return;
+
+      const admins = await loadInstitutionalAdmins();
+      if (counter) counter.textContent = admins.length;
+      tbody.innerHTML = '';
+
+      admins.forEach(admin => {
+        const isMaster = admin.isMaster || admin.email.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br';
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-[#070b14] transition";
+        tr.innerHTML = `
+          <td class="py-3 px-3">
+            <div class="font-bold text-white uppercase text-xs flex items-center gap-1.5">
+              ${isMaster ? '<span>👑</span>' : '<span>👤</span>'}
+              <span>${escapeText(admin.nome || 'Gestor Autorizado')}</span>
+            </div>
+            <span class="text-[10px] text-slate-400">Criado em: ${admin.created_at ? new Date(admin.created_at).toLocaleDateString('pt-BR') : '01/01/2026'}</span>
+          </td>
+          <td class="py-3 px-3 font-mono font-bold text-pe-gold text-xs">
+            ${escapeText(admin.email)}
+          </td>
+          <td class="py-3 px-3">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isMaster ? 'bg-amber-950/80 text-amber-400 border border-amber-500/40' : 'bg-blue-950/80 text-blue-400 border border-blue-500/30'}">
+              ${escapeText(admin.cargo || 'Diretoria')}
+            </span>
+          </td>
+          <td class="py-3 px-3 text-right">
+            ${isMaster ? `
+              <span class="text-[10px] font-mono font-bold text-pe-gold bg-pe-gold/10 border border-pe-gold/30 px-2 py-1 rounded">
+                ADM MASTER
+              </span>
+            ` : `
+              <button onclick="handleDeleteInstitutionalAdmin('${admin.email}')" class="text-xs text-red-400 hover:text-red-300 bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 px-2.5 py-1 rounded-lg transition cursor-pointer">
+                Excluir
+              </button>
+            `}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function handleAdminCreateEmail(e) {
+      e.preventDefault();
+      const name = document.getElementById('panelRegName').value.trim();
+      const role = document.getElementById('panelRegRole').value;
+      let emailPrefix = document.getElementById('panelRegEmail').value.trim().toLowerCase();
+      const password = document.getElementById('panelRegPassword').value;
+      const confirmPassword = document.getElementById('panelRegConfirmPassword').value;
+      const feedback = document.getElementById('panelRegFeedback');
+
+      feedback.classList.remove('hidden');
+
+      if (password !== confirmPassword) {
+        feedback.className = "text-xs rounded-xl p-3 border bg-red-950/40 border-red-500/40 text-red-300";
+        feedback.textContent = "❌ As senhas digitadas não coincidem. Verifique e tente novamente.";
+        return;
+      }
+
+      if (!emailPrefix) {
+        feedback.className = "text-xs rounded-xl p-3 border bg-red-950/40 border-red-500/40 text-red-300";
+        feedback.textContent = "❌ Informe o prefixo desejado para o e-mail institucional.";
+        return;
+      }
+
+      const fullEmail = emailPrefix.includes('@') ? emailPrefix : `${emailPrefix}@foot-table.pe.gov.br`;
+
+      feedback.className = "text-xs rounded-xl p-3 border bg-blue-950/40 border-blue-500/40 text-blue-300";
+      feedback.textContent = "Gerando credencial institucional oficial...";
+
+      const newAdmin = {
+        nome: name,
+        cargo: role,
+        email: fullEmail,
+        senha: password,
+        isMaster: fullEmail.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br',
+        created_at: new Date().toISOString()
+      };
+
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from('admin_users').upsert([newAdmin], { onConflict: 'email' });
+        } catch (err) {
+          console.warn("Aviso Supabase:", err);
+        }
+      }
+
+      let admins = await loadInstitutionalAdmins();
+      const existingIdx = admins.findIndex(a => a.email.toLowerCase() === fullEmail.toLowerCase());
+      if (existingIdx >= 0) {
+        admins[existingIdx] = { ...admins[existingIdx], ...newAdmin };
+      } else {
+        admins.push(newAdmin);
+      }
+      localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
+
+      feedback.className = "text-xs rounded-xl p-3 border bg-emerald-950/40 border-emerald-500/50 text-emerald-300 font-bold";
+      feedback.innerHTML = `✓ E-mail institucional <strong>${fullEmail}</strong> ativado com sucesso! Esta conta já pode acessar o sistema no login.`;
+
+      document.getElementById('adminCreateEmailForm').reset();
+      document.getElementById('panelRegFederationKey').value = "FPFTM-2026";
+      renderInstitutionalAdminsTable();
+    }
+
+    async function handleDeleteInstitutionalAdmin(email) {
+      if (email.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br') {
+        alert("A conta ADM MASTER (gabrielacessor@foot-table.pe.gov.br) é a conta principal da federação e não pode ser excluída.");
+        return;
+      }
+
+      if (!confirm(`Deseja revogar o acesso institucional do e-mail ${email}?`)) return;
+
+      let admins = await loadInstitutionalAdmins();
+      admins = admins.filter(a => a.email.toLowerCase() !== email.toLowerCase());
+      localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
+
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from('admin_users').delete().eq('email', email);
+        } catch (e) {
+          console.warn("Exclusão Supabase:", e);
+        }
+      }
+
+      renderInstitutionalAdminsTable();
+    }
+
+    /* =========================================================
        AUTENTICAÇÃO E SESSÃO DO ADMINISTRADOR
        ========================================================= */
     function checkAuth() {
@@ -2044,9 +2415,17 @@
       if (!isLogged) {
         window.location.href = 'login.html';
       } else {
-        const user = sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user');
+        const user = sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user') || 'gabrielacessor@foot-table.pe.gov.br';
         if (user && document.getElementById('sidebarAdminUser')) {
           document.getElementById('sidebarAdminUser').textContent = user;
+          const roleEl = document.getElementById('sidebarAdminRole');
+          if (roleEl) {
+            if (user.toLowerCase().includes('gabrielacessor') || user.toLowerCase().includes('admin')) {
+              roleEl.innerHTML = '👑 ADM MASTER • Presidência';
+            } else {
+              roleEl.innerHTML = 'Gestor Institucional';
+            }
+          }
         }
       }
     }
@@ -2072,6 +2451,7 @@
       renderAdminNews();
       syncStudioWithCurrentLayout();
       updateDashboardData();
+      renderInstitutionalAdminsTable();
 
       // Previne que o navegador insira emails de login automaticamente no campo de busca de atletas
       setTimeout(() => {

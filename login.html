@@ -171,7 +171,7 @@
                   id="adminUser" 
                   name="username" 
                   required 
-                  placeholder="diretoria@foot-table.pe.gov.br" 
+                  placeholder="gabrielacessor@foot-table.pe.gov.br" 
                   class="w-full bg-pe-inputBg border border-pe-cardBorder focus:border-pe-gold rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-600 outline-none transition duration-150"
                 />
               </div>
@@ -535,11 +535,27 @@
       loginFeedback.classList.add('hidden');
 
       // Verifica lista de administradores institucionais criados
-      const admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || [];
+      let admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || [];
+      const hasMaster = admins.some(a => a.email && a.email.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br');
+      if (!hasMaster) {
+        admins.unshift({
+          nome: "Gabriel Alves",
+          cargo: "Presidência (ADM MASTER)",
+          email: "gabrielacessor@foot-table.pe.gov.br",
+          senha: "admin",
+          isMaster: true,
+          created_at: "2026-01-01T00:00:00Z"
+        });
+        localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
+      }
+
       const foundAdmin = admins.find(a => a.email.toLowerCase() === user && a.senha === pass);
 
+      // Reconhece ADM MASTER (gabrielacessor@foot-table.pe.gov.br) com sua senha cadastrada ou padrão
+      const isMasterUser = (user === 'gabrielacessor@foot-table.pe.gov.br' || user === 'gabrielacessor') && (pass === 'admin' || pass.length >= 4);
+
       // Também aceita login padrão da diretoria ou qualquer e-mail institucional cadastrado
-      let isAuthorized = !!foundAdmin || (user.includes('@foot-table.pe.gov.br') && pass.length >= 4) || (user === 'admin' && pass.length >= 4);
+      let isAuthorized = !!foundAdmin || isMasterUser || (user.includes('@foot-table.pe.gov.br') && pass.length >= 4) || (user === 'admin' && pass.length >= 4);
 
       // Tenta validar no Supabase se existir
       if (!isAuthorized && supabaseClient) {
@@ -605,10 +621,10 @@
       loginFeedback.classList.remove('hidden');
     });
 
-    // Carrega último usuário
+    // Carrega último usuário ou ADM MASTER padrão
     window.addEventListener('load', () => {
-      const savedUser = localStorage.getItem('pe_admin_user');
-      if (savedUser) {
+      const savedUser = localStorage.getItem('pe_admin_user') || 'gabrielacessor@foot-table.pe.gov.br';
+      if (document.getElementById('adminUser')) {
         document.getElementById('adminUser').value = savedUser;
       }
     });
