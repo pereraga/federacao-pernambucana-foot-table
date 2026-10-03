@@ -6,6 +6,16 @@
   <title>FPEFT ADM | Painel de Controle Oficial</title>
   <link rel="icon" type="image/png" href="assets/images/logo-federacao.png" />
 
+  <!-- Proteção Imediata: Redireciona para o login se não autenticado -->
+  <script>
+    (function() {
+      const isLogged = sessionStorage.getItem('pe_admin_logged') === 'true' || localStorage.getItem('pe_admin_logged') === 'true';
+      if (!isLogged) {
+        window.location.replace('login.html');
+      }
+    })();
+  </script>
+
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2432,7 +2442,9 @@
 
     function handleLogout() {
       sessionStorage.removeItem('pe_admin_logged');
+      sessionStorage.removeItem('pe_admin_user');
       localStorage.removeItem('pe_admin_logged');
+      localStorage.removeItem('pe_admin_user');
       window.location.href = 'login.html';
     }
 
