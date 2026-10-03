@@ -104,26 +104,38 @@
         <span class="text-[10px] bg-pe-gold/20 text-pe-gold px-2 py-0.5 rounded font-mono font-bold">ADM</span>
       </div>
 
-      <!-- Menu de Navegação Vertical (Com as Abas Oficiais Solicitadas) -->
+      <!-- Menu de Navegação Vertical -->
       <nav class="flex-1 p-3.5 space-y-2 overflow-y-auto">
         
         <div class="px-3 pt-1 pb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
           Abas do Sistema
         </div>
 
-        <!-- 1. Aba Carteiras & Atletas (Ativo por padrão com Amarelo do Sistema) -->
-        <button onclick="switchTab('atletas')" id="navBtn-atletas" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all cursor-pointer group active-nav-pill">
+        <!-- 1. Aba Início (Ativo por padrão com Amarelo Oficial) -->
+        <button onclick="switchTab('inicio')" id="navBtn-inicio" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all cursor-pointer group active-nav-pill">
           <div class="flex items-center gap-3.5">
-            <!-- Ícone Carteira / Badge -->
+            <!-- Ícone Casa / Início -->
             <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 2a1 1 0 00-1 1v1a1 1 0 002 0V3a1 1 0 00-1-1zM4 4h3a3 3 0 006 0h3a2 2 0 012 2v9a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm2.5 7a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm2.45 4a2.5 2.5 0 00-4.9 0h4.9zM12 9a1 1 0 100 2h3a1 1 0 100-2h-3zm1 4a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z" clip-rule="evenodd"/>
+              <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
             </svg>
-            <span class="text-sm font-semibold tracking-wide">Carteiras & Atletas</span>
+            <span class="text-sm font-semibold tracking-wide">Início</span>
           </div>
           <span class="nav-indicator w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0"></span>
         </button>
 
-        <!-- 2. Aba Estúdio da Carteira -->
+        <!-- 2. Aba Carteiras & Atletas -->
+        <button onclick="switchTab('atletas')" id="navBtn-atletas" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
+          <div class="flex items-center gap-3.5">
+            <!-- Ícone Carteira / Badge -->
+            <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 2a1 1 0 00-1 1v1a1 1 0 002 0V3a1 1 0 00-1-1zM4 4h3a3 3 0 006 0h3a2 2 0 012 2v9a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm2.5 7a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm2.45 4a2.5 2.5 0 00-4.9 0h4.9zM12 9a1 1 0 100 2h3a1 1 0 100-2h-3zm1 4a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z" clip-rule="evenodd"/>
+            </svg>
+            <span class="text-sm font-semibold tracking-wide">Carteiras & Atletas</span>
+          </div>
+          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0"></span>
+        </button>
+
+        <!-- 3. Aba Estúdio da Carteira -->
         <button onclick="switchTab('estudio')" id="navBtn-estudio" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
           <div class="flex items-center gap-3.5">
             <!-- Ícone Estúdio / Dimensões -->
@@ -135,7 +147,7 @@
           <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0"></span>
         </button>
 
-        <!-- 3. Aba Notícias & Torneios -->
+        <!-- 4. Aba Notícias & Torneios -->
         <button onclick="switchTab('noticias')" id="navBtn-noticias" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
           <div class="flex items-center gap-3.5">
             <!-- Ícone Notícias / Jornal -->
@@ -147,7 +159,7 @@
           <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0"></span>
         </button>
 
-        <!-- 4. Aba Banco de Dados & Ajustes (Keep-Alive) -->
+        <!-- 5. Aba Banco de Dados & Ajustes (Keep-Alive) -->
         <button onclick="switchTab('config')" id="navBtn-config" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
           <div class="flex items-center gap-3.5">
             <!-- Ícone Engrenagem / Banco -->
@@ -160,7 +172,7 @@
           <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0"></span>
         </button>
 
-        <!-- 5. Guia Completo do Painel -->
+        <!-- 6. Guia Completo do Painel -->
         <button onclick="switchTab('guia')" id="navBtn-guia" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
           <div class="flex items-center gap-3.5">
             <!-- Ícone Manual / Guia -->
@@ -195,7 +207,7 @@
       <header class="bg-[#05080e]/95 backdrop-blur border-b border-[#151c2e] px-4 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-30">
         <div class="flex items-center gap-3">
           <span id="headerPageTitle" class="font-oswald text-xl uppercase font-bold text-white tracking-wide">
-            Carteiras & Atletas
+            Início & Carteiras Homologadas
           </span>
           <span class="hidden sm:inline-block bg-pe-gold/20 text-pe-gold text-[10px] font-bold px-2 py-0.5 rounded uppercase">
             Sistema Oficial PE
@@ -220,9 +232,130 @@
       <main class="p-4 sm:p-6 lg:p-8 flex-1 w-full space-y-8">
 
         <!-- ===================================================== -->
+        <!-- ABA: INÍCIO (DASHBOARD COM ATLETAS & CARTEIRAS)       -->
+        <!-- ===================================================== -->
+        <div id="tabContent-inicio" class="space-y-6">
+          
+          <!-- Banner Principal do Início (Exato da Imagem) -->
+          <div class="bg-gradient-to-r from-[#06173a] via-[#091e4a] to-[#040813] border border-[#1c253b] rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl">
+            <div class="pe-stripe-bar h-1.5 w-full absolute top-0 left-0"></div>
+            <div class="max-w-3xl space-y-3 relative z-10">
+              <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Sistema Integrado de Gestão Federativa</span>
+              <h2 class="font-oswald text-2xl sm:text-4xl uppercase font-extrabold text-white leading-tight">
+                Recepção Oficial — Federação Pernambucana
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                Bem-vindo ao centro de operações de Foot Table & FutMesa de Pernambuco. Controle carteiras digitais, cadastro de atletas homologados, notícias e status operacional.
+              </p>
+              <div class="flex flex-wrap items-center gap-3 pt-2">
+                <button onclick="switchTab('atletas')" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase px-5 py-2.5 rounded-xl transition shadow flex items-center gap-2 cursor-pointer">
+                  <span>🪪</span> Emitir Carteira de Atleta
+                </button>
+                <button onclick="switchTab('noticias')" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-5 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer">
+                  <span>📰</span> Publicar Notícia
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cards de Métricas Principais (Exatos da Imagem) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            
+            <!-- Card 1: Atletas Cadastrados -->
+            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-2">
+              <div class="flex items-center justify-between text-slate-400 text-xs">
+                <span class="font-bold uppercase tracking-wider">Atletas Cadastrados</span>
+                <span class="text-emerald-400 font-bold">● Ativos</span>
+              </div>
+              <div class="flex items-baseline gap-2">
+                <span id="metricTotalAthletes" class="font-oswald text-3xl font-extrabold text-white">0</span>
+                <span class="text-xs text-slate-400">atletas</span>
+              </div>
+              <span class="text-[11px] text-emerald-400 flex items-center gap-1 font-semibold">
+                ✓ Sincronizado no Supabase
+              </span>
+            </div>
+
+            <!-- Card 2: Saldo do Caixa -->
+            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-2">
+              <div class="flex items-center justify-between text-slate-400 text-xs">
+                <span class="font-bold uppercase tracking-wider">Saldo do Caixa</span>
+                <span class="text-pe-gold font-bold">BRL</span>
+              </div>
+              <div class="flex items-baseline gap-2">
+                <span class="font-oswald text-3xl font-extrabold text-pe-gold">R$ 4.820,00</span>
+              </div>
+              <span class="text-[11px] text-slate-400 font-semibold">
+                Taxas & inscrições 2026
+              </span>
+            </div>
+
+            <!-- Card 3: Próximo Torneio -->
+            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-2">
+              <div class="flex items-center justify-between text-slate-400 text-xs">
+                <span class="font-bold uppercase tracking-wider">Próximo Torneio</span>
+                <span class="text-pe-blue font-bold">ROMA 2026</span>
+              </div>
+              <div class="flex items-baseline gap-2">
+                <span class="font-oswald text-2xl font-extrabold text-white">Mundial Roma</span>
+              </div>
+              <span class="text-[11px] text-slate-400 font-semibold">
+                01 a 04 de Outubro
+              </span>
+            </div>
+
+            <!-- Card 4: Keep-Alive Vercel -->
+            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-2">
+              <div class="flex items-center justify-between text-slate-400 text-xs">
+                <span class="font-bold uppercase tracking-wider">Keep-Alive Vercel</span>
+                <span class="text-emerald-400 font-mono text-[10px]">24/7 ATIVO</span>
+              </div>
+              <div class="flex items-baseline gap-2">
+                <span class="font-oswald text-2xl font-extrabold text-emerald-400">100% Online</span>
+              </div>
+              <span class="text-[11px] text-slate-400 font-semibold">
+                Sem pausa de inatividade
+              </span>
+            </div>
+
+          </div>
+
+          <!-- Tabela: Últimas Carteiras Homologadas (Exata da Imagem) -->
+          <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 shadow-xl space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="font-oswald text-lg uppercase font-bold text-white flex items-center gap-2">
+                <span>📋</span> Últimos Atletas com Carteira Homologada
+              </h3>
+              <button onclick="switchTab('atletas')" class="text-xs text-pe-gold hover:underline font-bold flex items-center gap-1 cursor-pointer">
+                Ver todos os atletas →
+              </button>
+            </div>
+            
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-[#05080e] text-slate-400 uppercase text-[10px] font-mono border-b border-[#1c253b]">
+                  <tr>
+                    <th class="py-3 px-4">Código Oficial</th>
+                    <th class="py-3 px-4">Nome</th>
+                    <th class="py-3 px-4">Município</th>
+                    <th class="py-3 px-4">Modalidade</th>
+                    <th class="py-3 px-4">Status</th>
+                    <th class="py-3 px-4 text-right">Ação</th>
+                  </tr>
+                </thead>
+                <tbody id="quickAthletesList" class="divide-y divide-[#1c253b]/60">
+                  <!-- Inserido dinamicamente via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ===================================================== -->
         <!-- 1. 🪪 ABA CARTEIRAS & ATLETAS                          -->
         <!-- ===================================================== -->
-        <div id="tabContent-atletas" class="space-y-8">
+        <div id="tabContent-atletas" class="space-y-8 hidden">
           
           <!-- Box Informativo: O que você encontra na Aba Carteiras & Atletas -->
           <div class="bg-gradient-to-r from-[#06173a] via-[#091e4a] to-[#040813] border border-[#1c253b] rounded-2xl p-5 sm:p-6 relative overflow-hidden shadow-xl">
@@ -269,7 +402,7 @@
               <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Registros Oficiais</span>
               <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Emissão de Carteiras & Atletas</h2>
             </div>
-            <button onclick="generateRandomAthleteCode()" class="bg-[#0b101d] hover:bg-[#121a30] border border-[#1c253b] text-pe-gold font-mono font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2">
+            <button onclick="generateRandomAthleteCode()" class="bg-[#0b101d] hover:bg-[#121a30] border border-[#1c253b] text-pe-gold font-mono font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer">
               <span>🎲</span> Gerar Novo Código de 6 Dígitos
             </button>
           </div>
@@ -438,7 +571,7 @@
 
           </div>
 
-          <!-- Tabela de Atletas -->
+          <!-- Tabela Completa de Atletas -->
           <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 shadow-xl">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <h3 class="font-oswald text-xl uppercase font-bold text-white flex items-center gap-2">
@@ -984,8 +1117,9 @@
     /* =========================================================
        SISTEMA DE NAVEGAÇÃO LATERAL (ABAS OFICIAIS)
        ========================================================= */
-    const ALL_TABS = ['atletas', 'estudio', 'noticias', 'config', 'guia'];
+    const ALL_TABS = ['inicio', 'atletas', 'estudio', 'noticias', 'config', 'guia'];
     const TAB_TITLES = {
+      inicio: '🏠 Início & Carteiras Homologadas',
       atletas: '1. 🪪 Aba Carteiras & Atletas',
       estudio: '2. 🎨 Aba Estúdio da Carteira (Dimensões & Textos)',
       noticias: '3. 📰 Aba Notícias & Torneios',
@@ -1125,6 +1259,7 @@
       feedback.innerHTML = `✓ Atleta #${code} cadastrado com sucesso! ${savedInSupabase ? '(Sincronizado com Supabase)' : '(Salvo localmente)'}.`;
 
       renderAthletesTable();
+      updateDashboardData();
     }
 
     async function loadAthletes() {
@@ -1245,6 +1380,7 @@
       localStorage.setItem('pe_athletes_db', JSON.stringify(localAthletes));
 
       renderAthletesTable();
+      updateDashboardData();
     }
 
     async function fillFormWithAthlete(codigo) {
@@ -1283,6 +1419,48 @@
         a.href = canvas.toDataURL('image/png');
         a.click();
       });
+    }
+
+    /* =========================================================
+       DASHBOARD INICIAL: ÚLTIMAS CARTEIRAS & MÉTRICAS
+       ========================================================= */
+    async function updateDashboardData() {
+      const athletes = await loadAthletes();
+      
+      // Atualiza contador de atletas cadastrados
+      const metricEl = document.getElementById('metricTotalAthletes');
+      if (metricEl) {
+        metricEl.textContent = athletes.length;
+      }
+
+      // Renderiza as últimas carteiras homologadas (tabela rápida da aba Início)
+      const quickTable = document.getElementById('quickAthletesList');
+      if (quickTable) {
+        quickTable.innerHTML = '';
+        const recentAthletes = athletes.slice(0, 8);
+
+        recentAthletes.forEach(a => {
+          const tr = document.createElement('tr');
+          tr.className = "hover:bg-[#070b14] transition";
+          tr.innerHTML = `
+            <td class="py-3 px-4 font-mono font-bold text-pe-gold">#${a.codigo}</td>
+            <td class="py-3 px-4 font-bold text-white uppercase">${a.nome}</td>
+            <td class="py-3 px-4 text-slate-300">${a.municipio || 'Recife - PE'}</td>
+            <td class="py-3 px-4 text-pe-gold font-bold">${a.modalidade || 'SOLO'}</td>
+            <td class="py-3 px-4">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${a.status === 'REGULAR' ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-500/30' : 'bg-amber-950/60 text-amber-400 border border-amber-500/30'}">
+                ${a.status || 'REGULAR'}
+              </span>
+            </td>
+            <td class="py-3 px-4 text-right">
+              <button onclick="fillFormWithAthlete('${a.codigo}')" class="text-xs text-pe-gold hover:text-white font-bold bg-[#0e1526] hover:bg-[#15203a] border border-[#1c253b] px-3 py-1 rounded-lg transition cursor-pointer">
+                Ver Carteira
+              </button>
+            </td>
+          `;
+          quickTable.appendChild(tr);
+        });
+      }
     }
 
     /* =========================================================
@@ -1653,6 +1831,7 @@
       renderAthletesTable();
       renderAdminNews();
       syncStudioWithCurrentLayout();
+      updateDashboardData();
     };
   </script>
 </body>
