@@ -258,11 +258,11 @@
             </div>
           </div>
 
-          <!-- Cards de Métricas Principais -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Cards de Métricas Principais & Busca Rápida de Atleta -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 items-stretch">
             
             <!-- Card 1: Atletas Cadastrados -->
-            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-2">
+            <div class="col-span-1 md:col-span-1 lg:col-span-3 bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 flex flex-col justify-between space-y-3 shadow-xl">
               <div class="flex items-center justify-between text-slate-400 text-xs">
                 <span class="font-bold uppercase tracking-wider">Atletas Cadastrados</span>
                 <span class="text-emerald-400 font-bold">● Ativos</span>
@@ -271,10 +271,50 @@
                 <span id="metricTotalAthletes" class="font-oswald text-3xl font-extrabold text-white">0</span>
                 <span class="text-xs text-slate-400">atletas</span>
               </div>
+              <div class="text-[11px] text-slate-400 flex items-center gap-1.5 pt-1 border-t border-[#1c253b]/50">
+                <span class="text-pe-gold">●</span> Cadastro Oficial FPFT
+              </div>
             </div>
 
-            <!-- Card 2: Próximo Torneio -->
-            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-2">
+            <!-- Card 2: Busca Rápida de Atleta (Perfil Individual ou em Dupla) -->
+            <div class="col-span-1 md:col-span-2 lg:col-span-6 bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 flex flex-col justify-between space-y-3 shadow-xl relative">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-pe-gold text-base">🔍</span>
+                  <span class="font-bold uppercase tracking-wider text-white text-xs">Busca Rápida de Atleta</span>
+                </div>
+                
+                <!-- Filtros de Modalidade: Todos / Individual / Em Dupla -->
+                <div class="inline-flex items-center bg-[#05080e] p-0.5 rounded-lg border border-[#1c253b] text-[10px] font-bold">
+                  <button type="button" id="btnFilterAll" onclick="setQuickSearchModality('ALL')" class="px-2.5 py-1 rounded-md text-pe-dark bg-pe-gold font-extrabold transition cursor-pointer">
+                    Todos
+                  </button>
+                  <button type="button" id="btnFilterSolo" onclick="setQuickSearchModality('SOLO')" class="px-2.5 py-1 rounded-md text-slate-400 hover:text-white transition cursor-pointer">
+                    👤 Individual
+                  </button>
+                  <button type="button" id="btnFilterDupla" onclick="setQuickSearchModality('DUPLA')" class="px-2.5 py-1 rounded-md text-slate-400 hover:text-white transition cursor-pointer">
+                    👥 Em Dupla
+                  </button>
+                </div>
+              </div>
+
+              <!-- Input de Busca pelo Nome Completo -->
+              <div class="relative">
+                <input type="text" id="quickSearchAthleteInput" oninput="handleQuickAthleteSearch()" placeholder="Digite o nome completo do atleta (Individual ou em Dupla)..." class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl pl-9 pr-8 py-2 text-xs text-white placeholder-slate-500 outline-none transition font-sans" />
+                <span class="absolute left-3 top-2.5 text-slate-500 text-xs">🔎</span>
+                <button type="button" id="quickSearchClearBtn" onclick="clearQuickAthleteSearch()" class="hidden absolute right-2.5 top-2 text-slate-400 hover:text-white text-xs cursor-pointer p-0.5">✕</button>
+              </div>
+
+              <!-- Resultado da Busca Instantânea -->
+              <div id="quickSearchResults" class="min-h-[44px] flex items-center">
+                <div class="text-[11px] text-slate-400 flex items-center gap-1.5">
+                  <span class="text-pe-gold">ℹ️</span> Ache atletas com perfil Individual ou em Dupla pelo nome completo.
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 3: Próximo Torneio -->
+            <div class="col-span-1 md:col-span-1 lg:col-span-3 bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 flex flex-col justify-between space-y-3 shadow-xl">
               <div class="flex items-center justify-between text-slate-400 text-xs">
                 <span class="font-bold uppercase tracking-wider">Próximo Torneio</span>
                 <span class="text-pe-blue font-bold">ROMA 2026</span>
@@ -282,7 +322,7 @@
               <div class="flex items-baseline gap-2">
                 <span class="font-oswald text-2xl font-extrabold text-white">Mundial Roma</span>
               </div>
-              <span class="text-[11px] text-slate-400 font-semibold">
+              <span class="text-[11px] text-slate-400 font-semibold pt-1 border-t border-[#1c253b]/50">
                 01 a 04 de Outubro
               </span>
             </div>
@@ -1430,9 +1470,156 @@
           quickTable.appendChild(tr);
         });
       }
+
+      // Se houver busca rápida ativa, atualiza os resultados
+      const quickSearchInput = document.getElementById('quickSearchAthleteInput');
+      if (quickSearchInput && quickSearchInput.value.trim().length > 0) {
+        handleQuickAthleteSearch();
+      }
     }
 
     /* =========================================================
+       BUSCA RÁPIDA DE ATLETA (INDIVIDUAL OU EM DUPLA)
+       ========================================================= */
+    let quickSearchModality = 'ALL';
+
+    function setQuickSearchModality(mod) {
+      quickSearchModality = mod;
+      
+      const btnAll = document.getElementById('btnFilterAll');
+      const btnSolo = document.getElementById('btnFilterSolo');
+      const btnDupla = document.getElementById('btnFilterDupla');
+
+      const activeClass = "px-2.5 py-1 rounded-md text-pe-dark bg-pe-gold font-extrabold transition cursor-pointer";
+      const inactiveClass = "px-2.5 py-1 rounded-md text-slate-400 hover:text-white transition cursor-pointer";
+
+      if (btnAll) btnAll.className = (mod === 'ALL') ? activeClass : inactiveClass;
+      if (btnSolo) btnSolo.className = (mod === 'SOLO') ? activeClass : inactiveClass;
+      if (btnDupla) btnDupla.className = (mod === 'DUPLA') ? activeClass : inactiveClass;
+
+      handleQuickAthleteSearch();
+    }
+
+    function clearQuickAthleteSearch() {
+      const input = document.getElementById('quickSearchAthleteInput');
+      const clearBtn = document.getElementById('quickSearchClearBtn');
+      if (input) input.value = '';
+      if (clearBtn) clearBtn.classList.add('hidden');
+      
+      const resultsContainer = document.getElementById('quickSearchResults');
+      if (resultsContainer) {
+        resultsContainer.innerHTML = `
+          <div class="text-[11px] text-slate-400 flex items-center gap-1.5">
+            <span class="text-pe-gold">ℹ️</span> Ache atletas com perfil Individual ou em Dupla pelo nome completo.
+          </div>
+        `;
+      }
+    }
+
+    async function handleQuickAthleteSearch() {
+      const input = document.getElementById('quickSearchAthleteInput');
+      const clearBtn = document.getElementById('quickSearchClearBtn');
+      const resultsContainer = document.getElementById('quickSearchResults');
+      if (!input || !resultsContainer) return;
+
+      const rawQuery = input.value.trim();
+      if (clearBtn) {
+        if (rawQuery.length > 0) clearBtn.classList.remove('hidden');
+        else clearBtn.classList.add('hidden');
+      }
+
+      if (!rawQuery) {
+        resultsContainer.innerHTML = `
+          <div class="text-[11px] text-slate-400 flex items-center gap-1.5">
+            <span class="text-pe-gold">ℹ️</span> Ache atletas com perfil Individual ou em Dupla pelo nome completo.
+          </div>
+        `;
+        return;
+      }
+
+      const athletes = await loadAthletes();
+      
+      const normalize = str => (str || '')
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim();
+
+      const q = normalize(rawQuery);
+
+      const matches = athletes.filter(a => {
+        const nameNorm = normalize(a.nome);
+        const nameMatches = nameNorm.includes(q) || String(a.codigo || '').includes(q);
+        if (!nameMatches) return false;
+
+        const modUpper = (a.modalidade || '').toUpperCase();
+        const isDupla = modUpper.includes('DUPLA') || modUpper.includes('EQUIPE');
+        const isSolo = modUpper.includes('SOLO') || modUpper.includes('INDIVIDUAL');
+
+        if (quickSearchModality === 'SOLO') {
+          return isSolo;
+        } else if (quickSearchModality === 'DUPLA') {
+          return isDupla;
+        }
+        return true; // 'ALL' busca tanto em dupla quanto individual
+      });
+
+      if (matches.length === 0) {
+        const modalityLabel = quickSearchModality === 'ALL' 
+          ? 'Individual ou em Dupla' 
+          : (quickSearchModality === 'SOLO' ? 'Individual' : 'Em Dupla');
+
+        resultsContainer.innerHTML = `
+          <div class="w-full bg-[#05080e] border border-[#1c253b] rounded-xl p-2.5 text-center text-xs text-slate-400">
+            Nenhum atleta encontrado para "<strong class="text-pe-gold">${escapeText(rawQuery)}</strong>" com perfil <strong>${modalityLabel}</strong>.
+          </div>
+        `;
+        return;
+      }
+
+      resultsContainer.innerHTML = `
+        <div class="w-full space-y-2 max-h-48 overflow-y-auto pr-1">
+          ${matches.slice(0, 4).map(a => {
+            const modUpper = (a.modalidade || '').toUpperCase();
+            const isDupla = modUpper.includes('DUPLA') || modUpper.includes('EQUIPE');
+            const defaultPhoto = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80";
+            const photoUrl = a.foto || defaultPhoto;
+
+            return `
+              <div class="bg-[#05080e] border border-[#1c253b] hover:border-pe-gold/40 rounded-xl p-2.5 flex items-center justify-between gap-3 transition">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <img src="${photoUrl}" alt="${escapeText(a.nome)}" class="w-9 h-9 rounded-lg object-cover border border-pe-gold/50 flex-shrink-0" onerror="this.src='${defaultPhoto}'" />
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <span class="font-bold text-white uppercase text-xs truncate">${escapeText(a.nome)}</span>
+                      <span class="text-[10px] font-mono font-bold text-pe-gold">#${a.codigo}</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
+                      <span class="px-1.5 py-0.5 rounded font-bold ${isDupla ? 'bg-amber-950/80 text-amber-400 border border-amber-500/30' : 'bg-blue-950/80 text-blue-400 border border-blue-500/30'}">
+                        ${isDupla ? '👥 EM DUPLA' : '👤 INDIVIDUAL'}
+                      </span>
+                      <span class="truncate">${escapeText(a.municipio || 'Recife - PE')}</span>
+                    </div>
+                  </div>
+                </div>
+                <button type="button" onclick="fillFormWithAthlete('${a.codigo}')" class="flex-shrink-0 bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-[11px] uppercase px-3 py-1.5 rounded-lg transition shadow flex items-center gap-1 cursor-pointer">
+                  <span>🪪</span> Ver Carteira
+                </button>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function escapeText(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
        ESTÚDIO DA CARTEIRA: DIMENSÕES & TEXTOS CUSTOMIZADOS (ABA 2)
        ========================================================= */
     function syncStudioWithCurrentLayout() {
