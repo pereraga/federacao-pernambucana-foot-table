@@ -63,6 +63,15 @@
     .active-nav-pill svg {
       color: #080b12 !important;
     }
+    /* Previne fundo branco/amarelo gerado pelo autofill do navegador */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover, 
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 1000px #05080e inset !important;
+      -webkit-text-fill-color: #ffffff !important;
+      transition: background-color 5000s ease-in-out 0s !important;
+    }
   </style>
 </head>
 <body class="bg-[#080b12] text-slate-100 min-h-screen font-sans antialiased selection:bg-pe-gold selection:text-pe-dark">
@@ -276,12 +285,12 @@
               </div>
             </div>
 
-            <!-- Card 2: Busca Rápida de Atleta (Perfil Individual ou em Dupla) -->
+            <!-- Card 2: Busca Rápida de Atleta (Nome ou ID da Carteira) -->
             <div class="col-span-1 md:col-span-2 lg:col-span-6 bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 flex flex-col justify-between space-y-3 shadow-xl relative">
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div class="flex items-center gap-2">
                   <span class="text-pe-gold text-base">🔍</span>
-                  <span class="font-bold uppercase tracking-wider text-white text-xs">Busca Rápida de Atleta</span>
+                  <span class="font-bold uppercase tracking-wider text-white text-xs">Busca Rápida (Nome ou ID da Carteira)</span>
                 </div>
                 
                 <!-- Filtros de Modalidade: Todos / Individual / Em Dupla -->
@@ -298,17 +307,20 @@
                 </div>
               </div>
 
-              <!-- Input de Busca pelo Nome Completo -->
+              <!-- Input de Busca pelo Nome Completo ou ID da Carteira -->
               <div class="relative">
-                <input type="text" id="quickSearchAthleteInput" oninput="handleQuickAthleteSearch()" placeholder="Digite o nome completo do atleta (Individual ou em Dupla)..." class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl pl-9 pr-8 py-2 text-xs text-white placeholder-slate-500 outline-none transition font-sans" />
-                <span class="absolute left-3 top-2.5 text-slate-500 text-xs">🔎</span>
+                <input type="search" id="quickSearchAthleteInput" name="quick_athlete_search_query" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" oninput="handleQuickAthleteSearch()" placeholder="Digite o Nome Completo ou ID / Código da Carteira (ex: 742918)..." class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl pl-9 pr-8 py-2 text-xs text-white placeholder-slate-500 outline-none transition font-sans" />
+                <span class="absolute left-3 top-2.5 text-slate-400 text-xs">🔎</span>
                 <button type="button" id="quickSearchClearBtn" onclick="clearQuickAthleteSearch()" class="hidden absolute right-2.5 top-2 text-slate-400 hover:text-white text-xs cursor-pointer p-0.5">✕</button>
               </div>
 
               <!-- Resultado da Busca Instantânea -->
               <div id="quickSearchResults" class="min-h-[44px] flex items-center">
                 <div class="text-[11px] text-slate-400 flex items-center gap-1.5">
-                  <span class="text-pe-gold">ℹ️</span> Ache atletas com perfil Individual ou em Dupla pelo nome completo.
+                  <svg class="w-4 h-4 text-pe-gold flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                  </svg>
+                  <span>Ache atletas pelo <strong>Nome Completo</strong> ou <strong>ID da Carteira</strong> (Individual ou Dupla).</span>
                 </div>
               </div>
             </div>
@@ -1510,7 +1522,10 @@
       if (resultsContainer) {
         resultsContainer.innerHTML = `
           <div class="text-[11px] text-slate-400 flex items-center gap-1.5">
-            <span class="text-pe-gold">ℹ️</span> Ache atletas com perfil Individual ou em Dupla pelo nome completo.
+            <svg class="w-4 h-4 text-pe-gold flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+            </svg>
+            <span>Ache atletas pelo <strong>Nome Completo</strong> ou <strong>ID da Carteira</strong> (Individual ou Dupla).</span>
           </div>
         `;
       }
@@ -1531,7 +1546,10 @@
       if (!rawQuery) {
         resultsContainer.innerHTML = `
           <div class="text-[11px] text-slate-400 flex items-center gap-1.5">
-            <span class="text-pe-gold">ℹ️</span> Ache atletas com perfil Individual ou em Dupla pelo nome completo.
+            <svg class="w-4 h-4 text-pe-gold flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+            </svg>
+            <span>Ache atletas pelo <strong>Nome Completo</strong> ou <strong>ID da Carteira</strong> (Individual ou Dupla).</span>
           </div>
         `;
         return;
@@ -1546,11 +1564,31 @@
         .trim();
 
       const q = normalize(rawQuery);
+      const qDigits = rawQuery.replace(/\D/g, '');
+      const qClean = q.replace(/[^a-z0-9]/g, '');
 
       const matches = athletes.filter(a => {
         const nameNorm = normalize(a.nome);
-        const nameMatches = nameNorm.includes(q) || String(a.codigo || '').includes(q);
-        if (!nameMatches) return false;
+        const athleteCode = String(a.codigo || '').trim();
+        const athleteId = String(a.id || '').trim();
+        const athleteCpfDigits = String(a.cpf || '').replace(/\D/g, '');
+
+        // 1. Busca por Nome
+        const matchName = nameNorm.includes(q);
+
+        // 2. Busca por ID / Código Oficial da Carteira (ex: 742918, #742918, ID: 742918)
+        const matchCode = (
+          athleteCode.toLowerCase().includes(q) ||
+          (qDigits.length > 0 && athleteCode.includes(qDigits)) ||
+          athleteId === q ||
+          (qDigits.length > 0 && athleteId === qDigits) ||
+          (qClean.length > 0 && athleteCode.toLowerCase().includes(qClean))
+        );
+
+        // 3. Busca por CPF
+        const matchCpf = qDigits.length >= 3 && athleteCpfDigits.includes(qDigits);
+
+        if (!matchName && !matchCode && !matchCpf) return false;
 
         const modUpper = (a.modalidade || '').toUpperCase();
         const isDupla = modUpper.includes('DUPLA') || modUpper.includes('EQUIPE');
@@ -1565,13 +1603,59 @@
       });
 
       if (matches.length === 0) {
+        // Se não encontrou no filtro de modalidade atual, verifica se o ID/Código existe na outra modalidade
+        let crossMatch = null;
+        if (qDigits.length >= 2 || qClean.length >= 2) {
+          crossMatch = athletes.find(a => {
+            const athleteCode = String(a.codigo || '').trim();
+            const athleteId = String(a.id || '').trim();
+            return athleteCode.includes(qDigits) || athleteId === qDigits || athleteCode.toLowerCase().includes(qClean);
+          });
+        }
+
+        if (crossMatch) {
+          const crossModUpper = (crossMatch.modalidade || '').toUpperCase();
+          const crossIsDupla = crossModUpper.includes('DUPLA') || crossModUpper.includes('EQUIPE');
+          const defaultPhoto = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80";
+          const photoUrl = crossMatch.foto || defaultPhoto;
+
+          resultsContainer.innerHTML = `
+            <div class="w-full space-y-2">
+              <div class="text-[11px] text-amber-400 flex items-center gap-1 font-semibold">
+                <span>⚠️</span> ID localizado, porém registrado como <strong>${crossIsDupla ? 'EM DUPLA' : 'INDIVIDUAL'}</strong>:
+              </div>
+              <div class="bg-[#05080e] border border-amber-500/40 rounded-xl p-2.5 flex items-center justify-between gap-3 transition">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <img src="${photoUrl}" alt="${escapeText(crossMatch.nome)}" class="w-9 h-9 rounded-lg object-cover border border-amber-500/50 flex-shrink-0" onerror="this.src='${defaultPhoto}'" />
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <span class="font-bold text-white uppercase text-xs truncate">${escapeText(crossMatch.nome)}</span>
+                      <span class="text-[10px] font-mono font-bold text-pe-gold">#${crossMatch.codigo}</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
+                      <span class="px-1.5 py-0.5 rounded font-bold ${crossIsDupla ? 'bg-amber-950/80 text-amber-400 border border-amber-500/30' : 'bg-blue-950/80 text-blue-400 border border-blue-500/30'}">
+                        ${crossIsDupla ? '👥 EM DUPLA' : '👤 INDIVIDUAL'}
+                      </span>
+                      <span class="truncate">${escapeText(crossMatch.municipio || 'Recife - PE')}</span>
+                    </div>
+                  </div>
+                </div>
+                <button type="button" onclick="fillFormWithAthlete('${crossMatch.codigo}')" class="flex-shrink-0 bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-[11px] uppercase px-3 py-1.5 rounded-lg transition shadow flex items-center gap-1 cursor-pointer">
+                  <span>🪪</span> Ver Carteira
+                </button>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
         const modalityLabel = quickSearchModality === 'ALL' 
           ? 'Individual ou em Dupla' 
           : (quickSearchModality === 'SOLO' ? 'Individual' : 'Em Dupla');
 
         resultsContainer.innerHTML = `
           <div class="w-full bg-[#05080e] border border-[#1c253b] rounded-xl p-2.5 text-center text-xs text-slate-400">
-            Nenhum atleta encontrado para "<strong class="text-pe-gold">${escapeText(rawQuery)}</strong>" com perfil <strong>${modalityLabel}</strong>.
+            Nenhum atleta encontrado para "<strong class="text-pe-gold">${escapeText(rawQuery)}</strong>" com ID ou Nome no perfil <strong>${modalityLabel}</strong>.
           </div>
         `;
         return;
@@ -1988,6 +2072,15 @@
       renderAdminNews();
       syncStudioWithCurrentLayout();
       updateDashboardData();
+
+      // Previne que o navegador insira emails de login automaticamente no campo de busca de atletas
+      setTimeout(() => {
+        const searchInp = document.getElementById('quickSearchAthleteInput');
+        if (searchInp && searchInp.value.includes('@')) {
+          searchInp.value = '';
+          clearQuickAthleteSearch();
+        }
+      }, 50);
     };
   </script>
 </body>
