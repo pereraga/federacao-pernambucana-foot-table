@@ -72,7 +72,7 @@
   <div class="min-h-screen flex flex-col md:flex-row w-full">
 
     <!-- ========================================================= -->
-    <!-- PAINEL LATERAL (SIDEBAR PADRÃO SCREENSHOT)                -->
+    <!-- PAINEL LATERAL (SIDEBAR COM ABAS OFICIAIS DO SISTEMA)     -->
     <!-- ========================================================= -->
     <aside id="sidebar" class="w-full md:w-64 lg:w-72 bg-[#05080e] border-r border-[#151c2e] flex flex-col shrink-0 z-40 transition-all md:min-h-screen">
       
@@ -85,7 +85,7 @@
           </div>
           <div class="min-w-0">
             <h1 class="font-oswald text-base uppercase font-bold text-white tracking-wide truncate">
-              Foot Table <span class="text-pe-gold">&</span> FutMesa
+              Painel de Controle
             </h1>
             <span class="block text-[10px] text-slate-400 font-bold uppercase tracking-wider truncate">
               Federação Pernambucana
@@ -94,7 +94,7 @@
         </div>
       </div>
 
-      <!-- Perfil do Operador / E-mail Institucional -->
+      <!-- Perfil do Administrador Logado -->
       <div class="px-5 py-3.5 bg-[#080d16] border-b border-[#151c2e]/80 flex items-center justify-between">
         <div class="flex items-center gap-2.5 min-w-0">
           <div class="w-2.5 h-2.5 rounded-full bg-[#00e676] animate-pulse shrink-0"></div>
@@ -106,138 +106,77 @@
         <span class="text-[10px] bg-pe-gold/20 text-pe-gold px-2 py-0.5 rounded font-mono font-bold">ADM</span>
       </div>
 
-      <!-- Menu de Navegação Vertical (Estilo Exato da Imagem) -->
-      <nav class="flex-1 p-3.5 space-y-1.5 overflow-y-auto">
+      <!-- Menu de Navegação Vertical (Com as Abas Oficiais Solicitadas) -->
+      <nav class="flex-1 p-3.5 space-y-2 overflow-y-auto">
         
-        <!-- 1. Recepção (Ativo por padrão) -->
-        <button onclick="switchTab('recepcao')" id="navBtn-recepcao" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all cursor-pointer group active-nav-pill">
+        <div class="px-3 pt-1 pb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+          Abas do Sistema
+        </div>
+
+        <!-- 1. Aba Carteiras & Atletas (Ativo por padrão) -->
+        <button onclick="switchTab('atletas')" id="navBtn-atletas" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all cursor-pointer group active-nav-pill">
           <div class="flex items-center gap-3.5">
-            <!-- Ícone Casa -->
+            <!-- Ícone Carteira / Badge -->
             <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+              <path fill-rule="evenodd" d="M10 2a1 1 0 00-1 1v1a1 1 0 002 0V3a1 1 0 00-1-1zM4 4h3a3 3 0 006 0h3a2 2 0 012 2v9a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm2.5 7a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm2.45 4a2.5 2.5 0 00-4.9 0h4.9zM12 9a1 1 0 100 2h3a1 1 0 100-2h-3zm1 4a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z" clip-rule="evenodd"/>
             </svg>
-            <span class="text-sm font-semibold tracking-wide">Recepção</span>
+            <span class="text-sm font-semibold tracking-wide">Carteiras & Atletas</span>
           </div>
-          <!-- Ponto indicador à direita (exato da imagem) -->
           <span class="nav-indicator w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
         </button>
 
-        <!-- 2. Caixa -->
-        <button onclick="switchTab('caixa')" id="navBtn-caixa" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
-          <div class="flex items-center gap-3.5">
-            <!-- Ícone Pilha de Moedas -->
-            <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C6.48 2 2 3.34 2 5v14c0 1.66 4.48 3 10 3s10-1.34 10-3V5c0-1.66-4.48-3-10-3zm0 2c4.85 0 8 1.13 8 1s-3.15 1-8 1-8-.87-8-1 3.15-1 8-1zm0 5c4.85 0 8 1.13 8 1s-3.15 1-8 1-8-.87-8-1 3.15-1 8-1zm0 5c4.85 0 8 1.13 8 1s-3.15 1-8 1-8-.87-8-1 3.15-1 8-1zm0 5c-4.85 0-8-.87-8-1s3.15-1 8-1 8 .87 8 1-3.15 1-8 1z"/>
-            </svg>
-            <span class="text-sm font-semibold tracking-wide">Caixa</span>
-          </div>
-          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
-        </button>
-
-        <!-- 3. Financeiro -->
-        <button onclick="switchTab('financeiro')" id="navBtn-financeiro" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
-          <div class="flex items-center gap-3.5">
-            <!-- Ícone Envelope / Fatura -->
-            <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-            </svg>
-            <span class="text-sm font-semibold tracking-wide">Financeiro</span>
-          </div>
-          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
-        </button>
-
-        <!-- 4. Agenda -->
-        <button onclick="switchTab('agenda')" id="navBtn-agenda" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
-          <div class="flex items-center gap-3.5">
-            <!-- Ícone Calendário -->
-            <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-              <line x1="16" y1="2" x2="16" y2="6"/>
-              <line x1="8" y1="2" x2="8" y2="6"/>
-              <line x1="3" y1="10" x2="21" y2="10"/>
-              <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>
-            </svg>
-            <span class="text-sm font-semibold tracking-wide">Agenda</span>
-          </div>
-          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
-        </button>
-
-        <!-- 5. Pessoas (Atletas Federados & Carteiras) -->
-        <button onclick="switchTab('atletas')" id="navBtn-atletas" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
-          <div class="flex items-center gap-3.5">
-            <!-- Ícone Grupo de Pessoas -->
-            <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
-            </svg>
-            <span class="text-sm font-semibold tracking-wide">Pessoas (Atletas)</span>
-          </div>
-          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
-        </button>
-
-        <!-- 6. Contratos & Estoque (Estúdio da Carteira & Materiais) -->
+        <!-- 2. Aba Estúdio da Carteira -->
         <button onclick="switchTab('estudio')" id="navBtn-estudio" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
           <div class="flex items-center gap-3.5">
-            <!-- Ícone Documento / Contrato -->
+            <!-- Ícone Estúdio / Dimensões -->
             <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
             </svg>
-            <span class="text-sm font-semibold tracking-wide">Contratos & Estoque</span>
+            <span class="text-sm font-semibold tracking-wide">Estúdio da Carteira</span>
           </div>
           <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
         </button>
 
-        <!-- 7. Grupos B2B (Clubes & Parceiros) -->
-        <button onclick="switchTab('b2b')" id="navBtn-b2b" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
-          <div class="flex items-center gap-3.5">
-            <!-- Ícone Usuário B2B / Gravata -->
-            <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-4 4a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z" clip-rule="evenodd"/>
-            </svg>
-            <span class="text-sm font-semibold tracking-wide">Grupos B2B</span>
-          </div>
-          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
-        </button>
-
-        <!-- 8. Notícias & Boletins -->
+        <!-- 3. Aba Notícias & Torneios -->
         <button onclick="switchTab('noticias')" id="navBtn-noticias" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
           <div class="flex items-center gap-3.5">
-            <!-- Ícone Notícias -->
+            <!-- Ícone Notícias / Jornal -->
             <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
             </svg>
-            <span class="text-sm font-semibold tracking-wide">Notícias & Mídia</span>
+            <span class="text-sm font-semibold tracking-wide">Notícias & Torneios</span>
           </div>
           <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
         </button>
 
-        <!-- 9. Relatórios -->
-        <button onclick="switchTab('relatorios')" id="navBtn-relatorios" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
-          <div class="flex items-center gap-3.5">
-            <!-- Ícone Gráfico de Barras -->
-            <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
-            </svg>
-            <span class="text-sm font-semibold tracking-wide">Relatórios</span>
-          </div>
-          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
-        </button>
-
-        <!-- 10. Ajustes -->
+        <!-- 4. Aba Banco de Dados & Ajustes (Keep-Alive) -->
         <button onclick="switchTab('config')" id="navBtn-config" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
           <div class="flex items-center gap-3.5">
-            <!-- Ícone Engrenagem -->
+            <!-- Ícone Engrenagem / Banco -->
             <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
             </svg>
-            <span class="text-sm font-semibold tracking-wide">Ajustes</span>
+            <span class="text-sm font-semibold tracking-wide">Banco & Ajustes</span>
+          </div>
+          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
+        </button>
+
+        <!-- 5. Guia Completo do Painel -->
+        <button onclick="switchTab('guia')" id="navBtn-guia" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
+          <div class="flex items-center gap-3.5">
+            <!-- Ícone Manual / Guia -->
+            <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <span class="text-sm font-semibold tracking-wide">Guia do Painel</span>
           </div>
           <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#008744] shrink-0"></span>
         </button>
 
       </nav>
 
-      <!-- Rodapé da Sidebar: Site Público & Logout -->
+      <!-- Rodapé da Sidebar: Ver Site & Sair -->
       <div class="p-4 border-t border-[#151c2e] bg-[#04060b] space-y-2">
         <a href="index.html" class="w-full bg-[#0c1424] hover:bg-[#121e36] border border-pe-cardBorder text-white font-bold text-xs uppercase px-3 py-2.5 rounded-xl transition flex items-center justify-center gap-2">
           <span>🌐</span> Ver Site Público
@@ -258,7 +197,7 @@
       <header class="bg-[#05080e]/95 backdrop-blur border-b border-[#151c2e] px-4 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-30">
         <div class="flex items-center gap-3">
           <span id="headerPageTitle" class="font-oswald text-xl uppercase font-bold text-white tracking-wide">
-            Recepção & Dashboard
+            Carteiras & Atletas
           </span>
           <span class="hidden sm:inline-block bg-[#00e676]/20 text-[#00e676] text-[10px] font-bold px-2 py-0.5 rounded uppercase">
             Sistema Oficial PE
@@ -280,255 +219,53 @@
       </header>
 
       <!-- Conteúdo das Abas -->
-      <main class="p-4 sm:p-6 lg:p-8 flex-1 w-full space-y-6">
+      <main class="p-4 sm:p-6 lg:p-8 flex-1 w-full space-y-8">
 
         <!-- ===================================================== -->
-        <!-- ABA: RECEPÇÃO (VISÃO GERAL / DASHBOARD EXECUTIVO)      -->
+        <!-- 1. 🪪 ABA CARTEIRAS & ATLETAS                          -->
         <!-- ===================================================== -->
-        <div id="tabContent-recepcao" class="space-y-6">
+        <div id="tabContent-atletas" class="space-y-8">
           
-          <!-- Banner de Boas-vindas -->
-          <div class="bg-gradient-to-r from-[#06173a] via-[#091e4a] to-[#040813] border border-pe-cardBorder rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl">
-            <div class="pe-stripe-bar h-1.5 w-full absolute top-0 left-0"></div>
-            <div class="max-w-3xl space-y-3 relative z-10">
-              <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Sistema Integrado de Gestão Federativa</span>
-              <h2 class="font-oswald text-2xl sm:text-4xl uppercase font-extrabold text-white leading-tight">
-                Recepção Oficial — Federação Pernambucana
-              </h2>
-              <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                Bem-vindo ao centro de operações de Foot Table & FutMesa de Pernambuco. Controle carteiras digitais, financeiro, agenda de competições, clubes filiados e notícias oficiais.
-              </p>
-              <div class="flex flex-wrap items-center gap-3 pt-2">
-                <button onclick="switchTab('atletas')" class="bg-[#00e676] hover:bg-[#00c853] text-[#021509] font-bold text-xs uppercase px-5 py-2.5 rounded-xl transition shadow flex items-center gap-2">
-                  <span>🪪</span> Emitir Carteira de Atleta
-                </button>
-                <button onclick="switchTab('noticias')" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-5 py-2.5 rounded-xl transition flex items-center gap-2">
-                  <span>📰</span> Publicar Notícia
-                </button>
+          <!-- Box Informativo: O que você encontra na Aba Carteiras & Atletas -->
+          <div class="bg-gradient-to-r from-[#06173a] via-[#091e4a] to-[#040813] border border-[#1c253b] rounded-2xl p-5 sm:p-6 relative overflow-hidden shadow-xl">
+            <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
+            <div class="flex items-start gap-4">
+              <span class="text-3xl">🪪</span>
+              <div class="space-y-2 text-xs">
+                <h3 class="font-oswald text-lg uppercase font-bold text-white tracking-wide">
+                  O que você encontra na Aba Carteiras & Atletas:
+                </h3>
+                <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-slate-300">
+                  <li class="flex items-start gap-1.5">
+                    <span class="text-[#00e676] font-bold">●</span>
+                    <span><strong>Gerador de Código:</strong> Botão para gerar automaticamente um código oficial de 6 dígitos numéricos.</span>
+                  </li>
+                  <li class="flex items-start gap-1.5">
+                    <span class="text-[#00e676] font-bold">●</span>
+                    <span><strong>Upload da Foto Oficial:</strong> Você seleciona a foto do atleta direto do seu computador, que é inserida instantaneamente na carteirinha.</span>
+                  </li>
+                  <li class="flex items-start gap-1.5">
+                    <span class="text-[#00e676] font-bold">●</span>
+                    <span><strong>Preview ao Vivo:</strong> Enquanto você preenche os dados do atleta (Nome, CPF, Nascimento, Município, Modalidade), a carteirinha oficial é renderizada ao lado em tempo real.</span>
+                  </li>
+                  <li class="flex items-start gap-1.5">
+                    <span class="text-[#00e676] font-bold">●</span>
+                    <span><strong>Envio para o Banco de Dados:</strong> Ao clicar em "Salvar Atleta no Banco de Dados", as informações e a foto são gravadas no Supabase. Assim, quando o atleta digitar os 6 dígitos dele no site público, ele recebe a carteira oficial dele imediatamente!</span>
+                  </li>
+                  <li class="flex items-start gap-1.5">
+                    <span class="text-[#00e676] font-bold">●</span>
+                    <span><strong>Botão Baixar PNG HD:</strong> Exporta a carteirinha em altíssima resolução.</span>
+                  </li>
+                  <li class="flex items-start gap-1.5">
+                    <span class="text-[#00e676] font-bold">●</span>
+                    <span><strong>Tabela de Atletas:</strong> Lista com todos os atletas cadastrados, filtro de busca, edição e exclusão.</span>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
 
-          <!-- Cards de Métricas Principais -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            
-            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-2">
-              <div class="flex items-center justify-between text-slate-400 text-xs">
-                <span class="font-bold uppercase tracking-wider">Atletas Cadastrados</span>
-                <span class="text-[#00e676]">● Ativos</span>
-              </div>
-              <div class="flex items-baseline gap-2">
-                <span id="metricTotalAthletes" class="font-oswald text-3xl font-extrabold text-white">0</span>
-                <span class="text-xs text-slate-400">atletas</span>
-              </div>
-              <span class="text-[11px] text-emerald-400 flex items-center gap-1 font-semibold">
-                ✓ Sincronizado no Supabase
-              </span>
-            </div>
-
-            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-2">
-              <div class="flex items-center justify-between text-slate-400 text-xs">
-                <span class="font-bold uppercase tracking-wider">Saldo do Caixa</span>
-                <span class="text-pe-gold">BRL</span>
-              </div>
-              <div class="flex items-baseline gap-2">
-                <span class="font-oswald text-3xl font-extrabold text-pe-gold">R$ 4.820,00</span>
-              </div>
-              <span class="text-[11px] text-slate-400 font-semibold">
-                Taxas & inscrições 2026
-              </span>
-            </div>
-
-            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-2">
-              <div class="flex items-center justify-between text-slate-400 text-xs">
-                <span class="font-bold uppercase tracking-wider">Próximo Torneio</span>
-                <span class="text-pe-blue font-bold">ROMA 2026</span>
-              </div>
-              <div class="flex items-baseline gap-2">
-                <span class="font-oswald text-2xl font-extrabold text-white">Mundial Roma</span>
-              </div>
-              <span class="text-[11px] text-slate-400 font-semibold">
-                01 a 04 de Outubro
-              </span>
-            </div>
-
-            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-2">
-              <div class="flex items-center justify-between text-slate-400 text-xs">
-                <span class="font-bold uppercase tracking-wider">Keep-Alive Vercel</span>
-                <span class="text-emerald-400 font-mono text-[10px]">24/7 ATIVO</span>
-              </div>
-              <div class="flex items-baseline gap-2">
-                <span class="font-oswald text-2xl font-extrabold text-emerald-400">100% Online</span>
-              </div>
-              <span class="text-[11px] text-slate-400 font-semibold">
-                Sem pausa de inatividade
-              </span>
-            </div>
-
-          </div>
-
-          <!-- Tabela Rápida de Atletas Recentes -->
-          <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 shadow-xl space-y-4">
-            <div class="flex items-center justify-between">
-              <h3 class="font-oswald text-lg uppercase font-bold text-white flex items-center gap-2">
-                <span>📋</span> Últimos Atletas com Carteira Homologada
-              </h3>
-              <button onclick="switchTab('atletas')" class="text-xs text-[#00e676] hover:underline font-bold">
-                Ver todos os atletas →
-              </button>
-            </div>
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs">
-                <thead class="bg-[#05080e] text-slate-400 uppercase text-[10px] font-mono border-b border-[#1c253b]">
-                  <tr>
-                    <th class="py-2.5 px-3">Código Oficial</th>
-                    <th class="py-2.5 px-3">Nome</th>
-                    <th class="py-2.5 px-3">Município</th>
-                    <th class="py-2.5 px-3">Modalidade</th>
-                    <th class="py-2.5 px-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody id="quickAthletesList" class="divide-y divide-[#1c253b]/60">
-                  <!-- Inserido dinamicamente -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- ===================================================== -->
-        <!-- ABA: CAIXA (FINANÇAS DO DIA A DIA)                     -->
-        <!-- ===================================================== -->
-        <div id="tabContent-caixa" class="space-y-6 hidden">
-          <div class="flex items-center justify-between">
-            <div>
-              <span class="text-[#00e676] text-xs font-bold uppercase tracking-wider block">Fluxo de Caixa</span>
-              <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Controle de Caixa da Federação</h2>
-            </div>
-            <button onclick="alert('Lançamento registrado com sucesso!')" class="bg-[#00e676] text-[#021509] font-bold text-xs uppercase px-4 py-2 rounded-xl transition">
-              + Novo Lançamento
-            </button>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5">
-              <span class="text-xs text-slate-400 uppercase font-bold">Entradas do Mês</span>
-              <p class="font-oswald text-2xl font-bold text-emerald-400 mt-1">R$ 6.340,00</p>
-              <span class="text-[11px] text-slate-500">Filiações & Inscrições</span>
-            </div>
-            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5">
-              <span class="text-xs text-slate-400 uppercase font-bold">Saídas do Mês</span>
-              <p class="font-oswald text-2xl font-bold text-red-400 mt-1">R$ 1.520,00</p>
-              <span class="text-[11px] text-slate-500">Material de Quadra & Troféus</span>
-            </div>
-            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5">
-              <span class="text-xs text-slate-400 uppercase font-bold">Saldo Disponível</span>
-              <p class="font-oswald text-2xl font-bold text-pe-gold mt-1">R$ 4.820,00</p>
-              <span class="text-[11px] text-slate-500">Conta Institucional PE</span>
-            </div>
-          </div>
-
-          <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6">
-            <h3 class="font-oswald text-lg uppercase font-bold text-white mb-4">Extrato Recente do Caixa</h3>
-            <div class="divide-y divide-[#1c253b] text-xs">
-              <div class="py-3 flex items-center justify-between">
-                <div>
-                  <span class="font-bold text-white block">Taxa de Filiação — Atleta Matheus Ferraz (#742918)</span>
-                  <span class="text-slate-400 text-[11px]">02/10/2026 • PIX Institucional</span>
-                </div>
-                <span class="font-mono font-bold text-emerald-400">+ R$ 80,00</span>
-              </div>
-              <div class="py-3 flex items-center justify-between">
-                <div>
-                  <span class="font-bold text-white block">Emissão de Carteira Física com Chip — Camila Duarte (#581902)</span>
-                  <span class="text-slate-400 text-[11px]">01/10/2026 • Cartão de Débito</span>
-                </div>
-                <span class="font-mono font-bold text-emerald-400">+ R$ 40,00</span>
-              </div>
-              <div class="py-3 flex items-center justify-between">
-                <div>
-                  <span class="font-bold text-white block">Compra de Bolas Homologadas Foot Table Match Ball</span>
-                  <span class="text-slate-400 text-[11px]">30/09/2026 • Fornecedor Oficial</span>
-                </div>
-                <span class="font-mono font-bold text-red-400">- R$ 350,00</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ===================================================== -->
-        <!-- ABA: FINANCEIRO (TAXAS & ANUIDADES)                    -->
-        <!-- ===================================================== -->
-        <div id="tabContent-financeiro" class="space-y-6 hidden">
-          <div>
-            <span class="text-[#00e676] text-xs font-bold uppercase tracking-wider block">Prestação de Contas</span>
-            <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Gestão Financeira & Anuidades</h2>
-          </div>
-
-          <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 space-y-4">
-            <h3 class="font-oswald text-lg uppercase font-bold text-white">Tabela de Anuidades 2026</h3>
-            <p class="text-xs text-slate-400">Controle das anuidades ativas dos atletas federados para o circuito estadual e nacional.</p>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-              <div class="bg-[#070b14] border border-[#1c253b] p-4 rounded-xl text-center">
-                <span class="text-slate-400 text-xs block">Anuidades Quitadas</span>
-                <span class="font-oswald text-3xl font-bold text-emerald-400">92%</span>
-              </div>
-              <div class="bg-[#070b14] border border-[#1c253b] p-4 rounded-xl text-center">
-                <span class="text-slate-400 text-xs block">Pendências</span>
-                <span class="font-oswald text-3xl font-bold text-amber-400">8%</span>
-              </div>
-              <div class="bg-[#070b14] border border-[#1c253b] p-4 rounded-xl text-center">
-                <span class="text-slate-400 text-xs block">Total Arrecadado Anual</span>
-                <span class="font-oswald text-3xl font-bold text-white">R$ 28.400,00</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ===================================================== -->
-        <!-- ABA: AGENDA & CALENDÁRIO                               -->
-        <!-- ===================================================== -->
-        <div id="tabContent-agenda" class="space-y-6 hidden">
-          <div class="flex items-center justify-between">
-            <div>
-              <span class="text-[#00e676] text-xs font-bold uppercase tracking-wider block">Calendário Oficial</span>
-              <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Agenda de Torneios & Etapas</h2>
-            </div>
-            <button onclick="alert('Evento agendado com sucesso!')" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-4 py-2 rounded-xl transition">
-              + Agendar Competição
-            </button>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-3 relative overflow-hidden">
-              <div class="bg-pe-gold text-pe-dark text-[10px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider inline-block">Mundial</div>
-              <h3 class="font-oswald text-lg font-bold text-white">II Campeonato Mundial Foot Table</h3>
-              <p class="text-xs text-slate-400">Roma, Itália — Delegação Oficial de Pernambuco confirmada.</p>
-              <div class="text-xs font-mono text-[#00e676] font-bold">📅 01 a 04 de Outubro de 2026</div>
-            </div>
-
-            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-3 relative overflow-hidden">
-              <div class="bg-pe-blue text-white text-[10px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider inline-block">Estadual</div>
-              <h3 class="font-oswald text-lg font-bold text-white">Open Recife de Foot Table</h3>
-              <p class="text-xs text-slate-400">Praia de Boa Viagem — Etapa classificatória estadual.</p>
-              <div class="text-xs font-mono text-[#00e676] font-bold">📅 18 e 19 de Outubro de 2026</div>
-            </div>
-
-            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-3 relative overflow-hidden">
-              <div class="bg-emerald-500 text-black text-[10px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider inline-block">Interior</div>
-              <h3 class="font-oswald text-lg font-bold text-white">Copa Agreste de FutMesa</h3>
-              <p class="text-xs text-slate-400">Caruaru / PE — Categorias Solo, Dupla e Master 40+.</p>
-              <div class="text-xs font-mono text-[#00e676] font-bold">📅 07 e 08 de Novembro de 2026</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ===================================================== -->
-        <!-- ABA: PESSOAS (ATLETAS & CARTEIRAS FEDERADAS)           -->
-        <!-- ===================================================== -->
-        <div id="tabContent-atletas" class="space-y-8 hidden">
-          
+          <!-- Cabeçalho de Ação -->
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <span class="text-[#00e676] text-xs font-bold uppercase tracking-wider block">Registros Oficiais</span>
@@ -542,7 +279,7 @@
           <!-- Grid: Formulário + Preview Carteira -->
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
-            <!-- Formulário de Cadastro -->
+            <!-- Formulário de Cadastro do Atleta -->
             <div class="lg:col-span-6 bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 shadow-xl relative">
               <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0 rounded-t-2xl"></div>
 
@@ -598,7 +335,7 @@
                   </div>
                 </div>
 
-                <!-- Upload de Foto -->
+                <!-- Upload de Foto Oficial -->
                 <div>
                   <label class="block text-slate-300 font-bold mb-1">Foto Oficial do Atleta (Carteira)</label>
                   <div class="flex items-center gap-3">
@@ -610,10 +347,10 @@
                 <div id="athleteFeedback" class="hidden text-xs p-3 rounded-xl"></div>
 
                 <div class="pt-2 flex items-center gap-3">
-                  <button type="submit" class="flex-1 bg-[#00e676] hover:bg-[#00c853] text-[#021509] font-extrabold text-xs uppercase tracking-wider py-3.5 rounded-xl transition shadow flex items-center justify-center gap-2">
+                  <button type="submit" class="flex-1 bg-[#00e676] hover:bg-[#00c853] text-[#021509] font-extrabold text-xs uppercase tracking-wider py-3.5 rounded-xl transition shadow flex items-center justify-center gap-2 cursor-pointer">
                     <span>💾</span> Salvar Atleta no Banco de Dados
                   </button>
-                  <button type="button" onclick="clearAthleteForm()" class="bg-[#0b101d] border border-[#1c253b] hover:border-slate-500 text-slate-400 font-bold text-xs uppercase px-4 py-3.5 rounded-xl transition">
+                  <button type="button" onclick="clearAthleteForm()" class="bg-[#0b101d] border border-[#1c253b] hover:border-slate-500 text-slate-400 font-bold text-xs uppercase px-4 py-3.5 rounded-xl transition cursor-pointer">
                     Limpar
                   </button>
                 </div>
@@ -627,7 +364,7 @@
                   <span class="w-2 h-2 rounded-full bg-[#00e676] animate-pulse"></span>
                   Visualização da Carteira Gerada
                 </span>
-                <button onclick="downloadLivePreviewBadge()" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
+                <button onclick="downloadLivePreviewBadge()" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer">
                   <span>💾</span> Baixar PNG HD
                 </button>
               </div>
@@ -638,7 +375,7 @@
                   PERNAMBUCO
                 </div>
 
-                <!-- Topo Carteira -->
+                <!-- Topo da Carteira -->
                 <div class="flex items-center justify-between border-b border-pe-gold/25 pb-4 mb-4">
                   <div class="flex items-center gap-3">
                     <div class="rounded-full border border-pe-gold overflow-hidden bg-pe-darkblue p-0.5 flex items-center justify-center shrink-0" style="width: 42px; height: 42px;">
@@ -685,7 +422,7 @@
                 <!-- Textos Personalizados da Carteira -->
                 <div id="previewCustomTextsContainer" class="space-y-1 my-2"></div>
 
-                <!-- Rodapé Carteira -->
+                <!-- Rodapé da Carteira -->
                 <div class="bg-black/40 border-l-4 border-pe-gold p-3 rounded-lg flex items-center justify-between mt-4">
                   <div>
                     <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">Modalidade Homologada</span>
@@ -707,7 +444,7 @@
           <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 shadow-xl">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <h3 class="font-oswald text-xl uppercase font-bold text-white flex items-center gap-2">
-                <span>📋</span> Atletas Federados Cadastrados no Banco
+                <span>📋</span> Tabela de Atletas Cadastrados no Banco
               </h3>
               <input type="text" id="searchAthleteTable" oninput="filterAthletesTable()" placeholder="Filtrar por nome ou código..." class="bg-[#05080e] border border-[#1c253b] rounded-xl px-4 py-2 text-xs text-white outline-none focus:border-[#00e676]" />
             </div>
@@ -736,19 +473,52 @@
         </div>
 
         <!-- ===================================================== -->
-        <!-- ABA: CONTRATOS & ESTOQUE (ESTÚDIO DA CARTEIRA)         -->
+        <!-- 2. 🎨 ABA ESTÚDIO DA CARTEIRA                         -->
         <!-- ===================================================== -->
         <div id="tabContent-estudio" class="space-y-8 hidden">
+          
+          <!-- Box Informativo: O que você encontra na Aba Estúdio da Carteira -->
+          <div class="bg-gradient-to-r from-[#06173a] via-[#091e4a] to-[#040813] border border-[#1c253b] rounded-2xl p-5 sm:p-6 relative overflow-hidden shadow-xl">
+            <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
+            <div class="flex items-start gap-4">
+              <span class="text-3xl">🎨</span>
+              <div class="space-y-2 text-xs">
+                <h3 class="font-oswald text-lg uppercase font-bold text-white tracking-wide">
+                  O que você encontra na Aba Estúdio da Carteira (Dimensões & Textos Personalizados):
+                </h3>
+                <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-slate-300">
+                  <li class="flex items-start gap-1.5">
+                    <span class="text-[#00e676] font-bold">●</span>
+                    <span><strong>Controle de Dimensões:</strong> Largura/Comprimento (slider para aumentar ou diminuir a largura total da carteira), Altura Mínima, Espaçamento Interno (Padding) e Arredondamento das Bordas (Border Radius).</span>
+                  </li>
+                  <li class="flex items-start gap-1.5">
+                    <span class="text-[#00e676] font-bold">●</span>
+                    <span><strong>Dimensões da Foto do Atleta:</strong> Sliders para regular Largura, Altura e Arredondamento da moldura da foto.</span>
+                  </li>
+                  <li class="flex items-start gap-1.5">
+                    <span class="text-[#00e676] font-bold">●</span>
+                    <span><strong>Textos Adicionais na Carteira:</strong> Botão <em>+ Adicionar Texto</em> permite adicionar novos blocos de texto na carteira (ex: "VALIDADE 2026/2027", "CHANCELA CBFT", "CATEGORIA MASTER"), com controle de tamanho da fonte, cor do texto e alinhamento.</span>
+                  </li>
+                  <li class="flex items-start gap-1.5">
+                    <span class="text-[#00e676] font-bold">●</span>
+                    <span><strong>Salvar Layout Oficial:</strong> Ao clicar em salvar, o site público passa a emitir as carteiras exatamente com as dimensões e textos que você definiu!</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cabeçalho de Ação -->
           <div class="flex items-center justify-between">
             <div>
               <span class="text-[#00e676] text-xs font-bold uppercase tracking-wider block">Customizador Visual</span>
-              <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Estúdio da Carteira & Equipamentos</h2>
+              <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Estúdio da Carteira & Dimensões</h2>
             </div>
             <div class="flex items-center gap-2">
-              <button onclick="saveBadgeStudioLayout()" class="bg-[#00e676] hover:bg-[#00c853] text-[#021509] font-extrabold text-xs uppercase px-5 py-2.5 rounded-xl transition shadow flex items-center gap-1.5">
+              <button onclick="saveBadgeStudioLayout()" class="bg-[#00e676] hover:bg-[#00c853] text-[#021509] font-extrabold text-xs uppercase px-5 py-2.5 rounded-xl transition shadow flex items-center gap-1.5 cursor-pointer">
                 <span>💾</span> Salvar Layout Oficial
               </button>
-              <button onclick="resetBadgeStudioLayout()" class="bg-[#0b101d] border border-[#1c253b] text-slate-400 hover:text-white text-xs uppercase px-4 py-2.5 rounded-xl transition">
+              <button onclick="resetBadgeStudioLayout()" class="bg-[#0b101d] border border-[#1c253b] text-slate-400 hover:text-white text-xs uppercase px-4 py-2.5 rounded-xl transition cursor-pointer">
                 Padrão
               </button>
             </div>
@@ -762,12 +532,12 @@
               <!-- Dimensões da Carteira -->
               <div>
                 <h4 class="font-oswald text-base uppercase font-bold text-pe-gold mb-3 flex items-center gap-2">
-                  <span>📐</span> Dimensões da Carteira
+                  <span>📐</span> Controle de Dimensões da Carteira
                 </h4>
                 <div class="space-y-3">
                   <div>
                     <div class="flex justify-between text-slate-300 font-bold mb-1">
-                      <span>Largura da Carteira:</span>
+                      <span>Largura / Comprimento:</span>
                       <span id="valCardWidth" class="text-pe-gold font-mono">540px</span>
                     </div>
                     <input type="range" id="inputCardWidth" min="400" max="680" value="540" oninput="updateStudioLive()" class="w-full accent-[#00e676]" />
@@ -791,7 +561,7 @@
 
                   <div>
                     <div class="flex justify-between text-slate-300 font-bold mb-1">
-                      <span>Raio dos Cantos (Borda):</span>
+                      <span>Arredondamento das Bordas (Border Radius):</span>
                       <span id="valCardRadius" class="text-pe-gold font-mono">16px</span>
                     </div>
                     <input type="range" id="inputCardRadius" min="4" max="32" value="16" oninput="updateStudioLive()" class="w-full accent-[#00e676]" />
@@ -823,7 +593,7 @@
 
                   <div>
                     <div class="flex justify-between text-slate-300 font-bold mb-1">
-                      <span>Arredondamento da Foto:</span>
+                      <span>Arredondamento da Moldura da Foto:</span>
                       <span id="valPhotoRadius" class="text-pe-gold font-mono">8px</span>
                     </div>
                     <input type="range" id="inputPhotoRadius" min="0" max="30" value="8" oninput="updateStudioLive()" class="w-full accent-[#00e676]" />
@@ -831,13 +601,13 @@
                 </div>
               </div>
 
-              <!-- Textos Personalizados Adicionais -->
+              <!-- Textos Adicionais na Carteira -->
               <div class="border-t border-[#1c253b] pt-4">
                 <div class="flex items-center justify-between mb-3">
                   <h4 class="font-oswald text-base uppercase font-bold text-pe-gold flex items-center gap-2">
                     <span>🔤</span> Textos Adicionais na Carteira
                   </h4>
-                  <button onclick="addCustomTextItem()" class="bg-[#00e676] text-[#021509] font-bold text-[10px] uppercase px-2.5 py-1 rounded-lg transition">
+                  <button onclick="addCustomTextItem()" class="bg-[#00e676] text-[#021509] font-bold text-[10px] uppercase px-2.5 py-1 rounded-lg transition cursor-pointer">
                     + Adicionar Texto
                   </button>
                 </div>
@@ -867,56 +637,37 @@
         </div>
 
         <!-- ===================================================== -->
-        <!-- ABA: GRUPOS B2B (CLUBES & PARCEIROS)                   -->
-        <!-- ===================================================== -->
-        <div id="tabContent-b2b" class="space-y-6 hidden">
-          <div class="flex items-center justify-between">
-            <div>
-              <span class="text-[#00e676] text-xs font-bold uppercase tracking-wider block">Parcerias Institucionais</span>
-              <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Grupos B2B, Clubes & Federações</h2>
-            </div>
-            <button onclick="alert('Clube parceiro cadastrado!')" class="bg-[#00e676] text-[#021509] font-bold text-xs uppercase px-4 py-2 rounded-xl transition">
-              + Cadastrar Clube / Parceiro
-            </button>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-3">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-pe-gold uppercase">Clube Filiado</span>
-                <span class="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">ATIVO</span>
-              </div>
-              <h3 class="font-oswald text-lg font-bold text-white">Associação Boa Viagem de Foot Table</h3>
-              <p class="text-xs text-slate-400">Recife - PE • 24 atletas filiados • Responsável: Carlos Alberto</p>
-              <div class="text-[11px] text-slate-500 font-mono">CNPJ: 34.891.002/0001-90</div>
-            </div>
-
-            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-3">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-pe-gold uppercase">Clube Filiado</span>
-                <span class="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">ATIVO</span>
-              </div>
-              <h3 class="font-oswald text-lg font-bold text-white">FutMesa Olinda Clube</h3>
-              <p class="text-xs text-slate-400">Olinda - PE • 18 atletas filiados • Responsável: Rodrigo Mendes</p>
-              <div class="text-[11px] text-slate-500 font-mono">CNPJ: 41.229.110/0001-14</div>
-            </div>
-
-            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 space-y-3">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-pe-gold uppercase">Clube Filiado</span>
-                <span class="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">ATIVO</span>
-              </div>
-              <h3 class="font-oswald text-lg font-bold text-white">Caruaru Foot Table Team</h3>
-              <p class="text-xs text-slate-400">Caruaru - PE • 15 atletas filiados • Responsável: Fernando Sales</p>
-              <div class="text-[11px] text-slate-500 font-mono">CNPJ: 28.110.874/0001-88</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ===================================================== -->
-        <!-- ABA: NOTÍCIAS & MÍDIA                                  -->
+        <!-- 3. 📰 ABA NOTÍCIAS & TORNEIOS                         -->
         <!-- ===================================================== -->
         <div id="tabContent-noticias" class="space-y-8 hidden">
+          
+          <!-- Box Informativo: O que você encontra na Aba Notícias & Torneios -->
+          <div class="bg-gradient-to-r from-[#06173a] via-[#091e4a] to-[#040813] border border-[#1c253b] rounded-2xl p-5 sm:p-6 relative overflow-hidden shadow-xl">
+            <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
+            <div class="flex items-start gap-4">
+              <span class="text-3xl">📰</span>
+              <div class="space-y-2 text-xs">
+                <h3 class="font-oswald text-lg uppercase font-bold text-white tracking-wide">
+                  O que você encontra na Aba Notícias & Torneios:
+                </h3>
+                <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-slate-300">
+                  <li class="flex items-start gap-1.5">
+                    <span class="text-[#00e676] font-bold">●</span>
+                    <span><strong>Publicação de Novas Matérias:</strong> Com Título, Categoria (Mundial Roma, Campeonato, Regulamento, Informativo, Comunicado), Data e Conteúdo.</span>
+                  </li>
+                  <li class="flex items-start gap-1.5">
+                    <span class="text-[#00e676] font-bold">●</span>
+                    <span><strong>Sincronização no Supabase:</strong> As matérias salvas vão para o banco de dados Supabase e aparecem instantaneamente na página inicial pública.</span>
+                  </li>
+                  <li class="flex items-start gap-1.5">
+                    <span class="text-[#00e676] font-bold">●</span>
+                    <span><strong>Gerenciamento e Exclusão:</strong> Controle total e remoção de comunicados antigos com um clique.</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
           <div class="flex items-center justify-between">
             <div>
               <span class="text-[#00e676] text-xs font-bold uppercase tracking-wider block">Boletins Oficiais</span>
@@ -962,7 +713,7 @@
 
                 <div id="newsFeedback" class="hidden text-xs p-3 rounded-xl"></div>
 
-                <button type="submit" class="w-full bg-[#00e676] hover:bg-[#00c853] text-[#021509] font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition flex items-center justify-center gap-2">
+                <button type="submit" class="w-full bg-[#00e676] hover:bg-[#00c853] text-[#021509] font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer">
                   <span>🚀</span> Publicar no Site & Supabase
                 </button>
               </form>
@@ -979,40 +730,12 @@
         </div>
 
         <!-- ===================================================== -->
-        <!-- ABA: RELATÓRIOS & ESTATÍSTICAS                         -->
-        <!-- ===================================================== -->
-        <div id="tabContent-relatorios" class="space-y-6 hidden">
-          <div class="flex items-center justify-between">
-            <div>
-              <span class="text-[#00e676] text-xs font-bold uppercase tracking-wider block">Auditoria & Estatísticas</span>
-              <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Relatórios Oficiais de Atletas</h2>
-            </div>
-            <button onclick="window.print()" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-4 py-2 rounded-xl transition flex items-center gap-2">
-              <span>🖨️</span> Imprimir Relatório Oficial
-            </button>
-          </div>
-
-          <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 space-y-4">
-            <h3 class="font-oswald text-lg uppercase font-bold text-white">Exportação de Dados Federativos</h3>
-            <p class="text-xs text-slate-400">Emita a listagem completa dos atletas homologados em folha timbrada para mesas de arbitragem.</p>
-            <div class="flex flex-wrap gap-3 pt-2">
-              <button onclick="alert('Exportando CSV de atletas homologados...')" class="bg-[#070b14] border border-[#1c253b] hover:border-[#00e676] text-white px-4 py-2.5 rounded-xl text-xs font-bold transition">
-                📥 Exportar Planilha de Atletas (.CSV)
-              </button>
-              <button onclick="alert('Gerando documento PDF timbrado da Federação...')" class="bg-[#070b14] border border-[#1c253b] hover:border-[#00e676] text-white px-4 py-2.5 rounded-xl text-xs font-bold transition">
-                📄 Gerar Caderno de Árbitros (.PDF)
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- ===================================================== -->
-        <!-- ABA: AJUSTES (CONFIGURAÇÃO SUPABASE & KEEP-ALIVE)      -->
+        <!-- 4. ⚙️ ABA BANCO DE DADOS & AJUSTES                     -->
         <!-- ===================================================== -->
         <div id="tabContent-config" class="space-y-8 hidden">
           <div>
             <span class="text-[#00e676] text-xs font-bold uppercase tracking-wider block">Integração na Nuvem</span>
-            <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Ajustes do Sistema, Supabase & Keep-Alive</h2>
+            <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Configuração do Supabase & Keep-Alive</h2>
           </div>
 
           <div class="max-w-3xl bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 sm:p-8 space-y-6 shadow-xl relative">
@@ -1032,10 +755,10 @@
               <div id="adminConfigFeedback" class="hidden p-3 rounded-xl text-xs font-bold"></div>
 
               <div class="flex flex-wrap items-center gap-3 pt-2">
-                <button onclick="handleSaveAdminConfig()" class="bg-[#00e676] hover:bg-[#00c853] text-[#021509] font-extrabold text-xs uppercase px-6 py-3 rounded-xl transition">
+                <button onclick="handleSaveAdminConfig()" class="bg-[#00e676] hover:bg-[#00c853] text-[#021509] font-extrabold text-xs uppercase px-6 py-3 rounded-xl transition cursor-pointer">
                   Salvar Credenciais
                 </button>
-                <button onclick="testSupabaseConnection()" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-5 py-3 rounded-xl transition flex items-center gap-2">
+                <button onclick="testSupabaseConnection()" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-5 py-3 rounded-xl transition flex items-center gap-2 cursor-pointer">
                   <span>📡</span> Testar Conexão com o Banco
                 </button>
               </div>
@@ -1049,6 +772,111 @@
                 A rota <code class="text-pe-gold bg-black/50 px-1.5 py-0.5 rounded">/api/keep-alive</code> foi agendada na Vercel diariamente. Ela consulta a tabela <code class="text-slate-300">keep_alive_logs</code> do seu Supabase, garantindo que o banco de dados nunca seja pausado por inatividade.
               </p>
             </div>
+          </div>
+        </div>
+
+        <!-- ===================================================== -->
+        <!-- 5. 📋 ABA GUIA DO PAINEL ADMINISTRATIVO                -->
+        <!-- ===================================================== -->
+        <div id="tabContent-guia" class="space-y-6 hidden">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-[#00e676] text-xs font-bold uppercase tracking-wider block">Documentação Oficial</span>
+              <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">O que você encontra no Painel Administrativo</h2>
+            </div>
+          </div>
+
+          <div class="space-y-6">
+            
+            <!-- Item 1 -->
+            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
+              <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
+              <div class="flex items-center gap-3">
+                <span class="text-2xl">🪪</span>
+                <h3 class="font-oswald text-xl uppercase font-bold text-white">1. Aba Carteiras & Atletas</h3>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-300">
+                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
+                  <strong class="text-white block mb-1 text-sm text-[#00e676]">🎲 Gerador de Código:</strong>
+                  Botão para gerar automaticamente um código oficial de 6 dígitos numéricos.
+                </div>
+                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
+                  <strong class="text-white block mb-1 text-sm text-[#00e676]">📸 Upload da Foto Oficial:</strong>
+                  Você seleciona a foto do atleta direto do seu computador, que é inserida instantaneamente na carteirinha.
+                </div>
+                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
+                  <strong class="text-white block mb-1 text-sm text-[#00e676]">👁️ Preview ao Vivo:</strong>
+                  Enquanto você preenche os dados do atleta (Nome, CPF, Nascimento, Município, Modalidade), a carteirinha oficial é renderizada ao lado em tempo real.
+                </div>
+                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
+                  <strong class="text-white block mb-1 text-sm text-[#00e676]">☁️ Envio para o Banco de Dados:</strong>
+                  Ao clicar em "Salvar Atleta no Banco de Dados", as informações e a foto são gravadas no Supabase. Assim, quando o atleta digitar os 6 dígitos dele no site público, ele recebe a carteira oficial dele imediatamente!
+                </div>
+                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
+                  <strong class="text-white block mb-1 text-sm text-[#00e676]">💾 Botão Baixar PNG HD:</strong>
+                  Exporta a carteirinha em altíssima resolução para impressão ou envio.
+                </div>
+                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
+                  <strong class="text-white block mb-1 text-sm text-[#00e676]">📋 Tabela de Atletas:</strong>
+                  Lista com todos os atletas cadastrados, filtro de busca, edição e exclusão rápida.
+                </div>
+              </div>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
+              <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
+              <div class="flex items-center gap-3">
+                <span class="text-2xl">🎨</span>
+                <h3 class="font-oswald text-xl uppercase font-bold text-white">2. Aba Estúdio da Carteira (Dimensões & Textos Personalizados)</h3>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-300">
+                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
+                  <strong class="text-white block mb-1 text-sm text-pe-gold">📐 Controle de Dimensões:</strong>
+                  <ul class="list-disc list-inside space-y-1 mt-1 text-slate-400">
+                    <li><strong>Largura / Comprimento:</strong> Slider para aumentar ou diminuir a largura total da carteira.</li>
+                    <li><strong>Altura Mínima:</strong> Slider para ajustar a altura da carteira.</li>
+                    <li><strong>Espaçamento Interno (Padding)</strong> e <strong>Arredondamento das Bordas (Border Radius)</strong>.</li>
+                  </ul>
+                </div>
+                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
+                  <strong class="text-white block mb-1 text-sm text-pe-gold">🖼️ Dimensões da Foto do Atleta:</strong>
+                  Sliders para regular Largura, Altura e Arredondamento da moldura da foto oficial do atleta.
+                </div>
+                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
+                  <strong class="text-white block mb-1 text-sm text-pe-gold">🔤 Textos Adicionais na Carteira:</strong>
+                  Botão <em>+ Adicionar Texto</em> permite adicionar novos blocos de texto na carteira (ex: "VALIDADE 2026/2027", "CHANCELA CBFT", "CATEGORIA MASTER"), com controle de tamanho da fonte, cor do texto e alinhamento.
+                </div>
+                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
+                  <strong class="text-white block mb-1 text-sm text-pe-gold">💾 Salvar Layout Oficial:</strong>
+                  Ao clicar em salvar, o site público passa a emitir as carteiras exatamente com as dimensões e textos que você definiu!
+                </div>
+              </div>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
+              <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
+              <div class="flex items-center gap-3">
+                <span class="text-2xl">📰</span>
+                <h3 class="font-oswald text-xl uppercase font-bold text-white">3. Aba Notícias & Torneios</h3>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-300">
+                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
+                  <strong class="text-white block mb-1 text-sm text-pe-blue">🚀 Publicação de Matérias:</strong>
+                  Publicação de novas matérias com Título, Categoria (Mundial Roma, Campeonato, Regulamento, Informativo, Comunicado), Data e Conteúdo.
+                </div>
+                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
+                  <strong class="text-white block mb-1 text-sm text-pe-blue">⚡ Sincronização Automática:</strong>
+                  As matérias salvas vão para o Supabase e aparecem instantaneamente na página inicial.
+                </div>
+                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
+                  <strong class="text-white block mb-1 text-sm text-pe-blue">🗑️ Gerenciamento Rápido:</strong>
+                  Gerenciamento e exclusão de comunicados antigos com apenas um clique.
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -1156,20 +984,15 @@
     }
 
     /* =========================================================
-       SISTEMA DE NAVEGAÇÃO LATERAL (ESTILO EXATO SCREENSHOT)
+       SISTEMA DE NAVEGAÇÃO LATERAL (ABAS OFICIAIS)
        ========================================================= */
-    const ALL_TABS = ['recepcao', 'caixa', 'financeiro', 'agenda', 'atletas', 'estudio', 'b2b', 'noticias', 'relatorios', 'config'];
+    const ALL_TABS = ['atletas', 'estudio', 'noticias', 'config', 'guia'];
     const TAB_TITLES = {
-      recepcao: 'Recepção & Dashboard',
-      caixa: 'Controle de Caixa da Federação',
-      financeiro: 'Gestão Financeira & Anuidades',
-      agenda: 'Agenda de Torneios & Competições',
-      atletas: 'Pessoas (Atletas Federados & Carteiras)',
-      estudio: 'Contratos & Estoque (Estúdio da Carteira)',
-      b2b: 'Grupos B2B, Clubes & Parceiros',
-      noticias: 'Notícias & Boletins Oficiais',
-      relatorios: 'Relatórios Oficiais & Auditoria',
-      config: 'Ajustes, Supabase & Keep-Alive'
+      atletas: '1. 🪪 Aba Carteiras & Atletas',
+      estudio: '2. 🎨 Aba Estúdio da Carteira (Dimensões & Textos)',
+      noticias: '3. 📰 Aba Notícias & Torneios',
+      config: '4. ⚙️ Banco de Dados & Ajustes',
+      guia: '📋 Guia do Painel Administrativo'
     };
 
     function switchTab(tabName) {
@@ -1202,7 +1025,7 @@
     }
 
     /* =========================================================
-       GERENCIAMENTO DE ATLETAS (ABA 1 / PESSOAS)
+       GERENCIAMENTO DE ATLETAS (ABA 1)
        ========================================================= */
     function generateRandomAthleteCode() {
       const code = String(Math.floor(100000 + Math.random() * 900000));
@@ -1304,7 +1127,6 @@
       feedback.innerHTML = `✓ Atleta #${code} cadastrado com sucesso! ${savedInSupabase ? '(Sincronizado com Supabase)' : '(Salvo localmente)'}.`;
 
       renderAthletesTable();
-      updateDashboardMetrics();
     }
 
     async function loadAthletes() {
@@ -1359,44 +1181,54 @@
           </td>
           <td class="py-3 px-4 text-right">
             <div class="flex items-center justify-end gap-2">
-              <button onclick="fillFormWithAthlete('${a.codigo}')" class="text-xs text-blue-400 hover:text-blue-300 font-bold p-1">Editar</button>
-              <button onclick="deleteAthlete('${a.codigo}')" class="text-xs text-red-400 hover:text-red-300 font-bold p-1">Excluir</button>
+              <button onclick="fillFormWithAthlete('${a.codigo}')" class="text-xs text-blue-400 hover:text-blue-300 font-bold p-1 cursor-pointer">Editar</button>
+              <button onclick="deleteAthlete('${a.codigo}')" class="text-xs text-red-400 hover:text-red-300 font-bold p-1 cursor-pointer">Excluir</button>
             </div>
           </td>
         `;
         tbody.appendChild(tr);
       });
-
-      renderQuickAthletesList(athletes);
     }
 
-    function renderQuickAthletesList(athletes) {
-      const quick = document.getElementById('quickAthletesList');
-      if (!quick) return;
-      quick.innerHTML = '';
-      const topAthletes = athletes.slice(0, 5);
-      topAthletes.forEach(a => {
+    async function filterAthletesTable() {
+      const q = document.getElementById('searchAthleteTable').value.toLowerCase();
+      const athletes = await loadAthletes();
+      const filtered = athletes.filter(a => 
+        (a.nome && a.nome.toLowerCase().includes(q)) || 
+        (a.codigo && String(a.codigo).includes(q)) ||
+        (a.cpf && a.cpf.includes(q))
+      );
+
+      const tbody = document.getElementById('athletesTableBody');
+      tbody.innerHTML = "";
+      filtered.forEach(a => {
         const tr = document.createElement('tr');
         tr.className = "hover:bg-[#070b14] transition";
         tr.innerHTML = `
-          <td class="py-2.5 px-3 font-mono font-bold text-[#00e676]">#${a.codigo}</td>
-          <td class="py-2.5 px-3 font-bold text-white uppercase">${a.nome}</td>
-          <td class="py-2.5 px-3 text-slate-300">${a.municipio || 'Pernambuco'}</td>
-          <td class="py-2.5 px-3 text-pe-gold font-bold">${a.modalidade || 'SOLO'}</td>
-          <td class="py-2.5 px-3">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950/60 text-[#00e676] border border-emerald-500/30">
+          <td class="py-3 px-4">
+            <div class="w-9 h-11 rounded border border-pe-gold/40 overflow-hidden bg-slate-900">
+              <img src="${a.foto || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'}" class="w-full h-full object-cover" />
+            </div>
+          </td>
+          <td class="py-3 px-4 font-mono font-bold text-[#00e676]">#${a.codigo}</td>
+          <td class="py-3 px-4 font-bold text-white uppercase">${a.nome}</td>
+          <td class="py-3 px-4 font-mono text-slate-300">${a.cpf || '-'}</td>
+          <td class="py-3 px-4 text-slate-300">${a.municipio || '-'}</td>
+          <td class="py-3 px-4 text-pe-gold">${a.modalidade || 'SOLO'}</td>
+          <td class="py-3 px-4">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${a.status === 'REGULAR' ? 'bg-emerald-950/60 text-[#00e676] border border-emerald-500/30' : 'bg-amber-950/60 text-amber-400 border border-amber-500/30'}">
               ${a.status || 'REGULAR'}
             </span>
           </td>
+          <td class="py-3 px-4 text-right">
+            <div class="flex items-center justify-end gap-2">
+              <button onclick="fillFormWithAthlete('${a.codigo}')" class="text-xs text-blue-400 hover:text-blue-300 font-bold p-1 cursor-pointer">Editar</button>
+              <button onclick="deleteAthlete('${a.codigo}')" class="text-xs text-red-400 hover:text-red-300 font-bold p-1 cursor-pointer">Excluir</button>
+            </div>
+          </td>
         `;
-        quick.appendChild(tr);
+        tbody.appendChild(tr);
       });
-    }
-
-    async function updateDashboardMetrics() {
-      const athletes = await loadAthletes();
-      const el = document.getElementById('metricTotalAthletes');
-      if (el) el.textContent = athletes.length;
     }
 
     async function deleteAthlete(codigo) {
@@ -1415,7 +1247,6 @@
       localStorage.setItem('pe_athletes_db', JSON.stringify(localAthletes));
 
       renderAthletesTable();
-      updateDashboardMetrics();
     }
 
     async function fillFormWithAthlete(codigo) {
@@ -1457,7 +1288,7 @@
     }
 
     /* =========================================================
-       ESTÚDIO DA CARTEIRA: DIMENSÕES & TEXTOS CUSTOMIZADOS
+       ESTÚDIO DA CARTEIRA: DIMENSÕES & TEXTOS CUSTOMIZADOS (ABA 2)
        ========================================================= */
     function syncStudioWithCurrentLayout() {
       document.getElementById('inputCardWidth').value = currentBadgeLayout.cardWidth || 540;
@@ -1595,7 +1426,7 @@
         div.innerHTML = `
           <div class="flex items-center gap-2">
             <input type="text" value="${t.text}" oninput="updateCustomTextItem(${t.id}, 'text', this.value)" class="flex-1 bg-transparent border-b border-[#1c253b] text-white text-xs font-bold outline-none py-1 focus:border-[#00e676]" />
-            <button onclick="removeCustomTextItem(${t.id})" class="text-red-400 hover:text-red-300 font-bold px-2 py-0.5">✕</button>
+            <button onclick="removeCustomTextItem(${t.id})" class="text-red-400 hover:text-red-300 font-bold px-2 py-0.5 cursor-pointer">✕</button>
           </div>
           <div class="grid grid-cols-3 gap-2 text-[10px]">
             <div>
@@ -1633,7 +1464,7 @@
     }
 
     /* =========================================================
-       GERENCIAMENTO DE NOTÍCIAS
+       GERENCIAMENTO DE NOTÍCIAS (ABA 3)
        ========================================================= */
     async function loadNews() {
       let list = JSON.parse(localStorage.getItem('pe_news_db')) || DEFAULT_NEWS;
@@ -1674,7 +1505,7 @@
             <h4 class="font-oswald text-base font-bold text-white uppercase">${item.title}</h4>
             <p class="text-xs text-slate-400 line-clamp-2">${item.content}</p>
           </div>
-          <button onclick="deleteNews(${item.id})" class="text-red-400 hover:text-red-300 text-xs font-bold p-1">Excluir</button>
+          <button onclick="deleteNews(${item.id})" class="text-red-400 hover:text-red-300 text-xs font-bold p-1 cursor-pointer">Excluir</button>
         `;
         container.appendChild(div);
       });
@@ -1737,7 +1568,7 @@
     }
 
     /* =========================================================
-       CONFIGURAÇÃO DO BANCO & KEEP-ALIVE
+       CONFIGURAÇÃO DO BANCO & KEEP-ALIVE (ABA 4)
        ========================================================= */
     function handleSaveAdminConfig() {
       const url = document.getElementById('adminCfgUrl').value.trim();
@@ -1824,7 +1655,6 @@
       renderAthletesTable();
       renderAdminNews();
       syncStudioWithCurrentLayout();
-      updateDashboardMetrics();
     };
   </script>
 </body>
