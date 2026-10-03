@@ -138,20 +138,22 @@
         <!-- Linha tricolor no topo do card -->
         <div class="pe-stripe-line h-[4px] w-full absolute top-0 left-0"></div>
 
-        <!-- Seletor de Abas: Login vs Criar E-mail Institucional -->
-        <div class="flex border-b border-pe-cardBorder bg-[#090d16]/80 text-xs font-bold uppercase tracking-wider">
-          <button type="button" id="tabBtnLogin" onclick="switchAuthTab('login')" class="flex-1 py-3 px-3 text-pe-gold border-b-2 border-pe-gold transition flex items-center justify-center gap-1.5">
-            <span>🔑</span> Entrar com E-mail
-          </button>
-          <button type="button" id="tabBtnRegister" onclick="switchAuthTab('register')" class="flex-1 py-3 px-3 text-slate-400 hover:text-white border-b-2 border-transparent transition flex items-center justify-center gap-1.5">
-            <span>✍️</span> Criar E-mail Institucional
-          </button>
+        <!-- Cabeçalho do Card de Login Oficial -->
+        <div class="border-b border-pe-cardBorder bg-[#090d16]/80 px-6 py-4 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-pe-gold text-base">🔑</span>
+            <span class="text-xs font-bold uppercase tracking-wider text-pe-gold font-oswald">Autenticação Institucional</span>
+          </div>
+          <span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            Acesso Restrito
+          </span>
         </div>
 
         <div class="p-6 sm:p-8">
           
           <!-- ========================================== -->
-          <!-- FORMULÁRIO 1: LOGIN COM E-MAIL INSTITUCIONAL -->
+          <!-- FORMULÁRIO DE LOGIN COM E-MAIL INSTITUCIONAL -->
           <!-- ========================================== -->
           <form id="loginForm" class="space-y-4">
             
@@ -245,114 +247,6 @@
             </button>
           </form>
 
-          <!-- ========================================== -->
-          <!-- FORMULÁRIO 2: CRIAR E-MAIL INSTITUCIONAL   -->
-          <!-- ========================================== -->
-          <form id="registerForm" class="space-y-4 hidden" onsubmit="handleCreateInstitutionalEmail(event)">
-            
-            <div>
-              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-300 mb-1.5">
-                Nome do Diretor / Gestor *
-              </label>
-              <input 
-                type="text" 
-                id="regName" 
-                required 
-                placeholder="ex: Gabriel Alves" 
-                class="w-full bg-pe-inputBg border border-pe-cardBorder focus:border-pe-gold rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 outline-none"
-              />
-            </div>
-
-            <div>
-              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-300 mb-1.5">
-                Cargo / Atribuição
-              </label>
-              <select id="regRole" class="w-full bg-pe-inputBg border border-pe-cardBorder focus:border-pe-gold rounded-xl px-4 py-2.5 text-sm text-slate-200 outline-none">
-                <option value="Presidência">Presidência</option>
-                <option value="Diretoria Técnica">Diretoria Técnica</option>
-                <option value="Comissão de Arbitragem">Comissão de Arbitragem</option>
-                <option value="Secretaria Geral">Secretaria Geral</option>
-                <option value="Delegado Federativo">Delegado Federativo</option>
-              </select>
-            </div>
-
-            <!-- E-mail Institucional -->
-            <div>
-              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-300 mb-1.5">
-                E-mail Institucional Oficial *
-              </label>
-              <div class="relative flex items-center">
-                <input 
-                  type="text" 
-                  id="regEmail" 
-                  required 
-                  placeholder="gabriel.alves" 
-                  oninput="formatInstitutionalEmailInput(this)"
-                  class="w-full bg-pe-inputBg border border-pe-cardBorder focus:border-pe-gold rounded-xl pl-4 pr-32 py-2.5 text-sm text-white placeholder-slate-600 outline-none font-mono"
-                />
-                <span class="absolute right-3 text-pe-gold font-mono text-xs font-bold pointer-events-none select-none">
-                  @foot-table.pe.gov.br
-                </span>
-              </div>
-              <span class="text-[10px] text-slate-500 mt-1 block">
-                O sufixo institucional oficial da Federação será atribuído automaticamente.
-              </span>
-            </div>
-
-            <!-- Senhas -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-300 mb-1.5">
-                  Senha *
-                </label>
-                <input 
-                  type="password" 
-                  id="regPassword" 
-                  required 
-                  minlength="4" 
-                  placeholder="••••••••" 
-                  class="w-full bg-pe-inputBg border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none"
-                />
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-300 mb-1.5">
-                  Confirmar Senha *
-                </label>
-                <input 
-                  type="password" 
-                  id="regConfirmPassword" 
-                  required 
-                  minlength="4" 
-                  placeholder="••••••••" 
-                  class="w-full bg-pe-inputBg border border-pe-cardBorder focus:border-pe-gold rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none"
-                />
-              </div>
-            </div>
-
-            <!-- Chave de Segurança da Federação -->
-            <div>
-              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-300 mb-1.5">
-                Chave de Homologação da Federação
-              </label>
-              <input 
-                type="text" 
-                id="regFederationKey" 
-                value="FPFTM-2026" 
-                placeholder="FPFTM-2026" 
-                class="w-full bg-pe-inputBg border border-pe-cardBorder focus:border-pe-gold rounded-xl px-4 py-2.5 text-xs text-pe-gold font-mono outline-none"
-              />
-            </div>
-
-            <div id="registerFeedback" class="hidden text-xs rounded-xl p-3 border transition-all"></div>
-
-            <button 
-              type="submit" 
-              id="btnRegisterSubmit" 
-              class="w-full bg-pe-blue hover:bg-blue-600 text-white font-oswald text-base uppercase font-bold tracking-wider py-3.5 px-4 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2 cursor-pointer">
-              <span>✍️</span> GERAR E-MAIL INSTITUCIONAL & ATIVAR
-            </button>
-          </form>
-
         </div>
 
         <!-- Rodapé do Card -->
@@ -400,32 +294,7 @@
       }
     }
 
-    // 1. Alternador de Abas: Login vs Criar E-mail Institucional
-    function switchAuthTab(mode) {
-      const loginForm = document.getElementById('loginForm');
-      const registerForm = document.getElementById('registerForm');
-      const tabBtnLogin = document.getElementById('tabBtnLogin');
-      const tabBtnRegister = document.getElementById('tabBtnRegister');
-
-      if (mode === 'login') {
-        loginForm.classList.remove('hidden');
-        registerForm.classList.add('hidden');
-        tabBtnLogin.className = "flex-1 py-3 px-3 text-pe-gold border-b-2 border-pe-gold transition flex items-center justify-center gap-1.5";
-        tabBtnRegister.className = "flex-1 py-3 px-3 text-slate-400 hover:text-white border-b-2 border-transparent transition flex items-center justify-center gap-1.5";
-      } else {
-        loginForm.classList.add('hidden');
-        registerForm.classList.remove('hidden');
-        tabBtnRegister.className = "flex-1 py-3 px-3 text-pe-gold border-b-2 border-pe-gold transition flex items-center justify-center gap-1.5";
-        tabBtnLogin.className = "flex-1 py-3 px-3 text-slate-400 hover:text-white border-b-2 border-transparent transition flex items-center justify-center gap-1.5";
-      }
-    }
-
-    // Remove qualquer domínio que o usuário tente digitar no campo de e-mail institucional
-    function formatInstitutionalEmailInput(input) {
-      input.value = input.value.replace(/@foot-table\.pe\.gov\.br/gi, '').replace(/\s+/g, '').toLowerCase();
-    }
-
-    // 2. Alternador de Visibilidade de Senha
+    // 1. Alternador de Visibilidade de Senha
     const passInput = document.getElementById('adminPass');
     const btnToggle = document.getElementById('btnTogglePassword');
     const eyeIcon = document.getElementById('eyeIcon');
@@ -448,75 +317,7 @@
       }
     });
 
-    // 3. Criação de E-mail Institucional
-    async function handleCreateInstitutionalEmail(e) {
-      e.preventDefault();
-      const name = document.getElementById('regName').value.trim();
-      const role = document.getElementById('regRole').value;
-      let emailPrefix = document.getElementById('regEmail').value.trim().toLowerCase();
-      const password = document.getElementById('regPassword').value;
-      const confirmPassword = document.getElementById('regConfirmPassword').value;
-      const key = document.getElementById('regFederationKey').value.trim();
-      const feedback = document.getElementById('registerFeedback');
-
-      feedback.classList.remove('hidden');
-
-      if (password !== confirmPassword) {
-        feedback.className = "text-xs rounded-xl p-3 border bg-red-950/40 border-pe-red/50 text-red-300";
-        feedback.textContent = "❌ As senhas digitadas não coincidem. Verifique e tente novamente.";
-        return;
-      }
-
-      if (!emailPrefix) {
-        feedback.className = "text-xs rounded-xl p-3 border bg-red-950/40 border-pe-red/50 text-red-300";
-        feedback.textContent = "❌ Informe o prefixo desejado para seu e-mail institucional.";
-        return;
-      }
-
-      const fullEmail = emailPrefix.includes('@') ? emailPrefix : `${emailPrefix}@foot-table.pe.gov.br`;
-
-      feedback.className = "text-xs rounded-xl p-3 border bg-blue-950/40 border-blue-500/50 text-blue-300";
-      feedback.textContent = "Criando e-mail institucional oficial...";
-
-      const newAdmin = {
-        nome: name,
-        cargo: role,
-        email: fullEmail,
-        senha: password,
-        created_at: new Date().toISOString()
-      };
-
-      // 1. Tenta salvar no Supabase (se a tabela admin_users existir)
-      if (supabaseClient) {
-        try {
-          await supabaseClient.from('admin_users').upsert([newAdmin], { onConflict: 'email' });
-        } catch (err) {
-          console.warn("Aviso Supabase:", err);
-        }
-      }
-
-      // 2. Salva na lista local de administradores autorizados
-      let admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || [];
-      const existingIdx = admins.findIndex(a => a.email === fullEmail);
-      if (existingIdx >= 0) {
-        admins[existingIdx] = newAdmin;
-      } else {
-        admins.push(newAdmin);
-      }
-      localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
-
-      feedback.className = "text-xs rounded-xl p-3 border bg-emerald-950/40 border-emerald-500/50 text-emerald-300 font-bold";
-      feedback.innerHTML = `✓ E-mail institucional <strong>${fullEmail}</strong> criado com sucesso! Alternando para a tela de login...`;
-
-      // Preenche o campo de login e alterna a aba
-      setTimeout(() => {
-        document.getElementById('adminUser').value = fullEmail;
-        document.getElementById('adminPass').value = password;
-        switchAuthTab('login');
-      }, 1500);
-    }
-
-    // 4. Submissão de Login
+    // 2. Submissão de Login
     const loginForm = document.getElementById('loginForm');
     const loginFeedback = document.getElementById('loginFeedback');
     const btnSubmit = document.getElementById('btnLoginSubmit');
@@ -606,18 +407,18 @@
             <svg class="w-4 h-4 text-pe-red flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
             </svg>
-            <span><strong>Credenciais Inválidas:</strong> Verifique o e-mail e senha ou clique na aba <em>Criar E-mail Institucional</em>.</span>
+            <span><strong>Credenciais Inválidas:</strong> Verifique o e-mail institucional e a senha informados.</span>
           `;
           loginFeedback.classList.remove('hidden');
         }
       }, 600);
     });
 
-    // 5. Recuperação de senha
+    // 3. Recuperação de senha
     document.getElementById('btnForgot').addEventListener('click', (e) => {
       e.preventDefault();
       loginFeedback.className = "text-xs rounded-xl p-3 border bg-amber-950/40 border-pe-gold/50 text-amber-200";
-      loginFeedback.innerHTML = `<span>Para redefinir sua senha, solicite ao administrador geral ou crie um novo e-mail institucional na aba ao lado.</span>`;
+      loginFeedback.innerHTML = `<span>Para redefinir sua senha ou solicitar credenciamento oficial, contate a Presidência FPFTM via ADM MASTER (gabrielacessor@foot-table.pe.gov.br).</span>`;
       loginFeedback.classList.remove('hidden');
     });
 
