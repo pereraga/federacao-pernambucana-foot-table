@@ -628,16 +628,22 @@
                 </div>
 
                 <form id="athleteForm" onsubmit="handleSaveAthlete(event)" class="space-y-3.5 text-xs">
-                  <!-- Código e Status -->
+                  <!-- Nº do Federado e Status Federativo -->
                   <div class="grid grid-cols-2 gap-3">
                     <div>
                       <div class="flex items-center justify-between mb-1">
-                        <label class="block text-slate-300 font-bold">Código Oficial (6D) *</label>
-                        <button type="button" onclick="generateFederatedNumber()" class="text-[10px] font-extrabold text-pe-gold hover:text-amber-300 flex items-center gap-1 transition cursor-pointer select-none" title="Gerar Novo Código">
+                        <label class="block text-slate-300 font-bold">Nº do Federado *</label>
+                        <button type="button" onclick="generateFederatedNumber()" class="text-[10px] font-extrabold text-pe-gold hover:text-amber-300 flex items-center gap-1 transition cursor-pointer select-none" title="Gerar novo Nº de Federado">
                           <span>🎲</span> Gerar
                         </button>
                       </div>
-                      <input type="text" id="athleteCode" required maxlength="6" value="742918" inputmode="numeric" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-pe-gold font-mono font-bold text-sm outline-none" />
+                      <div class="relative flex items-center">
+                        <input type="text" id="athleteFederatedNum" required value="PE-2026/729" placeholder="PE-2026/000" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl pl-3 pr-8 py-2 text-pe-gold font-mono font-bold text-sm outline-none uppercase" />
+                        <button type="button" onclick="generateFederatedNumber()" class="absolute right-2 p-1 text-pe-gold/70 hover:text-pe-gold transition cursor-pointer" title="Gerar Nº do Federado">
+                          <span>🎲</span>
+                        </button>
+                      </div>
+                      <input type="hidden" id="athleteCode" value="PE-2026/729" />
                     </div>
                     <div>
                       <label class="block text-slate-300 font-bold mb-1">Status Federativo</label>
@@ -703,29 +709,15 @@
                     </div>
                   </div>
 
-                  <!-- Nº Federado, Município e Validade -->
-                  <div class="grid grid-cols-3 gap-2.5">
-                    <div>
-                      <div class="flex items-center justify-between mb-1">
-                        <label class="block text-slate-300 font-bold text-[10px]">Nº Federado</label>
-                        <button type="button" onclick="generateFederatedNumber()" class="text-[9px] font-extrabold text-pe-gold hover:text-amber-300 flex items-center gap-1 transition cursor-pointer select-none" title="Gerar novo Código de Federado">
-                          <span>🎲</span> Gerar
-                        </button>
-                      </div>
-                      <div class="relative flex items-center">
-                        <input type="text" id="athleteFederatedNum" value="PE-2026/048" placeholder="PE-2026/000" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl pl-2.5 pr-8 py-2 font-mono text-white text-xs outline-none uppercase font-bold" />
-                        <button type="button" onclick="generateFederatedNumber()" class="absolute right-1.5 p-1 text-pe-gold/70 hover:text-pe-gold transition cursor-pointer" title="Gerar Código do Federado">
-                          <span>🎲</span>
-                        </button>
-                      </div>
-                    </div>
+                  <!-- Município e Validade -->
+                  <div class="grid grid-cols-2 gap-3">
                     <div>
                       <label class="block text-slate-300 font-bold mb-1 text-[10px]">Município</label>
-                      <input type="text" id="athleteCity" value="RECIFE - PE" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-2.5 py-2 uppercase text-white font-bold text-xs outline-none font-fpeft" />
+                      <input type="text" id="athleteCity" value="RECIFE - PE" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 uppercase text-white font-bold text-xs outline-none font-fpeft" />
                     </div>
                     <div>
                       <label class="block text-slate-300 font-bold mb-1 text-[10px]">Validade</label>
-                      <input type="text" id="athleteValidity" value="12/2026" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-2.5 py-2 font-mono text-white text-xs outline-none" />
+                      <input type="text" id="athleteValidity" value="12/2026" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 font-mono text-white text-xs outline-none" />
                     </div>
                   </div>
 
@@ -1220,7 +1212,7 @@
               <table class="w-full text-left text-xs whitespace-nowrap">
                 <thead class="bg-[#05080e] text-slate-400 uppercase text-[10px] font-mono border-b border-[#1c253b]">
                   <tr>
-                    <th class="py-3 px-4">Código</th>
+                    <th class="py-3 px-4">Nº Federado</th>
                     <th class="py-3 px-4">Nome do Jogador (A-Z)</th>
                     <th class="py-3 px-4">CPF</th>
                     <th class="py-3 px-4">Nascimento</th>
@@ -1228,7 +1220,6 @@
                     <th class="py-3 px-4">Município</th>
                     <th class="py-3 px-4">Categoria</th>
                     <th class="py-3 px-4">Modalidade</th>
-                    <th class="py-3 px-4">Nº Federado</th>
                     <th class="py-3 px-4">Validade</th>
                     <th class="py-3 px-4">Status</th>
                     <th class="py-3 px-4 text-right">Ações</th>
@@ -3416,14 +3407,14 @@
     async function exportCarteiraPDF(athlete = null) {
       showToast('Gerando Carteira Oficial em PDF de Alta Qualidade...');
       const a = athlete || {
-        codigo: document.getElementById('athleteCode').value || '000000',
+        codigo: (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '') || (document.getElementById('athleteCode') ? document.getElementById('athleteCode').value : 'PE-2026/048'),
         nome: document.getElementById('athleteName').value || 'Atleta',
         cpf: document.getElementById('athleteCpf').value || '',
         nascimento: document.getElementById('athleteBirth').value || '',
         telefone: document.getElementById('athletePhone').value || '',
         categoria: (document.getElementById('athleteCategory') ? document.getElementById('athleteCategory').value : 'ASPIRANTE') || 'ASPIRANTE',
         modalidade: (document.getElementById('athleteModality') ? document.getElementById('athleteModality').value : 'SOLO (INDIVIDUAL)') || 'SOLO (INDIVIDUAL)',
-        federado: document.getElementById('athleteFederatedNum').value || '',
+        federado: (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '') || 'PE-2026/048',
         municipio: document.getElementById('athleteCity').value || '',
         validade: document.getElementById('athleteValidity').value || '12/2026'
       };
@@ -3473,7 +3464,8 @@
           }
         });
 
-        const fileName = `carteira-atleta-fpeft-${a.codigo || '000000'}.pdf`;
+        const safeCode = (a.federado || a.codigo || 'atleta').replace(/[^a-zA-Z0-9_-]/g, '_');
+        const fileName = `carteira-atleta-fpeft-${safeCode}.pdf`;
         doc.save(fileName);
         showToast('PDF Oficial em Alta Qualidade baixado com sucesso!');
       } catch (err) {
@@ -3489,13 +3481,14 @@
     async function exportHdPng() {
       showToast('Processando PNG em Alta Definição (300 DPI)...');
       try {
-        const code = document.getElementById('athleteCode').value || 'atleta';
+        const code = (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '') || (document.getElementById('athleteCode') ? document.getElementById('athleteCode').value : 'atleta');
+        const safeCode = code.replace(/[^a-zA-Z0-9_-]/g, '_');
         const hdCanvas = await renderCarteiraToHdCanvas(studioState.elements, null, 3);
         const pngUrl = hdCanvas.toDataURL('image/png', 1.0);
 
         const downloadLink = document.createElement('a');
         downloadLink.href = pngUrl;
-        downloadLink.download = `carteira-atleta-fpeft-HD-${code}.png`;
+        downloadLink.download = `carteira-atleta-fpeft-HD-${safeCode}.png`;
         document.body.appendChild(downloadLink);
         downloadLink.click();
         document.body.removeChild(downloadLink);
@@ -3567,6 +3560,10 @@
         const handler = (e) => {
           let val = e.target.value;
           if (uppercase) val = val.toUpperCase();
+          if (id === 'athleteFederatedNum') {
+            const cInp = document.getElementById('athleteCode');
+            if (cInp) cInp.value = val;
+          }
           const target = studioState.elements.find(item => item.targetKey === targetKey || item.id === `field-${targetKey}` || (targetKey === 'modalidade' && item.targetKey === 'filiacao'));
           if (target) {
             target.text = val;
@@ -3593,22 +3590,18 @@
       bindSync('inputAssinatura', 'assinatura', true);
       bindSync('inputQrText', 'qr', false);
 
-      // Sincronização e máscara do Código Oficial 6D
+      // Sincronização do Código / Nº Federado
       const codeInp = document.getElementById('athleteCode');
       if (codeInp) {
         codeInp.addEventListener('input', (e) => {
-          let v = e.target.value.replace(/\D/g, '').substring(0, 6);
-          e.target.value = v;
-          if (v.length >= 3) {
-            const fedInp = document.getElementById('athleteFederatedNum');
-            if (fedInp && (!fedInp.value || fedInp.value.startsWith('PE-2026/'))) {
-              const fedVal = `PE-2026/${v.slice(-3)}`;
-              fedInp.value = fedVal;
-              const target = studioState.elements.find(item => item.targetKey === 'federado' || item.id === 'field-federado');
-              if (target) {
-                target.text = fedVal;
-                renderInteractiveElements();
-              }
+          const v = e.target.value.toUpperCase();
+          const fedInp = document.getElementById('athleteFederatedNum');
+          if (fedInp && fedInp.value !== v) {
+            fedInp.value = v;
+            const target = studioState.elements.find(item => item.targetKey === 'federado' || item.id === 'field-federado');
+            if (target) {
+              target.text = v;
+              renderInteractiveElements();
             }
           }
           autoSaveStudioDesign();
@@ -4181,13 +4174,12 @@
     let batchExportAbort = false;
 
     function generateFederatedNumber(silent = false) {
-      const code = String(Math.floor(100000 + Math.random() * 900000));
+      const num3 = String(Math.floor(100 + Math.random() * 900));
+      const fedVal = `PE-2026/${num3}`;
       const codeInput = document.getElementById('athleteCode');
       const fedInput = document.getElementById('athleteFederatedNum');
-      const num3 = code.slice(-3);
-      const fedVal = `PE-2026/${num3}`;
 
-      if (codeInput) codeInput.value = code;
+      if (codeInput) codeInput.value = fedVal;
       if (fedInput) fedInput.value = fedVal;
 
       const fedTarget = studioState.elements.find(item => item.targetKey === 'federado' || item.id === 'field-federado');
@@ -4197,7 +4189,7 @@
       }
       autoSaveStudioDesign();
       if (!silent) {
-        showToast(`Nº Federado gerado: ${fedVal} (Código Oficial #${code})`);
+        showToast(`Nº do Federado gerado: ${fedVal}`);
       }
     }
 
@@ -4207,7 +4199,8 @@
 
     async function handleSaveAthlete(e) {
       if (e && e.preventDefault) e.preventDefault();
-      const code = (document.getElementById('athleteCode').value || '').trim();
+      const fedNum = (document.getElementById('athleteFederatedNum').value || '').trim();
+      const code = fedNum || (document.getElementById('athleteCode') ? document.getElementById('athleteCode').value : '').trim();
       const name = (document.getElementById('athleteName').value || '').trim();
       const cpf = (document.getElementById('athleteCpf').value || '').trim();
       const birth = (document.getElementById('athleteBirth').value || '').trim();
@@ -4216,7 +4209,6 @@
       const category = (document.getElementById('athleteCategory') ? document.getElementById('athleteCategory').value : 'ASPIRANTE').trim() || 'ASPIRANTE';
       const status = document.getElementById('athleteStatus').value;
       const modality = (document.getElementById('athleteModality') ? document.getElementById('athleteModality').value : (document.getElementById('athleteClub') ? document.getElementById('athleteClub').value : 'SOLO (INDIVIDUAL)')).trim() || 'SOLO (INDIVIDUAL)';
-      const fedNum = (document.getElementById('athleteFederatedNum').value || '').trim();
       const validity = (document.getElementById('athleteValidity').value || '').trim();
 
       if (!name) {
@@ -4245,7 +4237,7 @@
         modalidade: modality,
         status: status,
         clube: modality,
-        federado: fedNum,
+        federado: fedNum || code,
         validade: validity,
         foto_url: photo
       };
@@ -4393,6 +4385,9 @@
       }
       if (list && Array.isArray(list)) {
         list.forEach(a => {
+          if (!a.federado) {
+            a.federado = String(a.codigo).startsWith('PE-') ? a.codigo : `PE-2026/${String(a.codigo).slice(-3)}`;
+          }
           if (!a.categoria || a.categoria === 'MASTER / PRINCIPAL') {
             const def = DEFAULT_ATHLETES.find(d => String(d.codigo) === String(a.codigo));
             a.categoria = def ? def.categoria : 'ASPIRANTE';
@@ -4415,7 +4410,7 @@
               modalidade: d.modalidade,
               status: d.status || 'HOMOLOGADO',
               clube: d.clube,
-              federado: d.federado,
+              federado: d.federado || (String(d.codigo).startsWith('PE-') ? d.codigo : `PE-2026/${String(d.codigo).slice(-3)}`),
               validade: d.validade,
               foto: d.foto_url
             }));
@@ -4560,8 +4555,9 @@
           tr.addEventListener('mousemove', (e) => moveAthleteHoverCard(e));
           tr.addEventListener('mouseleave', () => hideAthleteHoverCard());
 
+          const fedDisplay = a.federado || (String(a.codigo).startsWith('PE-') ? a.codigo : `PE-2026/${String(a.codigo).slice(-3)}`);
           tr.innerHTML = `
-            <td class="py-3 px-4 font-mono font-bold text-pe-gold text-xs">#${a.codigo}</td>
+            <td class="py-3 px-4 font-mono font-bold text-pe-gold text-xs">${escapeHtml(fedDisplay)}</td>
             <td class="py-3 px-4 font-bold text-white uppercase text-xs">
               <div class="flex items-center gap-1.5">
                 <span class="w-1.5 h-1.5 rounded-full ${isPending ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}"></span>
@@ -4574,7 +4570,6 @@
             <td class="py-3 px-4 text-slate-300 text-xs truncate max-w-[130px]">${escapeHtml(a.municipio || '-')}</td>
             <td class="py-3 px-4">${getCategoryBadgeHtml(a.categoria)}</td>
             <td class="py-3 px-4 text-pe-gold text-xs font-semibold">${escapeHtml(a.modalidade || a.clube || 'SOLO')}</td>
-            <td class="py-3 px-4 font-mono text-sky-400 text-xs">${escapeHtml(a.federado || '-')}</td>
             <td class="py-3 px-4 text-slate-400 text-xs font-mono">${escapeHtml(a.validade || '12/2026')}</td>
             <td class="py-3 px-4">
               <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isPending ? 'bg-amber-950/70 text-amber-400 border border-amber-500/40 animate-pulse' : 'bg-emerald-950/70 text-emerald-400 border border-emerald-500/40'}">
@@ -4729,7 +4724,9 @@
       switchTab('atletas');
 
       // Preenche os inputs do formulário
-      document.getElementById('athleteCode').value = a.codigo;
+      const fedVal = a.federado || (String(a.codigo).startsWith('PE-') ? a.codigo : `PE-2026/${String(a.codigo).slice(-3)}`);
+      document.getElementById('athleteCode').value = fedVal;
+      document.getElementById('athleteFederatedNum').value = fedVal;
       document.getElementById('athleteName').value = a.nome;
       document.getElementById('athleteCpf').value = a.cpf || '';
       document.getElementById('athleteBirth').value = a.nascimento || '';
@@ -4741,7 +4738,6 @@
       const clubInp = document.getElementById('athleteClub');
       if (clubInp) clubInp.value = a.modalidade || a.clube || 'SOLO (INDIVIDUAL)';
       document.getElementById('athleteStatus').value = a.status || 'HOMOLOGADO';
-      document.getElementById('athleteFederatedNum').value = a.federado || `PE-2026/${String(a.codigo).slice(-3)}`;
       document.getElementById('athleteValidity').value = a.validade || '12/2026';
 
       // Sincroniza com os elementos do Studio CR80
@@ -4757,7 +4753,7 @@
       setElText('categoria', (a.categoria || 'ASPIRANTE').toUpperCase());
       setElText('modalidade', (a.modalidade || a.clube || 'SOLO (INDIVIDUAL)').toUpperCase());
       setElText('filiacao', (a.modalidade || a.clube || 'SOLO (INDIVIDUAL)').toUpperCase());
-      setElText('federado', a.federado || `PE-2026/${String(a.codigo).slice(-3)}`);
+      setElText('federado', fedVal);
       setElText('municipio', (a.municipio || 'RECIFE - PE').toUpperCase());
       setElText('validade', a.validade || '12/2026');
 
@@ -5316,19 +5312,21 @@
       const matches = athletes.filter(a => {
         const nameNorm = normalize(a.nome);
         const athleteCode = String(a.codigo || '').trim();
+        const athleteFed = String(a.federado || '').trim();
         const athleteId = String(a.id || '').trim();
         const athleteCpfDigits = String(a.cpf || '').replace(/\D/g, '');
 
         // 1. Busca por Nome
         const matchName = nameNorm.includes(q);
 
-        // 2. Busca por ID / Código Oficial da Carteira (ex: 742918, #742918, ID: 742918)
+        // 2. Busca por ID / Nº do Federado Oficial (ex: PE-2026/729, 729, #729)
         const matchCode = (
           athleteCode.toLowerCase().includes(q) ||
-          (qDigits.length > 0 && athleteCode.includes(qDigits)) ||
+          athleteFed.toLowerCase().includes(q) ||
+          (qDigits.length > 0 && (athleteCode.includes(qDigits) || athleteFed.includes(qDigits))) ||
           athleteId === q ||
           (qDigits.length > 0 && athleteId === qDigits) ||
-          (qClean.length > 0 && athleteCode.toLowerCase().includes(qClean))
+          (qClean.length > 0 && (athleteCode.toLowerCase().includes(qClean) || athleteFed.toLowerCase().includes(qClean)))
         );
 
         // 3. Busca por CPF
@@ -5349,13 +5347,14 @@
       });
 
       if (matches.length === 0) {
-        // Se não encontrou no filtro de modalidade atual, verifica se o ID/Código existe na outra modalidade
+        // Se não encontrou no filtro de modalidade atual, verifica se o Nº Federado existe na outra modalidade
         let crossMatch = null;
         if (qDigits.length >= 2 || qClean.length >= 2) {
           crossMatch = athletes.find(a => {
             const athleteCode = String(a.codigo || '').trim();
+            const athleteFed = String(a.federado || '').trim();
             const athleteId = String(a.id || '').trim();
-            return athleteCode.includes(qDigits) || athleteId === qDigits || athleteCode.toLowerCase().includes(qClean);
+            return athleteCode.includes(qDigits) || athleteFed.includes(qDigits) || athleteId === qDigits || athleteCode.toLowerCase().includes(qClean) || athleteFed.toLowerCase().includes(qClean);
           });
         }
 
