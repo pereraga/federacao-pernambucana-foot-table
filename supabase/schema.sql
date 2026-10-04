@@ -10,12 +10,25 @@ CREATE TABLE IF NOT EXISTS public.atletas (
     nome TEXT NOT NULL,
     cpf TEXT,
     nascimento TEXT,
+    telefone TEXT,
     municipio TEXT,
+    categoria TEXT DEFAULT 'AMADOR',
     modalidade TEXT DEFAULT 'SOLO (INDIVIDUAL)',
     status TEXT DEFAULT 'REGULAR',
+    clube TEXT,
+    federado TEXT,
+    validade TEXT DEFAULT '12/2026',
     foto_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+-- Suporte retroativo para bancos já criados
+ALTER TABLE public.atletas 
+ADD COLUMN IF NOT EXISTS categoria TEXT DEFAULT 'AMADOR',
+ADD COLUMN IF NOT EXISTS telefone TEXT,
+ADD COLUMN IF NOT EXISTS clube TEXT,
+ADD COLUMN IF NOT EXISTS federado TEXT,
+ADD COLUMN IF NOT EXISTS validade TEXT DEFAULT '12/2026';
 
 -- Índices para busca ultra-rápida pelos 6 dígitos
 CREATE INDEX IF NOT EXISTS idx_atletas_codigo ON public.atletas(codigo);

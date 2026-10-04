@@ -4483,9 +4483,23 @@
       let savedInSupabase = false;
       if (supabaseClient) {
         try {
-          const { data, error } = await supabaseClient
+          let { data, error } = await supabaseClient
             .from('atletas')
             .upsert([athleteObj], { onConflict: 'codigo' });
+          if (error && error.message && error.message.includes('column')) {
+            const baseObj = {
+              codigo: athleteObj.codigo,
+              nome: athleteObj.nome,
+              cpf: athleteObj.cpf,
+              nascimento: athleteObj.nascimento,
+              municipio: athleteObj.municipio,
+              modalidade: athleteObj.modalidade,
+              status: athleteObj.status,
+              foto_url: athleteObj.foto_url
+            };
+            const retry = await supabaseClient.from('atletas').upsert([baseObj], { onConflict: 'codigo' });
+            error = retry.error;
+          }
           if (!error) savedInSupabase = true;
           else console.warn("Supabase aviso:", error);
         } catch (err) {
@@ -4644,7 +4658,7 @@
             const dbCodes = new Set(data.map(d => String(d.codigo)));
             const missingInCloud = (list || []).filter(a => !dbCodes.has(String(a.codigo)));
             if (missingInCloud.length > 0) {
-              await supabaseClient.from('atletas').upsert(missingInCloud.map(a => ({
+              const fullBatch = missingInCloud.map(a => ({
                 codigo: a.codigo,
                 nome: a.nome,
                 cpf: a.cpf,
@@ -4658,8 +4672,24 @@
                 federado: a.federado || a.codigo,
                 validade: a.validade || '12/2026',
                 foto_url: a.foto || a.foto_url
-              })), { onConflict: 'codigo' });
-              console.log(`${missingInCloud.length} atleta(s) local(is) sincronizado(s) com o Supabase!`);
+              }));
+              let syncRes = await supabaseClient.from('atletas').upsert(fullBatch, { onConflict: 'codigo' });
+              if (syncRes.error && syncRes.error.message && syncRes.error.message.includes('column')) {
+                const baseBatch = missingInCloud.map(a => ({
+                  codigo: a.codigo,
+                  nome: a.nome,
+                  cpf: a.cpf,
+                  nascimento: a.nascimento,
+                  municipio: a.municipio,
+                  modalidade: a.modalidade || 'SOLO (INDIVIDUAL)',
+                  status: a.status || 'PENDENTE',
+                  foto_url: a.foto || a.foto_url
+                }));
+                syncRes = await supabaseClient.from('atletas').upsert(baseBatch, { onConflict: 'codigo' });
+              }
+              if (!syncRes.error) {
+                console.log(`${missingInCloud.length} atleta(s) local(is) sincronizado(s) com o Supabase!`);
+              }
             }
 
             if (data.length > 0) {
@@ -5421,20 +5451,35 @@
 
       if (supabaseClient) {
         try {
-          await supabaseClient.from('atletas').upsert(athletesToInsert.map(a => ({
+          const fullBatch = athletesToInsert.map(a => ({
             codigo: a.codigo,
             nome: a.nome,
             cpf: a.cpf,
             nascimento: a.nascimento,
             telefone: a.telefone,
             municipio: a.municipio,
+            categoria: a.categoria || 'ASPIRANTE',
             modalidade: a.modalidade,
             status: a.status,
             clube: a.clube,
             federado: a.federado,
             validade: a.validade,
             foto_url: a.foto_url
-          })), { onConflict: 'codigo' });
+          }));
+          let batchRes = await supabaseClient.from('atletas').upsert(fullBatch, { onConflict: 'codigo' });
+          if (batchRes.error && batchRes.error.message && batchRes.error.message.includes('column')) {
+            const baseBatch = athletesToInsert.map(a => ({
+              codigo: a.codigo,
+              nome: a.nome,
+              cpf: a.cpf,
+              nascimento: a.nascimento,
+              municipio: a.municipio,
+              modalidade: a.modalidade,
+              status: a.status,
+              foto_url: a.foto_url
+            }));
+            await supabaseClient.from('atletas').upsert(baseBatch, { onConflict: 'codigo' });
+          }
         } catch (e) {
           console.warn("Aviso ao salvar lote no Supabase:", e);
         }
