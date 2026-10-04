@@ -638,7 +638,7 @@
                         </button>
                       </div>
                       <div class="relative flex items-center">
-                        <input type="text" id="athleteFederatedNum" required maxlength="6" value="973321" placeholder="000000" inputmode="numeric" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl pl-3 pr-8 py-2 text-pe-gold font-mono font-bold text-sm outline-none" />
+                        <input type="text" id="athleteFederatedNum" required maxlength="6" autocomplete="off" value="973321" placeholder="000000" inputmode="numeric" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl pl-3 pr-8 py-2 text-pe-gold font-mono font-bold text-sm outline-none" />
                         <button type="button" onclick="generateFederatedNumber()" class="absolute right-2 p-1 text-pe-gold/70 hover:text-pe-gold transition cursor-pointer" title="Gerar Código 6D Único (Sem Repetição)">
                           <span>🎲</span>
                         </button>
@@ -3550,6 +3550,10 @@
         const fileName = `carteira-atleta-fpeft-${safeCode}.pdf`;
         doc.save(fileName);
         showToast('PDF Oficial em Alta Qualidade baixado com sucesso!');
+        // Ao gerar a carteira, atualiza automaticamente o código de federado para a próxima carteira
+        setTimeout(() => {
+          generateFederatedNumber(true);
+        }, 1000);
       } catch (err) {
         console.error('Erro ao gerar PDF:', err);
         showToast('Erro ao exportar PDF: ' + (err.message || 'Falha na exportação'));
@@ -3576,6 +3580,10 @@
         document.body.removeChild(downloadLink);
 
         showToast('PNG HD (300 DPI - Letras Nítidas) baixado com sucesso!');
+        // Ao gerar a carteira, atualiza automaticamente o código de federado para a próxima carteira
+        setTimeout(() => {
+          generateFederatedNumber(true);
+        }, 1000);
       } catch (err) {
         console.error('Erro ao exportar PNG:', err);
         showToast('Erro ao exportar PNG: ' + (err.message || 'Falha na exportação'));
@@ -4534,6 +4542,10 @@
         }
 
         showToast(`✓ Atleta #${code} enviado ao banco como Pendente de Homologação!`);
+        // Ao concluir e gerar carteira, renova automaticamente o código de federado para o próximo atleta
+        setTimeout(() => {
+          generateFederatedNumber(true);
+        }, 1000);
       } catch (err) {
         console.error('Erro ao enviar carteira ao banco:', err);
         showToast('❌ Ocorreu um erro ao enviar para o banco de dados.');
@@ -6230,9 +6242,8 @@
         if (keyInput) keyInput.value = localStorage.getItem('pe_supabase_anon_key') || '';
 
         initSupabase();
-        generateRandomAthleteCode();
         setAthleteModalityValue('SOLO (INDIVIDUAL)');
-        setAthleteCategoryValue('ASPIRANTE');
+        setAthleteCategoryValue('AMADOR');
         renderJogadoresCadastradosTable();
         renderAdminNews();
         syncStudioWithCurrentLayout();
@@ -6253,6 +6264,9 @@
             clearQuickAthleteSearch();
           }
         }, 50);
+
+        // Ao atualizar o site (F5 ou abertura), gera automaticamente um novo código de federado único
+        generateFederatedNumber(true);
       } catch (e) {
         console.warn("Aviso na inicialização do painel:", e);
       }
@@ -6263,6 +6277,13 @@
     } else {
       initApp();
     }
+
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        // Assegura renovação do código único após carregamento completo
+        generateFederatedNumber(true);
+      }, 80);
+    });
   </script>
 
   <!-- Toast Flutuante de Notificação -->
