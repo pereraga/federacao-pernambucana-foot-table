@@ -638,18 +638,18 @@
                         </button>
                       </div>
                       <div class="relative flex items-center">
-                        <input type="text" id="athleteFederatedNum" required maxlength="6" value="742918" placeholder="000000" inputmode="numeric" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl pl-3 pr-8 py-2 text-pe-gold font-mono font-bold text-sm outline-none" />
+                        <input type="text" id="athleteFederatedNum" required maxlength="6" value="973321" placeholder="000000" inputmode="numeric" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl pl-3 pr-8 py-2 text-pe-gold font-mono font-bold text-sm outline-none" />
                         <button type="button" onclick="generateFederatedNumber()" class="absolute right-2 p-1 text-pe-gold/70 hover:text-pe-gold transition cursor-pointer" title="Gerar Código 6D Único (Sem Repetição)">
                           <span>🎲</span>
                         </button>
                       </div>
-                      <input type="hidden" id="athleteCode" value="742918" />
+                      <input type="hidden" id="athleteCode" value="973321" />
                     </div>
                     <div>
                       <label class="block text-slate-300 font-bold mb-1">Status Federativo</label>
                       <select id="athleteStatus" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 outline-none">
+                        <option value="PENDENTE" selected>PENDENTE DE HOMOLOGAÇÃO</option>
                         <option value="HOMOLOGADO">HOMOLOGADO (Oficial no Site)</option>
-                        <option value="PENDENTE">PENDENTE DE HOMOLOGAÇÃO</option>
                         <option value="REGULAR">REGULAR (Ativo)</option>
                       </select>
                     </div>
@@ -1861,7 +1861,7 @@
         municipio: "Recife - PE",
         categoria: "AMADOR",
         modalidade: "SOLO (INDIVIDUAL)",
-        status: "HOMOLOGADO",
+        status: "PENDENTE",
         validade: "12/2026",
         foto: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80"
       },
@@ -4973,10 +4973,12 @@
     function clearAthleteForm() {
       document.getElementById('athleteForm').reset();
       generateRandomAthleteCode();
+      const statusSelect = document.getElementById('athleteStatus');
+      if (statusSelect) statusSelect.value = 'PENDENTE';
       setAthleteModalityValue('SOLO (INDIVIDUAL)');
-      setAthleteCategoryValue('ASPIRANTE');
+      setAthleteCategoryValue('AMADOR');
       const catTarget = studioState.elements.find(item => item.targetKey === 'categoria');
-      if (catTarget) catTarget.text = 'ASPIRANTE';
+      if (catTarget) catTarget.text = 'AMADOR';
       const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
       if (photoTarget) photoTarget.photoUrl = '';
       renderInteractiveElements();
