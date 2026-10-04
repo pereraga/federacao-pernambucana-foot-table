@@ -31,6 +31,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- PDF.js para renderização vetorial de PDFs sem erros de importação -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if (window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
   <script src="assets/carteira_template.js"></script>
   <script src="carteira_template.js"></script>
 
@@ -765,6 +772,17 @@
                     <i class="fa-solid fa-layer-group text-sky-400"></i> Fundo da Carteirinha
                   </span>
                   <span class="text-[10px] text-slate-400">Padrão CR80 Horizontal</span>
+                </div>
+
+                <!-- Botões de Troca de Fundo (PDF) e Restauração Oficial -->
+                <div class="grid grid-cols-2 gap-2">
+                  <label class="py-2 px-2.5 bg-[#05080e] hover:bg-[#121c32] border border-[#1c253b] hover:border-sky-500/50 rounded-xl text-[11px] font-bold text-sky-300 flex items-center justify-center gap-1.5 transition cursor-pointer text-center" title="Importar PDF, SVG ou Imagem">
+                    <i class="fa-solid fa-file-pdf text-rose-400"></i> Trocar Fundo (PDF)
+                    <input type="file" id="uploadSvgInput" accept=".pdf,image/*,.svg" class="hidden">
+                  </label>
+                  <button type="button" id="btnRestoreFpeftTemplate" class="py-2 px-2.5 bg-sky-950/40 hover:bg-sky-900/50 border border-sky-800/50 text-[11px] font-bold text-sky-200 rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer" title="Restaurar a arte oficial Carteira Atleta.pdf">
+                    <i class="fa-solid fa-rotate-left text-pe-gold"></i> Arte Oficial (PDF)
+                  </button>
                 </div>
 
                 <!-- Painel de Calibração / Ajuste Fino do Fundo -->
@@ -2043,7 +2061,7 @@
     /* =========================================================
        STUDIO CR80 OFICIAL & GERENCIAMENTO DE ATLETAS (ABA 1)
        Tamanho CR80: 85.60 mm x 53.98 mm | Resolução: 1050px x 662px
-       Baseado no vetor oficial CorelDRAW 2026: Carteira Atleta.svg
+       Baseado no vetor fiel oficial: Carteira Atleta.pdf (Alta Resolução 300 DPI)
        ========================================================= */
     const OFFICIAL_DEFAULT_ELEMENTS = [
       {
@@ -2366,24 +2384,38 @@
     }
 
     /* =========================================================
-       TEMPLATE VETORIAL SVG OFICIAL DA FPEFT (1050x662)
-       Carregado diretamente de CorelDRAW 2026 (Carteira Atleta.svg)
+       ARTE VETORIAL OFICIAL FPEFT DA CARTEIRINHA (1050x662 - CR80)
+       Baseado no arquivo vetorial fiel: Carteira Atleta.pdf (Alta Definição 300 DPI)
        ========================================================= */
     function getFpeftTemplateSvg(showLabels = true) {
       if (window.OFFICIAL_FPEFT_SVG_TEMPLATE && typeof window.OFFICIAL_FPEFT_SVG_TEMPLATE === 'string' && window.OFFICIAL_FPEFT_SVG_TEMPLATE.length > 500) {
         return window.OFFICIAL_FPEFT_SVG_TEMPLATE;
       }
-      // Se ainda não carregou do script externo, busca síncrono ou usa template estilizado
-      try {
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', 'assets/Carteira_Atleta_Template_1050x662.svg', false);
-        xhr.send(null);
-        if (xhr.status === 200 && xhr.responseText && xhr.responseText.includes('<svg')) {
-          window.OFFICIAL_FPEFT_SVG_TEMPLATE = xhr.responseText;
-          return xhr.responseText;
-        }
-      } catch (e) {
-        console.warn('XHR fallback não disponível:', e);
+      // Se ainda não carregou do script externo, busca síncrono local
+      const templatePaths = ['assets/Carteira_Atleta_Template_1050x662.svg', 'Carteira_Atleta_Template_1050x662.svg'];
+      for (const p of templatePaths) {
+        try {
+          const xhr = new XMLHttpRequest();
+          xhr.open('GET', p, false);
+          xhr.send(null);
+          if (xhr.status === 200 && xhr.responseText && xhr.responseText.includes('<svg')) {
+            window.OFFICIAL_FPEFT_SVG_TEMPLATE = xhr.responseText;
+            return xhr.responseText;
+          }
+        } catch (e) {}
+      }
+
+      if (window.OFFICIAL_FPEFT_BG_DATA_URL) {
+        return `<svg id="fpeftSvgTemplate" width="1050" height="662" viewBox="0 0 1050 662" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <clipPath id="cardRoundedClip">
+      <rect width="1050" height="662" rx="34" />
+    </clipPath>
+  </defs>
+  <g clip-path="url(#cardRoundedClip)">
+    <image width="1050" height="662" preserveAspectRatio="none" href="${window.OFFICIAL_FPEFT_BG_DATA_URL}" xlink:href="${window.OFFICIAL_FPEFT_BG_DATA_URL}" />
+  </g>
+</svg>`;
       }
 
       // Fallback de segurança elegante
@@ -2408,6 +2440,26 @@
         </g>
       </svg>
       `;
+    }
+
+    /* Retorna o SVG exato do fundo atual para exibição e exportações (SVG, PNG, ZIP) sem perda de qualidade */
+    function getCurrentBackgroundSvgString() {
+      if (studioState.customImageUrl) {
+        return `<svg id="fpeftSvgTemplate" width="1050" height="662" viewBox="0 0 1050 662" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <clipPath id="cardRoundedClip">
+      <rect width="1050" height="662" rx="34" />
+    </clipPath>
+  </defs>
+  <g clip-path="url(#cardRoundedClip)">
+    <image width="1050" height="662" preserveAspectRatio="none" href="${studioState.customImageUrl}" xlink:href="${studioState.customImageUrl}" />
+  </g>
+</svg>`;
+      }
+      if (studioState.customSvgContent) {
+        return studioState.customSvgContent;
+      }
+      return getFpeftTemplateSvg(studioState.showBgLabels);
     }
 
     /* =========================================================
@@ -3181,7 +3233,7 @@
     function exportPureSvg() {
       showToast('Gerando SVG puro com curvas e dados vetorizados...');
 
-      const currentBgSvg = studioState.customSvgContent || getFpeftTemplateSvg(studioState.showBgLabels);
+      const currentBgSvg = getCurrentBackgroundSvgString();
       const parser = new DOMParser();
       const svgDoc = parser.parseFromString(currentBgSvg, 'image/svg+xml');
       const rootSvg = svgDoc.documentElement;
@@ -3215,7 +3267,7 @@
     function exportHdPng() {
       showToast('Processando imagem HD para gráfica (300 DPI)...');
 
-      const currentBgSvg = studioState.customSvgContent || getFpeftTemplateSvg(studioState.showBgLabels);
+      const currentBgSvg = getCurrentBackgroundSvgString();
       const parser = new DOMParser();
       const svgDoc = parser.parseFromString(currentBgSvg, 'image/svg+xml');
       const rootSvg = svgDoc.documentElement;
@@ -3396,14 +3448,55 @@
         });
       }
 
-      // Upload de SVG / Imagem de Fundo
+      // Upload de Fundo: Suporte Completo a PDF Vetorial, SVG e Imagem
       const svgInp = document.getElementById('uploadSvgInput');
       if (svgInp) {
         svgInp.addEventListener('change', (e) => {
           const file = e.target.files[0];
           if (!file) return;
 
-          if (file.name.toLowerCase().endsWith('.svg') || file.type === 'image/svg+xml') {
+          if (file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf') {
+            showToast('Processando arte do PDF em Alta Resolução (300 DPI CR80)...');
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+              try {
+                if (!window.pdfjsLib) {
+                  throw new Error('Biblioteca PDF.js não inicializada.');
+                }
+                const typedArray = new Uint8Array(event.target.result);
+                const loadingTask = window.pdfjsLib.getDocument({ data: typedArray });
+                const pdf = await loadingTask.promise;
+                const page = await pdf.getPage(1);
+                const baseViewport = page.getViewport({ scale: 1 });
+
+                // Renderizar em alta definição (300 DPI CR80: ~3150 x 2000)
+                const hdScale = 3150 / baseViewport.width;
+                const hdViewport = page.getViewport({ scale: hdScale });
+                const canvas = document.createElement('canvas');
+                canvas.width = Math.round(hdViewport.width);
+                canvas.height = Math.round(hdViewport.height);
+                const ctx = canvas.getContext('2d');
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+
+                await page.render({
+                  canvasContext: ctx,
+                  viewport: hdViewport
+                }).promise;
+
+                const hdPngDataUrl = canvas.toDataURL('image/png', 1.0);
+                studioState.customImageUrl = hdPngDataUrl;
+                studioState.customSvgContent = null;
+                triggerAutoFitFullArea();
+                applyCurrentSvgBackground();
+                showToast('Fundo em PDF importado com perfeição (Zero Erros Vetoriais)!');
+              } catch (err) {
+                console.error('Erro ao processar PDF:', err);
+                showToast('Erro ao importar PDF: ' + (err.message || 'Falha na renderização'));
+              }
+            };
+            reader.readAsArrayBuffer(file);
+          } else if (file.name.toLowerCase().endsWith('.svg') || file.type === 'image/svg+xml') {
             const reader = new FileReader();
             reader.onload = (event) => {
               let svgContent = event.target.result;
@@ -3426,6 +3519,8 @@
               studioState.customSvgContent = svgContent;
               studioState.customImageUrl = null;
               triggerAutoFitFullArea();
+              applyCurrentSvgBackground();
+              showToast('Fundo SVG aplicado com sucesso!');
             };
             reader.readAsText(file);
           } else {
@@ -3434,6 +3529,8 @@
               studioState.customImageUrl = event.target.result;
               studioState.customSvgContent = null;
               triggerAutoFitFullArea();
+              applyCurrentSvgBackground();
+              showToast('Imagem de fundo aplicada!');
             };
             reader.readAsDataURL(file);
           }
@@ -3448,8 +3545,9 @@
         btnRestoreTpl.addEventListener('click', () => {
           studioState.customSvgContent = null;
           studioState.customImageUrl = null;
+          triggerAutoFitFullArea();
           applyCurrentSvgBackground();
-          showToast('Template Oficial FPEFT restaurado!');
+          showToast('Arte Oficial FPEFT (Carteira Atleta.pdf) restaurada com sucesso!');
         });
       }
 
@@ -4565,7 +4663,7 @@
        EXPORTAÇÃO EM LOTE DE CARTEIRINHAS HD (ZIP - 300 DPI)
        ========================================================= */
     function buildSvgStringForAthlete(athlete) {
-      const currentBgSvg = studioState.customSvgContent || getFpeftTemplateSvg(studioState.showBgLabels);
+      const currentBgSvg = getCurrentBackgroundSvgString();
       const parser = new DOMParser();
       const svgDoc = parser.parseFromString(currentBgSvg, 'image/svg+xml');
       const rootSvg = svgDoc.documentElement;
