@@ -685,8 +685,19 @@
                   <!-- Modalidade & Categoria -->
                   <div class="grid grid-cols-2 gap-3">
                     <div>
-                      <label class="block text-slate-300 font-bold mb-1">Modalidade</label>
-                      <input type="text" id="athleteModality" value="SOLO (INDIVIDUAL)" placeholder="SOLO / DUPLA / FOOT-TABLE" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 uppercase text-white font-bold outline-none font-fpeft" />
+                      <div class="flex items-center justify-between mb-1">
+                        <label class="block text-slate-300 font-bold">Modalidade</label>
+                        <span class="text-[10px] text-pe-gold font-bold uppercase">2 Opções</span>
+                      </div>
+                      <select id="athleteModality" onchange="onModalitySelectChange(this.value)" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 uppercase text-white font-bold outline-none font-fpeft cursor-pointer">
+                        <option value="SOLO (INDIVIDUAL)" selected>SOLO (INDIVIDUAL)</option>
+                        <option value="DUPLA">DUPLA</option>
+                      </select>
+                      <!-- Pílulas de Seleção Rápida de Modalidade -->
+                      <div class="grid grid-cols-2 gap-1 mt-1.5" id="modalityPillsContainer">
+                        <button type="button" onclick="selectModalityBase('SOLO (INDIVIDUAL)')" data-mod="SOLO (INDIVIDUAL)" class="mod-pill-btn text-[9px] py-1 px-1 rounded-lg font-extrabold text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow">Solo Individual</button>
+                        <button type="button" onclick="selectModalityBase('DUPLA')" data-mod="DUPLA" class="mod-pill-btn text-[9px] py-1 px-1 rounded-lg font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white">Dupla</button>
+                      </div>
                     </div>
                     <div>
                       <div class="flex items-center justify-between mb-1">
@@ -3549,6 +3560,64 @@
       });
     }
 
+    /* Gestão das 2 Opções de Modalidade: Solo Individual e Dupla */
+    function selectModalityBase(mod) {
+      setAthleteModalityValue(mod);
+      const target = studioState.elements.find(item => item.targetKey === 'modalidade' || item.targetKey === 'filiacao' || item.id === 'field-modalidade');
+      if (target) {
+        target.text = (mod || 'SOLO (INDIVIDUAL)').toUpperCase();
+        renderInteractiveElements();
+      }
+      autoSaveStudioDesign();
+      showToast(`Modalidade selecionada: ${mod}`);
+    }
+
+    function onModalitySelectChange(val) {
+      setAthleteModalityValue(val);
+      const target = studioState.elements.find(item => item.targetKey === 'modalidade' || item.targetKey === 'filiacao' || item.id === 'field-modalidade');
+      if (target) {
+        target.text = (val || 'SOLO (INDIVIDUAL)').toUpperCase();
+        renderInteractiveElements();
+      }
+      autoSaveStudioDesign();
+    }
+
+    function setAthleteModalityValue(mod) {
+      const sel = document.getElementById('athleteModality');
+      if (!sel) return;
+      const upper = (mod || 'SOLO (INDIVIDUAL)').toUpperCase().trim();
+      let matchedVal = 'SOLO (INDIVIDUAL)';
+      if (upper.includes('DUPLA') || upper.includes('EQUIPE')) {
+        matchedVal = 'DUPLA';
+      } else {
+        matchedVal = 'SOLO (INDIVIDUAL)';
+      }
+      let found = Array.from(sel.options).some(o => o.value === matchedVal);
+      if (!found) {
+        const opt = document.createElement('option');
+        opt.value = matchedVal;
+        opt.textContent = matchedVal;
+        sel.appendChild(opt);
+      }
+      sel.value = matchedVal;
+      updateModalityPillsUI(matchedVal);
+    }
+
+    function updateModalityPillsUI(selectedMod) {
+      const upper = (selectedMod || '').toUpperCase().trim();
+      const isDupla = upper.includes('DUPLA') || upper.includes('EQUIPE');
+      document.querySelectorAll('.mod-pill-btn').forEach(btn => {
+        const modAttr = (btn.getAttribute('data-mod') || btn.textContent).trim().toUpperCase();
+        const btnIsDupla = modAttr.includes('DUPLA') || modAttr.includes('EQUIPE');
+        const isActive = isDupla ? btnIsDupla : !btnIsDupla;
+        if (isActive) {
+          btn.className = "mod-pill-btn text-[9px] py-1 px-1 rounded-lg font-extrabold text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow";
+        } else {
+          btn.className = "mod-pill-btn text-[9px] py-1 px-1 rounded-lg font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white";
+        }
+      });
+    }
+
     /* =========================================================
        INICIALIZAÇÃO DOS EVENTOS DO STUDIO CR80
        ========================================================= */
@@ -3571,6 +3640,9 @@
           }
           if (id === 'athleteCategory') {
             updateCategoryPillsUI(val);
+          }
+          if (id === 'athleteModality') {
+            updateModalityPillsUI(val);
           }
           autoSaveStudioDesign();
         };
@@ -4732,8 +4804,7 @@
       document.getElementById('athleteBirth').value = a.nascimento || '';
       document.getElementById('athletePhone').value = a.telefone || '(81) 98765-4321';
       document.getElementById('athleteCity').value = a.municipio || 'RECIFE - PE';
-      const modInp = document.getElementById('athleteModality');
-      if (modInp) modInp.value = a.modalidade || a.clube || 'SOLO (INDIVIDUAL)';
+      setAthleteModalityValue(a.modalidade || a.clube || 'SOLO (INDIVIDUAL)');
       setAthleteCategoryValue(a.categoria || 'ASPIRANTE');
       const clubInp = document.getElementById('athleteClub');
       if (clubInp) clubInp.value = a.modalidade || a.clube || 'SOLO (INDIVIDUAL)';
@@ -4773,8 +4844,7 @@
     function clearAthleteForm() {
       document.getElementById('athleteForm').reset();
       generateRandomAthleteCode();
-      const modInp = document.getElementById('athleteModality');
-      if (modInp) modInp.value = 'SOLO (INDIVIDUAL)';
+      setAthleteModalityValue('SOLO (INDIVIDUAL)');
       setAthleteCategoryValue('ASPIRANTE');
       const catTarget = studioState.elements.find(item => item.targetKey === 'categoria');
       if (catTarget) catTarget.text = 'ASPIRANTE';
@@ -6030,6 +6100,8 @@
 
         initSupabase();
         generateRandomAthleteCode();
+        setAthleteModalityValue('SOLO (INDIVIDUAL)');
+        setAthleteCategoryValue('ASPIRANTE');
         renderJogadoresCadastradosTable();
         renderAdminNews();
         syncStudioWithCurrentLayout();
