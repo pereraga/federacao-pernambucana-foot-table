@@ -667,15 +667,15 @@
                     <input type="text" id="athletePhone" value="(81) 98765-4321" placeholder="(81) 90000-0000" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-slate-200 font-mono outline-none" />
                   </div>
 
-                  <!-- Categoria & Filiação / Clube -->
+                  <!-- Categoria & Modalidade -->
                   <div class="grid grid-cols-2 gap-3">
                     <div>
                       <label class="block text-slate-300 font-bold mb-1">Categoria</label>
                       <input type="text" id="athleteModality" value="MASTER / PRINCIPAL" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 uppercase text-white font-bold outline-none font-fpeft" />
                     </div>
                     <div>
-                      <label class="block text-slate-300 font-bold mb-1">Filiação / Clube</label>
-                      <input type="text" id="athleteClub" value="SPORT CLUB DO RECIFE" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 uppercase text-white font-bold outline-none font-fpeft" />
+                      <label class="block text-slate-300 font-bold mb-1">Modalidade</label>
+                      <input type="text" id="athleteClub" value="SOLO (INDIVIDUAL)" placeholder="SOLO / DUPLA / FOOT-TABLE" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 uppercase text-white font-bold outline-none font-fpeft" />
                     </div>
                   </div>
 
@@ -1168,7 +1168,7 @@
                     <th class="py-3 px-4">Nascimento</th>
                     <th class="py-3 px-4">Telefone</th>
                     <th class="py-3 px-4">Município</th>
-                    <th class="py-3 px-4">Clube / Filiação</th>
+                    <th class="py-3 px-4">Categoria</th>
                     <th class="py-3 px-4">Modalidade</th>
                     <th class="py-3 px-4">Nº Federado</th>
                     <th class="py-3 px-4">Validade</th>
@@ -2138,11 +2138,11 @@
       },
       {
         id: 'field-filiacao',
-        label: 'Filiação / Clube',
-        labelTag: 'FILIAÇÃO',
+        label: 'Modalidade',
+        labelTag: 'MODALIDADE',
         type: 'text-box',
         targetKey: 'filiacao',
-        text: 'SPORT CLUB DO RECIFE',
+        text: 'SOLO (INDIVIDUAL)',
         x: 268,
         y: 545,
         width: 550,
@@ -2298,6 +2298,13 @@
       if (savedCustomElements) {
         const parsed = JSON.parse(savedCustomElements);
         if (Array.isArray(parsed) && parsed.length > 0) {
+          parsed.forEach(el => {
+            if (el.id === 'field-filiacao') {
+              el.label = 'Modalidade';
+              el.labelTag = 'MODALIDADE';
+              if (el.text === 'SPORT CLUB DO RECIFE') el.text = 'SOLO (INDIVIDUAL)';
+            }
+          });
           studioState.elements = parsed;
         }
       }
@@ -3778,9 +3785,9 @@
       const birth = (document.getElementById('athleteBirth').value || '').trim();
       const phone = (document.getElementById('athletePhone').value || '').trim();
       const city = (document.getElementById('athleteCity').value || '').trim();
-      const modality = document.getElementById('athleteModality').value;
+      const category = (document.getElementById('athleteModality').value || 'MASTER / PRINCIPAL').trim();
       const status = document.getElementById('athleteStatus').value;
-      const club = (document.getElementById('athleteClub').value || '').trim();
+      const modality = (document.getElementById('athleteClub').value || 'SOLO (INDIVIDUAL)').trim();
       const fedNum = (document.getElementById('athleteFederatedNum').value || '').trim();
       const validity = (document.getElementById('athleteValidity').value || '').trim();
 
@@ -3806,9 +3813,10 @@
         nascimento: birth,
         telefone: phone,
         municipio: city,
+        categoria: category,
         modalidade: modality,
         status: status,
-        clube: club,
+        clube: modality,
         federado: fedNum,
         validade: validity,
         foto_url: photo
@@ -4104,8 +4112,8 @@
             <td class="py-3 px-4 text-slate-300 text-xs">${escapeHtml(a.nascimento || '-')}</td>
             <td class="py-3 px-4 text-slate-300 text-xs">${escapeHtml(a.telefone || '-')}</td>
             <td class="py-3 px-4 text-slate-300 text-xs truncate max-w-[130px]">${escapeHtml(a.municipio || '-')}</td>
-            <td class="py-3 px-4 text-slate-300 text-xs truncate max-w-[150px]">${escapeHtml(a.clube || '-')}</td>
-            <td class="py-3 px-4 text-pe-gold text-xs font-semibold">${escapeHtml(a.modalidade || 'SOLO')}</td>
+            <td class="py-3 px-4 text-slate-300 text-xs truncate max-w-[150px]">${escapeHtml(a.categoria || 'MASTER / PRINCIPAL')}</td>
+            <td class="py-3 px-4 text-pe-gold text-xs font-semibold">${escapeHtml(a.modalidade || a.clube || 'SOLO')}</td>
             <td class="py-3 px-4 font-mono text-sky-400 text-xs">${escapeHtml(a.federado || '-')}</td>
             <td class="py-3 px-4 text-slate-400 text-xs font-mono">${escapeHtml(a.validade || '12/2026')}</td>
             <td class="py-3 px-4">
@@ -4267,9 +4275,9 @@
       document.getElementById('athleteBirth').value = a.nascimento || '';
       document.getElementById('athletePhone').value = a.telefone || '(81) 98765-4321';
       document.getElementById('athleteCity').value = a.municipio || 'RECIFE - PE';
-      document.getElementById('athleteModality').value = a.modalidade || 'SOLO (INDIVIDUAL)';
+      document.getElementById('athleteModality').value = a.categoria || 'MASTER / PRINCIPAL';
       document.getElementById('athleteStatus').value = a.status || 'HOMOLOGADO';
-      document.getElementById('athleteClub').value = a.clube || 'SPORT CLUB DO RECIFE';
+      document.getElementById('athleteClub').value = a.modalidade || a.clube || 'SOLO (INDIVIDUAL)';
       document.getElementById('athleteFederatedNum').value = a.federado || `PE-2026/${String(a.codigo).slice(-3)}`;
       document.getElementById('athleteValidity').value = a.validade || '12/2026';
 
@@ -4283,8 +4291,8 @@
       setElText('cpf', a.cpf || '123.456.789-00');
       setElText('nasc', a.nascimento || '18/05/1996');
       setElText('fone', a.telefone || '(81) 98765-4321');
-      setElText('categoria', (a.modalidade || 'SOLO').toUpperCase());
-      setElText('filiacao', (a.clube || 'FEDERAÇÃO PERNAMBUCANA').toUpperCase());
+      setElText('categoria', (a.categoria || 'MASTER / PRINCIPAL').toUpperCase());
+      setElText('filiacao', (a.modalidade || a.clube || 'SOLO (INDIVIDUAL)').toUpperCase());
       setElText('federado', a.federado || `PE-2026/${String(a.codigo).slice(-3)}`);
       setElText('municipio', (a.municipio || 'RECIFE - PE').toUpperCase());
       setElText('validade', a.validade || '12/2026');
