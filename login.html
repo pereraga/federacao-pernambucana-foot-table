@@ -272,17 +272,35 @@
   <script>
     // Inicialização do Supabase para validação e persistência de credenciais
     const SUPABASE_PROJECT_URL = "https://qvnsahvdjhimlmtqrnif.supabase.co";
-    const SUPABASE_URL = localStorage.getItem('pe_supabase_url') || SUPABASE_PROJECT_URL;
-    const SUPABASE_ANON_KEY = localStorage.getItem('pe_supabase_anon_key') || "";
+    let SUPABASE_URL = localStorage.getItem('pe_supabase_url') || SUPABASE_PROJECT_URL;
+    let SUPABASE_ANON_KEY = localStorage.getItem('pe_supabase_anon_key') || "";
     let supabaseClient = null;
 
-    if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY) {
-      try {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      } catch (e) {
-        console.warn("Supabase não iniciado:", e);
+    async function initLoginSupabase() {
+      if ((!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.startsWith('http')) && typeof fetch === 'function') {
+        try {
+          const res = await fetch('/api/config');
+          if (res.ok) {
+            const data = await res.json();
+            if (data.supabaseAnonKey && data.hasValidKey) {
+              SUPABASE_URL = data.supabaseUrl || SUPABASE_URL;
+              SUPABASE_ANON_KEY = data.supabaseAnonKey;
+              localStorage.setItem('pe_supabase_url', SUPABASE_URL);
+              localStorage.setItem('pe_supabase_anon_key', SUPABASE_ANON_KEY);
+            }
+          }
+        } catch (e) {}
+      }
+
+      if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.startsWith('http')) {
+        try {
+          supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } catch (e) {
+          console.warn("Supabase não iniciado:", e);
+        }
       }
     }
+    initLoginSupabase();
 
     // 1. Alternador de Visibilidade de Senha
     const passInput = document.getElementById('adminPass');

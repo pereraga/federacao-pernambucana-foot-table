@@ -1997,17 +1997,36 @@
     /* =========================================================
        INICIALIZAÇÃO DO SUPABASE
        ========================================================= */
-    function initSupabase() {
+    async function initSupabase() {
       const dot = document.getElementById('adminDbStatusDot');
       const text = document.getElementById('adminDbStatusText');
 
-      if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY) {
+      // 1. Se ainda não possui chave local válida, tenta buscar do endpoint /api/config da Vercel
+      if ((!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.startsWith('http')) && typeof fetch === 'function') {
+        try {
+          const res = await fetch('/api/config');
+          if (res.ok) {
+            const data = await res.json();
+            if (data.supabaseAnonKey && data.hasValidKey) {
+              SUPABASE_URL = data.supabaseUrl || SUPABASE_URL;
+              SUPABASE_ANON_KEY = data.supabaseAnonKey;
+              localStorage.setItem('pe_supabase_url', SUPABASE_URL);
+              localStorage.setItem('pe_supabase_anon_key', SUPABASE_ANON_KEY);
+            }
+          }
+        } catch (e) {}
+      }
+
+      if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.startsWith('http')) {
         try {
           supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
           if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-pe-gold";
-          if (text) text.textContent = "Supabase Conectado";
+          if (text) text.textContent = "Supabase Conectado (Nuvem Oficial)";
           if (typeof fetchStudioDesignFromSupabase === 'function') {
             fetchStudioDesignFromSupabase();
+          }
+          if (typeof renderJogadoresCadastradosTable === 'function') {
+            renderJogadoresCadastradosTable();
           }
           return true;
         } catch (e) {
@@ -4610,24 +4629,48 @@
       if (supabaseClient) {
         try {
           const { data, error } = await supabaseClient.from('atletas').select('*').order('created_at', { ascending: false });
-          if (!error && data && data.length > 0) {
-            list = data.map(d => ({
-              id: d.id,
-              codigo: d.codigo,
-              nome: d.nome,
-              cpf: d.cpf,
-              nascimento: d.nascimento,
-              telefone: d.telefone,
-              municipio: d.municipio,
-              categoria: d.categoria || 'ASPIRANTE',
-              modalidade: d.modalidade,
-              status: d.status || 'HOMOLOGADO',
-              clube: d.clube,
-              federado: d.federado || (String(d.codigo).startsWith('PE-') ? d.codigo : `PE-2026/${String(d.codigo).slice(-3)}`),
-              validade: d.validade,
-              foto: d.foto_url
-            }));
-            localStorage.setItem('pe_athletes_db', JSON.stringify(list));
+          if (!error && data) {
+            // Sincroniza automaticamente qualquer atleta local que ainda não está na nuvem (ex: atletas pendentes)
+            const dbCodes = new Set(data.map(d => String(d.codigo)));
+            const missingInCloud = (list || []).filter(a => !dbCodes.has(String(a.codigo)));
+            if (missingInCloud.length > 0) {
+              await supabaseClient.from('atletas').upsert(missingInCloud.map(a => ({
+                codigo: a.codigo,
+                nome: a.nome,
+                cpf: a.cpf,
+                nascimento: a.nascimento,
+                telefone: a.telefone,
+                municipio: a.municipio,
+                categoria: a.categoria || 'ASPIRANTE',
+                modalidade: a.modalidade || 'SOLO (INDIVIDUAL)',
+                status: a.status || 'PENDENTE',
+                clube: a.clube || a.modalidade,
+                federado: a.federado || a.codigo,
+                validade: a.validade || '12/2026',
+                foto_url: a.foto || a.foto_url
+              })), { onConflict: 'codigo' });
+              console.log(`${missingInCloud.length} atleta(s) local(is) sincronizado(s) com o Supabase!`);
+            }
+
+            if (data.length > 0) {
+              list = data.map(d => ({
+                id: d.id,
+                codigo: d.codigo,
+                nome: d.nome,
+                cpf: d.cpf,
+                nascimento: d.nascimento,
+                telefone: d.telefone,
+                municipio: d.municipio,
+                categoria: d.categoria || 'ASPIRANTE',
+                modalidade: d.modalidade,
+                status: d.status || 'HOMOLOGADO',
+                clube: d.clube,
+                federado: d.federado || (String(d.codigo).startsWith('PE-') ? d.codigo : `PE-2026/${String(d.codigo).slice(-3)}`),
+                validade: d.validade,
+                foto: d.foto_url
+              }));
+              localStorage.setItem('pe_athletes_db', JSON.stringify(list));
+            }
           }
         } catch (e) {
           console.warn("Usando atletas locais:", e);
@@ -6232,7 +6275,7 @@
     /* =========================================================
        INICIALIZAÇÃO GERAL
        ========================================================= */
-    function initApp() {
+    async function initApp() {
       try {
         checkAuth();
 
@@ -6241,7 +6284,7 @@
         const keyInput = document.getElementById('adminCfgKey');
         if (keyInput) keyInput.value = localStorage.getItem('pe_supabase_anon_key') || '';
 
-        initSupabase();
+        await initSupabase();
         setAthleteModalityValue('SOLO (INDIVIDUAL)');
         setAthleteCategoryValue('AMADOR');
         renderJogadoresCadastradosTable();

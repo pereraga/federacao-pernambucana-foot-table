@@ -462,27 +462,39 @@
     let SUPABASE_ANON_KEY = localStorage.getItem('pe_supabase_anon_key') || "";
     let supabaseClient = null;
 
-    function initSupabase() {
+    async function initSupabase() {
       const dot = document.getElementById('supabaseStatusDot');
       const text = document.getElementById('supabaseStatusText');
 
-      if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY) {
+      if ((!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.startsWith('http')) && typeof fetch === 'function') {
+        try {
+          const res = await fetch('/api/config');
+          if (res.ok) {
+            const data = await res.json();
+            if (data.supabaseAnonKey && data.hasValidKey) {
+              SUPABASE_URL = data.supabaseUrl || SUPABASE_URL;
+              SUPABASE_ANON_KEY = data.supabaseAnonKey;
+              localStorage.setItem('pe_supabase_url', SUPABASE_URL);
+              localStorage.setItem('pe_supabase_anon_key', SUPABASE_ANON_KEY);
+            }
+          }
+        } catch (e) {}
+      }
+
+      if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.startsWith('http')) {
         try {
           supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
           if (dot) dot.className = "w-2 h-2 rounded-full bg-emerald-400";
-          if (text) text.textContent = "Supabase: Conectado";
+          if (text) text.textContent = "Supabase: Conectado (Nuvem)";
+          if (typeof renderPublicNews === 'function') renderPublicNews();
           return true;
         } catch (err) {
           console.warn("Erro ao instanciar Supabase:", err);
-          if (dot) dot.className = "w-2 h-2 rounded-full bg-amber-400";
-          if (text) text.textContent = "Supabase: Modo Local";
-          return false;
         }
-      } else {
-        if (dot) dot.className = "w-2 h-2 rounded-full bg-amber-400";
-        if (text) text.textContent = "Supabase: Modo Local";
-        return false;
       }
+      if (dot) dot.className = "w-2 h-2 rounded-full bg-amber-400";
+      if (text) text.textContent = "Supabase: Modo Local";
+      return false;
     }
 
     /* =======================================================
@@ -886,8 +898,8 @@
     });
 
     // Inicialização ao carregar página
-    function initIndexApp() {
-      initSupabase();
+    async function initIndexApp() {
+      await initSupabase();
       renderPublicNews();
       applySavedBadgeLayout();
     }

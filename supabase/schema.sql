@@ -65,6 +65,13 @@ ON public.atletas FOR SELECT
 TO anon, authenticated
 USING (true);
 
+-- Permite cadastro, edição e homologação de atletas pelo painel
+CREATE POLICY "Permitir gerenciamento de atletas"
+ON public.atletas FOR ALL
+TO anon, authenticated
+USING (true)
+WITH CHECK (true);
+
 -- Permite consulta pública às notícias
 CREATE POLICY "Permitir leitura pública de notícias"
 ON public.noticias FOR SELECT
