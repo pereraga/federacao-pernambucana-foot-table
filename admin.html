@@ -674,8 +674,23 @@
                       <input type="text" id="athleteModality" value="SOLO (INDIVIDUAL)" placeholder="SOLO / DUPLA / FOOT-TABLE" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 uppercase text-white font-bold outline-none font-fpeft" />
                     </div>
                     <div>
-                      <label class="block text-slate-300 font-bold mb-1">Categoria</label>
-                      <input type="text" id="athleteCategory" value="MASTER / PRINCIPAL" placeholder="MASTER / PRINCIPAL" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 uppercase text-white font-bold outline-none font-fpeft" />
+                      <div class="flex items-center justify-between mb-1">
+                        <label class="block text-slate-300 font-bold">Categoria</label>
+                        <span class="text-[10px] text-pe-gold font-bold uppercase">4 Bases</span>
+                      </div>
+                      <select id="athleteCategory" onchange="onCategorySelectChange(this.value)" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 uppercase text-white font-bold outline-none font-fpeft cursor-pointer">
+                        <option value="ASPIRANTE" selected>ASPIRANTE</option>
+                        <option value="INICIANTE">INICIANTE</option>
+                        <option value="AMADOR">AMADOR</option>
+                        <option value="PROFISSIONAL">PROFISSIONAL</option>
+                      </select>
+                      <!-- Pílulas de Seleção Rápida das 4 Bases -->
+                      <div class="grid grid-cols-4 gap-1 mt-1.5" id="categoryPillsContainer">
+                        <button type="button" onclick="selectCategoryBase('ASPIRANTE')" data-cat="ASPIRANTE" class="cat-pill-btn text-[9px] py-1 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow">Aspirante</button>
+                        <button type="button" onclick="selectCategoryBase('INICIANTE')" data-cat="INICIANTE" class="cat-pill-btn text-[9px] py-1 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white">Iniciante</button>
+                        <button type="button" onclick="selectCategoryBase('AMADOR')" data-cat="AMADOR" class="cat-pill-btn text-[9px] py-1 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white">Amador</button>
+                        <button type="button" onclick="selectCategoryBase('PROFISSIONAL')" data-cat="PROFISSIONAL" class="cat-pill-btn text-[9px] py-1 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white">Profissional</button>
+                      </div>
                     </div>
                   </div>
 
@@ -1148,6 +1163,19 @@
                 <button type="button" onclick="setJogadoresFilterStatus('PENDENTE')" id="filterTabStatus-PENDENTE" class="hidden text-xs px-3.5 py-2 rounded-xl font-bold transition cursor-pointer bg-[#05080e] border border-amber-500/50 text-amber-400 hover:bg-amber-500/20">
                   ⏳ Aguardando Homologação (<span id="countBtnPendentes">0</span>)
                 </button>
+
+                <!-- Filtro por Categoria (4 Bases) -->
+                <div class="flex items-center gap-1.5 bg-[#05080e] border border-[#1c253b] rounded-xl px-2.5 py-1.5">
+                  <i class="fa-solid fa-layer-group text-pe-gold text-xs"></i>
+                  <span class="text-[10px] text-slate-400 font-bold uppercase">Categoria:</span>
+                  <select id="filterJogadoresCategoria" onchange="renderJogadoresCadastradosTable()" class="bg-transparent text-xs text-white font-bold outline-none cursor-pointer">
+                    <option value="ALL" class="bg-[#0b101d] text-white">Todas</option>
+                    <option value="ASPIRANTE" class="bg-[#0b101d] text-cyan-300 font-bold">Aspirante</option>
+                    <option value="INICIANTE" class="bg-[#0b101d] text-emerald-300 font-bold">Iniciante</option>
+                    <option value="AMADOR" class="bg-[#0b101d] text-amber-300 font-bold">Amador</option>
+                    <option value="PROFISSIONAL" class="bg-[#0b101d] text-purple-300 font-bold">Profissional</option>
+                  </select>
+                </div>
               </div>
             </div>
 
@@ -1807,7 +1835,7 @@
         cpf: "123.456.789-00",
         nascimento: "14/05/1998",
         municipio: "Recife - PE",
-        categoria: "MASTER / PRINCIPAL",
+        categoria: "ASPIRANTE",
         modalidade: "SOLO (INDIVIDUAL)",
         status: "REGULAR",
         foto: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80"
@@ -1819,7 +1847,7 @@
         cpf: "987.654.321-11",
         nascimento: "22/11/2001",
         municipio: "Olinda - PE",
-        categoria: "PRINCIPAL / FEMININO",
+        categoria: "INICIANTE",
         modalidade: "DUPLA (EQUIPE)",
         status: "REGULAR",
         foto: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80"
@@ -1831,7 +1859,7 @@
         cpf: "456.789.123-22",
         nascimento: "08/03/1995",
         municipio: "Caruaru - PE",
-        categoria: "MASTER",
+        categoria: "AMADOR",
         modalidade: "SOLO & DUPLA",
         status: "HOMOLOGADO",
         foto: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80"
@@ -1843,7 +1871,7 @@
         cpf: "654.321.987-33",
         nascimento: "19/07/2000",
         municipio: "Jaboatão dos Guararapes - PE",
-        categoria: "PRINCIPAL / FEMININO",
+        categoria: "INICIANTE",
         modalidade: "SOLO (INDIVIDUAL)",
         status: "REGULAR",
         foto: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80"
@@ -1855,7 +1883,7 @@
         cpf: "321.654.987-44",
         nascimento: "30/10/1997",
         municipio: "Petrolina - PE",
-        categoria: "PRINCIPAL",
+        categoria: "AMADOR",
         modalidade: "DUPLA (EQUIPE)",
         status: "REGULAR",
         foto: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80"
@@ -1867,7 +1895,7 @@
         cpf: "789.123.456-55",
         nascimento: "12/01/1982",
         municipio: "Cabo de Santo Agostinho - PE",
-        categoria: "MASTER 40+",
+        categoria: "PROFISSIONAL",
         modalidade: "MASTER 40+",
         status: "HOMOLOGADO",
         foto: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=300&q=80"
@@ -1879,7 +1907,7 @@
         cpf: "159.357.486-66",
         nascimento: "05/09/2002",
         municipio: "Paulista - PE",
-        categoria: "PRINCIPAL / FEMININO",
+        categoria: "ASPIRANTE",
         modalidade: "SOLO (INDIVIDUAL)",
         status: "REGULAR",
         foto: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80"
@@ -1891,7 +1919,7 @@
         cpf: "753.951.852-77",
         nascimento: "17/04/1996",
         municipio: "Garanhuns - PE",
-        categoria: "MASTER / PRINCIPAL",
+        categoria: "PROFISSIONAL",
         modalidade: "DUPLA (EQUIPE)",
         status: "REGULAR",
         foto: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=300&q=80"
@@ -2128,7 +2156,7 @@
         labelTag: 'CATEGORIA',
         type: 'text-box',
         targetKey: 'categoria',
-        text: 'MASTER / PRINCIPAL',
+        text: 'ASPIRANTE',
         x: 268,
         y: 495,
         width: 550,
@@ -2318,7 +2346,7 @@
               el.label = 'Categoria';
               el.labelTag = 'CATEGORIA';
               el.targetKey = 'categoria';
-              if (el.text === 'SOLO (INDIVIDUAL)') el.text = 'MASTER / PRINCIPAL';
+              if (!el.text || el.text === 'SOLO (INDIVIDUAL)' || el.text === 'MASTER / PRINCIPAL') el.text = 'ASPIRANTE';
             }
           });
           studioState.elements = parsed;
@@ -3232,6 +3260,55 @@
       img.src = blobUrl;
     }
 
+    /* Gestão das 4 Bases de Categoria: Aspirante, Iniciante, Amador, Profissional */
+    function selectCategoryBase(cat) {
+      setAthleteCategoryValue(cat);
+      const target = studioState.elements.find(item => item.targetKey === 'categoria');
+      if (target) {
+        target.text = (cat || 'ASPIRANTE').toUpperCase();
+        renderInteractiveElements();
+      }
+      autoSaveStudioDesign();
+      showToast(`Categoria selecionada: ${cat}`);
+    }
+
+    function onCategorySelectChange(val) {
+      setAthleteCategoryValue(val);
+      const target = studioState.elements.find(item => item.targetKey === 'categoria');
+      if (target) {
+        target.text = (val || 'ASPIRANTE').toUpperCase();
+        renderInteractiveElements();
+      }
+      autoSaveStudioDesign();
+    }
+
+    function setAthleteCategoryValue(cat) {
+      const sel = document.getElementById('athleteCategory');
+      if (!sel) return;
+      const upper = (cat || 'ASPIRANTE').toUpperCase().trim();
+      let found = Array.from(sel.options).some(o => o.value === upper);
+      if (!found && upper) {
+        const opt = document.createElement('option');
+        opt.value = upper;
+        opt.textContent = upper;
+        sel.appendChild(opt);
+      }
+      sel.value = upper;
+      updateCategoryPillsUI(upper);
+    }
+
+    function updateCategoryPillsUI(selectedCat) {
+      const upper = (selectedCat || '').toUpperCase().trim();
+      document.querySelectorAll('.cat-pill-btn').forEach(btn => {
+        const catAttr = (btn.getAttribute('data-cat') || btn.textContent).trim().toUpperCase();
+        if (catAttr === upper) {
+          btn.className = "cat-pill-btn text-[9px] py-1 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow";
+        } else {
+          btn.className = "cat-pill-btn text-[9px] py-1 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white";
+        }
+      });
+    }
+
     /* =========================================================
        INICIALIZAÇÃO DOS EVENTOS DO STUDIO CR80
        ========================================================= */
@@ -3240,7 +3317,7 @@
       const bindSync = (id, targetKey, uppercase = false) => {
         const el = document.getElementById(id);
         if (!el) return;
-        el.addEventListener('input', (e) => {
+        const handler = (e) => {
           let val = e.target.value;
           if (uppercase) val = val.toUpperCase();
           const target = studioState.elements.find(item => item.targetKey === targetKey || (targetKey === 'modalidade' && item.targetKey === 'filiacao'));
@@ -3248,7 +3325,12 @@
             target.text = val;
             renderInteractiveElements();
           }
-        });
+          if (id === 'athleteCategory') {
+            updateCategoryPillsUI(val);
+          }
+        };
+        el.addEventListener('input', handler);
+        el.addEventListener('change', handler);
       };
 
       bindSync('athleteName', 'nome', true);
@@ -3802,7 +3884,7 @@
       const birth = (document.getElementById('athleteBirth').value || '').trim();
       const phone = (document.getElementById('athletePhone').value || '').trim();
       const city = (document.getElementById('athleteCity').value || '').trim();
-      const category = (document.getElementById('athleteCategory') ? document.getElementById('athleteCategory').value : 'MASTER / PRINCIPAL').trim() || 'MASTER / PRINCIPAL';
+      const category = (document.getElementById('athleteCategory') ? document.getElementById('athleteCategory').value : 'ASPIRANTE').trim() || 'ASPIRANTE';
       const status = document.getElementById('athleteStatus').value;
       const modality = (document.getElementById('athleteModality') ? document.getElementById('athleteModality').value : (document.getElementById('athleteClub') ? document.getElementById('athleteClub').value : 'SOLO (INDIVIDUAL)')).trim() || 'SOLO (INDIVIDUAL)';
       const fedNum = (document.getElementById('athleteFederatedNum').value || '').trim();
@@ -3980,6 +4062,14 @@
         list = [...(list || []), ...missing];
         localStorage.setItem('pe_athletes_db', JSON.stringify(list));
       }
+      if (list && Array.isArray(list)) {
+        list.forEach(a => {
+          if (!a.categoria || a.categoria === 'MASTER / PRINCIPAL') {
+            const def = DEFAULT_ATHLETES.find(d => String(d.codigo) === String(a.codigo));
+            a.categoria = def ? def.categoria : 'ASPIRANTE';
+          }
+        });
+      }
       if (supabaseClient) {
         try {
           const { data, error } = await supabaseClient.from('atletas').select('*').order('created_at', { ascending: false });
@@ -3992,6 +4082,7 @@
               nascimento: d.nascimento,
               telefone: d.telefone,
               municipio: d.municipio,
+              categoria: d.categoria || 'ASPIRANTE',
               modalidade: d.modalidade,
               status: d.status || 'HOMOLOGADO',
               clube: d.clube,
@@ -4012,6 +4103,21 @@
     // Compatibilidade reversa
     async function renderAthletesTable() {
       return renderJogadoresCadastradosTable();
+    }
+
+    /* Badge visual para as 4 Bases de Categoria */
+    function getCategoryBadgeHtml(cat) {
+      const c = (cat || 'ASPIRANTE').toUpperCase().trim();
+      if (c === 'ASPIRANTE') {
+        return `<span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-cyan-950/70 text-cyan-300 border border-cyan-500/40">ASPIRANTE</span>`;
+      } else if (c === 'INICIANTE') {
+        return `<span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-950/70 text-emerald-300 border border-emerald-500/40">INICIANTE</span>`;
+      } else if (c === 'AMADOR') {
+        return `<span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-amber-950/70 text-amber-300 border border-amber-500/40">AMADOR</span>`;
+      } else if (c === 'PROFISSIONAL') {
+        return `<span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-purple-950/70 text-purple-300 border border-purple-500/40">PROFISSIONAL</span>`;
+      }
+      return `<span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-slate-800 text-slate-300 border border-slate-700">${escapeHtml(c)}</span>`;
     }
 
     /* =========================================================
@@ -4077,6 +4183,13 @@
         list = list.filter(a => a.status === 'PENDENTE' || a.status === 'PENDENTE DE HOMOLOGAÇÃO');
       }
 
+      // Filtra por Categoria (4 Bases)
+      const filterCatEl = document.getElementById('filterJogadoresCategoria');
+      const catFilter = filterCatEl ? filterCatEl.value : 'ALL';
+      if (catFilter !== 'ALL') {
+        list = list.filter(a => (a.categoria || 'ASPIRANTE').toUpperCase().trim() === catFilter);
+      }
+
       // Filtra pela busca
       const searchInp = document.getElementById('searchJogadoresInput');
       const q = (searchInp ? searchInp.value : '').toLowerCase().trim();
@@ -4087,7 +4200,8 @@
           (a.cpf && a.cpf.toLowerCase().includes(q)) ||
           (a.municipio && a.municipio.toLowerCase().includes(q)) ||
           (a.clube && a.clube.toLowerCase().includes(q)) ||
-          (a.modalidade && a.modalidade.toLowerCase().includes(q))
+          (a.modalidade && a.modalidade.toLowerCase().includes(q)) ||
+          (a.categoria && a.categoria.toLowerCase().includes(q))
         );
       }
 
@@ -4129,7 +4243,7 @@
             <td class="py-3 px-4 text-slate-300 text-xs">${escapeHtml(a.nascimento || '-')}</td>
             <td class="py-3 px-4 text-slate-300 text-xs">${escapeHtml(a.telefone || '-')}</td>
             <td class="py-3 px-4 text-slate-300 text-xs truncate max-w-[130px]">${escapeHtml(a.municipio || '-')}</td>
-            <td class="py-3 px-4 text-slate-300 text-xs truncate max-w-[150px]">${escapeHtml(a.categoria || 'MASTER / PRINCIPAL')}</td>
+            <td class="py-3 px-4">${getCategoryBadgeHtml(a.categoria)}</td>
             <td class="py-3 px-4 text-pe-gold text-xs font-semibold">${escapeHtml(a.modalidade || a.clube || 'SOLO')}</td>
             <td class="py-3 px-4 font-mono text-sky-400 text-xs">${escapeHtml(a.federado || '-')}</td>
             <td class="py-3 px-4 text-slate-400 text-xs font-mono">${escapeHtml(a.validade || '12/2026')}</td>
@@ -4294,8 +4408,7 @@
       document.getElementById('athleteCity').value = a.municipio || 'RECIFE - PE';
       const modInp = document.getElementById('athleteModality');
       if (modInp) modInp.value = a.modalidade || a.clube || 'SOLO (INDIVIDUAL)';
-      const catInp = document.getElementById('athleteCategory');
-      if (catInp) catInp.value = a.categoria || 'MASTER / PRINCIPAL';
+      setAthleteCategoryValue(a.categoria || 'ASPIRANTE');
       const clubInp = document.getElementById('athleteClub');
       if (clubInp) clubInp.value = a.modalidade || a.clube || 'SOLO (INDIVIDUAL)';
       document.getElementById('athleteStatus').value = a.status || 'HOMOLOGADO';
@@ -4312,7 +4425,7 @@
       setElText('cpf', a.cpf || '123.456.789-00');
       setElText('nasc', a.nascimento || '18/05/1996');
       setElText('fone', a.telefone || '(81) 98765-4321');
-      setElText('categoria', (a.categoria || 'MASTER / PRINCIPAL').toUpperCase());
+      setElText('categoria', (a.categoria || 'ASPIRANTE').toUpperCase());
       setElText('modalidade', (a.modalidade || a.clube || 'SOLO (INDIVIDUAL)').toUpperCase());
       setElText('filiacao', (a.modalidade || a.clube || 'SOLO (INDIVIDUAL)').toUpperCase());
       setElText('federado', a.federado || `PE-2026/${String(a.codigo).slice(-3)}`);
@@ -4337,8 +4450,9 @@
       generateRandomAthleteCode();
       const modInp = document.getElementById('athleteModality');
       if (modInp) modInp.value = 'SOLO (INDIVIDUAL)';
-      const catInp = document.getElementById('athleteCategory');
-      if (catInp) catInp.value = 'MASTER / PRINCIPAL';
+      setAthleteCategoryValue('ASPIRANTE');
+      const catTarget = studioState.elements.find(item => item.targetKey === 'categoria');
+      if (catTarget) catTarget.text = 'ASPIRANTE';
       const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
       if (photoTarget) photoTarget.photoUrl = '';
       renderInteractiveElements();
@@ -4372,7 +4486,7 @@
               </span>
             </div>
             <h4 class="font-oswald text-sm uppercase font-bold text-white leading-tight truncate">${escapeHtml(a.nome)}</h4>
-            <p class="text-[10px] text-pe-gold/90 truncate mt-0.5 font-bold uppercase">${escapeHtml(a.categoria || 'MASTER / PRINCIPAL')}</p>
+            <div class="mt-1 flex items-center gap-1.5 flex-wrap">${getCategoryBadgeHtml(a.categoria || 'ASPIRANTE')}</div>
             <span class="inline-block mt-1 text-[9px] font-mono text-sky-400 bg-sky-950/50 px-1.5 py-0.5 rounded border border-sky-800/40">${escapeHtml(a.federado || 'PE-2026/' + String(a.codigo).slice(-3))}</span>
           </div>
         </div>
@@ -4472,7 +4586,7 @@
         } else if (item.targetKey === 'fone') {
           item.text = athlete.telefone || '';
         } else if (item.targetKey === 'categoria') {
-          item.text = (athlete.categoria || 'MASTER / PRINCIPAL').toUpperCase();
+          item.text = (athlete.categoria || 'ASPIRANTE').toUpperCase();
         } else if (item.targetKey === 'modalidade' || item.targetKey === 'filiacao') {
           item.text = (athlete.modalidade || athlete.clube || 'SOLO (INDIVIDUAL)').toUpperCase();
         } else if (item.targetKey === 'federado') {
