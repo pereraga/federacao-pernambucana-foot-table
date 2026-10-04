@@ -458,15 +458,20 @@
        ======================================================= */
     // URL oficial do projeto Supabase
     const SUPABASE_PROJECT_URL = "https://qvnsahvdjhimlmtqrnif.supabase.co";
+    const DEFAULT_SUPABASE_ANON_KEY = "sb_publishable_vvqh9vB0Dr0EqR9JGhy4kA_XnJ-9h0z";
     let SUPABASE_URL = localStorage.getItem('pe_supabase_url') || SUPABASE_PROJECT_URL;
-    let SUPABASE_ANON_KEY = localStorage.getItem('pe_supabase_anon_key') || "";
+    let SUPABASE_ANON_KEY = localStorage.getItem('pe_supabase_anon_key');
+    if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.startsWith('http') || SUPABASE_ANON_KEY.length < 20) {
+      SUPABASE_ANON_KEY = DEFAULT_SUPABASE_ANON_KEY;
+      localStorage.setItem('pe_supabase_anon_key', SUPABASE_ANON_KEY);
+    }
     let supabaseClient = null;
 
     async function initSupabase() {
       const dot = document.getElementById('supabaseStatusDot');
       const text = document.getElementById('supabaseStatusText');
 
-      if ((!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.startsWith('http')) && typeof fetch === 'function') {
+      if ((!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.startsWith('http') || SUPABASE_ANON_KEY.length < 20) && typeof fetch === 'function') {
         try {
           const res = await fetch('/api/config');
           if (res.ok) {
@@ -479,6 +484,11 @@
             }
           }
         } catch (e) {}
+      }
+
+      if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.startsWith('http') || SUPABASE_ANON_KEY.length < 20) {
+        SUPABASE_ANON_KEY = DEFAULT_SUPABASE_ANON_KEY;
+        localStorage.setItem('pe_supabase_anon_key', SUPABASE_ANON_KEY);
       }
 
       if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.startsWith('http')) {

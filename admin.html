@@ -1827,8 +1827,13 @@
   <script>
     // Configurações Padrão
     const DEFAULT_SUPABASE_URL = "https://qvnsahvdjhimlmtqrnif.supabase.co";
+    const DEFAULT_SUPABASE_ANON_KEY = "sb_publishable_vvqh9vB0Dr0EqR9JGhy4kA_XnJ-9h0z";
     let SUPABASE_URL = localStorage.getItem('pe_supabase_url') || DEFAULT_SUPABASE_URL;
-    let SUPABASE_ANON_KEY = localStorage.getItem('pe_supabase_anon_key') || "";
+    let SUPABASE_ANON_KEY = localStorage.getItem('pe_supabase_anon_key');
+    if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.startsWith('http') || SUPABASE_ANON_KEY.length < 20) {
+      SUPABASE_ANON_KEY = DEFAULT_SUPABASE_ANON_KEY;
+      localStorage.setItem('pe_supabase_anon_key', SUPABASE_ANON_KEY);
+    }
     let supabaseClient = null;
 
     // Layout padrão da carteira
@@ -2002,7 +2007,7 @@
       const text = document.getElementById('adminDbStatusText');
 
       // 1. Se ainda não possui chave local válida, tenta buscar do endpoint /api/config da Vercel
-      if ((!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.startsWith('http')) && typeof fetch === 'function') {
+      if ((!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.startsWith('http') || SUPABASE_ANON_KEY.length < 20) && typeof fetch === 'function') {
         try {
           const res = await fetch('/api/config');
           if (res.ok) {
@@ -2015,6 +2020,11 @@
             }
           }
         } catch (e) {}
+      }
+
+      if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.startsWith('http') || SUPABASE_ANON_KEY.length < 20) {
+        SUPABASE_ANON_KEY = DEFAULT_SUPABASE_ANON_KEY;
+        localStorage.setItem('pe_supabase_anon_key', SUPABASE_ANON_KEY);
       }
 
       if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.startsWith('http')) {
@@ -6282,7 +6292,7 @@
         const urlInput = document.getElementById('adminCfgUrl');
         if (urlInput) urlInput.value = localStorage.getItem('pe_supabase_url') || DEFAULT_SUPABASE_URL;
         const keyInput = document.getElementById('adminCfgKey');
-        if (keyInput) keyInput.value = localStorage.getItem('pe_supabase_anon_key') || '';
+        if (keyInput) keyInput.value = localStorage.getItem('pe_supabase_anon_key') || DEFAULT_SUPABASE_ANON_KEY;
 
         await initSupabase();
         setAthleteModalityValue('SOLO (INDIVIDUAL)');

@@ -8,13 +8,17 @@ export default async function handler(req, res) {
   // Evitar qualquer cache
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
 
-  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL || "https://qvnsahvdjhimlmtqrnif.supabase.co";
+  let supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || "sb_publishable_vvqh9vB0Dr0EqR9JGhy4kA_XnJ-9h0z";
+
+  if (!supabaseKey || supabaseKey.startsWith('http')) {
+    supabaseKey = "sb_publishable_vvqh9vB0Dr0EqR9JGhy4kA_XnJ-9h0z";
+  }
 
   if (!supabaseUrl || !supabaseKey) {
     return res.status(200).json({
       status: 'warning',
-      message: 'Keep-alive executado, mas as credenciais SUPABASE_URL e SUPABASE_ANON_KEY ainda não foram configuradas nas variáveis da Vercel.',
+      message: 'Credenciais Supabase não configuradas.',
       timestamp: new Date().toISOString()
     });
   }
