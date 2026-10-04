@@ -541,111 +541,7 @@
       }
     ];
 
-    const DEFAULT_ATHLETES = [
-      {
-        id: 100,
-        codigo: "973321",
-        federado: "973321",
-        nome: "Gabriel Pereira Alves",
-        cpf: "714.309.664-40",
-        nascimento: "24/03/2003",
-        telefone: "(81) 98463-4126",
-        municipio: "Recife - PE",
-        categoria: "AMADOR",
-        modalidade: "SOLO (INDIVIDUAL)",
-        status: "PENDENTE",
-        validade: "12/2026",
-        foto: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80"
-      },
-      {
-        id: 101,
-        codigo: "742918",
-        nome: "Matheus Vinicius Ferraz",
-        cpf: "123.456.789-00",
-        nascimento: "14/05/1998",
-        municipio: "Recife - PE",
-        modalidade: "SOLO (INDIVIDUAL)",
-        status: "REGULAR",
-        foto: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80"
-      },
-      {
-        id: 102,
-        codigo: "581902",
-        nome: "Camila Duarte Silveira",
-        cpf: "987.654.321-11",
-        nascimento: "22/11/2001",
-        municipio: "Olinda - PE",
-        modalidade: "DUPLA (EQUIPE)",
-        status: "REGULAR",
-        foto: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80"
-      },
-      {
-        id: 103,
-        codigo: "839104",
-        nome: "Lucas Gabriel Cavalcanti",
-        cpf: "456.789.123-22",
-        nascimento: "08/03/1995",
-        municipio: "Caruaru - PE",
-        modalidade: "SOLO & DUPLA",
-        status: "HOMOLOGADO",
-        foto: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80"
-      },
-      {
-        id: 104,
-        codigo: "412095",
-        nome: "Mariana Beatriz Souza",
-        cpf: "654.321.987-33",
-        nascimento: "19/07/2000",
-        municipio: "Jaboatão dos Guararapes - PE",
-        modalidade: "SOLO (INDIVIDUAL)",
-        status: "REGULAR",
-        foto: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80"
-      },
-      {
-        id: 105,
-        codigo: "625184",
-        nome: "Rodrigo Menezes Silva",
-        cpf: "321.654.987-44",
-        nascimento: "30/10/1997",
-        municipio: "Petrolina - PE",
-        modalidade: "DUPLA (EQUIPE)",
-        status: "REGULAR",
-        foto: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80"
-      },
-      {
-        id: 106,
-        codigo: "934172",
-        nome: "Felipe Albuquerque Lima",
-        cpf: "789.123.456-55",
-        nascimento: "12/01/1982",
-        municipio: "Cabo de Santo Agostinho - PE",
-        modalidade: "MASTER 40+",
-        status: "HOMOLOGADO",
-        foto: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=300&q=80"
-      },
-      {
-        id: 107,
-        codigo: "274910",
-        nome: "Juliana Peixoto Ramos",
-        cpf: "159.357.486-66",
-        nascimento: "05/09/2002",
-        municipio: "Paulista - PE",
-        modalidade: "SOLO (INDIVIDUAL)",
-        status: "REGULAR",
-        foto: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80"
-      },
-      {
-        id: 108,
-        codigo: "395812",
-        nome: "Eduardo Santos Costa",
-        cpf: "753.951.852-77",
-        nascimento: "17/04/1996",
-        municipio: "Garanhuns - PE",
-        modalidade: "DUPLA (EQUIPE)",
-        status: "REGULAR",
-        foto: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=300&q=80"
-      }
-    ];
+    const DEFAULT_ATHLETES = [];
 
     function getStoredNews() {
       let list = JSON.parse(localStorage.getItem('pe_news_db')) || JSON.parse(localStorage.getItem('pe_futmesa_news'));
@@ -659,14 +555,7 @@
     }
 
     function getStoredAthletes() {
-      let list = JSON.parse(localStorage.getItem('pe_athletes_db'));
-      if (!list || !Array.isArray(list) || list.length < DEFAULT_ATHLETES.length) {
-        const existingCodes = new Set((list || []).map(a => String(a.codigo)));
-        const missing = DEFAULT_ATHLETES.filter(a => !existingCodes.has(String(a.codigo)));
-        list = [...(list || []), ...missing];
-        localStorage.setItem('pe_athletes_db', JSON.stringify(list));
-      }
-      return list;
+      return JSON.parse(localStorage.getItem('pe_athletes_db')) || [];
     }
 
     /* =======================================================

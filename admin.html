@@ -1175,6 +1175,11 @@
               </div>
 
               <div class="flex flex-wrap items-center gap-2">
+                <!-- Botão Limpar Todos -->
+                <button type="button" onclick="clearAllAthletes()" class="bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/40 text-rose-300 font-bold text-xs uppercase px-3.5 py-2 rounded-xl transition cursor-pointer flex items-center gap-1.5" title="Remover todos os jogadores cadastrados">
+                  <i class="fa-solid fa-trash-can"></i> Limpar Todos
+                </button>
+
                 <!-- Filtros por Status -->
                 <button type="button" onclick="setJogadoresFilterStatus('ALL')" id="filterTabStatus-ALL" class="text-xs px-3.5 py-2 rounded-xl font-bold transition cursor-pointer bg-pe-gold text-pe-dark">
                   Todos (Ordem A-Z)
@@ -1853,120 +1858,8 @@
 
     let currentBadgeLayout = JSON.parse(localStorage.getItem('pe_badge_layout_config')) || DEFAULT_BADGE_LAYOUT;
 
-    // Atletas e Notícias Locais (Fallback Robusto com Roster Oficial)
-    const DEFAULT_ATHLETES = [
-      {
-        id: 100,
-        codigo: "973321",
-        federado: "973321",
-        nome: "Gabriel Pereira Alves",
-        cpf: "714.309.664-40",
-        nascimento: "24/03/2003",
-        telefone: "(81) 98463-4126",
-        municipio: "Recife - PE",
-        categoria: "AMADOR",
-        modalidade: "SOLO (INDIVIDUAL)",
-        status: "PENDENTE",
-        validade: "12/2026",
-        foto: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80"
-      },
-      {
-        id: 101,
-        codigo: "742918",
-        nome: "Matheus Vinicius Ferraz",
-        cpf: "123.456.789-00",
-        nascimento: "14/05/1998",
-        municipio: "Recife - PE",
-        categoria: "ASPIRANTE",
-        modalidade: "SOLO (INDIVIDUAL)",
-        status: "REGULAR",
-        foto: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80"
-      },
-      {
-        id: 102,
-        codigo: "581902",
-        nome: "Camila Duarte Silveira",
-        cpf: "987.654.321-11",
-        nascimento: "22/11/2001",
-        municipio: "Olinda - PE",
-        categoria: "INICIANTE",
-        modalidade: "DUPLA (EQUIPE)",
-        status: "REGULAR",
-        foto: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80"
-      },
-      {
-        id: 103,
-        codigo: "839104",
-        nome: "Lucas Gabriel Cavalcanti",
-        cpf: "456.789.123-22",
-        nascimento: "08/03/1995",
-        municipio: "Caruaru - PE",
-        categoria: "AMADOR",
-        modalidade: "SOLO & DUPLA",
-        status: "HOMOLOGADO",
-        foto: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80"
-      },
-      {
-        id: 104,
-        codigo: "412095",
-        nome: "Mariana Beatriz Souza",
-        cpf: "654.321.987-33",
-        nascimento: "19/07/2000",
-        municipio: "Jaboatão dos Guararapes - PE",
-        categoria: "INICIANTE",
-        modalidade: "SOLO (INDIVIDUAL)",
-        status: "REGULAR",
-        foto: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80"
-      },
-      {
-        id: 105,
-        codigo: "625184",
-        nome: "Rodrigo Menezes Silva",
-        cpf: "321.654.987-44",
-        nascimento: "30/10/1997",
-        municipio: "Petrolina - PE",
-        categoria: "AMADOR",
-        modalidade: "DUPLA (EQUIPE)",
-        status: "REGULAR",
-        foto: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80"
-      },
-      {
-        id: 106,
-        codigo: "934172",
-        nome: "Felipe Albuquerque Lima",
-        cpf: "789.123.456-55",
-        nascimento: "12/01/1982",
-        municipio: "Cabo de Santo Agostinho - PE",
-        categoria: "PROFISSIONAL",
-        modalidade: "MASTER 40+",
-        status: "HOMOLOGADO",
-        foto: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=300&q=80"
-      },
-      {
-        id: 107,
-        codigo: "274910",
-        nome: "Juliana Peixoto Ramos",
-        cpf: "159.357.486-66",
-        nascimento: "05/09/2002",
-        municipio: "Paulista - PE",
-        categoria: "ASPIRANTE",
-        modalidade: "SOLO (INDIVIDUAL)",
-        status: "REGULAR",
-        foto: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80"
-      },
-      {
-        id: 108,
-        codigo: "395812",
-        nome: "Eduardo Santos Costa",
-        cpf: "753.951.852-77",
-        nascimento: "17/04/1996",
-        municipio: "Garanhuns - PE",
-        categoria: "PROFISSIONAL",
-        modalidade: "DUPLA (EQUIPE)",
-        status: "REGULAR",
-        foto: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=300&q=80"
-      }
-    ];
+    // Lista de Atletas Padrão (Vazio por padrão - o sistema gerencia estritamente o que for inserido/removido pelo usuário)
+    const DEFAULT_ATHLETES = [];
 
     const DEFAULT_NEWS = [
       {
@@ -4507,7 +4400,7 @@
         }
       }
 
-      let localAthletes = JSON.parse(localStorage.getItem('pe_athletes_db')) || DEFAULT_ATHLETES;
+      let localAthletes = JSON.parse(localStorage.getItem('pe_athletes_db')) || [];
       const existingIdx = localAthletes.findIndex(a => String(a.codigo) === String(code));
       if (existingIdx >= 0) {
         localAthletes[existingIdx] = { ...localAthletes[existingIdx], ...athleteObj, foto: photo };
@@ -4632,88 +4525,32 @@
     }
 
     async function loadAthletes() {
-      let list = JSON.parse(localStorage.getItem('pe_athletes_db'));
-      if (!list || !Array.isArray(list) || list.length < DEFAULT_ATHLETES.length) {
-        const existingCodes = new Set((list || []).map(a => String(a.codigo)));
-        const missing = DEFAULT_ATHLETES.filter(a => !existingCodes.has(String(a.codigo)));
-        list = [...(list || []), ...missing];
-        localStorage.setItem('pe_athletes_db', JSON.stringify(list));
-      }
-      if (list && Array.isArray(list)) {
-        list.forEach(a => {
-          if (!a.federado) {
-            a.federado = String(a.codigo).startsWith('PE-') ? a.codigo : `PE-2026/${String(a.codigo).slice(-3)}`;
-          }
-          if (!a.categoria || a.categoria === 'MASTER / PRINCIPAL') {
-            const def = DEFAULT_ATHLETES.find(d => String(d.codigo) === String(a.codigo));
-            a.categoria = def ? def.categoria : 'ASPIRANTE';
-          }
-        });
-      }
+      let list = JSON.parse(localStorage.getItem('pe_athletes_db')) || [];
+
       if (supabaseClient) {
         try {
           const { data, error } = await supabaseClient.from('atletas').select('*').order('created_at', { ascending: false });
-          if (!error && data) {
-            // Sincroniza automaticamente qualquer atleta local que ainda não está na nuvem (ex: atletas pendentes)
-            const dbCodes = new Set(data.map(d => String(d.codigo)));
-            const missingInCloud = (list || []).filter(a => !dbCodes.has(String(a.codigo)));
-            if (missingInCloud.length > 0) {
-              const fullBatch = missingInCloud.map(a => ({
-                codigo: a.codigo,
-                nome: a.nome,
-                cpf: a.cpf,
-                nascimento: a.nascimento,
-                telefone: a.telefone,
-                municipio: a.municipio,
-                categoria: a.categoria || 'ASPIRANTE',
-                modalidade: a.modalidade || 'SOLO (INDIVIDUAL)',
-                status: a.status || 'PENDENTE',
-                clube: a.clube || a.modalidade,
-                federado: a.federado || a.codigo,
-                validade: a.validade || '12/2026',
-                foto_url: a.foto || a.foto_url
-              }));
-              let syncRes = await supabaseClient.from('atletas').upsert(fullBatch, { onConflict: 'codigo' });
-              if (syncRes.error && syncRes.error.message && syncRes.error.message.includes('column')) {
-                const baseBatch = missingInCloud.map(a => ({
-                  codigo: a.codigo,
-                  nome: a.nome,
-                  cpf: a.cpf,
-                  nascimento: a.nascimento,
-                  municipio: a.municipio,
-                  modalidade: a.modalidade || 'SOLO (INDIVIDUAL)',
-                  status: a.status || 'PENDENTE',
-                  foto_url: a.foto || a.foto_url
-                }));
-                syncRes = await supabaseClient.from('atletas').upsert(baseBatch, { onConflict: 'codigo' });
-              }
-              if (!syncRes.error) {
-                console.log(`${missingInCloud.length} atleta(s) local(is) sincronizado(s) com o Supabase!`);
-              }
-            }
-
-            if (data.length > 0) {
-              list = data.map(d => ({
-                id: d.id,
-                codigo: d.codigo,
-                nome: d.nome,
-                cpf: d.cpf,
-                nascimento: d.nascimento,
-                telefone: d.telefone,
-                municipio: d.municipio,
-                categoria: d.categoria || 'ASPIRANTE',
-                modalidade: d.modalidade,
-                status: d.status || 'HOMOLOGADO',
-                clube: d.clube,
-                federado: d.federado || (String(d.codigo).startsWith('PE-') ? d.codigo : `PE-2026/${String(d.codigo).slice(-3)}`),
-                validade: d.validade,
-                foto: d.foto_url
-              }));
-              localStorage.setItem('pe_athletes_db', JSON.stringify(list));
-            }
+          if (!error && Array.isArray(data)) {
+            list = data.map(d => ({
+              id: d.id,
+              codigo: d.codigo,
+              nome: d.nome,
+              cpf: d.cpf,
+              nascimento: d.nascimento,
+              telefone: d.telefone,
+              municipio: d.municipio,
+              categoria: d.categoria || 'ASPIRANTE',
+              modalidade: d.modalidade,
+              status: d.status || 'HOMOLOGADO',
+              clube: d.clube,
+              federado: d.federado || (String(d.codigo).startsWith('PE-') ? d.codigo : `PE-2026/${String(d.codigo).slice(-3)}`),
+              validade: d.validade,
+              foto: d.foto_url
+            }));
+            localStorage.setItem('pe_athletes_db', JSON.stringify(list));
           }
         } catch (e) {
-          console.warn("Usando atletas locais:", e);
+          console.warn("Falha ao consultar Supabase:", e);
         }
       }
       currentCachedAthletes = list;
@@ -5002,7 +4839,7 @@
         }
       }
 
-      let localAthletes = JSON.parse(localStorage.getItem('pe_athletes_db')) || DEFAULT_ATHLETES;
+      let localAthletes = JSON.parse(localStorage.getItem('pe_athletes_db')) || [];
       localAthletes = localAthletes.filter(a => String(a.codigo) !== String(codigo));
       localStorage.setItem('pe_athletes_db', JSON.stringify(localAthletes));
       currentCachedAthletes = localAthletes;
@@ -5010,6 +4847,25 @@
       renderJogadoresCadastradosTable();
       updateDashboardData();
       showToast(`Atleta #${codigo} excluído.`);
+    }
+
+    async function clearAllAthletes() {
+      if (!confirm('Deseja realmente remover TODOS os jogadores do sistema e banco de dados? Esta ação não pode ser desfeita.')) return;
+
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from('atletas').delete().neq('codigo', '0000000000');
+        } catch (e) {
+          console.warn("Erro ao remover no Supabase:", e);
+        }
+      }
+
+      localStorage.setItem('pe_athletes_db', JSON.stringify([]));
+      currentCachedAthletes = [];
+
+      await renderJogadoresCadastradosTable();
+      updateDashboardData();
+      showToast('Todos os jogadores foram removidos do sistema.');
     }
 
     async function fillFormWithAthlete(codigo) {
