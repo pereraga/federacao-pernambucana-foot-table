@@ -27,6 +27,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <!-- html2canvas for instant HD PNG badge export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- JSZip for Bulk CR80 Badge Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -203,16 +205,29 @@
           <span class="nav-indicator w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0"></span>
         </button>
 
-        <!-- 2. Aba Carteiras & Atletas -->
+        <!-- 2. Aba Studio de Emissão (CR80 Oficial) -->
         <button onclick="switchTab('atletas')" id="navBtn-atletas" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
           <div class="flex items-center gap-3.5">
-            <!-- Ícone Carteira / Badge -->
+            <!-- Ícone Studio / Carteira -->
             <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 2a1 1 0 00-1 1v1a1 1 0 002 0V3a1 1 0 00-1-1zM4 4h3a3 3 0 006 0h3a2 2 0 012 2v9a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm2.5 7a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm2.45 4a2.5 2.5 0 00-4.9 0h4.9zM12 9a1 1 0 100 2h3a1 1 0 100-2h-3zm1 4a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z" clip-rule="evenodd"/>
             </svg>
-            <span class="text-sm font-semibold tracking-wide">Carteiras & Atletas</span>
+            <span class="text-sm font-semibold tracking-wide">Studio de Emissão</span>
           </div>
           <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0"></span>
+        </button>
+
+        <!-- 3. Aba Jogadores Cadastrados (Nova Aba Oficial de Gestão e Homologação) -->
+        <button onclick="switchTab('jogadores')" id="navBtn-jogadores" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
+          <div class="flex items-center gap-3.5">
+            <!-- Ícone Jogadores / Grupo -->
+            <i class="fa-solid fa-users w-5 text-center text-slate-400 group-hover:text-white"></i>
+            <span class="text-sm font-semibold tracking-wide">Jogadores Cadastrados</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span id="navPendingBadge" class="hidden text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40 px-2 py-0.5 rounded-full"></span>
+            <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0"></span>
+          </div>
         </button>
 
         <!-- 3. Aba Estúdio da Carteira -->
@@ -341,7 +356,10 @@
               </p>
               <div class="flex flex-wrap items-center gap-3 pt-2">
                 <button onclick="switchTab('atletas')" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase px-5 py-2.5 rounded-xl transition shadow flex items-center gap-2 cursor-pointer">
-                  <span>🪪</span> Emitir Carteira de Atleta
+                  <span>🪪</span> Studio de Emissão
+                </button>
+                <button onclick="switchTab('jogadores')" class="bg-[#0e172a] hover:bg-[#1a2942] border border-[#1c253b] text-white font-bold text-xs uppercase px-5 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer">
+                  <span>👥</span> Jogadores Cadastrados
                 </button>
                 <button onclick="switchTab('noticias')" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-5 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer">
                   <span>📰</span> Publicar Notícia
@@ -430,7 +448,7 @@
               <h3 class="font-oswald text-lg uppercase font-bold text-white flex items-center gap-2">
                 <span>📋</span> Últimos Atletas com Carteira Homologada
               </h3>
-              <button onclick="switchTab('atletas')" class="text-xs text-pe-gold hover:underline font-bold flex items-center gap-1 cursor-pointer">
+              <button onclick="switchTab('jogadores')" class="text-xs text-pe-gold hover:underline font-bold flex items-center gap-1 cursor-pointer">
                 Ver todos os atletas →
               </button>
             </div>
@@ -516,17 +534,23 @@
 
             <!-- Botões de Ação do Cabeçalho -->
             <div class="flex flex-wrap items-center gap-2">
-              <button type="button" onclick="generateRandomAthleteCode()" class="bg-[#0b101d] hover:bg-[#121a30] border border-[#1c253b] text-pe-gold font-mono font-bold text-xs uppercase px-3.5 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer shadow">
+              <button type="button" onclick="generateRandomAthleteCode()" class="bg-[#0b101d] hover:bg-[#121a30] border border-[#1c253b] text-pe-gold font-mono font-bold text-xs uppercase px-3 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer shadow">
                 <span>🎲</span> Gerar Código 6D
               </button>
-              <button type="button" id="btnExportSVG" class="bg-[#0c1424] hover:bg-[#13203c] border border-sky-500/30 hover:border-sky-400 text-sky-300 font-bold text-xs uppercase px-3.5 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer shadow">
+              <button type="button" id="btnExportSVG" class="bg-[#0c1424] hover:bg-[#13203c] border border-sky-500/30 hover:border-sky-400 text-sky-300 font-bold text-xs uppercase px-3 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer shadow">
                 <i class="fa-solid fa-bezier-curve text-sky-400"></i> Exportar SVG Puro
               </button>
-              <button type="button" id="btnExportPNG" class="bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow-lg shadow-sky-600/25 cursor-pointer">
-                <i class="fa-solid fa-file-image"></i> Exportar PNG HD (300 DPI)
+              <button type="button" id="btnExportPNG" class="bg-[#0c1424] hover:bg-[#13203c] border border-sky-500/30 text-white font-bold text-xs uppercase px-3 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer shadow">
+                <i class="fa-solid fa-file-image text-sky-400"></i> Exportar PNG HD (300 DPI)
               </button>
-              <button type="button" onclick="document.getElementById('athleteForm').requestSubmit()" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow cursor-pointer">
-                <span>💾</span> Salvar no Banco
+              <button type="button" onclick="exportAllAthletesBatchZip()" class="bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow-lg shadow-sky-600/25 cursor-pointer">
+                <i class="fa-solid fa-file-zipper"></i> Exportar Lote (HD ZIP)
+              </button>
+              <button type="button" onclick="openBatchImportModal()" class="bg-[#0b101d] hover:bg-[#121c32] border border-[#1c253b] text-slate-200 font-bold text-xs uppercase px-3 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer shadow">
+                <i class="fa-solid fa-file-import text-pe-gold"></i> Importar Lista (CSV)
+              </button>
+              <button type="button" onclick="saveAndHomologateCurrentAthlete()" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow cursor-pointer">
+                <span>✓</span> Salvar & Homologar Oficial
               </button>
             </div>
           </div>
@@ -558,9 +582,9 @@
                     <div>
                       <label class="block text-slate-300 font-bold mb-1">Status Federativo</label>
                       <select id="athleteStatus" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 outline-none">
+                        <option value="HOMOLOGADO">HOMOLOGADO (Oficial no Site)</option>
+                        <option value="PENDENTE">PENDENTE DE HOMOLOGAÇÃO</option>
                         <option value="REGULAR">REGULAR (Ativo)</option>
-                        <option value="HOMOLOGADO">HOMOLOGADO</option>
-                        <option value="PENDENTE">PENDENTE</option>
                       </select>
                     </div>
                   </div>
@@ -651,11 +675,17 @@
                   <div id="athleteFeedback" class="hidden text-xs p-3 rounded-xl"></div>
 
                   <!-- Botões de Ação do Formulário -->
-                  <div class="pt-2 flex items-center gap-3">
-                    <button type="submit" class="flex-1 bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase tracking-wider py-3 rounded-xl transition shadow flex items-center justify-center gap-2 cursor-pointer">
-                      <span>💾</span> Salvar Atleta no Banco de Dados
+                  <div class="pt-2 flex flex-wrap items-center gap-2">
+                    <button type="button" onclick="saveAndHomologateCurrentAthlete()" class="flex-1 min-w-[170px] bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase tracking-wider py-3 px-3 rounded-xl transition shadow flex items-center justify-center gap-2 cursor-pointer">
+                      <span>✓</span> Salvar & Homologar Oficial
                     </button>
-                    <button type="button" onclick="clearAthleteForm()" class="bg-[#05080e] border border-[#1c253b] hover:border-slate-500 text-slate-400 font-bold text-xs uppercase px-4 py-3 rounded-xl transition cursor-pointer">
+                    <button type="button" onclick="saveAsPendingAthlete()" class="bg-[#0e172a] hover:bg-[#1a2942] border border-amber-500/40 text-amber-300 font-bold text-xs uppercase py-3 px-3 rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer">
+                      <span>⏳</span> Salvar Pendente
+                    </button>
+                    <button type="button" onclick="saveAndCreateNextAthlete()" class="bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs uppercase py-3 px-3 rounded-xl transition shadow flex items-center justify-center gap-1.5 cursor-pointer">
+                      <span>➕</span> Salvar e Novo
+                    </button>
+                    <button type="button" onclick="clearAthleteForm()" class="bg-[#05080e] border border-[#1c253b] hover:border-slate-500 text-slate-400 font-bold text-xs uppercase px-3 py-3 rounded-xl transition cursor-pointer">
                       Limpar
                     </button>
                   </div>
@@ -959,50 +989,174 @@
 
           </div>
 
-          <!-- TABELA DE ATLETAS CADASTRADOS NO BANCO -->
-          <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 shadow-xl">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <div>
-                <h3 class="font-oswald text-xl uppercase font-bold text-white flex items-center gap-2">
-                  <span>📋</span> Tabela de Atletas Homologados no Banco
-                </h3>
-                <p class="text-xs text-slate-400">Clique em "Ver no Studio" para carregar a carteira do atleta diretamente no editor</p>
+          <!-- RODAPÉ DE ATALHO RÁPIDO DO STUDIO -->
+          <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-pe-gold/20 text-pe-gold flex items-center justify-center text-lg shrink-0">
+                <i class="fa-solid fa-users"></i>
               </div>
-              <input type="text" id="searchAthleteTable" oninput="filterAthletesTable()" placeholder="Filtrar por nome ou código..." class="bg-[#05080e] border border-[#1c253b] rounded-xl px-4 py-2 text-xs text-white outline-none focus:border-pe-gold" />
+              <div>
+                <h4 class="font-bold text-white text-sm">Gestão Completa de Atletas & Homologação</h4>
+                <p class="text-xs text-slate-400">Consulte a relação completa de 500+ jogadores cadastrados, ordens alfabéticas e homologações pendentes.</p>
+              </div>
+            </div>
+            <button type="button" onclick="switchTab('jogadores')" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase px-5 py-2.5 rounded-xl transition shadow flex items-center gap-2 cursor-pointer shrink-0">
+              Ver Aba Jogadores Cadastrados <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- ===================================================== -->
+        <!-- 3. 👥 NOVA ABA: JOGADORES CADASTRADOS & HOMOLOGAÇÃO    -->
+        <!-- ===================================================== -->
+        <div id="tabContent-jogadores" class="space-y-6 hidden">
+          <!-- Cabeçalho Oficial da Aba de Jogadores -->
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-[#070b14] border border-[#1c253b] p-5 rounded-2xl shadow-xl">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-pe-blue via-pe-darkblue to-pe-gold p-0.5 shadow-lg shadow-pe-gold/20 shrink-0">
+                <div class="w-full h-full bg-[#070b14] rounded-[10px] flex items-center justify-center">
+                  <i class="fa-solid fa-users text-pe-gold text-lg"></i>
+                </div>
+              </div>
+              <div>
+                <h2 class="font-oswald text-2xl uppercase font-bold text-white tracking-wide">Jogadores Cadastrados FPEFT</h2>
+                <p class="text-xs text-slate-400">Relação completa de atletas federados, homologação oficial e dados cadastrais</p>
+              </div>
             </div>
 
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs">
+            <!-- Ações em Lote e Cadastro -->
+            <div class="flex flex-wrap items-center gap-2.5">
+              <button type="button" onclick="switchTab('atletas')" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow cursor-pointer">
+                <i class="fa-solid fa-plus"></i> Novo no Studio
+              </button>
+              <button type="button" onclick="openBatchImportModal()" class="bg-[#0b101d] hover:bg-[#121c32] border border-[#1c253b] text-slate-200 font-bold text-xs uppercase px-3.5 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-file-import text-pe-gold"></i> Importar Lista (CSV)
+              </button>
+              <button type="button" onclick="exportAllAthletesBatchZip()" class="bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow-lg shadow-sky-600/25 cursor-pointer">
+                <i class="fa-solid fa-file-zipper"></i> Exportar Todas em Lote (HD ZIP)
+              </button>
+              <button type="button" onclick="exportAthletesToCsv()" class="bg-[#0b101d] hover:bg-[#121c32] border border-[#1c253b] text-slate-200 font-bold text-xs uppercase px-3.5 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-file-excel text-emerald-400"></i> Baixar CSV
+              </button>
+            </div>
+          </div>
+
+          <!-- Cards de Contadores e Métricas -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-4 flex items-center justify-between shadow-lg">
+              <div>
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total de Atletas</span>
+                <h4 id="statTotalJogadores" class="font-oswald text-2xl font-bold text-white mt-1">0</h4>
+              </div>
+              <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-sky-400 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-user-group"></i>
+              </div>
+            </div>
+            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-4 flex items-center justify-between shadow-lg">
+              <div>
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Homologados (Oficiais no Site)</span>
+                <h4 id="statHomologadosJogadores" class="font-oswald text-2xl font-bold text-emerald-400 mt-1">0</h4>
+              </div>
+              <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-circle-check"></i>
+              </div>
+            </div>
+            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-4 flex items-center justify-between shadow-lg">
+              <div>
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Aguardando Homologação</span>
+                <h4 id="statPendentesJogadores" class="font-oswald text-2xl font-bold text-amber-400 mt-1">0</h4>
+              </div>
+              <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-clock"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- BANNER CONDICIONAL DE ALERTA: SÓ APARECE SE HOUVER JOGADOR PENDENTE DE HOMOLOGAÇÃO -->
+          <div id="bannerHomologacaoPendente" class="hidden bg-gradient-to-r from-amber-950/70 via-amber-900/40 to-[#0b101d] border border-amber-500/50 rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+              <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg shrink-0 animate-pulse">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-white text-sm flex items-center gap-2">
+                  <span>Jogadores Recentes Aguardando Homologação</span>
+                  <span id="badgeCountPendentes" class="bg-amber-500 text-black font-extrabold text-[10px] px-2 py-0.5 rounded-full">0</span>
+                </h4>
+                <p class="text-xs text-amber-200/80">Existem atletas criados recentemente que precisam ser homologados para constarem na validação pública oficial do site.</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <button type="button" id="btnFiltrarPendentes" onclick="toggleFiltroPendentes()" class="bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500 text-amber-300 font-bold text-xs uppercase px-3.5 py-2 rounded-xl transition cursor-pointer flex items-center gap-1.5">
+                <i class="fa-solid fa-filter"></i> <span id="labelFiltrarPendentes">Ver Apenas Pendentes</span>
+              </button>
+              <button type="button" onclick="homologarTodosPendentes()" class="bg-amber-400 hover:bg-amber-300 text-black font-black text-xs uppercase px-4 py-2 rounded-xl transition shadow cursor-pointer flex items-center gap-1.5">
+                <i class="fa-solid fa-check-double"></i> Homologar Todos Agora
+              </button>
+            </div>
+          </div>
+
+          <!-- Tabela de Jogadores Cadastrados (Dados completos, sem foto nas colunas, ordem A-Z, hover completo) -->
+          <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div class="relative flex-1 max-w-md">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" id="searchJogadoresInput" oninput="filterJogadoresTable()" placeholder="Buscar por nome, código, CPF, município ou clube..." class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl pl-9 pr-4 py-2.5 text-xs text-white outline-none transition" />
+              </div>
+
+              <div class="flex flex-wrap items-center gap-2">
+                <!-- Filtros por Status -->
+                <button type="button" onclick="setJogadoresFilterStatus('ALL')" id="filterTabStatus-ALL" class="text-xs px-3.5 py-2 rounded-xl font-bold transition cursor-pointer bg-pe-gold text-pe-dark">
+                  Todos (Ordem A-Z)
+                </button>
+                <button type="button" onclick="setJogadoresFilterStatus('HOMOLOGADO')" id="filterTabStatus-HOMOLOGADO" class="text-xs px-3.5 py-2 rounded-xl font-bold transition cursor-pointer bg-[#05080e] border border-[#1c253b] text-slate-300 hover:text-white">
+                  Homologados
+                </button>
+                <!-- BOTÃO CONDICIONAL: Só aparece via JS se houver pendentes -->
+                <button type="button" onclick="setJogadoresFilterStatus('PENDENTE')" id="filterTabStatus-PENDENTE" class="hidden text-xs px-3.5 py-2 rounded-xl font-bold transition cursor-pointer bg-[#05080e] border border-amber-500/50 text-amber-400 hover:bg-amber-500/20">
+                  ⏳ Aguardando Homologação (<span id="countBtnPendentes">0</span>)
+                </button>
+              </div>
+            </div>
+
+            <!-- Dica Visual de Hover da Ficha Completa -->
+            <div class="text-[11px] text-slate-400 flex items-center gap-2 bg-[#05080e]/60 px-3.5 py-2 rounded-xl border border-[#1c253b]">
+              <i class="fa-solid fa-circle-info text-pe-gold"></i>
+              <span><strong>Ficha Completa:</strong> Passe o cursor do mouse sobre qualquer linha da tabela para abrir a <strong>Ficha Completa Oficial com Foto 3x4 e QR Code</strong>.</span>
+            </div>
+
+            <!-- Tabela com todos os dados textuais, sem foto para leveza e alta densidade -->
+            <div class="overflow-x-auto rounded-xl border border-[#1c253b]">
+              <table class="w-full text-left text-xs whitespace-nowrap">
                 <thead class="bg-[#05080e] text-slate-400 uppercase text-[10px] font-mono border-b border-[#1c253b]">
                   <tr>
-                    <th class="py-3 px-4">Foto</th>
-                    <th class="py-3 px-4">Código (6D)</th>
-                    <th class="py-3 px-4">Nome do Atleta</th>
+                    <th class="py-3 px-4">Código</th>
+                    <th class="py-3 px-4">Nome do Jogador (A-Z)</th>
                     <th class="py-3 px-4">CPF</th>
+                    <th class="py-3 px-4">Nascimento</th>
+                    <th class="py-3 px-4">Telefone</th>
                     <th class="py-3 px-4">Município</th>
+                    <th class="py-3 px-4">Clube / Filiação</th>
                     <th class="py-3 px-4">Modalidade</th>
+                    <th class="py-3 px-4">Nº Federado</th>
+                    <th class="py-3 px-4">Validade</th>
                     <th class="py-3 px-4">Status</th>
                     <th class="py-3 px-4 text-right">Ações</th>
                   </tr>
                 </thead>
-                <tbody id="athletesTableBody" class="divide-y divide-[#1c253b]/60">
-                  <!-- Inserido dinamicamente -->
+                <tbody id="jogadoresTableBody" class="divide-y divide-[#1c253b]/60">
+                  <!-- Linhas renderizadas ordenadas alfabeticamente A-Z -->
                 </tbody>
               </table>
             </div>
-          </div>
 
-          <!-- Toast Flutuante de Notificação -->
-          <div id="toastNotification" class="fixed bottom-6 right-6 bg-[#070b14] border border-pe-gold/40 text-white px-4 py-3 rounded-xl shadow-2xl text-xs font-medium flex items-center gap-3 transform translate-y-24 opacity-0 transition-all duration-300 z-50">
-            <div class="w-6 h-6 rounded-full bg-pe-gold/20 text-pe-gold flex items-center justify-center shrink-0">
-              <i class="fa-solid fa-check text-xs"></i>
+            <!-- Rodapé com Contador -->
+            <div class="flex items-center justify-between text-xs text-slate-400 pt-2">
+              <span id="jogadoresTableCount">Mostrando 0 jogadores</span>
+              <span class="text-[10px] font-mono text-slate-500">Classificação: Alfabética por Nome (A-Z)</span>
             </div>
-            <span id="toastMessage">Operação realizada com sucesso!</span>
           </div>
-
-          <!-- Canvas Invisível para Renderização em Alta Resolução 300 DPI -->
-          <canvas id="hdRenderCanvas" class="hidden"></canvas>
-
         </div>
 
         <!-- ===================================================== -->
@@ -1761,12 +1915,13 @@
     /* =========================================================
        SISTEMA DE NAVEGAÇÃO LATERAL (ABAS OFICIAIS)
        ========================================================= */
-    const ALL_TABS = ['inicio', 'atletas', 'estudio', 'noticias', 'emails', 'config', 'guia'];
+    const ALL_TABS = ['inicio', 'atletas', 'jogadores', 'estudio', 'noticias', 'emails', 'config', 'guia'];
     const TAB_TITLES = {
       inicio: '🏠 Início & Carteiras Homologadas',
-      atletas: '1. 🪪 Aba Carteiras & Atletas',
-      estudio: '2. 🎨 Aba Estúdio da Carteira (Dimensões & Textos)',
-      noticias: '3. 📰 Aba Notícias & Torneios',
+      atletas: '1. 🪪 Studio de Emissão & Diagramação CR80',
+      jogadores: '2. 👥 Jogadores Cadastrados & Homologação',
+      estudio: '3. 🎨 Aba Estúdio da Carteira (Dimensões & Textos)',
+      noticias: '4. 📰 Aba Notícias & Torneios',
       emails: '5. 📧 Aba E-mails Institucionais & Gestão',
       config: '6. ⚙️ Banco de Dados & Ajustes',
       guia: '📋 Guia do Painel Administrativo'
@@ -1801,10 +1956,11 @@
         if (tabName === 'inicio') {
           updateDashboardData();
         } else if (tabName === 'atletas') {
-          renderAthletesTable();
           applyCurrentSvgBackground();
           renderInteractiveElements();
           setTimeout(() => updateFloatingPanelPosition(), 50);
+        } else if (tabName === 'jogadores') {
+          renderJogadoresCadastradosTable();
         } else if (tabName === 'estudio') {
           syncStudioWithCurrentLayout();
         } else if (tabName === 'noticias') {
@@ -3487,8 +3643,12 @@
     }
 
     /* =========================================================
-       BANCO DE DADOS & TABELA DE ATLETAS
+       BANCO DE DADOS, HOMOLOGAÇÃO & GESTÃO DE ATLETAS
        ========================================================= */
+    let currentCachedAthletes = [];
+    let jogadoresFilterStatus = 'ALL';
+    let batchExportAbort = false;
+
     function generateRandomAthleteCode() {
       const code = String(Math.floor(100000 + Math.random() * 900000));
       const codeInput = document.getElementById('athleteCode');
@@ -3503,7 +3663,7 @@
     }
 
     async function handleSaveAthlete(e) {
-      if (e) e.preventDefault();
+      if (e && e.preventDefault) e.preventDefault();
       const code = (document.getElementById('athleteCode').value || '').trim();
       const name = (document.getElementById('athleteName').value || '').trim();
       const cpf = (document.getElementById('athleteCpf').value || '').trim();
@@ -3515,6 +3675,11 @@
       const club = (document.getElementById('athleteClub').value || '').trim();
       const fedNum = (document.getElementById('athleteFederatedNum').value || '').trim();
       const validity = (document.getElementById('athleteValidity').value || '').trim();
+
+      if (!name) {
+        showToast('Informe o nome do atleta para salvar.');
+        return;
+      }
 
       const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
       const photo = (photoTarget && photoTarget.photoUrl) ? photoTarget.photoUrl : '';
@@ -3562,15 +3727,39 @@
         localAthletes.unshift({ id: Date.now(), ...athleteObj, foto: photo });
       }
       localStorage.setItem('pe_athletes_db', JSON.stringify(localAthletes));
+      currentCachedAthletes = localAthletes;
 
       if (feedback) {
-        feedback.className = "text-xs p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 font-bold";
-        feedback.innerHTML = `✓ Atleta #${code} cadastrado com sucesso! ${savedInSupabase ? '(Sincronizado com Supabase)' : '(Salvo localmente)'}.`;
+        const isHomolog = status === 'HOMOLOGADO';
+        feedback.className = `text-xs p-3 rounded-xl font-bold ${isHomolog ? 'bg-emerald-950/40 border border-emerald-500/40 text-emerald-300' : 'bg-amber-950/40 border border-amber-500/40 text-amber-300'}`;
+        feedback.innerHTML = `✓ Atleta #${code} (${name}) salvo como <strong>${status}</strong>! ${savedInSupabase ? '(Sincronizado Supabase)' : '(Salvo localmente)'}.`;
       }
 
-      showToast(`✓ Atleta #${code} (${name}) salvo com sucesso!`);
-      renderAthletesTable();
+      showToast(`✓ Atleta #${code} salvo como ${status}!`);
+      renderJogadoresCadastradosTable();
       updateDashboardData();
+    }
+
+    async function saveAndHomologateCurrentAthlete() {
+      const statusSelect = document.getElementById('athleteStatus');
+      if (statusSelect) statusSelect.value = 'HOMOLOGADO';
+      await handleSaveAthlete();
+    }
+
+    async function saveAsPendingAthlete() {
+      const statusSelect = document.getElementById('athleteStatus');
+      if (statusSelect) statusSelect.value = 'PENDENTE';
+      await handleSaveAthlete();
+    }
+
+    async function saveAndCreateNextAthlete() {
+      const statusSelect = document.getElementById('athleteStatus');
+      if (statusSelect) statusSelect.value = 'HOMOLOGADO';
+      await handleSaveAthlete();
+      clearAthleteForm();
+      const nameInput = document.getElementById('athleteName');
+      if (nameInput) nameInput.focus();
+      showToast('Atleta homologado! Pronto para o próximo cadastro contínuo.');
     }
 
     async function loadAthletes() {
@@ -3594,7 +3783,7 @@
               telefone: d.telefone,
               municipio: d.municipio,
               modalidade: d.modalidade,
-              status: d.status,
+              status: d.status || 'HOMOLOGADO',
               clube: d.clube,
               federado: d.federado,
               validade: d.validade,
@@ -3606,85 +3795,256 @@
           console.warn("Usando atletas locais:", e);
         }
       }
+      currentCachedAthletes = list;
       return list;
     }
 
+    // Compatibilidade reversa
     async function renderAthletesTable() {
-      const tbody = document.getElementById('athletesTableBody');
-      if (!tbody) return;
-      const athletes = await loadAthletes();
-      tbody.innerHTML = "";
+      return renderJogadoresCadastradosTable();
+    }
 
-      athletes.forEach(a => {
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-[#070b14] transition";
-        tr.innerHTML = `
-          <td class="py-3 px-4">
-            <div class="w-9 h-11 rounded border border-pe-gold/40 overflow-hidden bg-slate-900">
-              <img src="${a.foto || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'}" class="w-full h-full object-cover" />
-            </div>
-          </td>
-          <td class="py-3 px-4 font-mono font-bold text-pe-gold">#${a.codigo}</td>
-          <td class="py-3 px-4 font-bold text-white uppercase">${a.nome}</td>
-          <td class="py-3 px-4 font-mono text-slate-300">${a.cpf || '-'}</td>
-          <td class="py-3 px-4 text-slate-300">${a.municipio || '-'}</td>
-          <td class="py-3 px-4 text-pe-gold">${a.modalidade || 'SOLO'}</td>
-          <td class="py-3 px-4">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${a.status === 'REGULAR' ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-500/30' : 'bg-amber-950/60 text-amber-400 border border-amber-500/30'}">
-              ${a.status || 'REGULAR'}
-            </span>
-          </td>
-          <td class="py-3 px-4 text-right">
-            <div class="flex items-center justify-end gap-2">
-              <button onclick="fillFormWithAthlete('${a.codigo}')" class="text-xs text-sky-400 hover:text-white bg-slate-800/80 hover:bg-sky-600 px-2.5 py-1 rounded-lg border border-sky-500/30 font-bold transition cursor-pointer">Ver no Studio</button>
-              <button onclick="deleteAthlete('${a.codigo}')" class="text-xs text-red-400 hover:text-red-300 font-bold p-1 cursor-pointer">Excluir</button>
-            </div>
-          </td>
+    /* =========================================================
+       RENDERIZAÇÃO DA TABELA DE JOGADORES CADASTRADOS (ABA 2)
+       Ordem Alfabética (A-Z) | Sem foto nas colunas | Ficha Completa no Hover
+       ========================================================= */
+    async function renderJogadoresCadastradosTable() {
+      const tbody = document.getElementById('jogadoresTableBody');
+      const athletes = await loadAthletes();
+      
+      const totalCount = athletes.length;
+      const pendentesList = athletes.filter(a => a.status === 'PENDENTE' || a.status === 'PENDENTE DE HOMOLOGAÇÃO');
+      const pendingCount = pendentesList.length;
+      const homologadosCount = athletes.filter(a => a.status === 'HOMOLOGADO' || a.status === 'REGULAR').length;
+
+      // Atualiza contadores dos cards
+      const statTotal = document.getElementById('statTotalJogadores');
+      const statHomolog = document.getElementById('statHomologadosJogadores');
+      const statPend = document.getElementById('statPendentesJogadores');
+      if (statTotal) statTotal.textContent = totalCount;
+      if (statHomolog) statHomolog.textContent = homologadosCount;
+      if (statPend) statPend.textContent = pendingCount;
+
+      // Atualiza badge de pendentes na sidebar de navegação
+      const navBadge = document.getElementById('navPendingBadge');
+      if (navBadge) {
+        if (pendingCount > 0) {
+          navBadge.textContent = `${pendingCount} pendente${pendingCount > 1 ? 's' : ''}`;
+          navBadge.classList.remove('hidden');
+        } else {
+          navBadge.classList.add('hidden');
+        }
+      }
+
+      // FILTRO CONDICIONAL: O filtro e o alerta de pendentes SÓ aparecem se houver pelo menos 1 pendente!
+      const bannerPendentes = document.getElementById('bannerHomologacaoPendente');
+      const btnFilterPendente = document.getElementById('filterTabStatus-PENDENTE');
+      const countBtnPendentes = document.getElementById('countBtnPendentes');
+      const badgeCountPendentes = document.getElementById('badgeCountPendentes');
+
+      if (pendingCount > 0) {
+        if (bannerPendentes) bannerPendentes.classList.remove('hidden');
+        if (btnFilterPendente) btnFilterPendente.classList.remove('hidden');
+        if (countBtnPendentes) countBtnPendentes.textContent = pendingCount;
+        if (badgeCountPendentes) badgeCountPendentes.textContent = `${pendingCount} pendente${pendingCount > 1 ? 's' : ''}`;
+      } else {
+        if (bannerPendentes) bannerPendentes.classList.add('hidden');
+        if (btnFilterPendente) btnFilterPendente.classList.add('hidden');
+        // Se estava filtrando por pendente e não há mais pendentes, volta para todos
+        if (jogadoresFilterStatus === 'PENDENTE') {
+          jogadoresFilterStatus = 'ALL';
+          updateFilterButtonsUI();
+        }
+      }
+
+      if (!tbody) return;
+
+      // Filtra por status
+      let list = [...athletes];
+      if (jogadoresFilterStatus === 'HOMOLOGADO') {
+        list = list.filter(a => a.status === 'HOMOLOGADO' || a.status === 'REGULAR');
+      } else if (jogadoresFilterStatus === 'PENDENTE') {
+        list = list.filter(a => a.status === 'PENDENTE' || a.status === 'PENDENTE DE HOMOLOGAÇÃO');
+      }
+
+      // Filtra pela busca
+      const searchInp = document.getElementById('searchJogadoresInput');
+      const q = (searchInp ? searchInp.value : '').toLowerCase().trim();
+      if (q) {
+        list = list.filter(a => 
+          (a.nome && a.nome.toLowerCase().includes(q)) ||
+          (a.codigo && String(a.codigo).includes(q)) ||
+          (a.cpf && a.cpf.toLowerCase().includes(q)) ||
+          (a.municipio && a.municipio.toLowerCase().includes(q)) ||
+          (a.clube && a.clube.toLowerCase().includes(q)) ||
+          (a.modalidade && a.modalidade.toLowerCase().includes(q))
+        );
+      }
+
+      // ORDENAÇÃO PADRÃO: Ordem Alfabética (A-Z) pelo nome
+      list.sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR', { sensitivity: 'base' }));
+
+      // Renderiza as linhas na tabela
+      tbody.innerHTML = '';
+      if (list.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="12" class="py-8 text-center text-slate-500 font-medium">
+              <i class="fa-solid fa-user-slash text-2xl block mb-2 text-slate-600"></i>
+              Nenhum jogador encontrado com os filtros selecionados.
+            </td>
+          </tr>
         `;
-        tbody.appendChild(tr);
+      } else {
+        list.forEach(a => {
+          const isPending = a.status === 'PENDENTE' || a.status === 'PENDENTE DE HOMOLOGAÇÃO';
+          const tr = document.createElement('tr');
+          tr.className = "hover:bg-[#070e1d] transition cursor-pointer border-b border-[#1c253b]/50 group";
+          tr.setAttribute('data-code', a.codigo);
+
+          // Eventos de Hover para exibir a Ficha Completa Flutuante
+          tr.addEventListener('mouseenter', (e) => showAthleteHoverCard(e, a.codigo));
+          tr.addEventListener('mousemove', (e) => moveAthleteHoverCard(e));
+          tr.addEventListener('mouseleave', () => hideAthleteHoverCard());
+
+          tr.innerHTML = `
+            <td class="py-3 px-4 font-mono font-bold text-pe-gold text-xs">#${a.codigo}</td>
+            <td class="py-3 px-4 font-bold text-white uppercase text-xs">
+              <div class="flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full ${isPending ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}"></span>
+                <span class="hover:text-pe-gold transition">${escapeHtml(a.nome)}</span>
+              </div>
+            </td>
+            <td class="py-3 px-4 font-mono text-slate-300 text-xs">${escapeHtml(a.cpf || '-')}</td>
+            <td class="py-3 px-4 text-slate-300 text-xs">${escapeHtml(a.nascimento || '-')}</td>
+            <td class="py-3 px-4 text-slate-300 text-xs">${escapeHtml(a.telefone || '-')}</td>
+            <td class="py-3 px-4 text-slate-300 text-xs truncate max-w-[130px]">${escapeHtml(a.municipio || '-')}</td>
+            <td class="py-3 px-4 text-slate-300 text-xs truncate max-w-[150px]">${escapeHtml(a.clube || '-')}</td>
+            <td class="py-3 px-4 text-pe-gold text-xs font-semibold">${escapeHtml(a.modalidade || 'SOLO')}</td>
+            <td class="py-3 px-4 font-mono text-sky-400 text-xs">${escapeHtml(a.federado || '-')}</td>
+            <td class="py-3 px-4 text-slate-400 text-xs font-mono">${escapeHtml(a.validade || '12/2026')}</td>
+            <td class="py-3 px-4">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isPending ? 'bg-amber-950/70 text-amber-400 border border-amber-500/40 animate-pulse' : 'bg-emerald-950/70 text-emerald-400 border border-emerald-500/40'}">
+                ${isPending ? '⏳ PENDENTE' : '✓ HOMOLOGADO'}
+              </span>
+            </td>
+            <td class="py-3 px-4 text-right">
+              <div class="flex items-center justify-end gap-1.5" onclick="event.stopPropagation()">
+                ${isPending ? `
+                  <button type="button" onclick="homologarAthlete('${a.codigo}')" title="Homologar Imediatamente" class="bg-amber-400 hover:bg-amber-300 text-black text-[11px] font-extrabold px-2.5 py-1 rounded-lg transition cursor-pointer shadow flex items-center gap-1">
+                    <i class="fa-solid fa-check"></i> Homologar
+                  </button>
+                ` : ''}
+                <button type="button" onclick="fillFormWithAthlete('${a.codigo}')" title="Abrir no Studio de Emissão" class="text-xs text-sky-400 hover:text-white bg-slate-800/90 hover:bg-sky-600 px-2.5 py-1 rounded-lg border border-sky-500/30 font-bold transition cursor-pointer">
+                  Studio
+                </button>
+                <button type="button" onclick="deleteAthlete('${a.codigo}')" title="Excluir Jogador" class="text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 p-1.5 rounded-lg font-bold transition cursor-pointer">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      // Atualiza texto do rodapé
+      const countEl = document.getElementById('jogadoresTableCount');
+      if (countEl) {
+        countEl.textContent = `Mostrando ${list.length} de ${totalCount} jogadores cadastrados`;
+      }
+    }
+
+    function filterJogadoresTable() {
+      renderJogadoresCadastradosTable();
+    }
+
+    function setJogadoresFilterStatus(status) {
+      jogadoresFilterStatus = status;
+      updateFilterButtonsUI();
+      renderJogadoresCadastradosTable();
+    }
+
+    function updateFilterButtonsUI() {
+      const btns = ['ALL', 'HOMOLOGADO', 'PENDENTE'];
+      btns.forEach(b => {
+        const el = document.getElementById(`filterTabStatus-${b}`);
+        if (!el) return;
+        if (b === jogadoresFilterStatus) {
+          el.className = "text-xs px-3.5 py-2 rounded-xl font-bold transition cursor-pointer bg-pe-gold text-pe-dark shadow";
+        } else {
+          el.className = b === 'PENDENTE' 
+            ? "text-xs px-3.5 py-2 rounded-xl font-bold transition cursor-pointer bg-[#05080e] border border-amber-500/50 text-amber-400 hover:bg-amber-500/20"
+            : "text-xs px-3.5 py-2 rounded-xl font-bold transition cursor-pointer bg-[#05080e] border border-[#1c253b] text-slate-300 hover:text-white";
+        }
       });
     }
 
-    async function filterAthletesTable() {
-      const q = (document.getElementById('searchAthleteTable').value || '').toLowerCase();
-      const athletes = await loadAthletes();
-      const filtered = athletes.filter(a => 
-        (a.nome && a.nome.toLowerCase().includes(q)) || 
-        (a.codigo && String(a.codigo).includes(q)) ||
-        (a.cpf && a.cpf.includes(q))
-      );
+    function toggleFiltroPendentes() {
+      if (jogadoresFilterStatus === 'PENDENTE') {
+        setJogadoresFilterStatus('ALL');
+        const lbl = document.getElementById('labelFiltrarPendentes');
+        if (lbl) lbl.textContent = 'Ver Apenas Pendentes';
+      } else {
+        setJogadoresFilterStatus('PENDENTE');
+        const lbl = document.getElementById('labelFiltrarPendentes');
+        if (lbl) lbl.textContent = 'Ver Todos os Jogadores';
+      }
+    }
 
-      const tbody = document.getElementById('athletesTableBody');
-      if (!tbody) return;
-      tbody.innerHTML = "";
-      filtered.forEach(a => {
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-[#070b14] transition";
-        tr.innerHTML = `
-          <td class="py-3 px-4">
-            <div class="w-9 h-11 rounded border border-pe-gold/40 overflow-hidden bg-slate-900">
-              <img src="${a.foto || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'}" class="w-full h-full object-cover" />
-            </div>
-          </td>
-          <td class="py-3 px-4 font-mono font-bold text-pe-gold">#${a.codigo}</td>
-          <td class="py-3 px-4 font-bold text-white uppercase">${a.nome}</td>
-          <td class="py-3 px-4 font-mono text-slate-300">${a.cpf || '-'}</td>
-          <td class="py-3 px-4 text-slate-300">${a.municipio || '-'}</td>
-          <td class="py-3 px-4 text-pe-gold">${a.modalidade || 'SOLO'}</td>
-          <td class="py-3 px-4">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${a.status === 'REGULAR' ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-500/30' : 'bg-amber-950/60 text-amber-400 border border-amber-500/30'}">
-              ${a.status || 'REGULAR'}
-            </span>
-          </td>
-          <td class="py-3 px-4 text-right">
-            <div class="flex items-center justify-end gap-2">
-              <button onclick="fillFormWithAthlete('${a.codigo}')" class="text-xs text-sky-400 hover:text-white bg-slate-800/80 hover:bg-sky-600 px-2.5 py-1 rounded-lg border border-sky-500/30 font-bold transition cursor-pointer">Ver no Studio</button>
-              <button onclick="deleteAthlete('${a.codigo}')" class="text-xs text-red-400 hover:text-red-300 font-bold p-1 cursor-pointer">Excluir</button>
-            </div>
-          </td>
-        `;
-        tbody.appendChild(tr);
+    /* =========================================================
+       HOMOLOGAÇÃO DE ATLETAS (INDIVIDUAL E EM MASSA)
+       ========================================================= */
+    async function homologarAthlete(codigo) {
+      let athletes = await loadAthletes();
+      const a = athletes.find(item => String(item.codigo) === String(codigo));
+      if (!a) return;
+
+      a.status = 'HOMOLOGADO';
+
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from('atletas').update({ status: 'HOMOLOGADO' }).eq('codigo', codigo);
+        } catch (e) {
+          console.warn("Supabase update status error:", e);
+        }
+      }
+
+      localStorage.setItem('pe_athletes_db', JSON.stringify(athletes));
+      currentCachedAthletes = athletes;
+      showToast(`✓ Atleta #${codigo} (${a.nome}) homologado oficialmente no site!`);
+      renderJogadoresCadastradosTable();
+      updateDashboardData();
+    }
+
+    async function homologarTodosPendentes() {
+      let athletes = await loadAthletes();
+      let updatedCount = 0;
+      athletes.forEach(a => {
+        if (a.status !== 'HOMOLOGADO' && a.status !== 'REGULAR') {
+          a.status = 'HOMOLOGADO';
+          updatedCount++;
+        }
       });
+
+      if (updatedCount === 0) {
+        showToast('Não há jogadores pendentes de homologação.');
+        return;
+      }
+
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from('atletas').update({ status: 'HOMOLOGADO' }).neq('status', 'HOMOLOGADO');
+        } catch (e) {
+          console.warn("Supabase update all pendentes error:", e);
+        }
+      }
+
+      localStorage.setItem('pe_athletes_db', JSON.stringify(athletes));
+      currentCachedAthletes = athletes;
+      showToast(`✓ Todos os ${updatedCount} jogadores foram homologados com sucesso!`);
+      renderJogadoresCadastradosTable();
+      updateDashboardData();
     }
 
     async function deleteAthlete(codigo) {
@@ -3701,8 +4061,9 @@
       let localAthletes = JSON.parse(localStorage.getItem('pe_athletes_db')) || DEFAULT_ATHLETES;
       localAthletes = localAthletes.filter(a => String(a.codigo) !== String(codigo));
       localStorage.setItem('pe_athletes_db', JSON.stringify(localAthletes));
+      currentCachedAthletes = localAthletes;
 
-      renderAthletesTable();
+      renderJogadoresCadastradosTable();
       updateDashboardData();
       showToast(`Atleta #${codigo} excluído.`);
     }
@@ -3722,7 +4083,7 @@
       document.getElementById('athletePhone').value = a.telefone || '(81) 98765-4321';
       document.getElementById('athleteCity').value = a.municipio || 'RECIFE - PE';
       document.getElementById('athleteModality').value = a.modalidade || 'SOLO (INDIVIDUAL)';
-      document.getElementById('athleteStatus').value = a.status || 'REGULAR';
+      document.getElementById('athleteStatus').value = a.status || 'HOMOLOGADO';
       document.getElementById('athleteClub').value = a.clube || 'SPORT CLUB DO RECIFE';
       document.getElementById('athleteFederatedNum').value = a.federado || `PE-2026/${String(a.codigo).slice(-3)}`;
       document.getElementById('athleteValidity').value = a.validade || '12/2026';
@@ -3763,6 +4124,523 @@
       if (photoTarget) photoTarget.photoUrl = '';
       renderInteractiveElements();
       showToast('Formulário limpo. Pronto para novo atleta.');
+    }
+
+    /* =========================================================
+       FICHA COMPLETA FLUTUANTE (POPOVER HOVER NA TABELA)
+       ========================================================= */
+    function showAthleteHoverCard(e, codigo) {
+      const card = document.getElementById('athleteHoverCard');
+      const container = document.getElementById('athleteHoverCardContent');
+      if (!card || !container) return;
+
+      const a = (currentCachedAthletes || []).find(item => String(item.codigo) === String(codigo));
+      if (!a) return;
+
+      const isHomologado = a.status === 'HOMOLOGADO' || a.status === 'REGULAR';
+      const photoUrl = a.foto || a.foto_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80';
+
+      container.innerHTML = `
+        <div class="flex items-start gap-3 border-b border-[#1c253b] pb-3">
+          <div class="w-16 h-20 rounded-xl overflow-hidden border-2 border-pe-gold shrink-0 bg-[#0c1424] shadow">
+            <img src="${photoUrl}" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80'" />
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-1 mb-1">
+              <span class="text-[9px] font-mono font-bold text-pe-gold">#${a.codigo}</span>
+              <span class="px-1.5 py-0.5 rounded text-[8px] font-black uppercase ${isHomologado ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-500/40' : 'bg-amber-950/80 text-amber-400 border border-amber-500/40 animate-pulse'}">
+                ${isHomologado ? '✓ Homologado Oficial' : '⏳ Aguardando Homologação'}
+              </span>
+            </div>
+            <h4 class="font-oswald text-sm uppercase font-bold text-white leading-tight truncate">${escapeHtml(a.nome)}</h4>
+            <p class="text-[10px] text-slate-400 truncate mt-0.5 font-semibold">${escapeHtml(a.clube || 'Federação Pernambucana')}</p>
+            <span class="inline-block mt-1 text-[9px] font-mono text-sky-400 bg-sky-950/50 px-1.5 py-0.5 rounded border border-sky-800/40">${escapeHtml(a.federado || 'PE-2026/' + String(a.codigo).slice(-3))}</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-[10px]">
+          <div class="bg-[#05080e] p-2 rounded-lg border border-[#1c253b]">
+            <span class="text-[8px] text-slate-500 uppercase font-bold block">CPF</span>
+            <span class="font-mono text-slate-200 font-semibold">${escapeHtml(a.cpf || '-')}</span>
+          </div>
+          <div class="bg-[#05080e] p-2 rounded-lg border border-[#1c253b]">
+            <span class="text-[8px] text-slate-500 uppercase font-bold block">Nascimento</span>
+            <span class="text-slate-200">${escapeHtml(a.nascimento || '-')}</span>
+          </div>
+          <div class="bg-[#05080e] p-2 rounded-lg border border-[#1c253b]">
+            <span class="text-[8px] text-slate-500 uppercase font-bold block">Telefone / Fone</span>
+            <span class="text-slate-200">${escapeHtml(a.telefone || '-')}</span>
+          </div>
+          <div class="bg-[#05080e] p-2 rounded-lg border border-[#1c253b]">
+            <span class="text-[8px] text-slate-500 uppercase font-bold block">Município</span>
+            <span class="text-slate-200 truncate block">${escapeHtml(a.municipio || 'Recife - PE')}</span>
+          </div>
+          <div class="bg-[#05080e] p-2 rounded-lg border border-[#1c253b]">
+            <span class="text-[8px] text-slate-500 uppercase font-bold block">Modalidade</span>
+            <span class="text-pe-gold font-bold truncate block">${escapeHtml(a.modalidade || 'SOLO')}</span>
+          </div>
+          <div class="bg-[#05080e] p-2 rounded-lg border border-[#1c253b]">
+            <span class="text-[8px] text-slate-500 uppercase font-bold block">Validade Carteira</span>
+            <span class="text-slate-200 font-mono">${escapeHtml(a.validade || '12/2026')}</span>
+          </div>
+        </div>
+
+        <div class="pt-1 flex items-center justify-between text-[9px] text-slate-400 border-t border-[#1c253b]">
+          <span class="flex items-center gap-1 text-pe-gold font-semibold">
+            <i class="fa-solid fa-shield-halved text-[10px]"></i> Registro Oficial FPEFT
+          </span>
+          <span class="font-mono text-[8px] text-slate-500">QR Code Habilitado</span>
+        </div>
+      `;
+
+      card.classList.remove('hidden');
+      positionAthleteHoverCard(e);
+    }
+
+    function positionAthleteHoverCard(e) {
+      const card = document.getElementById('athleteHoverCard');
+      if (!card || card.classList.contains('hidden')) return;
+
+      const cardW = 340;
+      const cardH = 310;
+      let x = e.clientX + 20;
+      let y = e.clientY - 20;
+
+      if (x + cardW > window.innerWidth - 10) {
+        x = e.clientX - cardW - 20;
+      }
+      if (y + cardH > window.innerHeight - 10) {
+        y = window.innerHeight - cardH - 10;
+      }
+      if (y < 10) y = 10;
+      if (x < 10) x = 10;
+
+      card.style.left = `${x}px`;
+      card.style.top = `${y}px`;
+    }
+
+    function moveAthleteHoverCard(e) {
+      positionAthleteHoverCard(e);
+    }
+
+    function hideAthleteHoverCard() {
+      const card = document.getElementById('athleteHoverCard');
+      if (card) card.classList.add('hidden');
+    }
+
+    /* =========================================================
+       EXPORTAÇÃO EM LOTE DE CARTEIRINHAS HD (ZIP - 300 DPI)
+       ========================================================= */
+    function buildSvgStringForAthlete(athlete) {
+      const currentBgSvg = studioState.customSvgContent || getFpeftTemplateSvg(studioState.showBgLabels);
+      const parser = new DOMParser();
+      const svgDoc = parser.parseFromString(currentBgSvg, 'image/svg+xml');
+      const rootSvg = svgDoc.documentElement;
+
+      const overlayGroup = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+      overlayGroup.setAttribute('id', 'FPEFT_Dados_Atleta');
+
+      studioState.elements.forEach(baseItem => {
+        const item = { ...baseItem };
+        if (item.type === 'photo') {
+          item.photoUrl = athlete.foto || athlete.foto_url || '';
+        } else if (item.targetKey === 'nome') {
+          item.text = (athlete.nome || '').toUpperCase();
+        } else if (item.targetKey === 'cpf') {
+          item.text = athlete.cpf || '';
+        } else if (item.targetKey === 'nasc') {
+          item.text = athlete.nascimento || '';
+        } else if (item.targetKey === 'fone') {
+          item.text = athlete.telefone || '';
+        } else if (item.targetKey === 'categoria') {
+          item.text = (athlete.modalidade || 'SOLO').toUpperCase();
+        } else if (item.targetKey === 'filiacao') {
+          item.text = (athlete.clube || 'FEDERAÇÃO PERNAMBUCANA').toUpperCase();
+        } else if (item.targetKey === 'federado') {
+          item.text = athlete.federado || `PE-2026/${String(athlete.codigo).slice(-3)}`;
+        } else if (item.targetKey === 'municipio') {
+          item.text = (athlete.municipio || 'RECIFE - PE').toUpperCase();
+        } else if (item.targetKey === 'validade') {
+          item.text = athlete.validade || '12/2026';
+        }
+
+        if (item.type === 'photo') {
+          const gPhoto = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+          const clipId = `clip_foto_batch_${Date.now()}_${Math.floor(Math.random()*1000)}`;
+          const defs = rootSvg.querySelector('defs') || rootSvg.insertBefore(svgDoc.createElementNS('http://www.w3.org/2000/svg', 'defs'), rootSvg.firstChild);
+          const clipPath = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
+          clipPath.setAttribute('id', clipId);
+
+          const clipRect = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          clipRect.setAttribute('x', item.x);
+          clipRect.setAttribute('y', item.y);
+          clipRect.setAttribute('width', item.width);
+          clipRect.setAttribute('height', item.height);
+          clipRect.setAttribute('rx', item.borderRadius || 0);
+          clipPath.appendChild(clipRect);
+          defs.appendChild(clipPath);
+
+          if (item.photoUrl) {
+            const img = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'image');
+            img.setAttribute('href', item.photoUrl);
+            img.setAttribute('x', item.x);
+            img.setAttribute('y', item.y);
+            img.setAttribute('width', item.width);
+            img.setAttribute('height', item.height);
+            img.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+            img.setAttribute('clip-path', `url(#${clipId})`);
+            gPhoto.appendChild(img);
+          } else {
+            const rect = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', item.x);
+            rect.setAttribute('y', item.y);
+            rect.setAttribute('width', item.width);
+            rect.setAttribute('height', item.height);
+            rect.setAttribute('rx', item.borderRadius || 0);
+            rect.setAttribute('fill', '#0c2340');
+            gPhoto.appendChild(rect);
+          }
+
+          if (item.borderWidth > 0) {
+            const borderRect = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            borderRect.setAttribute('x', item.x);
+            borderRect.setAttribute('y', item.y);
+            borderRect.setAttribute('width', item.width);
+            borderRect.setAttribute('height', item.height);
+            borderRect.setAttribute('rx', item.borderRadius || 0);
+            borderRect.setAttribute('fill', 'none');
+            borderRect.setAttribute('stroke', item.borderColor || '#ffffff');
+            borderRect.setAttribute('stroke-width', item.borderWidth);
+            gPhoto.appendChild(borderRect);
+          }
+          overlayGroup.appendChild(gPhoto);
+        } else if (item.type === 'qrcode') {
+          const gQr = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+          const bg = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          bg.setAttribute('x', item.x);
+          bg.setAttribute('y', item.y);
+          bg.setAttribute('width', item.width);
+          bg.setAttribute('height', item.height);
+          bg.setAttribute('rx', item.borderRadius || 6);
+          bg.setAttribute('fill', '#ffffff');
+          gQr.appendChild(bg);
+
+          const qrInner = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+          qrInner.setAttribute('transform', `translate(${item.x + 8}, ${item.y + 8}) scale(${(item.width - 16) / 100})`);
+          qrInner.setAttribute('fill', '#000000');
+          qrInner.innerHTML = `
+            <rect x="5" y="5" width="28" height="28" rx="2" fill="none" stroke="#000" stroke-width="7"/>
+            <rect x="13" y="13" width="12" height="12"/>
+            <rect x="67" y="5" width="28" height="28" rx="2" fill="none" stroke="#000" stroke-width="7"/>
+            <rect x="75" y="13" width="12" height="12"/>
+            <rect x="5" y="67" width="28" height="28" rx="2" fill="none" stroke="#000" stroke-width="7"/>
+            <rect x="13" y="75" width="12" height="12"/>
+            <rect x="42" y="10" width="8" height="18"/>
+            <rect x="55" y="15" width="6" height="6"/>
+            <rect x="42" y="38" width="16" height="8"/>
+            <rect x="65" y="42" width="12" height="12"/>
+            <rect x="45" y="55" width="10" height="24"/>
+            <rect x="65" y="65" width="20" height="8"/>
+            <rect x="75" y="80" width="15" height="15"/>
+          `;
+          gQr.appendChild(qrInner);
+          overlayGroup.appendChild(gQr);
+        } else {
+          const gBox = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+          if (item.backgroundColor) {
+            const rect = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', item.x);
+            rect.setAttribute('y', item.y);
+            rect.setAttribute('width', item.width);
+            rect.setAttribute('height', item.height);
+            rect.setAttribute('rx', item.borderRadius || 0);
+            rect.setAttribute('fill', item.backgroundColor);
+            gBox.appendChild(rect);
+          }
+
+          if (item.text) {
+            const textEl = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'text');
+            textEl.setAttribute('fill', item.textColor || '#00204a');
+            textEl.setAttribute('font-family', "'Montserrat', 'Inter', sans-serif");
+            textEl.setAttribute('font-size', item.fontSize || 16);
+            textEl.setAttribute('font-weight', item.fontWeight || '800');
+            textEl.setAttribute('dominant-baseline', 'central');
+
+            let tx = item.x + (item.paddingLeft || 16);
+            if (item.textAlign === 'center') {
+              tx = item.x + item.width / 2;
+              textEl.setAttribute('text-anchor', 'middle');
+            } else if (item.textAlign === 'right') {
+              tx = item.x + item.width - (item.paddingRight || 16);
+              textEl.setAttribute('text-anchor', 'end');
+            } else {
+              textEl.setAttribute('text-anchor', 'start');
+            }
+
+            textEl.setAttribute('x', tx);
+            textEl.setAttribute('y', item.y + item.height / 2);
+            textEl.textContent = item.text;
+            gBox.appendChild(textEl);
+          }
+          overlayGroup.appendChild(gBox);
+        }
+      });
+
+      rootSvg.appendChild(overlayGroup);
+      return new XMLSerializer().serializeToString(svgDoc);
+    }
+
+    function renderSvgToBlob(svgString) {
+      return new Promise((resolve, reject) => {
+        const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+        const blobUrl = URL.createObjectURL(svgBlob);
+        const img = new Image();
+        img.onload = () => {
+          try {
+            const offCanvas = document.createElement('canvas');
+            const scale = 3; // 3x = ~3150 x 1986 px (300 DPI CR80)
+            offCanvas.width = 1050 * scale;
+            offCanvas.height = 662 * scale;
+            const ctx = offCanvas.getContext('2d');
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.scale(scale, scale);
+            ctx.drawImage(img, 0, 0, 1050, 662);
+            URL.revokeObjectURL(blobUrl);
+
+            offCanvas.toBlob(blob => {
+              resolve(blob);
+            }, 'image/png');
+          } catch (err) {
+            URL.revokeObjectURL(blobUrl);
+            reject(err);
+          }
+        };
+        img.onerror = (e) => {
+          URL.revokeObjectURL(blobUrl);
+          reject(e);
+        };
+        img.src = blobUrl;
+      });
+    }
+
+    async function exportAllAthletesBatchZip() {
+      if (typeof JSZip === 'undefined') {
+        showToast('Biblioteca JSZip carregando, tente novamente em instantes.');
+        return;
+      }
+
+      const athletes = await loadAthletes();
+      if (!athletes || athletes.length === 0) {
+        showToast('Nenhum atleta cadastrado para exportar.');
+        return;
+      }
+
+      const modal = document.getElementById('batchExportModal');
+      const bar = document.getElementById('batchExportProgressBar');
+      const countText = document.getElementById('batchExportCountText');
+      const pctText = document.getElementById('batchExportPercentText');
+      const statusText = document.getElementById('batchExportStatusText');
+
+      if (modal) modal.classList.remove('hidden');
+      batchExportAbort = false;
+
+      const zip = new JSZip();
+      const folder = zip.folder("carteiras_fpeft_300dpi");
+      const total = athletes.length;
+
+      for (let i = 0; i < total; i++) {
+        if (batchExportAbort) {
+          if (modal) modal.classList.add('hidden');
+          showToast('Exportação em lote cancelada.');
+          return;
+        }
+
+        const a = athletes[i];
+        const pct = Math.round(((i + 1) / total) * 100);
+        if (bar) bar.style.width = `${pct}%`;
+        if (countText) countText.textContent = `${i + 1} / ${total}`;
+        if (pctText) pctText.textContent = `${pct}%`;
+        if (statusText) statusText.textContent = `Renderizando carteira: ${a.nome}...`;
+
+        try {
+          const svgStr = buildSvgStringForAthlete(a);
+          const blob = await renderSvgToBlob(svgStr);
+          const cleanName = (a.nome || 'atleta').normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9_-]/g, "_").toUpperCase();
+          folder.file(`PE-2026-${a.codigo}_${cleanName}.png`, blob);
+        } catch (err) {
+          console.warn(`Erro ao gerar carteira ${a.codigo}:`, err);
+        }
+
+        // Cede tempo para o navegador atualizar a interface
+        await new Promise(r => setTimeout(r, 15));
+      }
+
+      if (statusText) statusText.textContent = "Empacotando arquivo ZIP final...";
+      const zipBlob = await zip.generateAsync({ type: "blob" }, (metadata) => {
+        if (bar) bar.style.width = `${metadata.percent}%`;
+        if (pctText) pctText.textContent = `${Math.round(metadata.percent)}%`;
+      });
+
+      const downloadLink = document.createElement('a');
+      downloadLink.href = URL.createObjectURL(zipBlob);
+      downloadLink.download = `carteirinhas_fpeft_lote_${total}_atletas_${Date.now()}.zip`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+
+      if (modal) modal.classList.add('hidden');
+      showToast(`✓ Lote com ${total} carteirinhas HD exportado com sucesso em ZIP!`);
+    }
+
+    function cancelBatchExport() {
+      batchExportAbort = true;
+      const modal = document.getElementById('batchExportModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    /* =========================================================
+       EXPORTAÇÃO CSV & IMPORTAÇÃO EM MASSA (ATÉ 500 ATLETAS)
+       ========================================================= */
+    function exportAthletesToCsv() {
+      const athletes = currentCachedAthletes || [];
+      if (!athletes.length) {
+        showToast('Nenhum atleta cadastrado para exportar.');
+        return;
+      }
+      const headers = ['Codigo', 'Nome', 'CPF', 'Nascimento', 'Telefone', 'Municipio', 'Clube', 'Modalidade', 'Federado', 'Validade', 'Status'];
+      const rows = athletes.map(a => [
+        `"${a.codigo || ''}"`,
+        `"${(a.nome || '').replace(/"/g, '""')}"`,
+        `"${a.cpf || ''}"`,
+        `"${a.nascimento || ''}"`,
+        `"${a.telefone || ''}"`,
+        `"${(a.municipio || '').replace(/"/g, '""')}"`,
+        `"${(a.clube || '').replace(/"/g, '""')}"`,
+        `"${(a.modalidade || '').replace(/"/g, '""')}"`,
+        `"${a.federado || ''}"`,
+        `"${a.validade || ''}"`,
+        `"${a.status || ''}"`
+      ]);
+
+      const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\r\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `jogadores_cadastrados_fpeft_${Date.now()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Planilha CSV exportada com sucesso!');
+    }
+
+    function openBatchImportModal() {
+      const modal = document.getElementById('batchImportModal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeBatchImportModal() {
+      const modal = document.getElementById('batchImportModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function handleBatchCsvFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const textarea = document.getElementById('batchImportTextarea');
+        if (textarea) textarea.value = e.target.result;
+        showToast('Arquivo CSV carregado no campo de texto!');
+      };
+      reader.readAsText(file);
+    }
+
+    async function processBatchImport() {
+      const textarea = document.getElementById('batchImportTextarea');
+      const text = (textarea ? textarea.value : '').trim();
+      if (!text) {
+        showToast('Cole ou digite ao menos uma linha de dados.');
+        return;
+      }
+
+      const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+      const athletesToInsert = [];
+      let existingAthletes = await loadAthletes();
+      const existingCodes = new Set(existingAthletes.map(a => String(a.codigo)));
+
+      for (let line of lines) {
+        const parts = line.split(/[;,|\t]/).map(p => p.trim());
+        if (!parts.length || !parts[0] || parts[0].toLowerCase() === 'nome') continue;
+
+        const nome = parts[0];
+        const cpf = parts[1] || '';
+        const municipio = parts[2] || 'Recife - PE';
+        const clube = parts[3] || 'Sport Club do Recife';
+        const modalidade = parts[4] || 'SOLO (INDIVIDUAL)';
+        const telefone = parts[5] || '(81) 98765-4321';
+        const nascimento = parts[6] || '01/01/2000';
+
+        let code = '';
+        do {
+          code = String(Math.floor(100000 + Math.random() * 900000));
+        } while (existingCodes.has(code));
+        existingCodes.add(code);
+
+        const athleteObj = {
+          id: Date.now() + Math.floor(Math.random() * 1000),
+          codigo: code,
+          nome: nome,
+          cpf: cpf,
+          nascimento: nascimento,
+          telefone: telefone,
+          municipio: municipio,
+          modalidade: modalidade,
+          status: 'HOMOLOGADO', // Cadastrados em massa já homologados como oficiais
+          clube: clube,
+          federado: `PE-2026/${code.slice(-3)}`,
+          validade: '12/2026',
+          foto_url: ''
+        };
+        athletesToInsert.push(athleteObj);
+      }
+
+      if (athletesToInsert.length === 0) {
+        showToast('Nenhum dado válido identificado.');
+        return;
+      }
+
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from('atletas').upsert(athletesToInsert.map(a => ({
+            codigo: a.codigo,
+            nome: a.nome,
+            cpf: a.cpf,
+            nascimento: a.nascimento,
+            telefone: a.telefone,
+            municipio: a.municipio,
+            modalidade: a.modalidade,
+            status: a.status,
+            clube: a.clube,
+            federado: a.federado,
+            validade: a.validade,
+            foto_url: a.foto_url
+          })), { onConflict: 'codigo' });
+        } catch (e) {
+          console.warn("Aviso ao salvar lote no Supabase:", e);
+        }
+      }
+
+      existingAthletes = [...athletesToInsert, ...existingAthletes];
+      localStorage.setItem('pe_athletes_db', JSON.stringify(existingAthletes));
+      currentCachedAthletes = existingAthletes;
+
+      closeBatchImportModal();
+      showToast(`✓ ${athletesToInsert.length} novos atletas cadastrados e homologados com sucesso!`);
+      renderJogadoresCadastradosTable();
+      updateDashboardData();
     }
 
     /* =========================================================
@@ -4608,7 +5486,7 @@
 
         initSupabase();
         generateRandomAthleteCode();
-        renderAthletesTable();
+        renderJogadoresCadastradosTable();
         renderAdminNews();
         syncStudioWithCurrentLayout();
         updateDashboardData();
@@ -4639,5 +5517,93 @@
       initApp();
     }
   </script>
+
+  <!-- Toast Flutuante de Notificação -->
+  <div id="toastNotification" class="fixed bottom-6 right-6 bg-[#070b14] border border-pe-gold/40 text-white px-4 py-3 rounded-xl shadow-2xl text-xs font-medium flex items-center gap-3 transform translate-y-24 opacity-0 transition-all duration-300 z-50 pointer-events-none">
+    <div class="w-6 h-6 rounded-full bg-pe-gold/20 text-pe-gold flex items-center justify-center shrink-0">
+      <i class="fa-solid fa-check text-xs"></i>
+    </div>
+    <span id="toastMessage">Operação realizada com sucesso!</span>
+  </div>
+
+  <!-- Canvas Invisível para Renderização em Alta Resolução 300 DPI -->
+  <canvas id="hdRenderCanvas" class="hidden"></canvas>
+
+  <!-- FICHA COMPLETA FLUTUANTE (POPOVER HOVER) -->
+  <div id="athleteHoverCard" class="fixed pointer-events-none z-[9999] hidden w-84 max-w-[340px] bg-[#070e1d]/95 backdrop-blur-xl border border-pe-gold/60 rounded-2xl p-4 shadow-[0_20px_50px_rgba(0,0,0,0.85)] transition-opacity duration-150">
+    <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0 rounded-t-2xl"></div>
+    <div id="athleteHoverCardContent" class="space-y-3 pt-1">
+      <!-- Injetado dinamicamente -->
+    </div>
+  </div>
+
+  <!-- MODAL DE EXPORTAÇÃO EM LOTE -->
+  <div id="batchExportModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-4">
+    <div class="bg-[#0b101d] border border-[#1c253b] rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-center space-y-5 relative">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-sky-600 to-blue-600 text-white flex items-center justify-center text-2xl mx-auto shadow-lg shadow-sky-600/30 animate-pulse">
+        <i class="fa-solid fa-file-zipper"></i>
+      </div>
+      <div>
+        <h3 class="font-oswald text-xl uppercase font-bold text-white">Exportação em Lote HD (300 DPI)</h3>
+        <p id="batchExportStatusText" class="text-xs text-slate-300 mt-1">Renderizando carteirinhas em PNG de alta resolução...</p>
+      </div>
+      <div class="w-full bg-[#05080e] rounded-full h-3 overflow-hidden border border-[#1c253b]">
+        <div id="batchExportProgressBar" class="bg-gradient-to-r from-pe-gold to-sky-400 h-full rounded-full transition-all duration-200" style="width: 0%"></div>
+      </div>
+      <div class="flex items-center justify-between text-[11px] text-slate-400 font-mono">
+        <span id="batchExportCountText">0 / 0</span>
+        <span id="batchExportPercentText">0%</span>
+      </div>
+      <button type="button" id="btnCancelBatchExport" onclick="cancelBatchExport()" class="text-xs text-slate-400 hover:text-white px-4 py-2 rounded-xl border border-slate-700 hover:border-slate-500 transition cursor-pointer">
+        Cancelar Operação
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL DE IMPORTAÇÃO EM MASSA (CSV / LISTA) -->
+  <div id="batchImportModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-4">
+    <div class="bg-[#0b101d] border border-[#1c253b] rounded-3xl p-6 sm:p-7 max-w-2xl w-full shadow-2xl space-y-4 relative">
+      <div class="flex items-center justify-between border-b border-[#1c253b] pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-pe-gold/20 text-pe-gold flex items-center justify-center text-lg">
+            <i class="fa-solid fa-file-import"></i>
+          </div>
+          <div>
+            <h3 class="font-oswald text-xl uppercase font-bold text-white">Cadastro em Massa de Atletas</h3>
+            <p class="text-xs text-slate-400">Cole uma lista ou envie um arquivo .CSV para cadastrar até 500 atletas</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeBatchImportModal()" class="text-slate-400 hover:text-white text-lg p-1 cursor-pointer">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-2">
+        <div class="flex items-center justify-between text-xs text-slate-300 font-bold">
+          <label>Cole os dados (Formato: Nome; CPF; Município; Clube; Modalidade):</label>
+          <span class="text-[10px] text-pe-gold font-mono">1 atleta por linha</span>
+        </div>
+        <textarea id="batchImportTextarea" rows="8" placeholder="Lucas Ferreira da Silva; 111.222.333-44; Recife - PE; Sport Club do Recife; SOLO (INDIVIDUAL)
+Amanda Costa Mendes; 222.333.444-55; Olinda - PE; Clube Náutico Capibaribe; DUPLAS MISTO
+Rodrigo Albuquerque; 333.444.555-66; Caruaru - PE; Central Foot Table; SOLO (INDIVIDUAL)" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl p-3 text-xs text-white font-mono outline-none"></textarea>
+        <p class="text-[10px] text-slate-400">Cada atleta receberá um código oficial exclusivo de 6 dígitos e registro federativo PE-2026/XXX gerados automaticamente.</p>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#1c253b]">
+        <label class="bg-[#05080e] hover:bg-[#121c32] border border-[#1c253b] text-slate-300 font-bold text-xs px-4 py-2.5 rounded-xl cursor-pointer flex items-center gap-2 transition">
+          <i class="fa-solid fa-upload text-pe-gold"></i> Subir Arquivo .CSV
+          <input type="file" id="batchCsvFileInput" accept=".csv,.txt" onchange="handleBatchCsvFile(event)" class="hidden">
+        </label>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="closeBatchImportModal()" class="text-slate-400 hover:text-white text-xs px-4 py-2.5 cursor-pointer">
+            Cancelar
+          </button>
+          <button type="button" onclick="processBatchImport()" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase px-5 py-2.5 rounded-xl transition shadow cursor-pointer">
+            Processar e Cadastrar Atletas
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
