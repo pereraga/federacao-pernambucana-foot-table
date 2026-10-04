@@ -31,6 +31,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/carteira_template.js"></script>
+  <script src="carteira_template.js"></script>
 
   <script>
     tailwind.config = {
@@ -132,6 +134,56 @@
     .win-resizer-tr { top: -4px; right: -4px; width: 12px; height: 12px; cursor: nesw-resize; }
     .win-resizer-bl { bottom: -4px; left: -4px; width: 12px; height: 12px; cursor: nesw-resize; }
     .win-resizer-br { bottom: -4px; right: -4px; width: 12px; height: 12px; cursor: nwse-resize; }
+    
+    /* Estilos do Modo Fixo vs Modo Design e Rótulos de Campos */
+    .field-top-label {
+      position: absolute;
+      top: -15px;
+      left: 8px;
+      font-size: 9.5px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      pointer-events: none;
+      white-space: nowrap;
+      font-family: 'Montserrat', sans-serif;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.85);
+    }
+    .field-top-label.label-center {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .field-bottom-label {
+      position: absolute;
+      bottom: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 8px;
+      font-weight: 800;
+      color: #94a3b8;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      pointer-events: none;
+      white-space: nowrap;
+      font-family: 'Montserrat', sans-serif;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.85);
+    }
+    .is-mode-fixed .selectable-item {
+      cursor: pointer !important;
+    }
+    .is-mode-fixed .selectable-item.is-selected {
+      outline: 2px solid #0284c7 !important;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.35) !important;
+    }
+    .is-mode-fixed .resize-handle {
+      display: none !important;
+    }
+    .is-mode-design .selectable-item {
+      cursor: move !important;
+    }
+
     input[type=range] { accent-color: #f5b800; }
     .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
     .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
@@ -791,26 +843,48 @@
             <div class="xl:col-span-7 flex flex-col space-y-4">
               
               <!-- Toolbar Superior do Canvas (Zoom e Padrão CR80) -->
-              <div class="flex items-center justify-between bg-[#0b101d] border border-[#1c253b] px-4 py-3 rounded-2xl shadow">
-                <div class="flex items-center gap-2 text-xs">
-                  <span class="w-2.5 h-2.5 rounded-full bg-pe-gold animate-pulse"></span>
-                  <span class="font-bold text-white uppercase tracking-wide">Padrão CR80 Oficial</span>
-                  <span class="text-slate-400 hidden sm:inline">(85.6mm × 53.98mm • 1050 × 662 px)</span>
+              <div class="flex items-center justify-between bg-[#0b101d] border border-[#1c253b] px-4 py-2.5 rounded-2xl shadow flex-wrap gap-2.5">
+                <div class="flex items-center gap-3 flex-wrap">
+                  <div class="flex items-center gap-2 text-xs">
+                    <span class="w-2.5 h-2.5 rounded-full bg-pe-gold animate-pulse"></span>
+                    <span class="font-bold text-white uppercase tracking-wide">Padrão CR80 Oficial</span>
+                    <span class="text-slate-400 hidden sm:inline">(85.6mm × 53.98mm • 1050 × 662 px)</span>
+                  </div>
+
+                  <!-- SELETOR DE MODO: FIXO vs DESIGN -->
+                  <div class="inline-flex items-center bg-[#05080e] p-1 rounded-xl border border-[#1c253b] shadow-inner">
+                    <button type="button" id="btnModeFixed" onclick="toggleDesignLock(true)" title="Modo Fixo: Layout travado para emissão rápida sem risco de mover campos" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-extrabold bg-emerald-600 text-white shadow transition cursor-pointer">
+                      <i class="fa-solid fa-lock"></i>
+                      <span>Modo Fixo</span>
+                    </button>
+                    <button type="button" id="btnModeDesign" onclick="toggleDesignLock(false)" title="Modo Design: Desbloqueia arrastar, redimensionar e editar posições livremente" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition cursor-pointer">
+                      <i class="fa-solid fa-pen-ruler"></i>
+                      <span>Modo Design</span>
+                    </button>
+                  </div>
                 </div>
 
-                <!-- Zoom Controls -->
-                <div class="flex items-center space-x-1.5 bg-[#05080e] px-2 py-1 rounded-xl border border-[#1c253b]">
-                  <button type="button" id="zoomOutBtn" title="Reduzir Visualização" class="w-7 h-7 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition text-xs cursor-pointer">
-                    <i class="fa-solid fa-minus"></i>
+                <div class="flex items-center gap-2">
+                  <!-- Botão Restaurar Posições Oficiais -->
+                  <button type="button" onclick="restoreOfficialElementPositions()" title="Restaurar posições exatas do design oficial da Federação" class="px-2.5 py-1.5 bg-[#05080e] hover:bg-[#121c32] text-slate-300 hover:text-white border border-[#1c253b] rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer">
+                    <i class="fa-solid fa-arrows-rotate text-sky-400"></i>
+                    <span class="hidden md:inline">Restaurar Layout</span>
                   </button>
-                  <span id="zoomDisplay" class="text-xs font-mono font-medium text-pe-gold w-12 text-center">80%</span>
-                  <button type="button" id="zoomInBtn" title="Aumentar Visualização" class="w-7 h-7 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition text-xs cursor-pointer">
-                    <i class="fa-solid fa-plus"></i>
-                  </button>
-                  <div class="w-[1px] h-4 bg-slate-700 mx-1"></div>
-                  <button type="button" id="zoomFitBtn" title="Enquadrar à Tela" class="px-2 py-1 text-xs text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition flex items-center gap-1.5 cursor-pointer">
-                    <i class="fa-solid fa-expand text-[10px]"></i> <span>Enquadrar</span>
-                  </button>
+
+                  <!-- Zoom Controls -->
+                  <div class="flex items-center space-x-1.5 bg-[#05080e] px-2 py-1 rounded-xl border border-[#1c253b]">
+                    <button type="button" id="zoomOutBtn" title="Reduzir Visualização" class="w-7 h-7 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition text-xs cursor-pointer">
+                      <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <span id="zoomDisplay" class="text-xs font-mono font-medium text-pe-gold w-12 text-center">80%</span>
+                    <button type="button" id="zoomInBtn" title="Aumentar Visualização" class="w-7 h-7 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition text-xs cursor-pointer">
+                      <i class="fa-solid fa-plus"></i>
+                    </button>
+                    <div class="w-[1px] h-4 bg-slate-700 mx-1"></div>
+                    <button type="button" id="zoomFitBtn" title="Enquadrar à Tela" class="px-2 py-1 text-xs text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition flex items-center gap-1.5 cursor-pointer">
+                      <i class="fa-solid fa-expand text-[10px]"></i> <span>Enquadrar</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -1976,263 +2050,314 @@
     /* =========================================================
        STUDIO CR80 OFICIAL & GERENCIAMENTO DE ATLETAS (ABA 1)
        Tamanho CR80: 85.60 mm x 53.98 mm | Resolução: 1050px x 662px
+       Baseado no vetor oficial CorelDRAW 2026: Carteira Atleta.svg
        ========================================================= */
+    const OFFICIAL_DEFAULT_ELEMENTS = [
+      {
+        id: 'field-foto',
+        label: 'Foto 3x4 do Atleta',
+        labelTag: '',
+        type: 'photo',
+        x: 44,
+        y: 295,
+        width: 200,
+        height: 236,
+        borderRadius: 20,
+        borderWidth: 4,
+        borderColor: '#ffffff',
+        backgroundColor: '#09152e',
+        photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+        locked: false
+      },
+      {
+        id: 'field-nome',
+        label: 'Nome do Atleta',
+        labelTag: 'NOME DO ATLETA',
+        type: 'text-box',
+        targetKey: 'nome',
+        text: 'CARLOS EDUARDO SILVA LIMA',
+        x: 268,
+        y: 295,
+        width: 738,
+        height: 34,
+        borderRadius: 17,
+        backgroundColor: '#ffffff',
+        textColor: '#00204a',
+        fontSize: 17,
+        fontWeight: '800',
+        fontFamily: 'Montserrat',
+        textAlign: 'left',
+        paddingLeft: 18,
+        paddingRight: 18,
+        locked: false
+      },
+      {
+        id: 'field-cpf',
+        label: 'CPF',
+        labelTag: 'CPF',
+        type: 'text-box',
+        targetKey: 'cpf',
+        text: '123.456.789-00',
+        x: 268,
+        y: 345,
+        width: 738,
+        height: 34,
+        borderRadius: 17,
+        backgroundColor: '#ffffff',
+        textColor: '#00204a',
+        fontSize: 15,
+        fontWeight: '800',
+        fontFamily: 'Montserrat',
+        textAlign: 'left',
+        paddingLeft: 18,
+        paddingRight: 18,
+        locked: false
+      },
+      {
+        id: 'field-nasc',
+        label: 'Data de Nascimento',
+        labelTag: 'DATA DE NASCIMENTO',
+        type: 'text-box',
+        targetKey: 'nasc',
+        text: '18/05/1996',
+        x: 268,
+        y: 395,
+        width: 738,
+        height: 34,
+        borderRadius: 17,
+        backgroundColor: '#ffffff',
+        textColor: '#00204a',
+        fontSize: 15,
+        fontWeight: '800',
+        fontFamily: 'Montserrat',
+        textAlign: 'left',
+        paddingLeft: 18,
+        paddingRight: 18,
+        locked: false
+      },
+      {
+        id: 'field-fone',
+        label: 'Telefone / WhatsApp',
+        labelTag: 'TELEFONE / WHATSAPP',
+        type: 'text-box',
+        targetKey: 'fone',
+        text: '(81) 98765-4321',
+        x: 268,
+        y: 445,
+        width: 738,
+        height: 34,
+        borderRadius: 17,
+        backgroundColor: '#ffffff',
+        textColor: '#00204a',
+        fontSize: 15,
+        fontWeight: '800',
+        fontFamily: 'Montserrat',
+        textAlign: 'left',
+        paddingLeft: 18,
+        paddingRight: 18,
+        locked: false
+      },
+      {
+        id: 'field-categoria',
+        label: 'Categoria',
+        labelTag: 'CATEGORIA',
+        type: 'text-box',
+        targetKey: 'categoria',
+        text: 'MASTER / PRINCIPAL',
+        x: 268,
+        y: 495,
+        width: 550,
+        height: 34,
+        borderRadius: 17,
+        backgroundColor: '#ffffff',
+        textColor: '#00204a',
+        fontSize: 14,
+        fontWeight: '800',
+        fontFamily: 'Montserrat',
+        textAlign: 'left',
+        paddingLeft: 16,
+        paddingRight: 16,
+        locked: false
+      },
+      {
+        id: 'field-filiacao',
+        label: 'Filiação / Clube',
+        labelTag: 'FILIAÇÃO',
+        type: 'text-box',
+        targetKey: 'filiacao',
+        text: 'SPORT CLUB DO RECIFE',
+        x: 268,
+        y: 545,
+        width: 550,
+        height: 34,
+        borderRadius: 17,
+        backgroundColor: '#ffffff',
+        textColor: '#00204a',
+        fontSize: 14,
+        fontWeight: '800',
+        fontFamily: 'Montserrat',
+        textAlign: 'left',
+        paddingLeft: 16,
+        paddingRight: 16,
+        locked: false
+      },
+      {
+        id: 'field-federado',
+        label: 'Nº do Federado',
+        labelTag: 'Nº DO FEDERADO',
+        type: 'text-box',
+        targetKey: 'federado',
+        text: 'PE-2026/048',
+        x: 44,
+        y: 544,
+        width: 200,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: '#ffffff',
+        textColor: '#00204a',
+        fontSize: 13,
+        fontWeight: '800',
+        fontFamily: 'Montserrat',
+        textAlign: 'center',
+        paddingLeft: 8,
+        paddingRight: 8,
+        locked: false
+      },
+      {
+        id: 'field-municipio',
+        label: 'Município',
+        labelTag: 'MUNICÍPIO',
+        type: 'text-box',
+        targetKey: 'municipio',
+        text: 'RECIFE - PE',
+        x: 44,
+        y: 594,
+        width: 114,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: '#ffffff',
+        textColor: '#00204a',
+        fontSize: 12,
+        fontWeight: '800',
+        fontFamily: 'Montserrat',
+        textAlign: 'center',
+        paddingLeft: 6,
+        paddingRight: 6,
+        locked: false
+      },
+      {
+        id: 'field-validade',
+        label: 'Validade',
+        labelTag: 'VALIDADE',
+        type: 'text-box',
+        targetKey: 'validade',
+        text: '12/2026',
+        x: 164,
+        y: 594,
+        width: 80,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: '#ffffff',
+        textColor: '#00204a',
+        fontSize: 12,
+        fontWeight: '800',
+        fontFamily: 'Montserrat',
+        textAlign: 'center',
+        paddingLeft: 6,
+        paddingRight: 6,
+        locked: false
+      },
+      {
+        id: 'field-qrcode',
+        label: 'QR Code de Autenticidade',
+        labelTag: 'VERIFICAÇÃO DE AUTENTICIDADE',
+        type: 'qrcode',
+        targetKey: 'qr',
+        x: 846,
+        y: 495,
+        width: 160,
+        height: 130,
+        borderRadius: 14,
+        backgroundColor: '#ffffff',
+        locked: false
+      },
+      {
+        id: 'field-assinatura',
+        label: 'Assinatura da Diretoria',
+        labelTag: '',
+        type: 'text-line',
+        targetKey: 'assinatura',
+        text: 'ASSINATURA DA DIRETORIA FPEFT',
+        x: 340,
+        y: 598,
+        width: 420,
+        height: 28,
+        textColor: '#ffffff',
+        fontSize: 11,
+        fontWeight: '700',
+        textAlign: 'center',
+        locked: false
+      }
+    ];
+
     const studioState = {
       zoom: 0.8,
       selectedId: 'field-nome',
       nudgeStep: 1, // 1px, 5px, 10px
-      showBgLabels: true,
+      showBgLabels: false,
+      isDesignLocked: true, // Padrão FIXO / TRAVADO contra modificações acidentais
       customSvgContent: null,
       customImageUrl: null,
       bgTransform: {
-        mode: 'cover',
+        mode: 'exact',
         scale: 1,
         x: 0,
         y: 0
       },
       floatingPinned: false,
       floatingMinimized: false,
-      elements: [
-        {
-          id: 'field-foto',
-          label: 'Foto 3x4 do Atleta',
-          type: 'photo',
-          x: 62,
-          y: 236,
-          width: 194,
-          height: 234,
-          borderRadius: 24,
-          borderWidth: 4,
-          borderColor: '#ffffff',
-          backgroundColor: '#0c2340',
-          photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
-          locked: false
-        },
-        {
-          id: 'field-nome',
-          label: 'Nome do Atleta (Caixa Branca)',
-          type: 'text-box',
-          targetKey: 'nome',
-          text: 'CARLOS EDUARDO SILVA LIMA',
-          x: 278,
-          y: 304,
-          width: 700,
-          height: 34,
-          borderRadius: 17,
-          backgroundColor: '#ffffff',
-          textColor: '#00204a',
-          fontSize: 18,
-          fontWeight: '800',
-          fontFamily: 'Montserrat',
-          textAlign: 'left',
-          paddingLeft: 18,
-          paddingRight: 18,
-          locked: false
-        },
-        {
-          id: 'field-cpf',
-          label: 'CPF (Caixa Branca)',
-          type: 'text-box',
-          targetKey: 'cpf',
-          text: '123.456.789-00',
-          x: 278,
-          y: 348,
-          width: 700,
-          height: 34,
-          borderRadius: 17,
-          backgroundColor: '#ffffff',
-          textColor: '#00204a',
-          fontSize: 16,
-          fontWeight: '800',
-          fontFamily: 'Montserrat',
-          textAlign: 'left',
-          paddingLeft: 18,
-          paddingRight: 18,
-          locked: false
-        },
-        {
-          id: 'field-nasc',
-          label: 'Data de Nascimento (Caixa Branca)',
-          type: 'text-box',
-          targetKey: 'nasc',
-          text: '18/05/1996',
-          x: 278,
-          y: 390,
-          width: 700,
-          height: 34,
-          borderRadius: 17,
-          backgroundColor: '#ffffff',
-          textColor: '#00204a',
-          fontSize: 16,
-          fontWeight: '800',
-          fontFamily: 'Montserrat',
-          textAlign: 'left',
-          paddingLeft: 18,
-          paddingRight: 18,
-          locked: false
-        },
-        {
-          id: 'field-fone',
-          label: 'Telefone / WhatsApp (Caixa Branca)',
-          type: 'text-box',
-          targetKey: 'fone',
-          text: '(81) 98765-4321',
-          x: 278,
-          y: 434,
-          width: 700,
-          height: 34,
-          borderRadius: 17,
-          backgroundColor: '#ffffff',
-          textColor: '#00204a',
-          fontSize: 16,
-          fontWeight: '800',
-          fontFamily: 'Montserrat',
-          textAlign: 'left',
-          paddingLeft: 18,
-          paddingRight: 18,
-          locked: false
-        },
-        {
-          id: 'field-categoria',
-          label: 'Categoria (Caixa Branca)',
-          type: 'text-box',
-          targetKey: 'categoria',
-          text: 'MASTER / PRINCIPAL',
-          x: 278,
-          y: 476,
-          width: 520,
-          height: 32,
-          borderRadius: 16,
-          backgroundColor: '#ffffff',
-          textColor: '#00204a',
-          fontSize: 15,
-          fontWeight: '800',
-          fontFamily: 'Montserrat',
-          textAlign: 'left',
-          paddingLeft: 16,
-          paddingRight: 16,
-          locked: false
-        },
-        {
-          id: 'field-filiacao',
-          label: 'Filiação / Clube (Caixa Branca)',
-          type: 'text-box',
-          targetKey: 'filiacao',
-          text: 'SPORT CLUB DO RECIFE',
-          x: 278,
-          y: 518,
-          width: 520,
-          height: 32,
-          borderRadius: 16,
-          backgroundColor: '#ffffff',
-          textColor: '#00204a',
-          fontSize: 15,
-          fontWeight: '800',
-          fontFamily: 'Montserrat',
-          textAlign: 'left',
-          paddingLeft: 16,
-          paddingRight: 16,
-          locked: false
-        },
-        {
-          id: 'field-federado',
-          label: 'Nº do Federado (Caixa Branca)',
-          type: 'text-box',
-          targetKey: 'federado',
-          text: 'PE-2026/048',
-          x: 62,
-          y: 494,
-          width: 194,
-          height: 28,
-          borderRadius: 14,
-          backgroundColor: '#ffffff',
-          textColor: '#00204a',
-          fontSize: 14,
-          fontWeight: '800',
-          fontFamily: 'Montserrat',
-          textAlign: 'center',
-          paddingLeft: 8,
-          paddingRight: 8,
-          locked: false
-        },
-        {
-          id: 'field-municipio',
-          label: 'Município (Caixa Branca)',
-          type: 'text-box',
-          targetKey: 'municipio',
-          text: 'RECIFE - PE',
-          x: 62,
-          y: 540,
-          width: 194,
-          height: 28,
-          borderRadius: 14,
-          backgroundColor: '#ffffff',
-          textColor: '#00204a',
-          fontSize: 13,
-          fontWeight: '800',
-          fontFamily: 'Montserrat',
-          textAlign: 'center',
-          paddingLeft: 8,
-          paddingRight: 8,
-          locked: false
-        },
-        {
-          id: 'field-validade',
-          label: 'Validade (Caixa Branca)',
-          type: 'text-box',
-          targetKey: 'validade',
-          text: '12/2026',
-          x: 150,
-          y: 574,
-          width: 106,
-          height: 26,
-          borderRadius: 13,
-          backgroundColor: '#ffffff',
-          textColor: '#00204a',
-          fontSize: 13,
-          fontWeight: '800',
-          fontFamily: 'Montserrat',
-          textAlign: 'center',
-          paddingLeft: 6,
-          paddingRight: 6,
-          locked: false
-        },
-        {
-          id: 'field-qrcode',
-          label: 'QR Code de Autenticidade',
-          type: 'qrcode',
-          targetKey: 'qr',
-          x: 852,
-          y: 472,
-          width: 96,
-          height: 96,
-          borderRadius: 8,
-          backgroundColor: '#ffffff',
-          locked: false
-        },
-        {
-          id: 'field-assinatura',
-          label: 'Linha / Assinatura do Presidente',
-          type: 'text-line',
-          targetKey: 'assinatura',
-          text: 'ASSINATURA DO PRESIDENTE FPEFT',
-          x: 440,
-          y: 585,
-          width: 300,
-          height: 24,
-          textColor: '#ffffff',
-          fontSize: 11,
-          fontWeight: '700',
-          textAlign: 'center',
-          locked: false
-        }
-      ]
+      elements: JSON.parse(JSON.stringify(OFFICIAL_DEFAULT_ELEMENTS))
     };
+
+    /* Carrega preferência de bloqueio de design salva se houver */
+    try {
+      const savedLock = localStorage.getItem('fpeft_studio_design_locked');
+      if (savedLock !== null) {
+        studioState.isDesignLocked = savedLock === 'true';
+      }
+      const savedCustomElements = localStorage.getItem('fpeft_studio_custom_elements');
+      if (savedCustomElements) {
+        const parsed = JSON.parse(savedCustomElements);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          studioState.elements = parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('Erro ao restaurar preferências do Studio:', e);
+    }
 
     /* =========================================================
        TEMPLATE VETORIAL SVG OFICIAL DA FPEFT (1050x662)
+       Carregado diretamente de CorelDRAW 2026 (Carteira Atleta.svg)
        ========================================================= */
     function getFpeftTemplateSvg(showLabels = true) {
+      if (window.OFFICIAL_FPEFT_SVG_TEMPLATE && typeof window.OFFICIAL_FPEFT_SVG_TEMPLATE === 'string' && window.OFFICIAL_FPEFT_SVG_TEMPLATE.length > 500) {
+        return window.OFFICIAL_FPEFT_SVG_TEMPLATE;
+      }
+      // Se ainda não carregou do script externo, busca síncrono ou usa template estilizado
+      try {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', 'assets/Carteira_Atleta_Template_1050x662.svg', false);
+        xhr.send(null);
+        if (xhr.status === 200 && xhr.responseText && xhr.responseText.includes('<svg')) {
+          window.OFFICIAL_FPEFT_SVG_TEMPLATE = xhr.responseText;
+          return xhr.responseText;
+        }
+      } catch (e) {
+        console.warn('XHR fallback não disponível:', e);
+      }
+
+      // Fallback de segurança elegante
       return `
       <svg id="fpeftSvgTemplate" width="1050" height="662" viewBox="0 0 1050 662" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -2241,132 +2366,16 @@
             <stop offset="45%" stop-color="#003580"/>
             <stop offset="100%" stop-color="#001a42"/>
           </linearGradient>
-          <linearGradient id="glowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#0066d6" stop-opacity="0"/>
-            <stop offset="50%" stop-color="#00aaff" stop-opacity="0.6"/>
-            <stop offset="100%" stop-color="#0066d6" stop-opacity="0"/>
-          </linearGradient>
-          <linearGradient id="sunGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#ffd000"/>
-            <stop offset="100%" stop-color="#ff9900"/>
-          </linearGradient>
           <clipPath id="cardRoundedClip">
             <rect width="1050" height="662" rx="34" />
           </clipPath>
         </defs>
-
         <g clip-path="url(#cardRoundedClip)">
-          <!-- Fundo Principal Azul Profundo -->
           <rect width="1050" height="662" fill="url(#bgGrad)"/>
-
-          <!-- Linhas de Luz e Brilho High-Tech Dinâmico -->
-          <ellipse cx="650" cy="220" rx="420" ry="14" fill="url(#glowGrad)"/>
-          <path d="M 0 540 Q 300 480 600 580 T 1050 560" stroke="#0284c7" stroke-width="1.5" opacity="0.25" fill="none"/>
-          <path d="M 0 565 Q 400 520 800 620 T 1050 600" stroke="#38bdf8" stroke-width="1" opacity="0.2" fill="none"/>
-
-          <!-- Faixa Ondulada Superior Direita (Bandeira PE estilizada) -->
-          <g transform="translate(850, 0)">
-            <path d="M 0 0 L 200 0 L 200 130 Q 120 70 0 110 Z" fill="#002b66" opacity="0.6"/>
-            <path d="M 30 0 L 200 0 L 200 90 Q 110 50 30 80 Z" fill="#e63946" opacity="0.9"/>
-            <path d="M 70 0 L 200 0 L 200 60 Q 130 30 70 50 Z" fill="#ffd000" opacity="0.95"/>
-            <path d="M 120 0 L 200 0 L 200 30 Q 160 15 120 25 Z" fill="#008000" opacity="0.95"/>
+          <g transform="translate(62, 28)">
+            <text x="0" y="32" font-family="'Montserrat', sans-serif" font-size="28" font-weight="900" fill="#ffffff" letter-spacing="1">CARTEIRA DO ATLETA</text>
+            <text x="0" y="52" font-family="'Montserrat', sans-serif" font-size="14" font-weight="800" fill="#38bdf8" letter-spacing="1.5">ATLETA OFICIAL</text>
           </g>
-
-          <!-- Detalhe Inferior Esquerdo (Bandeira PE) -->
-          <g transform="translate(0, 560)">
-            <path d="M 0 0 L 110 80 L 0 102 Z" fill="#e63946"/>
-            <path d="M 0 25 L 90 85 L 0 102 Z" fill="#ffd000"/>
-            <path d="M 0 55 L 70 95 L 0 102 Z" fill="#008000"/>
-          </g>
-
-          <!-- Selo Circular da Federação / Pernambuco (Canto Superior Esquerdo) -->
-          <g transform="translate(62, 22)">
-            <circle cx="85" cy="85" r="76" stroke="#ffffff" stroke-width="3" stroke-dasharray="6,4" opacity="0.4" fill="none"/>
-            <circle cx="85" cy="85" r="70" stroke="#00aaff" stroke-width="2" fill="#00183b"/>
-            <!-- Estilização do Arco-íris e Sol de PE -->
-            <path d="M 35 90 A 50 50 0 0 1 135 90" stroke="#e63946" stroke-width="6" fill="none"/>
-            <path d="M 40 90 A 45 45 0 0 1 130 90" stroke="#ffd000" stroke-width="5" fill="none"/>
-            <path d="M 45 90 A 40 40 0 0 1 125 90" stroke="#009944" stroke-width="4" fill="none"/>
-            <!-- Sol -->
-            <circle cx="85" cy="62" r="14" fill="url(#sunGrad)"/>
-            <!-- Cruz Vermelha -->
-            <rect x="83" y="78" width="4" height="18" fill="#e63946"/>
-            <rect x="76" y="83" width="18" height="4" fill="#e63946"/>
-            
-            <!-- Tipografia do Escudo -->
-            <text x="85" y="112" font-family="'Montserrat', sans-serif" font-size="14" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="1">PERNAMBUCO</text>
-            <text x="85" y="126" font-family="'Montserrat', sans-serif" font-size="10" font-weight="800" fill="#ffd000" text-anchor="middle" letter-spacing="0.5">FUTMESA</text>
-            <text x="85" y="138" font-family="'Montserrat', sans-serif" font-size="9" font-weight="700" fill="#cbd5e1" text-anchor="middle">FOOT TABLE</text>
-          </g>
-
-          <!-- Cabeçalho Principal: FPEFT & Descrição -->
-          <g transform="translate(288, 32)">
-            <text x="0" y="54" font-family="'Montserrat', sans-serif" font-size="58" font-weight="900" fill="#ffffff" letter-spacing="2">FPEFT</text>
-            <text x="2" y="80" font-family="'Montserrat', sans-serif" font-size="16" font-weight="800" fill="#ffffff" letter-spacing="0.8">FEDERAÇÃO PERNAMBUCANA</text>
-            <text x="2" y="102" font-family="'Montserrat', sans-serif" font-size="16" font-weight="800" fill="#ffffff" letter-spacing="0.8">DE FOOT TABLE</text>
-            <text x="2" y="122" font-family="'Montserrat', sans-serif" font-size="11" font-weight="700" fill="#94a3b8" letter-spacing="2.5">DISCIPLINA  •  ESPORTE  •  UNIÃO</text>
-          </g>
-
-          <!-- Slogan Direita: "O FOOT TABLE É DE PERNAMBUCO" -->
-          <g transform="translate(650, 40)">
-            <text x="0" y="24" font-family="'Montserrat', sans-serif" font-size="18" font-weight="900" fill="#ffffff" letter-spacing="0.5">O FOOT TABLE</text>
-            <text x="0" y="44" font-family="'Montserrat', sans-serif" font-size="18" font-weight="900" fill="#ffffff" letter-spacing="0.5">É DE</text>
-            <text x="0" y="66" font-family="'Montserrat', sans-serif" font-size="18" font-weight="900" fill="#ffffff" letter-spacing="0.5">PERNAMBUCO</text>
-            <!-- Faixa estilizada PE -->
-            <rect x="0" y="76" width="130" height="4" fill="#e63946"/>
-            <rect x="0" y="80" width="130" height="4" fill="#ffd000"/>
-            <rect x="0" y="84" width="130" height="4" fill="#008000"/>
-          </g>
-
-          <!-- Mini Arco-Íris PE Canto Superior Direito -->
-          <g transform="translate(930, 75)">
-            <path d="M 0 45 A 35 35 0 0 1 70 45" stroke="#e63946" stroke-width="4" fill="none"/>
-            <path d="M 5 45 A 30 30 0 0 1 65 45" stroke="#ffd000" stroke-width="3" fill="none"/>
-            <circle cx="35" cy="26" r="8" fill="#ffd000"/>
-            <rect x="33" y="38" width="4" height="12" fill="#e63946"/>
-            <rect x="29" y="42" width="12" height="4" fill="#e63946"/>
-          </g>
-
-          <!-- Título da Carteira: CARTEIRA DO ATLETA -->
-          <g transform="translate(288, 192)">
-            <text x="0" y="30" font-family="'Montserrat', sans-serif" font-size="34" font-weight="900" fill="#ffffff" letter-spacing="1">CARTEIRA DO ATLETA</text>
-            <text x="0" y="52" font-family="'Montserrat', sans-serif" font-size="16" font-weight="800" fill="#38bdf8" letter-spacing="1.5">ATLETA OFICIAL</text>
-          </g>
-
-          <!-- Ícone do Foot Table (Mesa Curva e Jogador) -->
-          <g transform="translate(830, 168)">
-            <circle cx="48" cy="18" r="8" fill="#ffffff"/>
-            <path d="M 40 28 Q 50 24 64 36 L 56 46 L 44 38 Z" fill="#ffffff"/>
-            <path d="M 12 56 Q 50 44 88 56" stroke="#ffffff" stroke-width="5" stroke-linecap="round" fill="none"/>
-            <rect x="24" y="56" width="4" height="16" fill="#ffffff"/>
-            <rect x="72" y="56" width="4" height="16" fill="#ffffff"/>
-            <text x="50" y="86" font-family="'Montserrat', sans-serif" font-size="12" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="1.5">FOOT TABLE</text>
-          </g>
-
-          ${showLabels ? `
-          <!-- Rótulos Fixos da Carteira (Nome dos Campos) -->
-          <g id="svgFixedLabels" font-family="'Montserrat', sans-serif" font-size="11" font-weight="800" fill="#ffffff" letter-spacing="0.5">
-            <text x="62" y="488" font-size="10">Nº DO FEDERADO</text>
-            <text x="62" y="534" font-size="10">MUNICÍPIO</text>
-            <text x="62" y="584" font-size="10">VALIDADE</text>
-            <text x="175" y="585" fill="#38bdf8" font-size="11">___/___</text>
-
-            <text x="284" y="298">NOME DO ATLETA</text>
-            <text x="284" y="342">CPF</text>
-            <text x="284" y="384">DATA DE NASCIMENTO</text>
-            <text x="495" y="384" fill="#38bdf8">____/____/________</text>
-            <text x="284" y="428">TELEFONE / WHATSAPP</text>
-            <text x="284" y="470">CATEGORIA</text>
-            <text x="284" y="512">FILIAÇÃO</text>
-
-            <line x1="440" y1="578" x2="740" y2="578" stroke="#ffffff" stroke-width="1.5"/>
-            <text x="590" y="602" font-size="10" fill="#e2e8f0" text-anchor="middle">ASSINATURA DO PRESIDENTE</text>
-            <text x="590" y="616" font-size="10" fill="#38bdf8" text-anchor="middle">FPEFT</text>
-
-            <text x="900" y="584" font-size="9" fill="#94a3b8" text-anchor="middle">VERIFICAÇÃO DE AUTENTICIDADE</text>
-          </g>
-          ` : ''}
-
         </g>
       </svg>
       `;
@@ -2461,10 +2470,22 @@
 
     /* =========================================================
        RENDERIZAÇÃO DOS ELEMENTOS INTERATIVOS NO CANVAS CR80
+       Suporta MODO FIXO (Emissão Segura) e MODO DESIGN (Livre)
        ========================================================= */
     function renderInteractiveElements() {
       const interactiveLayer = document.getElementById('interactiveElementsLayer');
+      const canvasEl = document.getElementById('creditCardCanvas');
       if (!interactiveLayer) return;
+
+      if (canvasEl) {
+        if (studioState.isDesignLocked) {
+          canvasEl.classList.add('is-mode-fixed');
+          canvasEl.classList.remove('is-mode-design');
+        } else {
+          canvasEl.classList.add('is-mode-design');
+          canvasEl.classList.remove('is-mode-fixed');
+        }
+      }
 
       interactiveLayer.innerHTML = '';
 
@@ -2485,25 +2506,41 @@
           div.style.backgroundColor = item.backgroundColor || '#0c2340';
           div.style.border = `${item.borderWidth || 4}px solid ${item.borderColor || '#ffffff'}`;
           div.style.overflow = 'hidden';
+          div.style.boxShadow = '0 10px 25px rgba(0,0,0,0.55)';
 
           if (item.photoUrl) {
             div.innerHTML = `<img src="${item.photoUrl}" class="w-full h-full object-cover pointer-events-none select-none" />`;
           } else {
             div.innerHTML = `
               <div class="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-slate-900/80 pointer-events-none select-none">
-                <i class="fa-solid fa-user text-4xl mb-1 text-slate-400"></i>
+                <i class="fa-solid fa-user text-5xl mb-1 text-slate-400"></i>
                 <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Foto 3x4</span>
               </div>
             `;
           }
         } else if (item.type === 'qrcode') {
           div.style.backgroundColor = item.backgroundColor || '#ffffff';
-          div.style.overflow = 'hidden';
-          div.style.padding = '6px';
+          div.style.overflow = 'visible';
+          div.style.padding = '8px';
+          div.style.display = 'flex';
+          div.style.flexDirection = 'column';
+          div.style.alignItems = 'center';
+          div.style.justifyContent = 'center';
+          div.style.boxShadow = '0 8px 24px rgba(0,0,0,0.45)';
           div.innerHTML = `
-            <div class="w-full h-full flex flex-col items-center justify-center bg-white pointer-events-none">
-              <i class="fa-solid fa-qrcode text-slate-950 text-5xl"></i>
+            <div class="w-full h-full flex flex-col items-center justify-center bg-white pointer-events-none rounded-[8px] overflow-hidden">
+              <i class="fa-solid fa-qrcode text-slate-950 text-6xl"></i>
             </div>
+            ${item.labelTag ? `<span class="field-bottom-label select-none pointer-events-none">${escapeHtml(item.labelTag)}</span>` : ''}
+          `;
+        } else if (item.type === 'text-line') {
+          div.style.display = 'flex';
+          div.style.flexDirection = 'column';
+          div.style.alignItems = 'center';
+          div.style.justifyContent = 'center';
+          div.innerHTML = `
+            <div class="w-full h-[1.5px] bg-white/90 mb-1"></div>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-200 select-none pointer-events-none leading-tight font-fpeft">${escapeHtml(item.text || 'ASSINATURA DA DIRETORIA FPEFT')}</span>
           `;
         } else {
           if (item.backgroundColor) {
@@ -2516,9 +2553,10 @@
           div.style.display = 'flex';
           div.style.alignItems = 'center';
           div.style.whiteSpace = 'nowrap';
-          div.style.overflow = 'hidden';
+          div.style.overflow = 'visible';
           div.style.paddingLeft = `${item.paddingLeft || 0}px`;
           div.style.paddingRight = `${item.paddingRight || 0}px`;
+          div.style.boxShadow = '0 4px 14px rgba(0,0,0,0.35)';
 
           if (item.textAlign === 'center') {
             div.style.justifyContent = 'center';
@@ -2528,11 +2566,15 @@
             div.style.justifyContent = 'flex-start';
           }
 
-          div.innerHTML = `<span class="truncate pointer-events-none select-none">${escapeHtml(item.text || '')}</span>`;
+          const labelHtml = item.labelTag ? `<span class="field-top-label ${item.textAlign === 'center' ? 'label-center' : ''} select-none pointer-events-none">${escapeHtml(item.labelTag)}</span>` : '';
+          div.innerHTML = `
+            ${labelHtml}
+            <span class="truncate pointer-events-none select-none font-fpeft">${escapeHtml(item.text || '')}</span>
+          `;
         }
 
-        // 8 Alças de Redimensionamento quando selecionado
-        if (isSelected) {
+        // 8 Alças de Redimensionamento: APENAS no Modo Design Livre
+        if (isSelected && !studioState.isDesignLocked) {
           const handles = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
           handles.forEach(dir => {
             const h = document.createElement('div');
@@ -2549,9 +2591,10 @@
       });
 
       renderLayersSidebar();
-      if (!studioState.floatingPinned) {
+      if (!studioState.floatingPinned && !studioState.isDesignLocked) {
         updateFloatingPanelPosition();
       }
+      updateModeButtonsUI();
     }
 
     /* =========================================================
@@ -2576,6 +2619,15 @@
       if (!item) return;
 
       studioState.selectedId = id;
+
+      // NO MODO FIXO: apenas seleciona o elemento sem movimentação acidental
+      if (studioState.isDesignLocked) {
+        renderInteractiveElements();
+        syncFloatingPanel();
+        return;
+      }
+
+      // NO MODO DESIGN: inicia drag ou resize interativo
       startX = e.clientX;
       startY = e.clientY;
       startItem = { x: item.x, y: item.y, w: item.width, h: item.height };
@@ -2595,6 +2647,7 @@
     }
 
     function onGlobalPointerMove(e) {
+      if (studioState.isDesignLocked) return;
       if (!studioState.selectedId) return;
       const item = studioState.elements.find(i => i.id === studioState.selectedId);
       if (!item) return;
@@ -2641,16 +2694,21 @@
         item.height = Math.round(newH);
         updateItemStyle(item);
       }
+
+      syncFloatingPanelInputs();
     }
 
     function onGlobalPointerUp() {
+      if (isDragging || isResizing) {
+        try {
+          localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(studioState.elements));
+        } catch (e) {}
+      }
       isDragging = false;
       isResizing = false;
+      currentResizeDir = null;
       window.removeEventListener('pointermove', onGlobalPointerMove);
       window.removeEventListener('pointerup', onGlobalPointerUp);
-      if (!studioState.floatingPinned) {
-        updateFloatingPanelPosition();
-      }
     }
 
     function updateItemStyle(item) {
@@ -2665,7 +2723,60 @@
       const dirH = document.getElementById('inputDirectHeight');
       if (dirW) dirW.value = item.width;
       if (dirH) dirH.value = item.height;
-      updateFloatingPanelPosition();
+      if (!studioState.isDesignLocked) {
+        updateFloatingPanelPosition();
+      }
+    }
+
+    /* Alterna entre Modo Fixo (Bloqueado) e Modo Design (Livre) */
+    function toggleDesignLock(locked) {
+      studioState.isDesignLocked = locked;
+      try {
+        localStorage.setItem('fpeft_studio_design_locked', locked ? 'true' : 'false');
+      } catch (e) {}
+      updateModeButtonsUI();
+      renderInteractiveElements();
+      syncFloatingPanel();
+      showToast(locked ? '🔒 Modo Fixo ativado: layout travado para emissão rápida.' : '✏️ Modo Design ativado: você pode arrastar e redimensionar qualquer campo.');
+    }
+
+    function updateModeButtonsUI() {
+      const btnFixed = document.getElementById('btnModeFixed');
+      const btnDesign = document.getElementById('btnModeDesign');
+      const floatingPanel = document.getElementById('floatingControlPanel');
+
+      if (studioState.isDesignLocked) {
+        if (btnFixed) {
+          btnFixed.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-extrabold bg-emerald-600 text-white shadow transition cursor-pointer';
+        }
+        if (btnDesign) {
+          btnDesign.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition cursor-pointer';
+        }
+        if (floatingPanel) {
+          floatingPanel.style.display = 'none';
+        }
+      } else {
+        if (btnFixed) {
+          btnFixed.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition cursor-pointer';
+        }
+        if (btnDesign) {
+          btnDesign.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-extrabold bg-pe-gold text-pe-dark shadow transition cursor-pointer';
+        }
+        if (floatingPanel && studioState.selectedId) {
+          floatingPanel.style.display = 'flex';
+        }
+      }
+    }
+
+    /* Restaura o layout com as posições originais da Carteira Atleta.svg */
+    function restoreOfficialElementPositions() {
+      studioState.elements = JSON.parse(JSON.stringify(OFFICIAL_DEFAULT_ELEMENTS));
+      try {
+        localStorage.removeItem('fpeft_studio_custom_elements');
+      } catch (e) {}
+      renderInteractiveElements();
+      syncFloatingPanel();
+      showToast('✓ Layout oficial da carteira restaurado com sucesso!');
     }
 
     /* =========================================================
@@ -2818,24 +2929,14 @@
     }
 
     /* =========================================================
-       EXPORTAÇÃO 1: SVG PURO VETORIZADO (COREL / ILLUSTRATOR)
+       HELPER COMPARTILHADO: RENDERIZAÇÃO DOS DADOS NO SVG
        ========================================================= */
-    function exportPureSvg() {
-      showToast('Gerando SVG puro com curvas e dados vetorizados...');
-
-      const currentBgSvg = studioState.customSvgContent || getFpeftTemplateSvg(studioState.showBgLabels);
-      const parser = new DOMParser();
-      const svgDoc = parser.parseFromString(currentBgSvg, 'image/svg+xml');
-      const rootSvg = svgDoc.documentElement;
-
-      const overlayGroup = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
-      overlayGroup.setAttribute('id', 'FPEFT_Dados_Atleta');
-
-      studioState.elements.forEach(item => {
+    function appendAthleteElementsToSvg(svgDoc, overlayGroup, elementsList) {
+      elementsList.forEach(item => {
         if (item.type === 'photo') {
           const gPhoto = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
-          const clipId = `clip_foto_${Date.now()}`;
-          
+          const clipId = 'clip_foto_' + Math.random().toString(36).substr(2, 9);
+          const rootSvg = svgDoc.documentElement;
           const defs = rootSvg.querySelector('defs') || rootSvg.insertBefore(svgDoc.createElementNS('http://www.w3.org/2000/svg', 'defs'), rootSvg.firstChild);
           const clipPath = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
           clipPath.setAttribute('id', clipId);
@@ -2845,7 +2946,7 @@
           clipRect.setAttribute('y', item.y);
           clipRect.setAttribute('width', item.width);
           clipRect.setAttribute('height', item.height);
-          clipRect.setAttribute('rx', item.borderRadius || 0);
+          clipRect.setAttribute('rx', item.borderRadius || 20);
           clipPath.appendChild(clipRect);
           defs.appendChild(clipPath);
 
@@ -2865,8 +2966,8 @@
             rect.setAttribute('y', item.y);
             rect.setAttribute('width', item.width);
             rect.setAttribute('height', item.height);
-            rect.setAttribute('rx', item.borderRadius || 0);
-            rect.setAttribute('fill', '#0c2340');
+            rect.setAttribute('rx', item.borderRadius || 20);
+            rect.setAttribute('fill', '#09152e');
             gPhoto.appendChild(rect);
           }
 
@@ -2876,10 +2977,10 @@
             borderRect.setAttribute('y', item.y);
             borderRect.setAttribute('width', item.width);
             borderRect.setAttribute('height', item.height);
-            borderRect.setAttribute('rx', item.borderRadius || 0);
+            borderRect.setAttribute('rx', item.borderRadius || 20);
             borderRect.setAttribute('fill', 'none');
             borderRect.setAttribute('stroke', item.borderColor || '#ffffff');
-            borderRect.setAttribute('stroke-width', item.borderWidth);
+            borderRect.setAttribute('stroke-width', item.borderWidth || 4);
             gPhoto.appendChild(borderRect);
           }
 
@@ -2891,12 +2992,15 @@
           bg.setAttribute('y', item.y);
           bg.setAttribute('width', item.width);
           bg.setAttribute('height', item.height);
-          bg.setAttribute('rx', item.borderRadius || 6);
+          bg.setAttribute('rx', item.borderRadius || 14);
           bg.setAttribute('fill', '#ffffff');
           gQr.appendChild(bg);
 
           const qrInner = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
-          qrInner.setAttribute('transform', `translate(${item.x + 8}, ${item.y + 8}) scale(${(item.width - 16) / 100})`);
+          const scaleFactor = Math.min((item.width - 24) / 100, (item.height - 24) / 100);
+          const offsetX = item.x + (item.width - 100 * scaleFactor) / 2;
+          const offsetY = item.y + (item.height - 100 * scaleFactor) / 2;
+          qrInner.setAttribute('transform', `translate(${offsetX}, ${offsetY}) scale(${scaleFactor})`);
           qrInner.setAttribute('fill', '#000000');
           qrInner.innerHTML = `
             <rect x="5" y="5" width="28" height="28" rx="2" fill="none" stroke="#000" stroke-width="7"/>
@@ -2914,24 +3018,85 @@
             <rect x="75" y="80" width="15" height="15"/>
           `;
           gQr.appendChild(qrInner);
+
+          if (item.labelTag) {
+            const lbl = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'text');
+            lbl.setAttribute('x', item.x + item.width / 2);
+            lbl.setAttribute('y', item.y + item.height + 13);
+            lbl.setAttribute('fill', '#94a3b8');
+            lbl.setAttribute('font-family', "'Montserrat', sans-serif");
+            lbl.setAttribute('font-size', '8.5');
+            lbl.setAttribute('font-weight', '800');
+            lbl.setAttribute('letter-spacing', '0.5');
+            lbl.setAttribute('text-anchor', 'middle');
+            lbl.textContent = item.labelTag;
+            gQr.appendChild(lbl);
+          }
+
           overlayGroup.appendChild(gQr);
+        } else if (item.type === 'text-line') {
+          const gLine = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+          const line = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', item.x);
+          line.setAttribute('y1', item.y);
+          line.setAttribute('x2', item.x + item.width);
+          line.setAttribute('y2', item.y);
+          line.setAttribute('stroke', '#ffffff');
+          line.setAttribute('stroke-width', '1.5');
+          gLine.appendChild(line);
+
+          const signText = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'text');
+          signText.setAttribute('x', item.x + item.width / 2);
+          signText.setAttribute('y', item.y + 16);
+          signText.setAttribute('fill', '#e2e8f0');
+          signText.setAttribute('font-family', "'Montserrat', sans-serif");
+          signText.setAttribute('font-size', '10.5');
+          signText.setAttribute('font-weight', '800');
+          signText.setAttribute('text-anchor', 'middle');
+          signText.setAttribute('letter-spacing', '0.5');
+          signText.textContent = item.text || 'ASSINATURA DA DIRETORIA FPEFT';
+          gLine.appendChild(signText);
+
+          overlayGroup.appendChild(gLine);
         } else {
           const gBox = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+          if (item.labelTag) {
+            const lbl = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'text');
+            let lx = item.x + 8;
+            let ly = item.y - 4;
+            if (item.textAlign === 'center') {
+              lx = item.x + item.width / 2;
+              lbl.setAttribute('text-anchor', 'middle');
+            } else {
+              lbl.setAttribute('text-anchor', 'start');
+            }
+            lbl.setAttribute('x', lx);
+            lbl.setAttribute('y', ly);
+            lbl.setAttribute('fill', '#ffffff');
+            lbl.setAttribute('font-family', "'Montserrat', sans-serif");
+            lbl.setAttribute('font-size', '9.5');
+            lbl.setAttribute('font-weight', '800');
+            lbl.setAttribute('letter-spacing', '0.5');
+            lbl.textContent = item.labelTag;
+            gBox.appendChild(lbl);
+          }
+
           if (item.backgroundColor) {
             const rect = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
             rect.setAttribute('x', item.x);
             rect.setAttribute('y', item.y);
             rect.setAttribute('width', item.width);
             rect.setAttribute('height', item.height);
-            rect.setAttribute('rx', item.borderRadius || 0);
-            rect.setAttribute('fill', item.backgroundColor);
+            rect.setAttribute('rx', item.borderRadius || 17);
+            rect.setAttribute('fill', item.backgroundColor || '#ffffff');
             gBox.appendChild(rect);
           }
 
           if (item.text) {
             const textEl = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'text');
             textEl.setAttribute('fill', item.textColor || '#00204a');
-            textEl.setAttribute('font-family', "'Montserrat', 'Inter', sans-serif");
+            textEl.setAttribute('font-family', "'Montserrat', sans-serif");
             textEl.setAttribute('font-size', item.fontSize || 16);
             textEl.setAttribute('font-weight', item.fontWeight || '800');
             textEl.setAttribute('dominant-baseline', 'central');
@@ -2956,7 +3121,23 @@
           overlayGroup.appendChild(gBox);
         }
       });
+    }
 
+    /* =========================================================
+       EXPORTAÇÃO 1: SVG PURO VETORIZADO (COREL / ILLUSTRATOR)
+       ========================================================= */
+    function exportPureSvg() {
+      showToast('Gerando SVG puro com curvas e dados vetorizados...');
+
+      const currentBgSvg = studioState.customSvgContent || getFpeftTemplateSvg(studioState.showBgLabels);
+      const parser = new DOMParser();
+      const svgDoc = parser.parseFromString(currentBgSvg, 'image/svg+xml');
+      const rootSvg = svgDoc.documentElement;
+
+      const overlayGroup = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+      overlayGroup.setAttribute('id', 'FPEFT_Dados_Atleta');
+
+      appendAthleteElementsToSvg(svgDoc, overlayGroup, studioState.elements);
       rootSvg.appendChild(overlayGroup);
 
       const serializer = new XMLSerializer();
@@ -2990,145 +3171,16 @@
       const overlayGroup = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
       overlayGroup.setAttribute('id', 'FPEFT_Overlay');
 
-      const styleNode = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'style');
-      styleNode.textContent = `
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&display=swap');
-        text { font-family: 'Montserrat', sans-serif; }
-      `;
-      rootSvg.insertBefore(styleNode, rootSvg.firstChild);
-
-      studioState.elements.forEach(item => {
-        if (item.type === 'photo') {
-          const gPhoto = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
-          const clipId = `png_clip_${Math.random().toString(36).substr(2, 9)}`;
-          const defs = rootSvg.querySelector('defs') || rootSvg.insertBefore(svgDoc.createElementNS('http://www.w3.org/2000/svg', 'defs'), rootSvg.firstChild);
-          const clipPath = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
-          clipPath.setAttribute('id', clipId);
-
-          const clipRect = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
-          clipRect.setAttribute('x', item.x);
-          clipRect.setAttribute('y', item.y);
-          clipRect.setAttribute('width', item.width);
-          clipRect.setAttribute('height', item.height);
-          clipRect.setAttribute('rx', item.borderRadius || 0);
-          clipPath.appendChild(clipRect);
-          defs.appendChild(clipPath);
-
-          if (item.photoUrl) {
-            const img = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'image');
-            img.setAttribute('href', item.photoUrl);
-            img.setAttribute('x', item.x);
-            img.setAttribute('y', item.y);
-            img.setAttribute('width', item.width);
-            img.setAttribute('height', item.height);
-            img.setAttribute('preserveAspectRatio', 'xMidYMid slice');
-            img.setAttribute('clip-path', `url(#${clipId})`);
-            gPhoto.appendChild(img);
-          } else {
-            const rect = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
-            rect.setAttribute('x', item.x);
-            rect.setAttribute('y', item.y);
-            rect.setAttribute('width', item.width);
-            rect.setAttribute('height', item.height);
-            rect.setAttribute('rx', item.borderRadius || 0);
-            rect.setAttribute('fill', '#0c2340');
-            gPhoto.appendChild(rect);
-          }
-
-          if (item.borderWidth > 0) {
-            const borderRect = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
-            borderRect.setAttribute('x', item.x);
-            borderRect.setAttribute('y', item.y);
-            borderRect.setAttribute('width', item.width);
-            borderRect.setAttribute('height', item.height);
-            borderRect.setAttribute('rx', item.borderRadius || 0);
-            borderRect.setAttribute('fill', 'none');
-            borderRect.setAttribute('stroke', item.borderColor || '#ffffff');
-            borderRect.setAttribute('stroke-width', item.borderWidth);
-            gPhoto.appendChild(borderRect);
-          }
-
-          overlayGroup.appendChild(gPhoto);
-        } else if (item.type === 'qrcode') {
-          const gQr = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
-          const bg = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
-          bg.setAttribute('x', item.x);
-          bg.setAttribute('y', item.y);
-          bg.setAttribute('width', item.width);
-          bg.setAttribute('height', item.height);
-          bg.setAttribute('rx', item.borderRadius || 6);
-          bg.setAttribute('fill', '#ffffff');
-          gQr.appendChild(bg);
-
-          const qrInner = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
-          qrInner.setAttribute('transform', `translate(${item.x + 8}, ${item.y + 8}) scale(${(item.width - 16) / 100})`);
-          qrInner.setAttribute('fill', '#000000');
-          qrInner.innerHTML = `
-            <rect x="5" y="5" width="28" height="28" rx="2" fill="none" stroke="#000" stroke-width="7"/>
-            <rect x="13" y="13" width="12" height="12"/>
-            <rect x="67" y="5" width="28" height="28" rx="2" fill="none" stroke="#000" stroke-width="7"/>
-            <rect x="75" y="13" width="12" height="12"/>
-            <rect x="5" y="67" width="28" height="28" rx="2" fill="none" stroke="#000" stroke-width="7"/>
-            <rect x="13" y="75" width="12" height="12"/>
-            <rect x="42" y="10" width="8" height="18"/>
-            <rect x="55" y="15" width="6" height="6"/>
-            <rect x="42" y="38" width="16" height="8"/>
-            <rect x="65" y="42" width="12" height="12"/>
-            <rect x="45" y="55" width="10" height="24"/>
-            <rect x="65" y="65" width="20" height="8"/>
-            <rect x="75" y="80" width="15" height="15"/>
-          `;
-          gQr.appendChild(qrInner);
-          overlayGroup.appendChild(gQr);
-        } else {
-          const gBox = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
-          if (item.backgroundColor) {
-            const rect = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
-            rect.setAttribute('x', item.x);
-            rect.setAttribute('y', item.y);
-            rect.setAttribute('width', item.width);
-            rect.setAttribute('height', item.height);
-            rect.setAttribute('rx', item.borderRadius || 0);
-            rect.setAttribute('fill', item.backgroundColor);
-            gBox.appendChild(rect);
-          }
-
-          if (item.text) {
-            const textEl = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'text');
-            textEl.setAttribute('fill', item.textColor || '#00204a');
-            textEl.setAttribute('font-family', "'Montserrat', 'Inter', sans-serif");
-            textEl.setAttribute('font-size', item.fontSize || 16);
-            textEl.setAttribute('font-weight', item.fontWeight || '800');
-            textEl.setAttribute('dominant-baseline', 'central');
-
-            let tx = item.x + (item.paddingLeft || 16);
-            if (item.textAlign === 'center') {
-              tx = item.x + item.width / 2;
-              textEl.setAttribute('text-anchor', 'middle');
-            } else if (item.textAlign === 'right') {
-              tx = item.x + item.width - (item.paddingRight || 16);
-              textEl.setAttribute('text-anchor', 'end');
-            } else {
-              textEl.setAttribute('text-anchor', 'start');
-            }
-
-            textEl.setAttribute('x', tx);
-            textEl.setAttribute('y', item.y + item.height / 2);
-            textEl.textContent = item.text;
-            gBox.appendChild(textEl);
-          }
-          overlayGroup.appendChild(gBox);
-        }
-      });
-
+      appendAthleteElementsToSvg(svgDoc, overlayGroup, studioState.elements);
       rootSvg.appendChild(overlayGroup);
 
       const serializer = new XMLSerializer();
-      const svgString = serializer.serializeToString(svgDoc);
-      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-      const blobUrl = URL.createObjectURL(svgBlob);
+      const finalSvgString = serializer.serializeToString(svgDoc);
 
       const img = new Image();
+      const svgBlob = new Blob([finalSvgString], { type: 'image/svg+xml;charset=utf-8' });
+      const blobUrl = URL.createObjectURL(svgBlob);
+
       img.onload = () => {
         const hdCanvas = document.getElementById('hdRenderCanvas');
         const scale = 3; // 3x = ~3150 x 1986 px (Offset 300 DPI)
@@ -3150,7 +3202,8 @@
         downloadLink.click();
         document.body.removeChild(downloadLink);
         URL.revokeObjectURL(blobUrl);
-        showToast('PNG HD 300 DPI exportado com sucesso!');
+
+        showToast('PNG HD (300 DPI) gerado com sucesso!');
       };
       img.src = blobUrl;
     }
@@ -4240,7 +4293,7 @@
       const overlayGroup = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
       overlayGroup.setAttribute('id', 'FPEFT_Dados_Atleta');
 
-      studioState.elements.forEach(baseItem => {
+      const athleteElements = studioState.elements.map(baseItem => {
         const item = { ...baseItem };
         if (item.type === 'photo') {
           item.photoUrl = athlete.foto || athlete.foto_url || '';
@@ -4259,135 +4312,18 @@
         } else if (item.targetKey === 'federado') {
           item.text = athlete.federado || `PE-2026/${String(athlete.codigo).slice(-3)}`;
         } else if (item.targetKey === 'municipio') {
-          item.text = (athlete.municipio || 'RECIFE - PE').toUpperCase();
+          item.text = (athlete.municipio || athlete.cidade || 'RECIFE - PE').toUpperCase();
         } else if (item.targetKey === 'validade') {
           item.text = athlete.validade || '12/2026';
         }
-
-        if (item.type === 'photo') {
-          const gPhoto = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
-          const clipId = `clip_foto_batch_${Date.now()}_${Math.floor(Math.random()*1000)}`;
-          const defs = rootSvg.querySelector('defs') || rootSvg.insertBefore(svgDoc.createElementNS('http://www.w3.org/2000/svg', 'defs'), rootSvg.firstChild);
-          const clipPath = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
-          clipPath.setAttribute('id', clipId);
-
-          const clipRect = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
-          clipRect.setAttribute('x', item.x);
-          clipRect.setAttribute('y', item.y);
-          clipRect.setAttribute('width', item.width);
-          clipRect.setAttribute('height', item.height);
-          clipRect.setAttribute('rx', item.borderRadius || 0);
-          clipPath.appendChild(clipRect);
-          defs.appendChild(clipPath);
-
-          if (item.photoUrl) {
-            const img = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'image');
-            img.setAttribute('href', item.photoUrl);
-            img.setAttribute('x', item.x);
-            img.setAttribute('y', item.y);
-            img.setAttribute('width', item.width);
-            img.setAttribute('height', item.height);
-            img.setAttribute('preserveAspectRatio', 'xMidYMid slice');
-            img.setAttribute('clip-path', `url(#${clipId})`);
-            gPhoto.appendChild(img);
-          } else {
-            const rect = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
-            rect.setAttribute('x', item.x);
-            rect.setAttribute('y', item.y);
-            rect.setAttribute('width', item.width);
-            rect.setAttribute('height', item.height);
-            rect.setAttribute('rx', item.borderRadius || 0);
-            rect.setAttribute('fill', '#0c2340');
-            gPhoto.appendChild(rect);
-          }
-
-          if (item.borderWidth > 0) {
-            const borderRect = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
-            borderRect.setAttribute('x', item.x);
-            borderRect.setAttribute('y', item.y);
-            borderRect.setAttribute('width', item.width);
-            borderRect.setAttribute('height', item.height);
-            borderRect.setAttribute('rx', item.borderRadius || 0);
-            borderRect.setAttribute('fill', 'none');
-            borderRect.setAttribute('stroke', item.borderColor || '#ffffff');
-            borderRect.setAttribute('stroke-width', item.borderWidth);
-            gPhoto.appendChild(borderRect);
-          }
-          overlayGroup.appendChild(gPhoto);
-        } else if (item.type === 'qrcode') {
-          const gQr = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
-          const bg = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
-          bg.setAttribute('x', item.x);
-          bg.setAttribute('y', item.y);
-          bg.setAttribute('width', item.width);
-          bg.setAttribute('height', item.height);
-          bg.setAttribute('rx', item.borderRadius || 6);
-          bg.setAttribute('fill', '#ffffff');
-          gQr.appendChild(bg);
-
-          const qrInner = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
-          qrInner.setAttribute('transform', `translate(${item.x + 8}, ${item.y + 8}) scale(${(item.width - 16) / 100})`);
-          qrInner.setAttribute('fill', '#000000');
-          qrInner.innerHTML = `
-            <rect x="5" y="5" width="28" height="28" rx="2" fill="none" stroke="#000" stroke-width="7"/>
-            <rect x="13" y="13" width="12" height="12"/>
-            <rect x="67" y="5" width="28" height="28" rx="2" fill="none" stroke="#000" stroke-width="7"/>
-            <rect x="75" y="13" width="12" height="12"/>
-            <rect x="5" y="67" width="28" height="28" rx="2" fill="none" stroke="#000" stroke-width="7"/>
-            <rect x="13" y="75" width="12" height="12"/>
-            <rect x="42" y="10" width="8" height="18"/>
-            <rect x="55" y="15" width="6" height="6"/>
-            <rect x="42" y="38" width="16" height="8"/>
-            <rect x="65" y="42" width="12" height="12"/>
-            <rect x="45" y="55" width="10" height="24"/>
-            <rect x="65" y="65" width="20" height="8"/>
-            <rect x="75" y="80" width="15" height="15"/>
-          `;
-          gQr.appendChild(qrInner);
-          overlayGroup.appendChild(gQr);
-        } else {
-          const gBox = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
-          if (item.backgroundColor) {
-            const rect = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
-            rect.setAttribute('x', item.x);
-            rect.setAttribute('y', item.y);
-            rect.setAttribute('width', item.width);
-            rect.setAttribute('height', item.height);
-            rect.setAttribute('rx', item.borderRadius || 0);
-            rect.setAttribute('fill', item.backgroundColor);
-            gBox.appendChild(rect);
-          }
-
-          if (item.text) {
-            const textEl = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'text');
-            textEl.setAttribute('fill', item.textColor || '#00204a');
-            textEl.setAttribute('font-family', "'Montserrat', 'Inter', sans-serif");
-            textEl.setAttribute('font-size', item.fontSize || 16);
-            textEl.setAttribute('font-weight', item.fontWeight || '800');
-            textEl.setAttribute('dominant-baseline', 'central');
-
-            let tx = item.x + (item.paddingLeft || 16);
-            if (item.textAlign === 'center') {
-              tx = item.x + item.width / 2;
-              textEl.setAttribute('text-anchor', 'middle');
-            } else if (item.textAlign === 'right') {
-              tx = item.x + item.width - (item.paddingRight || 16);
-              textEl.setAttribute('text-anchor', 'end');
-            } else {
-              textEl.setAttribute('text-anchor', 'start');
-            }
-
-            textEl.setAttribute('x', tx);
-            textEl.setAttribute('y', item.y + item.height / 2);
-            textEl.textContent = item.text;
-            gBox.appendChild(textEl);
-          }
-          overlayGroup.appendChild(gBox);
-        }
+        return item;
       });
 
+      appendAthleteElementsToSvg(svgDoc, overlayGroup, athleteElements);
       rootSvg.appendChild(overlayGroup);
-      return new XMLSerializer().serializeToString(svgDoc);
+
+      const serializer = new XMLSerializer();
+      return serializer.serializeToString(svgDoc);
     }
 
     function renderSvgToBlob(svgString) {
