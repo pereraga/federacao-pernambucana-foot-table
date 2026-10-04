@@ -687,35 +687,25 @@
                     <div>
                       <div class="flex items-center justify-between mb-1">
                         <label class="block text-slate-300 font-bold">Modalidade</label>
-                        <span class="text-[10px] text-pe-gold font-bold uppercase">2 Opções</span>
                       </div>
-                      <select id="athleteModality" onchange="onModalitySelectChange(this.value)" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 uppercase text-white font-bold outline-none font-fpeft cursor-pointer">
-                        <option value="SOLO (INDIVIDUAL)" selected>SOLO (INDIVIDUAL)</option>
-                        <option value="DUPLA">DUPLA</option>
-                      </select>
-                      <!-- Pílulas de Seleção Rápida de Modalidade -->
-                      <div class="grid grid-cols-2 gap-1 mt-1.5" id="modalityPillsContainer">
-                        <button type="button" onclick="selectModalityBase('SOLO (INDIVIDUAL)')" data-mod="SOLO (INDIVIDUAL)" class="mod-pill-btn text-[9px] py-1 px-1 rounded-lg font-extrabold text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow">Solo Individual</button>
-                        <button type="button" onclick="selectModalityBase('DUPLA')" data-mod="DUPLA" class="mod-pill-btn text-[9px] py-1 px-1 rounded-lg font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white">Dupla</button>
+                      <input type="hidden" id="athleteModality" value="SOLO (INDIVIDUAL)" />
+                      <!-- Botões de Seleção Direta de Modalidade -->
+                      <div class="grid grid-cols-2 gap-1.5" id="modalityPillsContainer">
+                        <button type="button" onclick="selectModalityBase('SOLO (INDIVIDUAL)')" data-mod="SOLO (INDIVIDUAL)" class="mod-pill-btn flex items-center justify-center text-xs py-2 px-1.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none">Solo Individual</button>
+                        <button type="button" onclick="selectModalityBase('DUPLA')" data-mod="DUPLA" class="mod-pill-btn flex items-center justify-center text-xs py-2 px-1.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none">Dupla</button>
                       </div>
                     </div>
                     <div>
                       <div class="flex items-center justify-between mb-1">
                         <label class="block text-slate-300 font-bold">Categoria</label>
-                        <span class="text-[10px] text-pe-gold font-bold uppercase">4 Bases</span>
                       </div>
-                      <select id="athleteCategory" onchange="onCategorySelectChange(this.value)" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 uppercase text-white font-bold outline-none font-fpeft cursor-pointer">
-                        <option value="ASPIRANTE" selected>ASPIRANTE</option>
-                        <option value="INICIANTE">INICIANTE</option>
-                        <option value="AMADOR">AMADOR</option>
-                        <option value="PROFISSIONAL">PROFISSIONAL</option>
-                      </select>
-                      <!-- Pílulas de Seleção Rápida das 4 Bases -->
-                      <div class="grid grid-cols-4 gap-1 mt-1.5" id="categoryPillsContainer">
-                        <button type="button" onclick="selectCategoryBase('ASPIRANTE')" data-cat="ASPIRANTE" class="cat-pill-btn text-[9px] py-1 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow">Aspirante</button>
-                        <button type="button" onclick="selectCategoryBase('INICIANTE')" data-cat="INICIANTE" class="cat-pill-btn text-[9px] py-1 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white">Iniciante</button>
-                        <button type="button" onclick="selectCategoryBase('AMADOR')" data-cat="AMADOR" class="cat-pill-btn text-[9px] py-1 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white">Amador</button>
-                        <button type="button" onclick="selectCategoryBase('PROFISSIONAL')" data-cat="PROFISSIONAL" class="cat-pill-btn text-[9px] py-1 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white">Profissional</button>
+                      <input type="hidden" id="athleteCategory" value="ASPIRANTE" />
+                      <!-- Botões de Seleção Direta das 4 Bases -->
+                      <div class="grid grid-cols-4 gap-1" id="categoryPillsContainer">
+                        <button type="button" onclick="selectCategoryBase('ASPIRANTE')" data-cat="ASPIRANTE" class="cat-pill-btn flex items-center justify-center text-[10px] py-2 px-0.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none">Aspirante</button>
+                        <button type="button" onclick="selectCategoryBase('INICIANTE')" data-cat="INICIANTE" class="cat-pill-btn flex items-center justify-center text-[10px] py-2 px-0.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none">Iniciante</button>
+                        <button type="button" onclick="selectCategoryBase('AMADOR')" data-cat="AMADOR" class="cat-pill-btn flex items-center justify-center text-[10px] py-2 px-0.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none">Amador</button>
+                        <button type="button" onclick="selectCategoryBase('PROFISSIONAL')" data-cat="PROFISSIONAL" class="cat-pill-btn flex items-center justify-center text-[10px] py-2 px-0.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none">Profissional</button>
                       </div>
                     </div>
                   </div>
@@ -3542,12 +3532,14 @@
       const sel = document.getElementById('athleteCategory');
       if (!sel) return;
       const upper = (cat || 'ASPIRANTE').toUpperCase().trim();
-      let found = Array.from(sel.options).some(o => o.value === upper);
-      if (!found && upper) {
-        const opt = document.createElement('option');
-        opt.value = upper;
-        opt.textContent = upper;
-        sel.appendChild(opt);
+      if (sel.tagName === 'SELECT') {
+        let found = Array.from(sel.options).some(o => o.value === upper);
+        if (!found && upper) {
+          const opt = document.createElement('option');
+          opt.value = upper;
+          opt.textContent = upper;
+          sel.appendChild(opt);
+        }
       }
       sel.value = upper;
       updateCategoryPillsUI(upper);
@@ -3558,9 +3550,9 @@
       document.querySelectorAll('.cat-pill-btn').forEach(btn => {
         const catAttr = (btn.getAttribute('data-cat') || btn.textContent).trim().toUpperCase();
         if (catAttr === upper) {
-          btn.className = "cat-pill-btn text-[9px] py-1 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow";
+          btn.className = "cat-pill-btn flex items-center justify-center text-[10px] py-2 px-0.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none";
         } else {
-          btn.className = "cat-pill-btn text-[9px] py-1 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white";
+          btn.className = "cat-pill-btn flex items-center justify-center text-[10px] py-2 px-0.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none";
         }
       });
     }
@@ -3597,12 +3589,14 @@
       } else {
         matchedVal = 'SOLO (INDIVIDUAL)';
       }
-      let found = Array.from(sel.options).some(o => o.value === matchedVal);
-      if (!found) {
-        const opt = document.createElement('option');
-        opt.value = matchedVal;
-        opt.textContent = matchedVal;
-        sel.appendChild(opt);
+      if (sel.tagName === 'SELECT') {
+        let found = Array.from(sel.options).some(o => o.value === matchedVal);
+        if (!found) {
+          const opt = document.createElement('option');
+          opt.value = matchedVal;
+          opt.textContent = matchedVal;
+          sel.appendChild(opt);
+        }
       }
       sel.value = matchedVal;
       updateModalityPillsUI(matchedVal);
@@ -3616,9 +3610,9 @@
         const btnIsDupla = modAttr.includes('DUPLA') || modAttr.includes('EQUIPE');
         const isActive = isDupla ? btnIsDupla : !btnIsDupla;
         if (isActive) {
-          btn.className = "mod-pill-btn text-[9px] py-1 px-1 rounded-lg font-extrabold text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow";
+          btn.className = "mod-pill-btn flex items-center justify-center text-xs py-2 px-1.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none";
         } else {
-          btn.className = "mod-pill-btn text-[9px] py-1 px-1 rounded-lg font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white";
+          btn.className = "mod-pill-btn flex items-center justify-center text-xs py-2 px-1.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none";
         }
       });
     }
