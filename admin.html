@@ -667,15 +667,15 @@
                     <input type="text" id="athletePhone" value="(81) 98765-4321" placeholder="(81) 90000-0000" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-slate-200 font-mono outline-none" />
                   </div>
 
-                  <!-- Categoria & Modalidade -->
+                  <!-- Modalidade & Categoria -->
                   <div class="grid grid-cols-2 gap-3">
                     <div>
-                      <label class="block text-slate-300 font-bold mb-1">Categoria</label>
-                      <input type="text" id="athleteModality" value="MASTER / PRINCIPAL" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 uppercase text-white font-bold outline-none font-fpeft" />
+                      <label class="block text-slate-300 font-bold mb-1">Modalidade</label>
+                      <input type="text" id="athleteModality" value="SOLO (INDIVIDUAL)" placeholder="SOLO / DUPLA / FOOT-TABLE" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 uppercase text-white font-bold outline-none font-fpeft" />
                     </div>
                     <div>
-                      <label class="block text-slate-300 font-bold mb-1">Modalidade</label>
-                      <input type="text" id="athleteClub" value="SOLO (INDIVIDUAL)" placeholder="SOLO / DUPLA / FOOT-TABLE" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 uppercase text-white font-bold outline-none font-fpeft" />
+                      <label class="block text-slate-300 font-bold mb-1">Categoria</label>
+                      <input type="text" id="athleteCategory" value="MASTER / PRINCIPAL" placeholder="MASTER / PRINCIPAL" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 uppercase text-white font-bold outline-none font-fpeft" />
                     </div>
                   </div>
 
@@ -1807,6 +1807,7 @@
         cpf: "123.456.789-00",
         nascimento: "14/05/1998",
         municipio: "Recife - PE",
+        categoria: "MASTER / PRINCIPAL",
         modalidade: "SOLO (INDIVIDUAL)",
         status: "REGULAR",
         foto: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80"
@@ -1818,6 +1819,7 @@
         cpf: "987.654.321-11",
         nascimento: "22/11/2001",
         municipio: "Olinda - PE",
+        categoria: "PRINCIPAL / FEMININO",
         modalidade: "DUPLA (EQUIPE)",
         status: "REGULAR",
         foto: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80"
@@ -1829,6 +1831,7 @@
         cpf: "456.789.123-22",
         nascimento: "08/03/1995",
         municipio: "Caruaru - PE",
+        categoria: "MASTER",
         modalidade: "SOLO & DUPLA",
         status: "HOMOLOGADO",
         foto: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80"
@@ -1840,6 +1843,7 @@
         cpf: "654.321.987-33",
         nascimento: "19/07/2000",
         municipio: "Jaboatão dos Guararapes - PE",
+        categoria: "PRINCIPAL / FEMININO",
         modalidade: "SOLO (INDIVIDUAL)",
         status: "REGULAR",
         foto: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80"
@@ -1851,6 +1855,7 @@
         cpf: "321.654.987-44",
         nascimento: "30/10/1997",
         municipio: "Petrolina - PE",
+        categoria: "PRINCIPAL",
         modalidade: "DUPLA (EQUIPE)",
         status: "REGULAR",
         foto: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80"
@@ -1862,6 +1867,7 @@
         cpf: "789.123.456-55",
         nascimento: "12/01/1982",
         municipio: "Cabo de Santo Agostinho - PE",
+        categoria: "MASTER 40+",
         modalidade: "MASTER 40+",
         status: "HOMOLOGADO",
         foto: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=300&q=80"
@@ -1873,6 +1879,7 @@
         cpf: "159.357.486-66",
         nascimento: "05/09/2002",
         municipio: "Paulista - PE",
+        categoria: "PRINCIPAL / FEMININO",
         modalidade: "SOLO (INDIVIDUAL)",
         status: "REGULAR",
         foto: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80"
@@ -1884,6 +1891,7 @@
         cpf: "753.951.852-77",
         nascimento: "17/04/1996",
         municipio: "Garanhuns - PE",
+        categoria: "MASTER / PRINCIPAL",
         modalidade: "DUPLA (EQUIPE)",
         status: "REGULAR",
         foto: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=300&q=80"
@@ -2137,11 +2145,11 @@
         locked: false
       },
       {
-        id: 'field-filiacao',
+        id: 'field-modalidade',
         label: 'Modalidade',
         labelTag: 'MODALIDADE',
         type: 'text-box',
-        targetKey: 'filiacao',
+        targetKey: 'modalidade',
         text: 'SOLO (INDIVIDUAL)',
         x: 268,
         y: 545,
@@ -2299,10 +2307,18 @@
         const parsed = JSON.parse(savedCustomElements);
         if (Array.isArray(parsed) && parsed.length > 0) {
           parsed.forEach(el => {
-            if (el.id === 'field-filiacao') {
+            if (el.id === 'field-filiacao' || el.id === 'field-modalidade') {
+              el.id = 'field-modalidade';
               el.label = 'Modalidade';
               el.labelTag = 'MODALIDADE';
-              if (el.text === 'SPORT CLUB DO RECIFE') el.text = 'SOLO (INDIVIDUAL)';
+              el.targetKey = 'modalidade';
+              if (!el.text || el.text === 'SPORT CLUB DO RECIFE') el.text = 'SOLO (INDIVIDUAL)';
+            }
+            if (el.id === 'field-categoria') {
+              el.label = 'Categoria';
+              el.labelTag = 'CATEGORIA';
+              el.targetKey = 'categoria';
+              if (el.text === 'SOLO (INDIVIDUAL)') el.text = 'MASTER / PRINCIPAL';
             }
           });
           studioState.elements = parsed;
@@ -3227,7 +3243,7 @@
         el.addEventListener('input', (e) => {
           let val = e.target.value;
           if (uppercase) val = val.toUpperCase();
-          const target = studioState.elements.find(item => item.targetKey === targetKey);
+          const target = studioState.elements.find(item => item.targetKey === targetKey || (targetKey === 'modalidade' && item.targetKey === 'filiacao'));
           if (target) {
             target.text = val;
             renderInteractiveElements();
@@ -3236,8 +3252,9 @@
       };
 
       bindSync('athleteName', 'nome', true);
-      bindSync('athleteModality', 'categoria', true);
-      bindSync('athleteClub', 'filiacao', true);
+      bindSync('athleteModality', 'modalidade', true);
+      bindSync('athleteCategory', 'categoria', true);
+      bindSync('athleteClub', 'modalidade', true);
       bindSync('athleteFederatedNum', 'federado', true);
       bindSync('athleteCity', 'municipio', true);
       bindSync('athleteValidity', 'validade', false);
@@ -3785,9 +3802,9 @@
       const birth = (document.getElementById('athleteBirth').value || '').trim();
       const phone = (document.getElementById('athletePhone').value || '').trim();
       const city = (document.getElementById('athleteCity').value || '').trim();
-      const category = (document.getElementById('athleteModality').value || 'MASTER / PRINCIPAL').trim();
+      const category = (document.getElementById('athleteCategory') ? document.getElementById('athleteCategory').value : 'MASTER / PRINCIPAL').trim() || 'MASTER / PRINCIPAL';
       const status = document.getElementById('athleteStatus').value;
-      const modality = (document.getElementById('athleteClub').value || 'SOLO (INDIVIDUAL)').trim();
+      const modality = (document.getElementById('athleteModality') ? document.getElementById('athleteModality').value : (document.getElementById('athleteClub') ? document.getElementById('athleteClub').value : 'SOLO (INDIVIDUAL)')).trim() || 'SOLO (INDIVIDUAL)';
       const fedNum = (document.getElementById('athleteFederatedNum').value || '').trim();
       const validity = (document.getElementById('athleteValidity').value || '').trim();
 
@@ -4275,9 +4292,13 @@
       document.getElementById('athleteBirth').value = a.nascimento || '';
       document.getElementById('athletePhone').value = a.telefone || '(81) 98765-4321';
       document.getElementById('athleteCity').value = a.municipio || 'RECIFE - PE';
-      document.getElementById('athleteModality').value = a.categoria || 'MASTER / PRINCIPAL';
+      const modInp = document.getElementById('athleteModality');
+      if (modInp) modInp.value = a.modalidade || a.clube || 'SOLO (INDIVIDUAL)';
+      const catInp = document.getElementById('athleteCategory');
+      if (catInp) catInp.value = a.categoria || 'MASTER / PRINCIPAL';
+      const clubInp = document.getElementById('athleteClub');
+      if (clubInp) clubInp.value = a.modalidade || a.clube || 'SOLO (INDIVIDUAL)';
       document.getElementById('athleteStatus').value = a.status || 'HOMOLOGADO';
-      document.getElementById('athleteClub').value = a.modalidade || a.clube || 'SOLO (INDIVIDUAL)';
       document.getElementById('athleteFederatedNum').value = a.federado || `PE-2026/${String(a.codigo).slice(-3)}`;
       document.getElementById('athleteValidity').value = a.validade || '12/2026';
 
@@ -4292,6 +4313,7 @@
       setElText('nasc', a.nascimento || '18/05/1996');
       setElText('fone', a.telefone || '(81) 98765-4321');
       setElText('categoria', (a.categoria || 'MASTER / PRINCIPAL').toUpperCase());
+      setElText('modalidade', (a.modalidade || a.clube || 'SOLO (INDIVIDUAL)').toUpperCase());
       setElText('filiacao', (a.modalidade || a.clube || 'SOLO (INDIVIDUAL)').toUpperCase());
       setElText('federado', a.federado || `PE-2026/${String(a.codigo).slice(-3)}`);
       setElText('municipio', (a.municipio || 'RECIFE - PE').toUpperCase());
@@ -4313,6 +4335,10 @@
     function clearAthleteForm() {
       document.getElementById('athleteForm').reset();
       generateRandomAthleteCode();
+      const modInp = document.getElementById('athleteModality');
+      if (modInp) modInp.value = 'SOLO (INDIVIDUAL)';
+      const catInp = document.getElementById('athleteCategory');
+      if (catInp) catInp.value = 'MASTER / PRINCIPAL';
       const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
       if (photoTarget) photoTarget.photoUrl = '';
       renderInteractiveElements();
@@ -4346,7 +4372,7 @@
               </span>
             </div>
             <h4 class="font-oswald text-sm uppercase font-bold text-white leading-tight truncate">${escapeHtml(a.nome)}</h4>
-            <p class="text-[10px] text-slate-400 truncate mt-0.5 font-semibold">${escapeHtml(a.clube || 'Federação Pernambucana')}</p>
+            <p class="text-[10px] text-pe-gold/90 truncate mt-0.5 font-bold uppercase">${escapeHtml(a.categoria || 'MASTER / PRINCIPAL')}</p>
             <span class="inline-block mt-1 text-[9px] font-mono text-sky-400 bg-sky-950/50 px-1.5 py-0.5 rounded border border-sky-800/40">${escapeHtml(a.federado || 'PE-2026/' + String(a.codigo).slice(-3))}</span>
           </div>
         </div>
@@ -4370,7 +4396,7 @@
           </div>
           <div class="bg-[#05080e] p-2 rounded-lg border border-[#1c253b]">
             <span class="text-[8px] text-slate-500 uppercase font-bold block">Modalidade</span>
-            <span class="text-pe-gold font-bold truncate block">${escapeHtml(a.modalidade || 'SOLO')}</span>
+            <span class="text-pe-gold font-bold truncate block">${escapeHtml(a.modalidade || a.clube || 'SOLO (INDIVIDUAL)')}</span>
           </div>
           <div class="bg-[#05080e] p-2 rounded-lg border border-[#1c253b]">
             <span class="text-[8px] text-slate-500 uppercase font-bold block">Validade Carteira</span>
@@ -4446,9 +4472,9 @@
         } else if (item.targetKey === 'fone') {
           item.text = athlete.telefone || '';
         } else if (item.targetKey === 'categoria') {
-          item.text = (athlete.modalidade || 'SOLO').toUpperCase();
-        } else if (item.targetKey === 'filiacao') {
-          item.text = (athlete.clube || 'FEDERAÇÃO PERNAMBUCANA').toUpperCase();
+          item.text = (athlete.categoria || 'MASTER / PRINCIPAL').toUpperCase();
+        } else if (item.targetKey === 'modalidade' || item.targetKey === 'filiacao') {
+          item.text = (athlete.modalidade || athlete.clube || 'SOLO (INDIVIDUAL)').toUpperCase();
         } else if (item.targetKey === 'federado') {
           item.text = athlete.federado || `PE-2026/${String(athlete.codigo).slice(-3)}`;
         } else if (item.targetKey === 'municipio') {
