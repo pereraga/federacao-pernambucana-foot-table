@@ -180,6 +180,10 @@
     .is-mode-fixed .resize-handle {
       display: none !important;
     }
+    .is-mode-fixed #floatingControlPanel,
+    #viewportArea.is-mode-fixed #floatingControlPanel {
+      display: none !important;
+    }
     .is-mode-design .selectable-item {
       cursor: move !important;
     }
@@ -2477,6 +2481,16 @@
       const canvasEl = document.getElementById('creditCardCanvas');
       if (!interactiveLayer) return;
 
+      const viewportArea = document.getElementById('viewportArea');
+      if (viewportArea) {
+        if (studioState.isDesignLocked) {
+          viewportArea.classList.add('is-mode-fixed');
+          viewportArea.classList.remove('is-mode-design');
+        } else {
+          viewportArea.classList.add('is-mode-design');
+          viewportArea.classList.remove('is-mode-fixed');
+        }
+      }
       if (canvasEl) {
         if (studioState.isDesignLocked) {
           canvasEl.classList.add('is-mode-fixed');
@@ -2786,13 +2800,19 @@
       const panel = document.getElementById('floatingControlPanel');
       if (!panel) return;
 
+      // BLOQUEIO TOTAL NO MODO FIXO: o painel de ajuste nunca abre no modo fixo
+      if (studioState.isDesignLocked) {
+        panel.style.display = 'none';
+        return;
+      }
+
       const item = studioState.elements.find(i => i.id === studioState.selectedId);
       if (!item) {
         panel.style.display = 'none';
         return;
       }
 
-      panel.style.display = 'block';
+      panel.style.display = 'flex';
       const labelEl = document.getElementById('floatingItemLabel');
       if (labelEl) labelEl.innerText = item.label || 'Item';
 
@@ -2826,7 +2846,12 @@
 
     function updateFloatingPanelPosition() {
       const panel = document.getElementById('floatingControlPanel');
-      if (!panel || panel.style.display === 'none') return;
+      if (!panel) return;
+      if (studioState.isDesignLocked) {
+        panel.style.display = 'none';
+        return;
+      }
+      if (panel.style.display === 'none') return;
       if (studioState.floatingPinned) return;
 
       const viewportEl = document.getElementById('viewportArea');
@@ -2855,6 +2880,7 @@
     }
 
     function setRadiusPreset(val) {
+      if (studioState.isDesignLocked) return;
       const item = studioState.elements.find(i => i.id === studioState.selectedId);
       if (!item) return;
       item.borderRadius = val;
@@ -2867,6 +2893,7 @@
     }
 
     function nudgeSelected(dx, dy) {
+      if (studioState.isDesignLocked) return;
       const item = studioState.elements.find(i => i.id === studioState.selectedId);
       if (!item) return;
       item.x += dx * studioState.nudgeStep;
@@ -3519,6 +3546,7 @@
 
       // Teclas do Teclado para Setas
       window.addEventListener('keydown', (e) => {
+        if (studioState.isDesignLocked) return;
         if (!studioState.selectedId) return;
         if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
 
