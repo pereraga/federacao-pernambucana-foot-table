@@ -601,16 +601,12 @@
 
             <!-- Botões de Ação do Cabeçalho -->
             <div class="flex flex-wrap items-center gap-2">
-              <button type="button" onclick="generateRandomAthleteCode()" class="bg-[#0b101d] hover:bg-[#121a30] border border-[#1c253b] text-pe-gold font-mono font-bold text-xs uppercase px-3 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer shadow">
-                <span>🎲</span> Gerar Código 6D
-              </button>
               <button type="button" id="btnExportPDF" onclick="exportCarteiraPDF()" class="bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer shadow-lg shadow-rose-950/30" title="Exportar Carteira em PDF Vetorial de Alta Resolução">
                 <i class="fa-solid fa-file-pdf text-white text-sm"></i> Exportar PDF
               </button>
               <button type="button" id="btnExportPNG" onclick="exportHdPng()" class="bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer shadow-lg shadow-sky-600/25" title="Exportar Carteira em PNG HD (300 DPI)">
                 <i class="fa-solid fa-file-image text-white text-sm"></i> Exportar PNG HD (300 DPI)
               </button>
-
             </div>
           </div>
 
@@ -635,7 +631,12 @@
                   <!-- Código e Status -->
                   <div class="grid grid-cols-2 gap-3">
                     <div>
-                      <label class="block text-slate-300 font-bold mb-1">Código Oficial (6D) *</label>
+                      <div class="flex items-center justify-between mb-1">
+                        <label class="block text-slate-300 font-bold">Código Oficial (6D) *</label>
+                        <button type="button" onclick="generateFederatedNumber()" class="text-[10px] font-extrabold text-pe-gold hover:text-amber-300 flex items-center gap-1 transition cursor-pointer select-none" title="Gerar Novo Código">
+                          <span>🎲</span> Gerar
+                        </button>
+                      </div>
                       <input type="text" id="athleteCode" required maxlength="6" value="742918" inputmode="numeric" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-pe-gold font-mono font-bold text-sm outline-none" />
                     </div>
                     <div>
@@ -705,8 +706,18 @@
                   <!-- Nº Federado, Município e Validade -->
                   <div class="grid grid-cols-3 gap-2.5">
                     <div>
-                      <label class="block text-slate-300 font-bold mb-1 text-[10px]">Nº Federado</label>
-                      <input type="text" id="athleteFederatedNum" value="PE-2026/048" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-2.5 py-2 font-mono text-white text-xs outline-none" />
+                      <div class="flex items-center justify-between mb-1">
+                        <label class="block text-slate-300 font-bold text-[10px]">Nº Federado</label>
+                        <button type="button" onclick="generateFederatedNumber()" class="text-[9px] font-extrabold text-pe-gold hover:text-amber-300 flex items-center gap-1 transition cursor-pointer select-none" title="Gerar novo Código de Federado">
+                          <span>🎲</span> Gerar
+                        </button>
+                      </div>
+                      <div class="relative flex items-center">
+                        <input type="text" id="athleteFederatedNum" value="PE-2026/048" placeholder="PE-2026/000" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl pl-2.5 pr-8 py-2 font-mono text-white text-xs outline-none uppercase font-bold" />
+                        <button type="button" onclick="generateFederatedNumber()" class="absolute right-1.5 p-1 text-pe-gold/70 hover:text-pe-gold transition cursor-pointer" title="Gerar Código do Federado">
+                          <span>🎲</span>
+                        </button>
+                      </div>
                     </div>
                     <div>
                       <label class="block text-slate-300 font-bold mb-1 text-[10px]">Município</label>
@@ -3556,7 +3567,7 @@
         const handler = (e) => {
           let val = e.target.value;
           if (uppercase) val = val.toUpperCase();
-          const target = studioState.elements.find(item => item.targetKey === targetKey || (targetKey === 'modalidade' && item.targetKey === 'filiacao'));
+          const target = studioState.elements.find(item => item.targetKey === targetKey || item.id === `field-${targetKey}` || (targetKey === 'modalidade' && item.targetKey === 'filiacao'));
           if (target) {
             target.text = val;
             renderInteractiveElements();
@@ -3564,6 +3575,7 @@
           if (id === 'athleteCategory') {
             updateCategoryPillsUI(val);
           }
+          autoSaveStudioDesign();
         };
         el.addEventListener('input', handler);
         el.addEventListener('change', handler);
@@ -3581,6 +3593,28 @@
       bindSync('inputAssinatura', 'assinatura', true);
       bindSync('inputQrText', 'qr', false);
 
+      // Sincronização e máscara do Código Oficial 6D
+      const codeInp = document.getElementById('athleteCode');
+      if (codeInp) {
+        codeInp.addEventListener('input', (e) => {
+          let v = e.target.value.replace(/\D/g, '').substring(0, 6);
+          e.target.value = v;
+          if (v.length >= 3) {
+            const fedInp = document.getElementById('athleteFederatedNum');
+            if (fedInp && (!fedInp.value || fedInp.value.startsWith('PE-2026/'))) {
+              const fedVal = `PE-2026/${v.slice(-3)}`;
+              fedInp.value = fedVal;
+              const target = studioState.elements.find(item => item.targetKey === 'federado' || item.id === 'field-federado');
+              if (target) {
+                target.text = fedVal;
+                renderInteractiveElements();
+              }
+            }
+          }
+          autoSaveStudioDesign();
+        });
+      }
+
       // Máscara do CPF
       const cpfInp = document.getElementById('athleteCpf');
       if (cpfInp) {
@@ -3592,11 +3626,12 @@
           v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
           e.target.value = v;
 
-          const target = studioState.elements.find(item => item.targetKey === 'cpf');
+          const target = studioState.elements.find(item => item.targetKey === 'cpf' || item.id === 'field-cpf');
           if (target) {
             target.text = v;
             renderInteractiveElements();
           }
+          autoSaveStudioDesign();
         });
       }
 
@@ -4145,17 +4180,29 @@
     let jogadoresFilterStatus = 'ALL';
     let batchExportAbort = false;
 
-    function generateRandomAthleteCode() {
+    function generateFederatedNumber(silent = false) {
       const code = String(Math.floor(100000 + Math.random() * 900000));
       const codeInput = document.getElementById('athleteCode');
       const fedInput = document.getElementById('athleteFederatedNum');
-      if (codeInput) codeInput.value = code;
-      if (fedInput) fedInput.value = `PE-2026/${code.slice(-3)}`;
+      const num3 = code.slice(-3);
+      const fedVal = `PE-2026/${num3}`;
 
-      const fedTarget = studioState.elements.find(item => item.targetKey === 'federado');
-      if (fedTarget) fedTarget.text = `PE-2026/${code.slice(-3)}`;
-      renderInteractiveElements();
-      showToast(`Código #${code} gerado com sucesso!`);
+      if (codeInput) codeInput.value = code;
+      if (fedInput) fedInput.value = fedVal;
+
+      const fedTarget = studioState.elements.find(item => item.targetKey === 'federado' || item.id === 'field-federado');
+      if (fedTarget) {
+        fedTarget.text = fedVal;
+        renderInteractiveElements();
+      }
+      autoSaveStudioDesign();
+      if (!silent) {
+        showToast(`Nº Federado gerado: ${fedVal} (Código Oficial #${code})`);
+      }
+    }
+
+    function generateRandomAthleteCode(silent = false) {
+      generateFederatedNumber(silent);
     }
 
     async function handleSaveAthlete(e) {
@@ -4699,7 +4746,7 @@
 
       // Sincroniza com os elementos do Studio CR80
       const setElText = (key, text) => {
-        const item = studioState.elements.find(i => i.targetKey === key);
+        const item = studioState.elements.find(i => i.targetKey === key || i.id === `field-${key}`);
         if (item) item.text = text;
       };
 
