@@ -722,9 +722,24 @@
                     </div>
                   </div>
 
+                  <!-- Botão de Conclusão do Cadastro e Envio ao Banco de Dados -->
+                  <div class="pt-3 space-y-2 border-t border-[#1c253b]">
+                    <button type="button" id="btnConcluirCadastro" onclick="concluirCadastroEnviarBanco()" class="w-full bg-gradient-to-r from-pe-gold via-amber-400 to-pe-gold hover:from-amber-400 hover:to-pe-gold text-pe-dark font-black text-xs uppercase tracking-wider py-3.5 px-4 rounded-xl transition shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 cursor-pointer border border-amber-300 active:scale-[0.99]">
+                      <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
+                      <span>Concluir Cadastro & Enviar ao Banco de Dados</span>
+                    </button>
+                    <div class="flex items-center justify-between text-[11px] text-slate-400 px-1">
+                      <span class="flex items-center gap-1.5 text-amber-300 font-medium">
+                        <i class="fa-solid fa-clock-rotate-left"></i> Envia como <strong>Pendente</strong> para homologar
+                      </span>
+                      <button type="button" onclick="clearAthleteForm()" class="text-slate-400 hover:text-slate-200 transition underline cursor-pointer">
+                        Limpar formulário
+                      </button>
+                    </div>
+                  </div>
+
                   <!-- Feedback de Salvamento -->
                   <div id="athleteFeedback" class="hidden text-xs p-3 rounded-xl"></div>
-
                 </form>
               </div>
 
@@ -2275,7 +2290,19 @@
       elements: JSON.parse(JSON.stringify(OFFICIAL_DEFAULT_ELEMENTS))
     };
 
-    /* Carrega preferência de bloqueio de design salva se houver */
+    /* Salva automaticamente o design (posições, dimensões, estilo e transformações) no localStorage */
+    function autoSaveStudioDesign() {
+      try {
+        localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(studioState.elements));
+        if (studioState.bgTransform) {
+          localStorage.setItem('fpeft_studio_bg_transform', JSON.stringify(studioState.bgTransform));
+        }
+      } catch (err) {
+        console.warn('Erro ao salvar design automaticamente:', err);
+      }
+    }
+
+    /* Carrega preferências e design salvo automaticamente */
     try {
       const savedLock = localStorage.getItem('fpeft_studio_design_locked');
       if (savedLock !== null) {
@@ -2287,6 +2314,15 @@
         if (Array.isArray(parsed) && parsed.length > 0) {
           studioState.elements = parsed;
         }
+      }
+      const savedBgTransform = localStorage.getItem('fpeft_studio_bg_transform');
+      if (savedBgTransform) {
+        try {
+          const parsedBg = JSON.parse(savedBgTransform);
+          if (parsedBg && typeof parsedBg === 'object') {
+            studioState.bgTransform = parsedBg;
+          }
+        } catch (e) {}
       }
     } catch (e) {
       console.warn('Erro ao restaurar preferências do Studio:', e);
@@ -2666,9 +2702,7 @@
 
     function onGlobalPointerUp() {
       if (isDragging || isResizing) {
-        try {
-          localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(studioState.elements));
-        } catch (e) {}
+        autoSaveStudioDesign();
       }
       isDragging = false;
       isResizing = false;
@@ -2842,6 +2876,7 @@
       if (radiusLabel) radiusLabel.innerText = `${val}px`;
       const el = document.getElementById(item.id);
       if (el) el.style.borderRadius = `${val}px`;
+      autoSaveStudioDesign();
     }
 
     function nudgeSelected(dx, dy) {
@@ -2851,6 +2886,7 @@
       item.x += dx * studioState.nudgeStep;
       item.y += dy * studioState.nudgeStep;
       updateItemStyle(item);
+      autoSaveStudioDesign();
     }
 
     function renderLayersSidebar() {
@@ -3344,6 +3380,7 @@
           studioState.bgTransform.mode = 'cover';
           updateBgFitButtons();
           applyCurrentSvgBackground();
+          autoSaveStudioDesign();
           showToast('Fundo ajustado: Preenchimento sem bordas');
         });
       }
@@ -3352,12 +3389,57 @@
           studioState.bgTransform.mode = 'contain';
           updateBgFitButtons();
           applyCurrentSvgBackground();
+          autoSaveStudioDesign();
           showToast('Fundo ajustado: Imagem inteira contida');
         });
       }
       if (btnFitExact) {
-        btnFitExact.addEventListener('click', triggerAutoFitFullArea);
+        btnFitExact.addEventListener('click', () => {
+          triggerAutoFitFullArea();
+          autoSaveStudioDesign();
+        });
       }
+
+      // Sliders de Calibração / Ajuste Fino do Fundo (CR80)
+      const scaleRange = document.getElementById('inputBgScale');
+      const percInput = document.getElementById('inputBgPercent');
+      const posXRange = document.getElementById('inputBgPosX');
+      const posYRange = document.getElementById('inputBgPosY');
+      const resetBgBtn = document.getElementById('btnResetBgTransform');
+
+      function updateBgTransformFromSliders() {
+        const scaleVal = (parseFloat(scaleRange ? scaleRange.value : 100) || 100) / 100;
+        const xVal = parseFloat(posXRange ? posXRange.value : 0) || 0;
+        const yVal = parseFloat(posYRange ? posYRange.value : 0) || 0;
+        studioState.bgTransform.scale = scaleVal;
+        studioState.bgTransform.x = xVal;
+        studioState.bgTransform.y = yVal;
+        const posXLabel = document.getElementById('bgPosXLabel');
+        const posYLabel = document.getElementById('bgPosYLabel');
+        if (posXLabel) posXLabel.innerText = `${xVal}px`;
+        if (posYLabel) posYLabel.innerText = `${yVal}px`;
+        applyCurrentSvgBackground();
+        autoSaveStudioDesign();
+      }
+
+      if (scaleRange) {
+        scaleRange.addEventListener('input', () => {
+          if (percInput) percInput.value = scaleRange.value;
+          updateBgTransformFromSliders();
+        });
+      }
+      if (percInput) {
+        percInput.addEventListener('input', () => {
+          if (scaleRange) scaleRange.value = percInput.value;
+          updateBgTransformFromSliders();
+        });
+      }
+      if (posXRange) posXRange.addEventListener('input', updateBgTransformFromSliders);
+      if (posYRange) posYRange.addEventListener('input', updateBgTransformFromSliders);
+      if (resetBgBtn) resetBgBtn.addEventListener('click', () => {
+        triggerAutoFitFullArea();
+        autoSaveStudioDesign();
+      });
 
       // Zoom
       const zIn = document.getElementById('zoomInBtn');
@@ -3418,6 +3500,7 @@
           if (!item) return;
           item.x = Math.round((1050 - item.width) / 2);
           updateItemStyle(item);
+          autoSaveStudioDesign();
           showToast('Elemento centralizado no cartão');
         });
       }
@@ -3433,6 +3516,7 @@
           if (rLbl) rLbl.innerText = `${item.borderRadius}px`;
           const el = document.getElementById(item.id);
           if (el) el.style.borderRadius = `${item.borderRadius}px`;
+          autoSaveStudioDesign();
         });
       }
 
@@ -3445,6 +3529,7 @@
           if (!item) return;
           item.width = Math.max(20, parseInt(e.target.value) || item.width);
           renderInteractiveElements();
+          autoSaveStudioDesign();
         });
       }
       if (dirH) {
@@ -3453,6 +3538,7 @@
           if (!item) return;
           item.height = Math.max(15, parseInt(e.target.value) || item.height);
           renderInteractiveElements();
+          autoSaveStudioDesign();
         });
       }
 
@@ -3465,6 +3551,7 @@
           if (!item) return;
           item.fontSize = parseInt(e.target.value) || 16;
           renderInteractiveElements();
+          autoSaveStudioDesign();
         });
       }
       if (colorInp) {
@@ -3475,6 +3562,7 @@
           const hexEl = document.getElementById('textColorHex');
           if (hexEl) hexEl.innerText = item.textColor.toUpperCase();
           renderInteractiveElements();
+          autoSaveStudioDesign();
         });
       }
 
@@ -3486,6 +3574,7 @@
             if (!item) return;
             item.textAlign = align.toLowerCase();
             renderInteractiveElements();
+            autoSaveStudioDesign();
           });
         }
       });
@@ -3771,6 +3860,83 @@
       showToast(`✓ Atleta #${code} salvo como ${status}!`);
       renderJogadoresCadastradosTable();
       updateDashboardData();
+    }
+
+    /* Conclui o cadastro, salva o design automaticamente e envia para o banco como PENDENTE DE HOMOLOGAÇÃO */
+    async function concluirCadastroEnviarBanco() {
+      const name = (document.getElementById('athleteName').value || '').trim();
+      if (!name) {
+        showToast('⚠️ Preencha o nome do atleta antes de concluir o cadastro.');
+        const nameInp = document.getElementById('athleteName');
+        if (nameInp) nameInp.focus();
+        return;
+      }
+
+      // Garante status PENDENTE para que necessite homologação posterior
+      const statusSelect = document.getElementById('athleteStatus');
+      if (statusSelect) statusSelect.value = 'PENDENTE';
+
+      // Salva o design automaticamente
+      autoSaveStudioDesign();
+
+      const btn = document.getElementById('btnConcluirCadastro');
+      const originalHtml = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-sm"></i> <span>Enviando ao Banco de Dados...</span>';
+      }
+
+      try {
+        await handleSaveAthlete();
+
+        const code = (document.getElementById('athleteCode').value || '').trim();
+        const feedback = document.getElementById('athleteFeedback');
+        if (feedback) {
+          feedback.classList.remove('hidden');
+          feedback.className = "text-xs p-3.5 rounded-xl font-bold bg-amber-950/70 border border-amber-500/50 text-amber-200 shadow-xl space-y-2.5";
+          feedback.innerHTML = `
+            <div class="flex items-start gap-2.5">
+              <span class="text-lg text-amber-400">⏳</span>
+              <div>
+                <p class="font-extrabold text-amber-300 text-xs uppercase tracking-wide">Cadastro Concluído com Sucesso!</p>
+                <p class="text-[11px] font-normal text-slate-200 mt-0.5 leading-snug">
+                  Atleta <strong>#${escapeHtml(code)} - ${escapeHtml(name)}</strong> enviado ao banco de dados com status <strong>PENDENTE</strong>.
+                </p>
+                <p class="text-[10px] text-amber-300/80 font-medium mt-1">
+                  Requer homologação oficial na aba de <strong>Jogadores Cadastrados</strong>.
+                </p>
+              </div>
+            </div>
+            <div class="pt-1 flex flex-wrap items-center gap-2">
+              <button type="button" onclick="switchTab('jogadores')" class="px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-black font-extrabold text-[10px] uppercase rounded-lg transition shadow flex items-center gap-1.5 cursor-pointer">
+                <span>Ver na Aba Jogadores</span> <i class="fa-solid fa-arrow-right text-[9px]"></i>
+              </button>
+              <button type="button" onclick="prepararProximoCadastro()" class="px-3 py-1.5 bg-[#0e172a] hover:bg-[#1a2942] border border-slate-600 text-white font-bold text-[10px] uppercase rounded-lg transition flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-plus text-sky-400"></i> <span>Cadastrar Próximo</span>
+              </button>
+            </div>
+          `;
+        }
+
+        showToast(`✓ Atleta #${code} enviado ao banco como Pendente de Homologação!`);
+      } catch (err) {
+        console.error('Erro ao enviar carteira ao banco:', err);
+        showToast('❌ Ocorreu um erro ao enviar para o banco de dados.');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = originalHtml;
+        }
+      }
+    }
+
+    function prepararProximoCadastro() {
+      clearAthleteForm();
+      const feedback = document.getElementById('athleteFeedback');
+      if (feedback) feedback.classList.add('hidden');
+      const nameInput = document.getElementById('athleteName');
+      if (nameInput) nameInput.focus();
+      showToast('Formulário pronto para o próximo cadastro!');
     }
 
     async function saveAndHomologateCurrentAthlete() {
