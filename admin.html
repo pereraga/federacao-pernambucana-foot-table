@@ -661,25 +661,25 @@
                       <label class="block text-slate-300 font-bold">Nome do Atleta *</label>
                       <button type="button" class="text-sky-400 hover:underline text-[10px]" onclick="selectElement('field-nome')">Selecionar no cartão</button>
                     </div>
-                    <input type="text" id="athleteName" required value="CARLOS EDUARDO SILVA LIMA" placeholder="Nome Completo" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-white uppercase font-bold outline-none font-fpeft" />
+                    <input type="text" id="athleteName" required value="GABRIEL PEREIRA ALVES" placeholder="Nome Completo" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-white uppercase font-bold outline-none font-fpeft" />
                   </div>
 
                   <!-- CPF e Data de Nascimento -->
                   <div class="grid grid-cols-2 gap-3">
                     <div>
                       <label class="block text-slate-300 font-bold mb-1">CPF</label>
-                      <input type="text" id="athleteCpf" maxlength="14" value="123.456.789-00" placeholder="000.000.000-00" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-slate-200 font-mono outline-none" />
+                      <input type="text" id="athleteCpf" maxlength="14" value="714.309.664-40" placeholder="000.000.000-00" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-slate-200 font-mono outline-none" />
                     </div>
                     <div>
                       <label class="block text-slate-300 font-bold mb-1">Nascimento</label>
-                      <input type="text" id="athleteBirth" value="18/05/1996" placeholder="DD/MM/AAAA" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-slate-200 font-mono outline-none" />
+                      <input type="text" id="athleteBirth" value="24/03/2003" placeholder="DD/MM/AAAA" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-slate-200 font-mono outline-none" />
                     </div>
                   </div>
 
                   <!-- Telefone / WhatsApp -->
                   <div>
                     <label class="block text-slate-300 font-bold mb-1">Telefone / WhatsApp</label>
-                    <input type="text" id="athletePhone" value="(81) 98765-4321" placeholder="(81) 90000-0000" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-slate-200 font-mono outline-none" />
+                    <input type="text" id="athletePhone" value="(81) 98463-4126" placeholder="(81) 90000-0000" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-slate-200 font-mono outline-none" />
                   </div>
 
                   <!-- Modalidade & Categoria -->
@@ -699,12 +699,12 @@
                       <div class="flex items-center justify-between mb-1">
                         <label class="block text-slate-300 font-bold">Categoria</label>
                       </div>
-                      <input type="hidden" id="athleteCategory" value="ASPIRANTE" />
+                      <input type="hidden" id="athleteCategory" value="AMADOR" />
                       <!-- Botões de Seleção Direta das 4 Bases -->
                       <div class="grid grid-cols-4 gap-1" id="categoryPillsContainer">
-                        <button type="button" onclick="selectCategoryBase('ASPIRANTE')" data-cat="ASPIRANTE" class="cat-pill-btn flex items-center justify-center text-[10px] py-2 px-0.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none">Aspirante</button>
+                        <button type="button" onclick="selectCategoryBase('ASPIRANTE')" data-cat="ASPIRANTE" class="cat-pill-btn flex items-center justify-center text-[10px] py-2 px-0.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none">Aspirante</button>
                         <button type="button" onclick="selectCategoryBase('INICIANTE')" data-cat="INICIANTE" class="cat-pill-btn flex items-center justify-center text-[10px] py-2 px-0.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none">Iniciante</button>
-                        <button type="button" onclick="selectCategoryBase('AMADOR')" data-cat="AMADOR" class="cat-pill-btn flex items-center justify-center text-[10px] py-2 px-0.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none">Amador</button>
+                        <button type="button" onclick="selectCategoryBase('AMADOR')" data-cat="AMADOR" class="cat-pill-btn flex items-center justify-center text-[10px] py-2 px-0.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none">Amador</button>
                         <button type="button" onclick="selectCategoryBase('PROFISSIONAL')" data-cat="PROFISSIONAL" class="cat-pill-btn flex items-center justify-center text-[10px] py-2 px-0.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none">Profissional</button>
                       </div>
                     </div>
@@ -1851,6 +1851,21 @@
     // Atletas e Notícias Locais (Fallback Robusto com Roster Oficial)
     const DEFAULT_ATHLETES = [
       {
+        id: 100,
+        codigo: "973321",
+        federado: "973321",
+        nome: "Gabriel Pereira Alves",
+        cpf: "714.309.664-40",
+        nascimento: "24/03/2003",
+        telefone: "(81) 98463-4126",
+        municipio: "Recife - PE",
+        categoria: "AMADOR",
+        modalidade: "SOLO (INDIVIDUAL)",
+        status: "HOMOLOGADO",
+        validade: "12/2026",
+        foto: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80"
+      },
+      {
         id: 101,
         codigo: "742918",
         nome: "Matheus Vinicius Ferraz",
@@ -2093,7 +2108,7 @@
         labelTag: 'Nº DO FEDERADO',
         type: 'text-box',
         targetKey: 'federado',
-        text: '742918',
+        text: '973321',
         x: 44,
         y: 544,
         width: 200,
@@ -2115,7 +2130,7 @@
         labelTag: 'NOME DO ATLETA',
         type: 'text-box',
         targetKey: 'nome',
-        text: 'CARLOS EDUARDO SILVA LIMA',
+        text: 'GABRIEL PEREIRA ALVES',
         x: 268,
         y: 295,
         width: 738,
@@ -2137,7 +2152,7 @@
         labelTag: 'CPF',
         type: 'text-box',
         targetKey: 'cpf',
-        text: '123.456.789-00',
+        text: '714.309.664-40',
         x: 268,
         y: 355,
         width: 226,
@@ -2159,7 +2174,7 @@
         labelTag: 'DATA DE NASCIMENTO',
         type: 'text-box',
         targetKey: 'nasc',
-        text: '18/05/1996',
+        text: '24/03/2003',
         x: 508,
         y: 355,
         width: 222,
@@ -2181,7 +2196,7 @@
         labelTag: 'TELEFONE / WHATSAPP',
         type: 'text-box',
         targetKey: 'fone',
-        text: '(81) 98765-4321',
+        text: '(81) 98463-4126',
         x: 744,
         y: 355,
         width: 262,
@@ -2247,7 +2262,7 @@
         labelTag: 'CATEGORIA',
         type: 'text-box',
         targetKey: 'categoria',
-        text: 'ASPIRANTE',
+        text: 'AMADOR',
         x: 654,
         y: 445,
         width: 190,
@@ -2266,7 +2281,7 @@
       {
         id: 'field-qrcode',
         label: 'QR Code de Autenticidade',
-        labelTag: 'VERIFICAÇÃO DE AUTENTICIDADE',
+        labelTag: '',
         type: 'qrcode',
         targetKey: 'qr',
         x: 860,
@@ -2285,7 +2300,7 @@
         targetKey: 'validade',
         text: '12/2026',
         x: 868,
-        y: 596,
+        y: 602,
         width: 130,
         height: 32,
         borderRadius: 16,
@@ -2318,7 +2333,7 @@
       }
     ];
 
-    const STUDIO_LAYOUT_VERSION = 'v2026_cr80_grid_official';
+    const STUDIO_LAYOUT_VERSION = 'v2026_cr80_grid_v4_clean';
 
     const studioState = {
       zoom: 0.8,
@@ -2425,8 +2440,15 @@
               }
               if (el.id === 'field-federado') {
                 if (el.text && (el.text.startsWith('PE-2026/') || el.text.includes('/'))) {
-                  el.text = '742918';
+                  el.text = '973321';
                 }
+              }
+              if (el.id === 'field-qrcode') {
+                el.labelTag = '';
+              }
+              if (el.id === 'field-validade') {
+                if (el.y < 602) el.y = 602;
+                el.labelTag = 'VALIDADE';
               }
             });
             studioState.elements = parsed;
