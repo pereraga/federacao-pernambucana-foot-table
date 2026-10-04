@@ -633,17 +633,17 @@
                     <div>
                       <div class="flex items-center justify-between mb-1">
                         <label class="block text-slate-300 font-bold">Nº do Federado *</label>
-                        <button type="button" onclick="generateFederatedNumber()" class="text-[10px] font-extrabold text-pe-gold hover:text-amber-300 flex items-center gap-1 transition cursor-pointer select-none" title="Gerar novo Nº de Federado">
+                        <button type="button" onclick="generateFederatedNumber()" class="text-[10px] font-extrabold text-pe-gold hover:text-amber-300 flex items-center gap-1 transition cursor-pointer select-none" title="Gerar novo Código de 6 Dígitos Único">
                           <span>🎲</span> Gerar
                         </button>
                       </div>
                       <div class="relative flex items-center">
-                        <input type="text" id="athleteFederatedNum" required value="PE-2026/729" placeholder="PE-2026/000" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl pl-3 pr-8 py-2 text-pe-gold font-mono font-bold text-sm outline-none uppercase" />
-                        <button type="button" onclick="generateFederatedNumber()" class="absolute right-2 p-1 text-pe-gold/70 hover:text-pe-gold transition cursor-pointer" title="Gerar Nº do Federado">
+                        <input type="text" id="athleteFederatedNum" required maxlength="6" value="742918" placeholder="000000" inputmode="numeric" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl pl-3 pr-8 py-2 text-pe-gold font-mono font-bold text-sm outline-none" />
+                        <button type="button" onclick="generateFederatedNumber()" class="absolute right-2 p-1 text-pe-gold/70 hover:text-pe-gold transition cursor-pointer" title="Gerar Código 6D Único (Sem Repetição)">
                           <span>🎲</span>
                         </button>
                       </div>
-                      <input type="hidden" id="athleteCode" value="PE-2026/729" />
+                      <input type="hidden" id="athleteCode" value="742918" />
                     </div>
                     <div>
                       <label class="block text-slate-300 font-bold mb-1">Status Federativo</label>
@@ -2232,7 +2232,7 @@
         labelTag: 'Nº DO FEDERADO',
         type: 'text-box',
         targetKey: 'federado',
-        text: 'PE-2026/048',
+        text: '742918',
         x: 44,
         y: 544,
         width: 200,
@@ -2379,6 +2379,11 @@
               el.labelTag = 'CATEGORIA';
               el.targetKey = 'categoria';
               if (!el.text || el.text === 'SOLO (INDIVIDUAL)' || el.text === 'MASTER / PRINCIPAL') el.text = 'ASPIRANTE';
+            }
+            if (el.id === 'field-federado') {
+              if (el.text && (el.text.startsWith('PE-2026/') || el.text.includes('/'))) {
+                el.text = '742918';
+              }
             }
           });
           studioState.elements = parsed;
@@ -3662,14 +3667,30 @@
       bindSync('inputAssinatura', 'assinatura', true);
       bindSync('inputQrText', 'qr', false);
 
-      // Sincronização do Código / Nº Federado
+      // Sincronização e máscara do Nº de Federado (6 dígitos numéricos)
+      const fedInp = document.getElementById('athleteFederatedNum');
+      if (fedInp) {
+        fedInp.addEventListener('input', (e) => {
+          let v = e.target.value.replace(/\D/g, '').substring(0, 6);
+          e.target.value = v;
+          const cInp = document.getElementById('athleteCode');
+          if (cInp) cInp.value = v;
+          const target = studioState.elements.find(item => item.targetKey === 'federado' || item.id === 'field-federado');
+          if (target) {
+            target.text = v;
+            renderInteractiveElements();
+          }
+          autoSaveStudioDesign();
+        });
+      }
+
       const codeInp = document.getElementById('athleteCode');
       if (codeInp) {
         codeInp.addEventListener('input', (e) => {
-          const v = e.target.value.toUpperCase();
-          const fedInp = document.getElementById('athleteFederatedNum');
-          if (fedInp && fedInp.value !== v) {
-            fedInp.value = v;
+          const v = e.target.value.replace(/\D/g, '').substring(0, 6);
+          const fInp = document.getElementById('athleteFederatedNum');
+          if (fInp && fInp.value !== v) {
+            fInp.value = v;
             const target = studioState.elements.find(item => item.targetKey === 'federado' || item.id === 'field-federado');
             if (target) {
               target.text = v;
@@ -4245,23 +4266,61 @@
     let jogadoresFilterStatus = 'ALL';
     let batchExportAbort = false;
 
+    /* Coleta todos os códigos já existentes para garantir unicidade absoluta (Zero Colisão) */
+    function getExistingAthleteCodes() {
+      const codeSet = new Set();
+      if (typeof DEFAULT_ATHLETES !== 'undefined' && Array.isArray(DEFAULT_ATHLETES)) {
+        DEFAULT_ATHLETES.forEach(a => {
+          if (a.codigo) codeSet.add(String(a.codigo).trim());
+          if (a.federado) codeSet.add(String(a.federado).trim());
+        });
+      }
+      try {
+        const local = JSON.parse(localStorage.getItem('pe_athletes_db'));
+        if (Array.isArray(local)) {
+          local.forEach(a => {
+            if (a.codigo) codeSet.add(String(a.codigo).trim());
+            if (a.federado) codeSet.add(String(a.federado).trim());
+          });
+        }
+      } catch (e) {}
+      if (typeof currentCachedAthletes !== 'undefined' && Array.isArray(currentCachedAthletes)) {
+        currentCachedAthletes.forEach(a => {
+          if (a.codigo) codeSet.add(String(a.codigo).trim());
+          if (a.federado) codeSet.add(String(a.federado).trim());
+        });
+      }
+      return codeSet;
+    }
+
+    /* Gera código aleatório de 6 dígitos que nunca se choca com nenhum código já criado */
+    function generateUnique6DigitCode() {
+      const existing = getExistingAthleteCodes();
+      let code = '';
+      let attempts = 0;
+      do {
+        code = String(Math.floor(100000 + Math.random() * 900000));
+        attempts++;
+      } while (existing.has(code) && attempts < 10000);
+      return code;
+    }
+
     function generateFederatedNumber(silent = false) {
-      const num3 = String(Math.floor(100 + Math.random() * 900));
-      const fedVal = `PE-2026/${num3}`;
+      const uniqueCode = generateUnique6DigitCode();
       const codeInput = document.getElementById('athleteCode');
       const fedInput = document.getElementById('athleteFederatedNum');
 
-      if (codeInput) codeInput.value = fedVal;
-      if (fedInput) fedInput.value = fedVal;
+      if (codeInput) codeInput.value = uniqueCode;
+      if (fedInput) fedInput.value = uniqueCode;
 
       const fedTarget = studioState.elements.find(item => item.targetKey === 'federado' || item.id === 'field-federado');
       if (fedTarget) {
-        fedTarget.text = fedVal;
+        fedTarget.text = uniqueCode;
         renderInteractiveElements();
       }
       autoSaveStudioDesign();
       if (!silent) {
-        showToast(`Nº do Federado gerado: ${fedVal}`);
+        showToast(`Código 6D único gerado: #${uniqueCode}`);
       }
     }
 
