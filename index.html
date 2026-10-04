@@ -277,6 +277,10 @@
               <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">Modalidade Homologada</span>
               <span class="text-xs font-extrabold uppercase text-pe-gold tracking-wide" id="cardBadgeModality">SOLO (INDIVIDUAL)</span>
             </div>
+            <div>
+              <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">Categoria</span>
+              <span class="text-xs font-extrabold uppercase text-amber-300 tracking-wide" id="cardBadgeCategory">ASPIRANTE</span>
+            </div>
             <div class="text-right">
               <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">Status Federado</span>
               <span class="text-[10px] font-bold uppercase text-emerald-400 flex items-center gap-1">
@@ -772,6 +776,8 @@
       document.getElementById('cardBadgeBirth').textContent = athlete.nascimento;
       document.getElementById('cardBadgeCity').textContent = athlete.municipio;
       document.getElementById('cardBadgeModality').textContent = athlete.modalidade;
+      const catBadge = document.getElementById('cardBadgeCategory');
+      if (catBadge) catBadge.textContent = athlete.categoria || 'ASPIRANTE';
       document.getElementById('cardBadgeCode').textContent = `ID: #${athlete.codigo}`;
       document.getElementById('cardBadgePhoto').src = athlete.foto || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80";
 

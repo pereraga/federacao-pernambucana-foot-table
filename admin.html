@@ -1991,6 +1991,9 @@
           supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
           if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-pe-gold";
           if (text) text.textContent = "Supabase Conectado";
+          if (typeof fetchStudioDesignFromSupabase === 'function') {
+            fetchStudioDesignFromSupabase();
+          }
           return true;
         } catch (e) {
           console.warn("Erro ao instanciar Supabase:", e);
@@ -2085,138 +2088,6 @@
         locked: false
       },
       {
-        id: 'field-nome',
-        label: 'Nome do Atleta',
-        labelTag: 'NOME DO ATLETA',
-        type: 'text-box',
-        targetKey: 'nome',
-        text: 'CARLOS EDUARDO SILVA LIMA',
-        x: 268,
-        y: 295,
-        width: 738,
-        height: 34,
-        borderRadius: 17,
-        backgroundColor: '#ffffff',
-        textColor: '#00204a',
-        fontSize: 17,
-        fontWeight: '800',
-        fontFamily: 'Montserrat',
-        textAlign: 'left',
-        paddingLeft: 18,
-        paddingRight: 18,
-        locked: false
-      },
-      {
-        id: 'field-cpf',
-        label: 'CPF',
-        labelTag: 'CPF',
-        type: 'text-box',
-        targetKey: 'cpf',
-        text: '123.456.789-00',
-        x: 268,
-        y: 345,
-        width: 738,
-        height: 34,
-        borderRadius: 17,
-        backgroundColor: '#ffffff',
-        textColor: '#00204a',
-        fontSize: 15,
-        fontWeight: '800',
-        fontFamily: 'Montserrat',
-        textAlign: 'left',
-        paddingLeft: 18,
-        paddingRight: 18,
-        locked: false
-      },
-      {
-        id: 'field-nasc',
-        label: 'Data de Nascimento',
-        labelTag: 'DATA DE NASCIMENTO',
-        type: 'text-box',
-        targetKey: 'nasc',
-        text: '18/05/1996',
-        x: 268,
-        y: 395,
-        width: 738,
-        height: 34,
-        borderRadius: 17,
-        backgroundColor: '#ffffff',
-        textColor: '#00204a',
-        fontSize: 15,
-        fontWeight: '800',
-        fontFamily: 'Montserrat',
-        textAlign: 'left',
-        paddingLeft: 18,
-        paddingRight: 18,
-        locked: false
-      },
-      {
-        id: 'field-fone',
-        label: 'Telefone / WhatsApp',
-        labelTag: 'TELEFONE / WHATSAPP',
-        type: 'text-box',
-        targetKey: 'fone',
-        text: '(81) 98765-4321',
-        x: 268,
-        y: 445,
-        width: 738,
-        height: 34,
-        borderRadius: 17,
-        backgroundColor: '#ffffff',
-        textColor: '#00204a',
-        fontSize: 15,
-        fontWeight: '800',
-        fontFamily: 'Montserrat',
-        textAlign: 'left',
-        paddingLeft: 18,
-        paddingRight: 18,
-        locked: false
-      },
-      {
-        id: 'field-categoria',
-        label: 'Categoria',
-        labelTag: 'CATEGORIA',
-        type: 'text-box',
-        targetKey: 'categoria',
-        text: 'ASPIRANTE',
-        x: 268,
-        y: 495,
-        width: 550,
-        height: 34,
-        borderRadius: 17,
-        backgroundColor: '#ffffff',
-        textColor: '#00204a',
-        fontSize: 14,
-        fontWeight: '800',
-        fontFamily: 'Montserrat',
-        textAlign: 'left',
-        paddingLeft: 16,
-        paddingRight: 16,
-        locked: false
-      },
-      {
-        id: 'field-modalidade',
-        label: 'Modalidade',
-        labelTag: 'MODALIDADE',
-        type: 'text-box',
-        targetKey: 'modalidade',
-        text: 'SOLO (INDIVIDUAL)',
-        x: 268,
-        y: 545,
-        width: 550,
-        height: 34,
-        borderRadius: 17,
-        backgroundColor: '#ffffff',
-        textColor: '#00204a',
-        fontSize: 14,
-        fontWeight: '800',
-        fontFamily: 'Montserrat',
-        textAlign: 'left',
-        paddingLeft: 16,
-        paddingRight: 16,
-        locked: false
-      },
-      {
         id: 'field-federado',
         label: 'Nº do Federado',
         labelTag: 'Nº DO FEDERADO',
@@ -2239,25 +2110,171 @@
         locked: false
       },
       {
+        id: 'field-nome',
+        label: 'Nome do Atleta',
+        labelTag: 'NOME DO ATLETA',
+        type: 'text-box',
+        targetKey: 'nome',
+        text: 'CARLOS EDUARDO SILVA LIMA',
+        x: 268,
+        y: 295,
+        width: 738,
+        height: 34,
+        borderRadius: 17,
+        backgroundColor: '#ffffff',
+        textColor: '#00204a',
+        fontSize: 16,
+        fontWeight: '800',
+        fontFamily: 'Montserrat',
+        textAlign: 'left',
+        paddingLeft: 18,
+        paddingRight: 18,
+        locked: false
+      },
+      {
+        id: 'field-cpf',
+        label: 'CPF',
+        labelTag: 'CPF',
+        type: 'text-box',
+        targetKey: 'cpf',
+        text: '123.456.789-00',
+        x: 268,
+        y: 355,
+        width: 226,
+        height: 34,
+        borderRadius: 17,
+        backgroundColor: '#ffffff',
+        textColor: '#00204a',
+        fontSize: 14,
+        fontWeight: '800',
+        fontFamily: 'Montserrat',
+        textAlign: 'center',
+        paddingLeft: 10,
+        paddingRight: 10,
+        locked: false
+      },
+      {
+        id: 'field-nasc',
+        label: 'Data de Nascimento',
+        labelTag: 'DATA DE NASCIMENTO',
+        type: 'text-box',
+        targetKey: 'nasc',
+        text: '18/05/1996',
+        x: 508,
+        y: 355,
+        width: 222,
+        height: 34,
+        borderRadius: 17,
+        backgroundColor: '#ffffff',
+        textColor: '#00204a',
+        fontSize: 14,
+        fontWeight: '800',
+        fontFamily: 'Montserrat',
+        textAlign: 'center',
+        paddingLeft: 10,
+        paddingRight: 10,
+        locked: false
+      },
+      {
+        id: 'field-fone',
+        label: 'Telefone / WhatsApp',
+        labelTag: 'TELEFONE / WHATSAPP',
+        type: 'text-box',
+        targetKey: 'fone',
+        text: '(81) 98765-4321',
+        x: 744,
+        y: 355,
+        width: 262,
+        height: 34,
+        borderRadius: 17,
+        backgroundColor: '#ffffff',
+        textColor: '#00204a',
+        fontSize: 14,
+        fontWeight: '800',
+        fontFamily: 'Montserrat',
+        textAlign: 'center',
+        paddingLeft: 10,
+        paddingRight: 10,
+        locked: false
+      },
+      {
+        id: 'field-modalidade',
+        label: 'Modalidade',
+        labelTag: 'MODALIDADE',
+        type: 'text-box',
+        targetKey: 'modalidade',
+        text: 'SOLO (INDIVIDUAL)',
+        x: 268,
+        y: 445,
+        width: 195,
+        height: 34,
+        borderRadius: 17,
+        backgroundColor: '#ffffff',
+        textColor: '#00204a',
+        fontSize: 13,
+        fontWeight: '800',
+        fontFamily: 'Montserrat',
+        textAlign: 'center',
+        paddingLeft: 10,
+        paddingRight: 10,
+        locked: false
+      },
+      {
         id: 'field-municipio',
         label: 'Município',
         labelTag: 'MUNICÍPIO',
         type: 'text-box',
         targetKey: 'municipio',
         text: 'RECIFE - PE',
-        x: 44,
-        y: 594,
-        width: 114,
-        height: 32,
-        borderRadius: 16,
+        x: 476,
+        y: 445,
+        width: 165,
+        height: 34,
+        borderRadius: 17,
         backgroundColor: '#ffffff',
         textColor: '#00204a',
-        fontSize: 12,
+        fontSize: 13,
         fontWeight: '800',
         fontFamily: 'Montserrat',
         textAlign: 'center',
-        paddingLeft: 6,
-        paddingRight: 6,
+        paddingLeft: 8,
+        paddingRight: 8,
+        locked: false
+      },
+      {
+        id: 'field-categoria',
+        label: 'Categoria',
+        labelTag: 'CATEGORIA',
+        type: 'text-box',
+        targetKey: 'categoria',
+        text: 'ASPIRANTE',
+        x: 654,
+        y: 445,
+        width: 190,
+        height: 34,
+        borderRadius: 17,
+        backgroundColor: '#ffffff',
+        textColor: '#00204a',
+        fontSize: 13,
+        fontWeight: '800',
+        fontFamily: 'Montserrat',
+        textAlign: 'center',
+        paddingLeft: 10,
+        paddingRight: 10,
+        locked: false
+      },
+      {
+        id: 'field-qrcode',
+        label: 'QR Code de Autenticidade',
+        labelTag: 'VERIFICAÇÃO DE AUTENTICIDADE',
+        type: 'qrcode',
+        targetKey: 'qr',
+        x: 860,
+        y: 432,
+        width: 146,
+        height: 146,
+        borderRadius: 18,
+        backgroundColor: '#ffffff',
         locked: false
       },
       {
@@ -2267,33 +2284,19 @@
         type: 'text-box',
         targetKey: 'validade',
         text: '12/2026',
-        x: 164,
-        y: 594,
-        width: 80,
+        x: 868,
+        y: 596,
+        width: 130,
         height: 32,
         borderRadius: 16,
         backgroundColor: '#ffffff',
         textColor: '#00204a',
-        fontSize: 12,
+        fontSize: 13,
         fontWeight: '800',
         fontFamily: 'Montserrat',
         textAlign: 'center',
         paddingLeft: 6,
         paddingRight: 6,
-        locked: false
-      },
-      {
-        id: 'field-qrcode',
-        label: 'QR Code de Autenticidade',
-        labelTag: 'VERIFICAÇÃO DE AUTENTICIDADE',
-        type: 'qrcode',
-        targetKey: 'qr',
-        x: 846,
-        y: 495,
-        width: 160,
-        height: 130,
-        borderRadius: 14,
-        backgroundColor: '#ffffff',
         locked: false
       },
       {
@@ -2303,8 +2306,8 @@
         type: 'text-line',
         targetKey: 'assinatura',
         text: 'ASSINATURA DA DIRETORIA FPEFT',
-        x: 340,
-        y: 598,
+        x: 330,
+        y: 592,
         width: 420,
         height: 28,
         textColor: '#ffffff',
@@ -2314,6 +2317,8 @@
         locked: false
       }
     ];
+
+    const STUDIO_LAYOUT_VERSION = 'v2026_cr80_grid_official';
 
     const studioState = {
       zoom: 0.8,
@@ -2334,49 +2339,98 @@
       elements: JSON.parse(JSON.stringify(OFFICIAL_DEFAULT_ELEMENTS))
     };
 
-    /* Salva automaticamente o design (posições, dimensões, estilo e transformações) no localStorage */
+    /* Sincroniza design com Supabase para que qualquer usuário/máquina receba as alterações */
+    async function syncStudioDesignToSupabase() {
+      if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+        try {
+          await supabaseClient.from('keep_alive_logs').insert([{
+            source: 'studio_layout_sync',
+            status: JSON.stringify(studioState.elements)
+          }]);
+        } catch (e) {
+          console.warn('Erro ao sincronizar design na nuvem:', e);
+        }
+      }
+    }
+
+    /* Busca o design oficial na nuvem Supabase ao inicializar */
+    async function fetchStudioDesignFromSupabase() {
+      if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+        try {
+          const { data, error } = await supabaseClient
+            .from('keep_alive_logs')
+            .select('*')
+            .eq('source', 'studio_layout_sync')
+            .order('pinged_at', { ascending: false })
+            .limit(1);
+          if (data && data.length > 0 && data[0].status) {
+            const parsed = JSON.parse(data[0].status);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              studioState.elements = parsed;
+              localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(parsed));
+              localStorage.setItem('fpeft_studio_layout_version', STUDIO_LAYOUT_VERSION);
+              renderInteractiveElements();
+            }
+          }
+        } catch (e) {
+          console.warn('Erro ao carregar design da nuvem:', e);
+        }
+      }
+    }
+
+    /* Salva automaticamente o design (posições, dimensões, estilo e transformações) no localStorage e Supabase */
     function autoSaveStudioDesign() {
       try {
         localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(studioState.elements));
+        localStorage.setItem('fpeft_studio_layout_version', STUDIO_LAYOUT_VERSION);
         if (studioState.bgTransform) {
           localStorage.setItem('fpeft_studio_bg_transform', JSON.stringify(studioState.bgTransform));
         }
+        syncStudioDesignToSupabase();
       } catch (err) {
         console.warn('Erro ao salvar design automaticamente:', err);
       }
     }
 
-    /* Carrega preferências e design salvo automaticamente */
+    /* Carrega preferências e design salvo automaticamente, garantindo que novos computadores e e-mails vejam o design oficial atualizado */
     try {
       const savedLock = localStorage.getItem('fpeft_studio_design_locked');
       if (savedLock !== null) {
         studioState.isDesignLocked = savedLock === 'true';
       }
-      const savedCustomElements = localStorage.getItem('fpeft_studio_custom_elements');
-      if (savedCustomElements) {
-        const parsed = JSON.parse(savedCustomElements);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          parsed.forEach(el => {
-            if (el.id === 'field-filiacao' || el.id === 'field-modalidade') {
-              el.id = 'field-modalidade';
-              el.label = 'Modalidade';
-              el.labelTag = 'MODALIDADE';
-              el.targetKey = 'modalidade';
-              if (!el.text || el.text === 'SPORT CLUB DO RECIFE') el.text = 'SOLO (INDIVIDUAL)';
-            }
-            if (el.id === 'field-categoria') {
-              el.label = 'Categoria';
-              el.labelTag = 'CATEGORIA';
-              el.targetKey = 'categoria';
-              if (!el.text || el.text === 'SOLO (INDIVIDUAL)' || el.text === 'MASTER / PRINCIPAL') el.text = 'ASPIRANTE';
-            }
-            if (el.id === 'field-federado') {
-              if (el.text && (el.text.startsWith('PE-2026/') || el.text.includes('/'))) {
-                el.text = '742918';
+      const savedVersion = localStorage.getItem('fpeft_studio_layout_version');
+      if (savedVersion !== STUDIO_LAYOUT_VERSION) {
+        // Atualiza e migra qualquer cache antigo para o novo layout oficial de 3 colunas
+        localStorage.setItem('fpeft_studio_layout_version', STUDIO_LAYOUT_VERSION);
+        localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(OFFICIAL_DEFAULT_ELEMENTS));
+        studioState.elements = JSON.parse(JSON.stringify(OFFICIAL_DEFAULT_ELEMENTS));
+      } else {
+        const savedCustomElements = localStorage.getItem('fpeft_studio_custom_elements');
+        if (savedCustomElements) {
+          const parsed = JSON.parse(savedCustomElements);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            parsed.forEach(el => {
+              if (el.id === 'field-filiacao' || el.id === 'field-modalidade') {
+                el.id = 'field-modalidade';
+                el.label = 'Modalidade';
+                el.labelTag = 'MODALIDADE';
+                el.targetKey = 'modalidade';
+                if (!el.text || el.text === 'SPORT CLUB DO RECIFE') el.text = 'SOLO (INDIVIDUAL)';
               }
-            }
-          });
-          studioState.elements = parsed;
+              if (el.id === 'field-categoria') {
+                el.label = 'Categoria';
+                el.labelTag = 'CATEGORIA';
+                el.targetKey = 'categoria';
+                if (!el.text || el.text === 'SOLO (INDIVIDUAL)' || el.text === 'MASTER / PRINCIPAL') el.text = 'ASPIRANTE';
+              }
+              if (el.id === 'field-federado') {
+                if (el.text && (el.text.startsWith('PE-2026/') || el.text.includes('/'))) {
+                  el.text = '742918';
+                }
+              }
+            });
+            studioState.elements = parsed;
+          }
         }
       }
       const savedBgTransform = localStorage.getItem('fpeft_studio_bg_transform');
