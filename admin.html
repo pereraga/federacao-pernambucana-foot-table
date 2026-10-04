@@ -38,6 +38,10 @@
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     }
   </script>
+  <!-- jsPDF para exportação de PDFs vetoriais oficiais -->
+  <script src="assets/jspdf.umd.min.js"></script>
+  <script src="jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="assets/carteira_template.js"></script>
   <script src="carteira_template.js"></script>
 
@@ -600,14 +604,11 @@
               <button type="button" onclick="generateRandomAthleteCode()" class="bg-[#0b101d] hover:bg-[#121a30] border border-[#1c253b] text-pe-gold font-mono font-bold text-xs uppercase px-3 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer shadow">
                 <span>🎲</span> Gerar Código 6D
               </button>
-              <button type="button" id="btnExportSVG" class="bg-[#0c1424] hover:bg-[#13203c] border border-sky-500/30 hover:border-sky-400 text-sky-300 font-bold text-xs uppercase px-3 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer shadow">
-                <i class="fa-solid fa-bezier-curve text-sky-400"></i> Exportar SVG Puro
+              <button type="button" id="btnExportPDF" onclick="exportCarteiraPDF()" class="bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer shadow-lg shadow-rose-950/30" title="Exportar Carteira em PDF Vetorial de Alta Resolução">
+                <i class="fa-solid fa-file-pdf text-white text-sm"></i> Exportar PDF
               </button>
-              <button type="button" id="btnExportPNG" class="bg-[#0c1424] hover:bg-[#13203c] border border-sky-500/30 text-white font-bold text-xs uppercase px-3 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer shadow">
-                <i class="fa-solid fa-file-image text-sky-400"></i> Exportar PNG HD (300 DPI)
-              </button>
-              <button type="button" onclick="exportAllAthletesBatchZip()" class="bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow-lg shadow-sky-600/25 cursor-pointer">
-                <i class="fa-solid fa-file-zipper"></i> Exportar Lote (HD ZIP)
+              <button type="button" id="btnExportPNG" onclick="exportHdPng()" class="bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer shadow-lg shadow-sky-600/25" title="Exportar Carteira em PNG HD (300 DPI)">
+                <i class="fa-solid fa-file-image text-white text-sm"></i> Exportar PNG HD (300 DPI)
               </button>
 
             </div>
@@ -3228,88 +3229,271 @@
     }
 
     /* =========================================================
-       EXPORTAÇÃO 1: SVG PURO VETORIZADO (COREL / ILLUSTRATOR)
+       HELPER: CARREGAMENTO ASSÍNCRONO DE IMAGEM
        ========================================================= */
-    function exportPureSvg() {
-      showToast('Gerando SVG puro com curvas e dados vetorizados...');
+    function loadImageAsync(src) {
+      return new Promise((resolve) => {
+        if (!src) return resolve(null);
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = () => {
+          console.warn('Falha ao carregar imagem para exportação:', src);
+          resolve(null);
+        };
+        img.src = src;
+      });
+    }
 
-      const currentBgSvg = getCurrentBackgroundSvgString();
-      const parser = new DOMParser();
-      const svgDoc = parser.parseFromString(currentBgSvg, 'image/svg+xml');
-      const rootSvg = svgDoc.documentElement;
-
-      const overlayGroup = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
-      overlayGroup.setAttribute('id', 'FPEFT_Dados_Atleta');
-
-      appendAthleteElementsToSvg(svgDoc, overlayGroup, studioState.elements);
-      rootSvg.appendChild(overlayGroup);
-
-      const serializer = new XMLSerializer();
-      const finalSvgString = serializer.serializeToString(svgDoc);
-      const blob = new Blob([finalSvgString], { type: 'image/svg+xml;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      
-      const link = document.createElement('a');
-      link.href = url;
-      const code = document.getElementById('athleteCode').value || 'atleta';
-      link.download = `carteira-atleta-fpeft-${code}.svg`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      showToast('SVG Puro Vetorizado baixado com sucesso!');
+    function drawRoundedRectPath(ctx, x, y, width, height, radius) {
+      ctx.beginPath();
+      if (typeof ctx.roundRect === 'function') {
+        ctx.roundRect(x, y, width, height, radius);
+      } else {
+        const r = Math.min(radius, width / 2, height / 2);
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + width, y, x + width, y + height, r);
+        ctx.arcTo(x + width, y + height, x, y + height, r);
+        ctx.arcTo(x, y + height, x, y, r);
+        ctx.arcTo(x, y, x + width, y, r);
+        ctx.closePath();
+      }
     }
 
     /* =========================================================
-       EXPORTAÇÃO 2: PNG ALTA DEFINIÇÃO (300 DPI)
+       RENDERIZADOR NATIVO EM ALTA RESOLUÇÃO (300 DPI CR80)
+       Garante curvas perfeitas e letras nítidas sem defeito de pixel
        ========================================================= */
-    function exportHdPng() {
-      showToast('Processando imagem HD para gráfica (300 DPI)...');
+    async function renderCarteiraToHdCanvas(elements = studioState.elements, athlete = null, scale = 3) {
+      if (document.fonts && document.fonts.ready) {
+        try {
+          await document.fonts.ready;
+        } catch (e) {}
+      }
 
-      const currentBgSvg = getCurrentBackgroundSvgString();
-      const parser = new DOMParser();
-      const svgDoc = parser.parseFromString(currentBgSvg, 'image/svg+xml');
-      const rootSvg = svgDoc.documentElement;
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(1050 * scale); // 3150 px
+      canvas.height = Math.round(662 * scale); // 1986 px
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
 
-      const overlayGroup = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
-      overlayGroup.setAttribute('id', 'FPEFT_Overlay');
+      // 1. Fundo Oficial de Alta Resolução do PDF
+      let bgImgSrc = 'assets/Carteira_Atleta_HD.png';
+      if (window.OFFICIAL_FPEFT_BG_DATA_URL) bgImgSrc = window.OFFICIAL_FPEFT_BG_DATA_URL;
+      if (studioState.customImageUrl) bgImgSrc = studioState.customImageUrl;
 
-      appendAthleteElementsToSvg(svgDoc, overlayGroup, studioState.elements);
-      rootSvg.appendChild(overlayGroup);
+      const bgImg = await loadImageAsync(bgImgSrc);
+      if (bgImg) {
+        const { scale: bgS, x: bgX, y: bgY } = studioState.bgTransform || { scale: 1, x: 0, y: 0 };
+        ctx.save();
+        ctx.translate((canvas.width / 2) + (bgX * scale), (canvas.height / 2) + (bgY * scale));
+        ctx.scale(bgS, bgS);
+        ctx.drawImage(bgImg, -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
+        ctx.restore();
+      } else {
+        ctx.fillStyle = '#00183b';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
 
-      const serializer = new XMLSerializer();
-      const finalSvgString = serializer.serializeToString(svgDoc);
+      // 2. Elementos Diagramáveis (Foto, Caixas Brancas, Textos Vetoriais Nítidos)
+      for (const item of elements) {
+        if (item.type === 'photo') {
+          const pUrl = athlete ? (athlete.foto || athlete.foto_url || item.photoUrl) : item.photoUrl;
+          if (pUrl) {
+            const photoImg = await loadImageAsync(pUrl);
+            if (photoImg) {
+              ctx.save();
+              drawRoundedRectPath(ctx, item.x * scale, item.y * scale, item.width * scale, item.height * scale, (item.borderRadius || 20) * scale);
+              ctx.clip();
+              ctx.drawImage(photoImg, item.x * scale, item.y * scale, item.width * scale, item.height * scale);
+              ctx.restore();
 
-      const img = new Image();
-      const svgBlob = new Blob([finalSvgString], { type: 'image/svg+xml;charset=utf-8' });
-      const blobUrl = URL.createObjectURL(svgBlob);
+              if (item.borderWidth) {
+                ctx.save();
+                ctx.strokeStyle = item.borderColor || '#ffffff';
+                ctx.lineWidth = item.borderWidth * scale;
+                drawRoundedRectPath(ctx, item.x * scale, item.y * scale, item.width * scale, item.height * scale, (item.borderRadius || 20) * scale);
+                ctx.stroke();
+                ctx.restore();
+              }
+            }
+          }
+        } else if (item.type === 'signature-line') {
+          ctx.save();
+          ctx.strokeStyle = '#94a3b8';
+          ctx.lineWidth = 2 * scale;
+          ctx.beginPath();
+          ctx.moveTo(item.x * scale, item.y * scale);
+          ctx.lineTo((item.x + item.width) * scale, item.y * scale);
+          ctx.stroke();
 
-      img.onload = () => {
-        const hdCanvas = document.getElementById('hdRenderCanvas');
-        const scale = 3; // 3x = ~3150 x 1986 px (Offset 300 DPI)
-        hdCanvas.width = 1050 * scale;
-        hdCanvas.height = 662 * scale;
-        
-        const ctx = hdCanvas.getContext('2d');
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-        ctx.scale(scale, scale);
-        ctx.drawImage(img, 0, 0, 1050, 662);
+          ctx.fillStyle = '#e2e8f0';
+          ctx.font = `800 ${Math.round(10.5 * scale)}px 'Montserrat', sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'top';
+          ctx.fillText(item.text || 'ASSINATURA DA DIRETORIA FPEFT', (item.x + item.width / 2) * scale, (item.y + 6) * scale);
+          ctx.restore();
+        } else {
+          // A) Rótulo Superior (Tag)
+          if (item.labelTag) {
+            ctx.save();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `800 ${Math.round(9.5 * scale)}px 'Montserrat', sans-serif`;
+            ctx.textBaseline = 'bottom';
+            if (item.textAlign === 'center') {
+              ctx.textAlign = 'center';
+              ctx.fillText(item.labelTag, (item.x + item.width / 2) * scale, (item.y - 3) * scale);
+            } else {
+              ctx.textAlign = 'left';
+              ctx.fillText(item.labelTag, (item.x + 8) * scale, (item.y - 3) * scale);
+            }
+            ctx.restore();
+          }
 
-        const pngUrl = hdCanvas.toDataURL('image/png');
+          // B) Caixa de Fundo (Pílula Branca)
+          if (item.backgroundColor) {
+            ctx.save();
+            ctx.fillStyle = item.backgroundColor || '#ffffff';
+            drawRoundedRectPath(ctx, item.x * scale, item.y * scale, item.width * scale, item.height * scale, (item.borderRadius || 17) * scale);
+            ctx.fill();
+            ctx.restore();
+          }
+
+          // C) Texto do Dado (Tipografia Nítida em Alta Definição)
+          let textVal = item.text || '';
+          if (athlete) {
+            if (item.targetKey === 'nome') textVal = (athlete.nome || '').toUpperCase();
+            else if (item.targetKey === 'cpf') textVal = athlete.cpf || '';
+            else if (item.targetKey === 'nasc') textVal = athlete.nascimento || '';
+            else if (item.targetKey === 'fone') textVal = athlete.telefone || '';
+            else if (item.targetKey === 'categoria') textVal = (athlete.categoria || 'ASPIRANTE').toUpperCase();
+            else if (item.targetKey === 'modalidade' || item.targetKey === 'filiacao') textVal = (athlete.modalidade || athlete.clube || 'SOLO (INDIVIDUAL)').toUpperCase();
+            else if (item.targetKey === 'federado') textVal = athlete.federado || `PE-2026/${String(athlete.codigo).slice(-3)}`;
+            else if (item.targetKey === 'municipio') textVal = (athlete.municipio || athlete.cidade || 'RECIFE - PE').toUpperCase();
+            else if (item.targetKey === 'validade') textVal = athlete.validade || '12/2026';
+          }
+
+          if (textVal) {
+            ctx.save();
+            ctx.fillStyle = item.textColor || '#00204a';
+            ctx.font = `${item.fontWeight || '800'} ${Math.round((item.fontSize || 15) * scale)}px 'Montserrat', sans-serif`;
+            ctx.textBaseline = 'middle';
+
+            if (item.textAlign === 'center') {
+              ctx.textAlign = 'center';
+              ctx.fillText(textVal, (item.x + item.width / 2) * scale, (item.y + item.height / 2) * scale);
+            } else if (item.textAlign === 'right') {
+              ctx.textAlign = 'right';
+              ctx.fillText(textVal, (item.x + item.width - (item.paddingRight || 16)) * scale, (item.y + item.height / 2) * scale);
+            } else {
+              ctx.textAlign = 'left';
+              ctx.fillText(textVal, (item.x + (item.paddingLeft || 16)) * scale, (item.y + item.height / 2) * scale);
+            }
+            ctx.restore();
+          }
+        }
+      }
+
+      return canvas;
+    }
+
+    /* =========================================================
+       MODO 1: EXPORTAR PDF EM ALTA DEFINIÇÃO (CR80 VETORIAL)
+       Formato oficial CR80 (85.60 mm x 53.98 mm) - Letras e Arte Nítidas
+       ========================================================= */
+    async function exportCarteiraPDF(athlete = null) {
+      showToast('Gerando Carteira Oficial em PDF de Alta Qualidade...');
+      const a = athlete || {
+        codigo: document.getElementById('athleteCode').value || '000000',
+        nome: document.getElementById('athleteName').value || 'Atleta',
+        cpf: document.getElementById('athleteCpf').value || '',
+        nascimento: document.getElementById('athleteBirth').value || '',
+        telefone: document.getElementById('athletePhone').value || '',
+        categoria: (document.getElementById('athleteCategory') ? document.getElementById('athleteCategory').value : 'ASPIRANTE') || 'ASPIRANTE',
+        modalidade: (document.getElementById('athleteModality') ? document.getElementById('athleteModality').value : 'SOLO (INDIVIDUAL)') || 'SOLO (INDIVIDUAL)',
+        federado: document.getElementById('athleteFederatedNum').value || '',
+        municipio: document.getElementById('athleteCity').value || '',
+        validade: document.getElementById('athleteValidity').value || '12/2026'
+      };
+
+      try {
+        const hdCanvas = await renderCarteiraToHdCanvas(studioState.elements, a, 3);
+        const hdImgData = hdCanvas.toDataURL('image/png', 1.0);
+
+        const jsPdfLib = window.jspdf && window.jspdf.jsPDF ? window.jspdf.jsPDF : window.jsPDF;
+        if (!jsPdfLib) {
+          throw new Error('Biblioteca jsPDF não inicializada.');
+        }
+
+        const doc = new jsPdfLib({
+          orientation: 'landscape',
+          unit: 'mm',
+          format: [85.60, 53.98]
+        });
+
+        // Insere a carteira renderizada a 300 DPI cobrindo exatamente o tamanho CR80
+        doc.addImage(hdImgData, 'PNG', 0, 0, 85.60, 53.98, undefined, 'FAST');
+
+        // Adiciona camada de textos vetoriais selecionáveis
+        const scaleX = 85.60 / 1050;
+        const scaleY = 53.98 / 662;
+
+        doc.setFont('helvetica', 'bold');
+        studioState.elements.forEach(item => {
+          let tVal = item.text || '';
+          if (item.targetKey === 'nome') tVal = a.nome;
+          else if (item.targetKey === 'cpf') tVal = a.cpf;
+          else if (item.targetKey === 'nasc') tVal = a.nascimento;
+          else if (item.targetKey === 'fone') tVal = a.telefone;
+          else if (item.targetKey === 'categoria') tVal = a.categoria;
+          else if (item.targetKey === 'modalidade' || item.targetKey === 'filiacao') tVal = a.modalidade;
+          else if (item.targetKey === 'federado') tVal = a.federado;
+          else if (item.targetKey === 'municipio') tVal = a.municipio;
+          else if (item.targetKey === 'validade') tVal = a.validade;
+
+          if (item.type !== 'photo' && item.type !== 'signature-line' && tVal) {
+            const fontSizePt = Math.max(5, (item.fontSize || 14) * 0.58);
+            doc.setFontSize(fontSizePt);
+            doc.setTextColor(0, 32, 74);
+            const tx = (item.x + (item.paddingLeft || 16)) * scaleX;
+            const ty = (item.y + item.height / 2 + 1) * scaleY;
+            doc.text(String(tVal), tx, ty, { baseline: 'middle' });
+          }
+        });
+
+        const fileName = `carteira-atleta-fpeft-${a.codigo || '000000'}.pdf`;
+        doc.save(fileName);
+        showToast('PDF Oficial em Alta Qualidade baixado com sucesso!');
+      } catch (err) {
+        console.error('Erro ao gerar PDF:', err);
+        showToast('Erro ao exportar PDF: ' + (err.message || 'Falha na exportação'));
+      }
+    }
+
+    /* =========================================================
+       MODO 2: EXPORTAR PNG EM ALTA DEFINIÇÃO (300 DPI)
+       Resolução gráfica 3150x1986 px com letras nítidas sem pixelização
+       ========================================================= */
+    async function exportHdPng() {
+      showToast('Processando PNG em Alta Definição (300 DPI)...');
+      try {
+        const code = document.getElementById('athleteCode').value || 'atleta';
+        const hdCanvas = await renderCarteiraToHdCanvas(studioState.elements, null, 3);
+        const pngUrl = hdCanvas.toDataURL('image/png', 1.0);
+
         const downloadLink = document.createElement('a');
         downloadLink.href = pngUrl;
-        const code = document.getElementById('athleteCode').value || 'atleta';
         downloadLink.download = `carteira-atleta-fpeft-HD-${code}.png`;
         document.body.appendChild(downloadLink);
         downloadLink.click();
         document.body.removeChild(downloadLink);
-        URL.revokeObjectURL(blobUrl);
 
-        showToast('PNG HD (300 DPI) gerado com sucesso!');
-      };
-      img.src = blobUrl;
+        showToast('PNG HD (300 DPI - Letras Nítidas) baixado com sucesso!');
+      } catch (err) {
+        console.error('Erro ao exportar PNG:', err);
+        showToast('Erro ao exportar PNG: ' + (err.message || 'Falha na exportação'));
+      }
     }
 
     /* Gestão das 4 Bases de Categoria: Aspirante, Iniciante, Amador, Profissional */
@@ -3769,11 +3953,11 @@
         }
       });
 
-      // Exportações
-      const expSvg = document.getElementById('btnExportSVG');
+      // Exportações: Modo PDF e Modo PNG HD (Exclusivos)
+      const expPdf = document.getElementById('btnExportPDF');
       const expPng = document.getElementById('btnExportPNG');
-      if (expSvg) expSvg.addEventListener('click', exportPureSvg);
-      if (expPng) expPng.addEventListener('click', exportHdPng);
+      if (expPdf) expPdf.addEventListener('click', () => exportCarteiraPDF());
+      if (expPng) expPng.addEventListener('click', () => exportHdPng());
 
       // Teclas do Teclado para Setas
       window.addEventListener('keydown', (e) => {
@@ -4778,8 +4962,8 @@
         if (statusText) statusText.textContent = `Renderizando carteira: ${a.nome}...`;
 
         try {
-          const svgStr = buildSvgStringForAthlete(a);
-          const blob = await renderSvgToBlob(svgStr);
+          const hdCanvas = await renderCarteiraToHdCanvas(studioState.elements, a, 3);
+          const blob = await new Promise(res => hdCanvas.toBlob(res, 'image/png'));
           const cleanName = (a.nome || 'atleta').normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9_-]/g, "_").toUpperCase();
           folder.file(`PE-2026-${a.codigo}_${cleanName}.png`, blob);
         } catch (err) {
