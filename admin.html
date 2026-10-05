@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261005_v19_fix_download_native';
+      const APP_REV = '20261005_v20_fix_chrome_multiple_downloads';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -4536,7 +4536,11 @@
     }
 
     async function baixarCarteiraAtletaPorCodigo(codigo, format = 'pdf', btn = null) {
-      const athletes = await loadAthletes();
+      let athletes = typeof currentCachedAthletes !== 'undefined' && currentCachedAthletes && currentCachedAthletes.length > 0 ? currentCachedAthletes : [];
+      if (athletes.length === 0) {
+        athletes = await loadAthletes();
+      }
+      
       const a = athletes.find(item => String(item.codigo) === String(codigo));
       if (!a) {
         showToast('Atleta não encontrado para download.');
