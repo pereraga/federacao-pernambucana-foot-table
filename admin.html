@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261005_v21_fix_timeout';
+      const APP_REV = '20261005_v22_fix_safari_crossbrowser_download';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -4157,84 +4157,49 @@
       }
     }
 
-    /* =========================================================
-       HELPER INFALÍVEL: DISPARO DIRETO E SEGURO DE DOWNLOAD
-       Garante que o Chrome/Edge/Safari nunca cancelem ou bloqueiem
-       o download do PDF ou PNG no Windows/Mac/Mobile
-       ========================================================= */
-    function executeDirectDownload(blobOrDataUrl, fileName, mimeType = 'application/octet-stream') {
+    function executeDirectDownload(blobOrDataUrl, fileName) {
       if (!blobOrDataUrl) return null;
 
-      let downloadUrl = null;
+      let downloadUrl = blobOrDataUrl;
       let isBlobUrl = false;
 
       if (blobOrDataUrl instanceof Blob) {
-        // Envelopa o Blob garantindo MIME 'application/octet-stream' para forçar download binário direto no SO
-        let binBlob = blobOrDataUrl;
-        try {
-          binBlob = new Blob([blobOrDataUrl], { type: 'application/octet-stream' });
-        } catch (e) {
-          binBlob = blobOrDataUrl;
-        }
-        downloadUrl = URL.createObjectURL(binBlob);
+        // NÃO mudar o MIME type. Usa o original (application/pdf ou image/png) para evitar bugs de extensão.
+        downloadUrl = URL.createObjectURL(blobOrDataUrl);
         isBlobUrl = true;
-      } else if (typeof blobOrDataUrl === 'string') {
-        downloadUrl = blobOrDataUrl;
-      } else {
-        return null;
       }
 
-      // 1. Suporte legado msSaveOrOpenBlob
-      if (isBlobUrl && window.navigator && typeof window.navigator.msSaveOrOpenBlob === 'function') {
+      // 1. Suporte legado msSaveOrOpenBlob (Edge antigo/IE)
+      if (isBlobUrl && window.navigator && window.navigator.msSaveOrOpenBlob) {
         try {
           window.navigator.msSaveOrOpenBlob(blobOrDataUrl, fileName);
           return downloadUrl;
         } catch (e) {}
       }
 
-      // 2. Elemento âncora <a> invisível mas conectado ao layout (evita bloqueio display:none)
+      // 2. Método padrão Web (FileSaver.js style)
       const a = document.createElement('a');
       a.href = downloadUrl;
       a.download = fileName;
-      a.style.position = 'fixed';
-      a.style.left = '-9999px';
-      a.style.top = '-9999px';
+      a.style.display = 'none';
       document.body.appendChild(a);
 
-      try {
-        a.click();
-      } catch (err) {
-        try {
-          const evt = new MouseEvent('click', { bubbles: true, cancelable: true, view: window });
-          a.dispatchEvent(evt);
-        } catch (e2) {}
-      }
+      // Disparo nativo simples
+      a.click();
 
-      // 3. Fallback infalível via iframe oculto (força download automático no Chrome sem bloquear a thread)
-      setTimeout(() => {
-        try {
-          const iframe = document.createElement('iframe');
-          iframe.style.display = 'none';
-          iframe.src = downloadUrl;
-          document.body.appendChild(iframe);
-          setTimeout(() => {
-            if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
-          }, 10000);
-        } catch (e) {}
-      }, 50);
-
-      // NUNCA remova o <a> imediatamente, o Chrome cancela o download
+      // Limpeza após tempo generoso (20s) para garantir captura pelo SO
       setTimeout(() => {
         try {
           if (a.parentNode) a.parentNode.removeChild(a);
         } catch (e) {}
-      }, 5000);
+        
+        // Se a gente manter a URL viva muito tempo, pesa na RAM. Vamos liberar após o uso do Toast (3 min).
+      }, 20000);
 
-      // Mantém a URL do Blob viva temporariamente
       if (isBlobUrl) {
         setTimeout(() => {
           try { URL.revokeObjectURL(downloadUrl); } catch (e) {}
-        }, 180000); // 3 minutos para permitir clicar no Toast
+        }, 180000); // 3 minutos para uso no Toast
       }
 
       return downloadUrl;
