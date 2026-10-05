@@ -150,7 +150,6 @@
     .field-top-label {
       position: absolute;
       top: -15px;
-      left: 8px;
       font-size: 9.5px;
       font-weight: 800;
       color: #ffffff;
@@ -160,17 +159,32 @@
       white-space: nowrap;
       font-family: 'Montserrat', sans-serif;
       text-shadow: 0 1px 2px rgba(0,0,0,0.85);
+      transition: left 0.15s ease, right 0.15s ease, transform 0.15s ease;
     }
+    .field-top-label.label-align-left,
+    .field-top-label.label-left {
+      left: 10px;
+      right: auto;
+      transform: none;
+    }
+    .field-top-label.label-align-center,
     .field-top-label.label-center {
       left: 50%;
+      right: auto;
       transform: translateX(-50%);
+    }
+    .field-top-label.label-align-right,
+    .field-top-label.label-right {
+      left: auto;
+      right: 10px;
+      transform: none;
     }
     .field-bottom-label {
       position: absolute;
-      bottom: -16px;
+      bottom: -15px;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 8px;
+      font-size: 7.5px;
       font-weight: 800;
       color: #94a3b8;
       letter-spacing: 0.5px;
@@ -874,6 +888,13 @@
                 </div>
 
                 <div class="flex items-center gap-2 flex-wrap">
+                  <!-- Botão Linhas Guia Inteligentes de Alinhamento -->
+                  <button type="button" id="btnToggleGuides" onclick="toggleAlignmentGuides()" title="Ativar/Desativar Linhas Guia e Limites de Alinhamento" class="px-2.5 py-1.5 bg-[#05080e] hover:bg-[#121c32] text-slate-300 hover:text-pe-gold border border-[#1c253b] rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer">
+                    <i class="fa-solid fa-ruler-combined text-pe-gold"></i>
+                    <span class="hidden sm:inline">Linhas Guia</span>
+                    <span id="guidesStateBadge" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">ON</span>
+                  </button>
+
                   <!-- Botão Gravar Padrão Fixo Oficial -->
                   <button type="button" onclick="saveOfficialLayoutToCloud()" title="Gravar este design como Padrão Fixo Oficial na nuvem para todos os computadores e usuários" class="px-2.5 py-1.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer shadow-md">
                     <i class="fa-solid fa-cloud-arrow-up text-slate-950"></i>
@@ -916,6 +937,11 @@
                     <div id="svgBackgroundContainer" class="absolute inset-0 w-full h-full pointer-events-none">
                       <!-- Template SVG embutido ou custom -->
                     </div>
+
+                    <!-- Camada de Guias de Alinhamento e Limites Inteligentes (SVG 1050x662) -->
+                    <svg id="alignmentGuidesLayer" class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 35;" viewBox="0 0 1050 662" xmlns="http://www.w3.org/2000/svg">
+                      <!-- Linhas do meio, laterais, bounding boxes e snapping dinâmico -->
+                    </svg>
 
                     <!-- Camada de Elementos Editáveis (Foto, Caixas Brancas, QR, Assinatura) -->
                     <div id="interactiveElementsLayer" class="absolute inset-0 w-full h-full">
@@ -1052,16 +1078,39 @@
                         </div>
                       </div>
 
+                      <!-- Alinhamento do Texto Editável (Valor Interno) -->
                       <div class="flex items-center justify-between pt-1">
-                        <span class="text-[10px] text-slate-400">Alinhamento</span>
-                        <div class="flex bg-[#05080e] border border-slate-800 rounded-lg p-0.5 gap-0.5">
-                          <button type="button" id="btnAlignLeft" title="Esquerda" class="w-7 h-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer">
+                        <div>
+                          <span class="text-[10px] text-slate-300 font-semibold block">Texto Editável</span>
+                          <span class="text-[8.5px] text-slate-500 block">Conteúdo interno (ex: CPF, Nome)</span>
+                        </div>
+                        <div class="flex bg-[#05080e] border border-slate-800 rounded-lg p-0.5 gap-0.5" id="groupAlignText">
+                          <button type="button" id="btnAlignLeft" title="Texto à Esquerda" class="w-7 h-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer">
                             <i class="fa-solid fa-align-left text-[11px]"></i>
                           </button>
-                          <button type="button" id="btnAlignCenter" title="Centralizado" class="w-7 h-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer">
+                          <button type="button" id="btnAlignCenter" title="Texto Centralizado" class="w-7 h-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer">
                             <i class="fa-solid fa-align-center text-[11px]"></i>
                           </button>
-                          <button type="button" id="btnAlignRight" title="Direita" class="w-7 h-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer">
+                          <button type="button" id="btnAlignRight" title="Texto à Direita" class="w-7 h-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer">
+                            <i class="fa-solid fa-align-right text-[11px]"></i>
+                          </button>
+                        </div>
+                      </div>
+
+                      <!-- Alinhamento do Texto Fixo (Rótulo / Título Superior) -->
+                      <div id="labelAlignControlBox" class="flex items-center justify-between pt-1 border-t border-[#1c253b]/60">
+                        <div>
+                          <span class="text-[10px] text-slate-300 font-semibold block">Texto Fixo (Rótulo)</span>
+                          <span class="text-[8.5px] text-slate-500 block">Título do campo (ex: CPF, MODALIDADE)</span>
+                        </div>
+                        <div class="flex bg-[#05080e] border border-slate-800 rounded-lg p-0.5 gap-0.5" id="groupAlignLabel">
+                          <button type="button" id="btnLabelAlignLeft" title="Rótulo à Esquerda" class="w-7 h-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer">
+                            <i class="fa-solid fa-align-left text-[11px]"></i>
+                          </button>
+                          <button type="button" id="btnLabelAlignCenter" title="Rótulo Centralizado" class="w-7 h-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer">
+                            <i class="fa-solid fa-align-center text-[11px]"></i>
+                          </button>
+                          <button type="button" id="btnLabelAlignRight" title="Rótulo à Direita" class="w-7 h-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer">
                             <i class="fa-solid fa-align-right text-[11px]"></i>
                           </button>
                         </div>
@@ -2048,6 +2097,7 @@
         fontWeight: '800',
         fontFamily: 'Montserrat',
         textAlign: 'center',
+        labelAlign: 'center',
         paddingLeft: 8,
         paddingRight: 8,
         locked: false
@@ -2070,6 +2120,7 @@
         fontWeight: '800',
         fontFamily: 'Montserrat',
         textAlign: 'left',
+        labelAlign: 'left',
         paddingLeft: 18,
         paddingRight: 18,
         locked: false
@@ -2092,6 +2143,7 @@
         fontWeight: '800',
         fontFamily: 'Montserrat',
         textAlign: 'center',
+        labelAlign: 'center',
         paddingLeft: 10,
         paddingRight: 10,
         locked: false
@@ -2114,6 +2166,7 @@
         fontWeight: '800',
         fontFamily: 'Montserrat',
         textAlign: 'center',
+        labelAlign: 'center',
         paddingLeft: 10,
         paddingRight: 10,
         locked: false
@@ -2136,6 +2189,7 @@
         fontWeight: '800',
         fontFamily: 'Montserrat',
         textAlign: 'center',
+        labelAlign: 'center',
         paddingLeft: 10,
         paddingRight: 10,
         locked: false
@@ -2158,6 +2212,7 @@
         fontWeight: '800',
         fontFamily: 'Montserrat',
         textAlign: 'center',
+        labelAlign: 'center',
         paddingLeft: 10,
         paddingRight: 10,
         locked: false
@@ -2180,6 +2235,7 @@
         fontWeight: '800',
         fontFamily: 'Montserrat',
         textAlign: 'center',
+        labelAlign: 'center',
         paddingLeft: 8,
         paddingRight: 8,
         locked: false
@@ -2202,6 +2258,7 @@
         fontWeight: '800',
         fontFamily: 'Montserrat',
         textAlign: 'center',
+        labelAlign: 'center',
         paddingLeft: 10,
         paddingRight: 10,
         locked: false
@@ -2238,6 +2295,7 @@
         fontWeight: '800',
         fontFamily: 'Montserrat',
         textAlign: 'center',
+        labelAlign: 'center',
         paddingLeft: 6,
         paddingRight: 6,
         locked: false
@@ -2261,13 +2319,14 @@
       }
     ];
 
-    const STUDIO_LAYOUT_VERSION = 'v2026_cr80_padrao_oficial_v5_perfeito';
+    const STUDIO_LAYOUT_VERSION = 'v2026_cr80_padrao_oficial_v6_guias_alinhamento';
 
     const studioState = {
       zoom: 0.8,
       selectedId: 'field-nome',
       nudgeStep: 1, // 1px, 5px, 10px
       showBgLabels: false,
+      showGuides: true, // Linhas Guia Inteligentes e Limites Ativos por Padrão
       isDesignLocked: true, // Padrão FIXO / TRAVADO contra modificações acidentais
       customSvgContent: null,
       customImageUrl: null,
@@ -2343,6 +2402,9 @@
         if (el.id === 'field-federado') {
           if (el.y < 550) el.y = 554;
         }
+        if (!el.labelAlign) {
+          el.labelAlign = el.textAlign === 'center' ? 'center' : (el.id === 'field-nome' ? 'left' : 'center');
+        }
       });
       return elements;
     }
@@ -2391,6 +2453,10 @@
       const savedLock = localStorage.getItem('fpeft_studio_design_locked');
       if (savedLock !== null) {
         studioState.isDesignLocked = savedLock === 'true';
+      }
+      const savedGuides = localStorage.getItem('fpeft_studio_show_guides');
+      if (savedGuides !== null) {
+        studioState.showGuides = savedGuides === 'true';
       }
       const savedVersion = localStorage.getItem('fpeft_studio_layout_version');
       if (savedVersion !== STUDIO_LAYOUT_VERSION) {
@@ -2694,7 +2760,8 @@
             div.style.justifyContent = 'flex-start';
           }
 
-          const labelHtml = item.labelTag ? `<span class="field-top-label ${item.textAlign === 'center' ? 'label-center' : ''} select-none pointer-events-none">${escapeHtml(item.labelTag)}</span>` : '';
+          const effLabelAlign = item.labelAlign || (item.textAlign === 'center' ? 'center' : 'left');
+          const labelHtml = item.labelTag ? `<span class="field-top-label label-align-${effLabelAlign} select-none pointer-events-none">${escapeHtml(item.labelTag)}</span>` : '';
           div.innerHTML = `
             ${labelHtml}
             <span class="truncate pointer-events-none select-none font-fpeft">${escapeHtml(item.text || '')}</span>
@@ -2723,6 +2790,241 @@
         updateFloatingPanelPosition();
       }
       updateModeButtonsUI();
+      renderAlignmentGuides();
+    }
+
+    /* =========================================================
+       LINHAS GUIA INTELIGENTES, LIMITES DE CAMADAS E SNAPPING VISUAL
+       Suporta: Linha do meio (X=525, Y=331), Laterais (X=268, X=1006),
+       Limites da foto (X=44, 244), Alinhamento entre caixas brancas
+       e Bounding Box com tags de dimensões da camada selecionada.
+       ========================================================= */
+    function toggleAlignmentGuides() {
+      studioState.showGuides = !studioState.showGuides;
+      try {
+        localStorage.setItem('fpeft_studio_show_guides', studioState.showGuides ? 'true' : 'false');
+      } catch (e) {}
+      updateGuidesButtonUI();
+      renderAlignmentGuides();
+      showToast(studioState.showGuides ? '📐 Linhas Guia Inteligentes ativadas!' : '📐 Linhas Guia desativadas.');
+    }
+
+    function updateGuidesButtonUI() {
+      const badge = document.getElementById('guidesStateBadge');
+      const btn = document.getElementById('btnToggleGuides');
+      if (!badge || !btn) return;
+      if (studioState.showGuides !== false) {
+        badge.innerText = 'ON';
+        badge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+        btn.classList.add('border-pe-gold/60', 'text-pe-gold');
+      } else {
+        badge.innerText = 'OFF';
+        badge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700';
+        btn.classList.remove('border-pe-gold/60', 'text-pe-gold');
+      }
+    }
+
+    function renderAlignmentGuides() {
+      const svg = document.getElementById('alignmentGuidesLayer');
+      if (!svg) return;
+
+      if (studioState.showGuides === false) {
+        svg.innerHTML = '';
+        return;
+      }
+
+      const selItem = studioState.elements.find(i => i.id === studioState.selectedId);
+      let svgHtml = '';
+
+      // 1. LINHAS MESTRAS DO CARTÃO: CENTRO E LATERAIS (CR80: 1050 x 662)
+      // Centro Vertical (X = 525)
+      svgHtml += `
+        <!-- Centro Vertical (X = 525) -->
+        <g opacity="0.85">
+          <line x1="525" y1="0" x2="525" y2="662" stroke="#ec4899" stroke-width="1.2" stroke-dasharray="6,4" />
+          <rect x="470" y="4" width="110" height="18" rx="4" fill="#0b0f19" stroke="#ec4899" stroke-width="0.8" opacity="0.95" />
+          <text x="525" y="16.5" fill="#f472b6" font-size="8.5" font-weight="800" text-anchor="middle" font-family="'Montserrat', sans-serif">MEIO VERTICAL 525px</text>
+        </g>
+      `;
+
+      // Centro Horizontal (Y = 331)
+      svgHtml += `
+        <!-- Centro Horizontal (Y = 331) -->
+        <g opacity="0.85">
+          <line x1="0" y1="331" x2="1050" y2="331" stroke="#ec4899" stroke-width="1.2" stroke-dasharray="6,4" />
+          <rect x="6" y="322" width="116" height="18" rx="4" fill="#0b0f19" stroke="#ec4899" stroke-width="0.8" opacity="0.95" />
+          <text x="64" y="334.5" fill="#f472b6" font-size="8.5" font-weight="800" text-anchor="middle" font-family="'Montserrat', sans-serif">MEIO HORIZONTAL 331px</text>
+        </g>
+      `;
+
+      // Linha Lateral Esquerda Oficial dos Campos (X = 268)
+      svgHtml += `
+        <!-- Lateral Esquerda dos Campos (X = 268) -->
+        <g opacity="0.8">
+          <line x1="268" y1="18" x2="268" y2="644" stroke="#06b6d4" stroke-width="1.2" stroke-dasharray="4,4" />
+          <rect x="215" y="24" width="106" height="17" rx="3.5" fill="#082f49" stroke="#06b6d4" stroke-width="0.8" opacity="0.95" />
+          <text x="268" y="35.5" fill="#38bdf8" font-size="8" font-weight="800" text-anchor="middle" font-family="'Montserrat', sans-serif">LATERAL ESQ 268px</text>
+        </g>
+      `;
+
+      // Linha Lateral Direita Oficial dos Campos (X = 1006)
+      svgHtml += `
+        <!-- Lateral Direita dos Campos (X = 1006) -->
+        <g opacity="0.8">
+          <line x1="1006" y1="18" x2="1006" y2="644" stroke="#06b6d4" stroke-width="1.2" stroke-dasharray="4,4" />
+          <rect x="948" y="24" width="102" height="17" rx="3.5" fill="#082f49" stroke="#06b6d4" stroke-width="0.8" opacity="0.95" />
+          <text x="999" y="35.5" fill="#38bdf8" font-size="8" font-weight="800" text-anchor="middle" font-family="'Montserrat', sans-serif">LATERAL DIR 1006px</text>
+        </g>
+      `;
+
+      // Coluna da Foto 3x4 (X = 44 e X = 244)
+      svgHtml += `
+        <!-- Limites da Foto 3x4 (X=44, X=244) -->
+        <g opacity="0.55">
+          <line x1="44" y1="20" x2="44" y2="642" stroke="#3b82f6" stroke-width="1" stroke-dasharray="2,3" />
+          <line x1="244" y1="20" x2="244" y2="642" stroke="#3b82f6" stroke-width="1" stroke-dasharray="2,3" />
+        </g>
+      `;
+
+      // 2. ALINHAMENTO INTELIGENTE DINÂMICO ENTRE CAIXAS BRANCAS (ENTRE QUADRADOS)
+      if (selItem) {
+        const selLeft = selItem.x;
+        const selRight = selItem.x + selItem.width;
+        const selCenterX = Math.round(selItem.x + selItem.width / 2);
+        const selTop = selItem.y;
+        const selBottom = selItem.y + selItem.height;
+        const selCenterY = Math.round(selItem.y + selItem.height / 2);
+
+        studioState.elements.forEach(other => {
+          if (other.id === selItem.id) return;
+
+          const oLeft = other.x;
+          const oRight = other.x + other.width;
+          const oCenterX = Math.round(other.x + other.width / 2);
+          const oTop = other.y;
+          const oBottom = other.y + other.height;
+          const oCenterY = Math.round(other.y + other.height / 2);
+
+          // A) Alinhamento de Topo (y == other.y)
+          if (Math.abs(selTop - oTop) <= 2) {
+            const minX = Math.min(selLeft, oLeft) - 10;
+            const maxX = Math.max(selRight, oRight) + 10;
+            svgHtml += `
+              <g>
+                <line x1="${minX}" y1="${oTop}" x2="${maxX}" y2="${oTop}" stroke="#10b981" stroke-width="1.5" stroke-dasharray="3,3" />
+                <circle cx="${selLeft}" cy="${oTop}" r="3" fill="#10b981" />
+                <circle cx="${oLeft}" cy="${oTop}" r="3" fill="#10b981" />
+                <rect x="${(minX + maxX)/2 - 45}" y="${oTop - 16}" width="90" height="14" rx="3" fill="#022c22" stroke="#10b981" stroke-width="0.8" opacity="0.95" />
+                <text x="${(minX + maxX)/2}" y="${oTop - 6}" fill="#6ee7b7" font-size="7.5" font-weight="800" text-anchor="middle" font-family="'Montserrat', sans-serif">ALINHADO TOPO ${oTop}px</text>
+              </g>
+            `;
+          }
+
+          // B) Alinhamento de Base (bottom == other.bottom)
+          if (Math.abs(selBottom - oBottom) <= 2) {
+            const minX = Math.min(selLeft, oLeft) - 10;
+            const maxX = Math.max(selRight, oRight) + 10;
+            svgHtml += `
+              <g>
+                <line x1="${minX}" y1="${oBottom}" x2="${maxX}" y2="${oBottom}" stroke="#10b981" stroke-width="1.5" stroke-dasharray="3,3" />
+                <circle cx="${selRight}" cy="${oBottom}" r="3" fill="#10b981" />
+                <circle cx="${oRight}" cy="${oBottom}" r="3" fill="#10b981" />
+                <rect x="${(minX + maxX)/2 - 45}" y="${oBottom + 3}" width="90" height="14" rx="3" fill="#022c22" stroke="#10b981" stroke-width="0.8" opacity="0.95" />
+                <text x="${(minX + maxX)/2}" y="${oBottom + 13}" fill="#6ee7b7" font-size="7.5" font-weight="800" text-anchor="middle" font-family="'Montserrat', sans-serif">ALINHADO BASE ${oBottom}px</text>
+              </g>
+            `;
+          }
+
+          // C) Alinhamento de Centro Y (center Y == other.center Y)
+          if (Math.abs(selCenterY - oCenterY) <= 2) {
+            const minX = Math.min(selLeft, oLeft) - 10;
+            const maxX = Math.max(selRight, oRight) + 10;
+            svgHtml += `
+              <g>
+                <line x1="${minX}" y1="${oCenterY}" x2="${maxX}" y2="${oCenterY}" stroke="#eab308" stroke-width="1.5" stroke-dasharray="4,3" />
+                <circle cx="${selCenterX}" cy="${oCenterY}" r="3.5" fill="#eab308" />
+                <circle cx="${oCenterX}" cy="${oCenterY}" r="3.5" fill="#eab308" />
+              </g>
+            `;
+          }
+
+          // D) Alinhamento de Esquerda (left == other.left)
+          if (Math.abs(selLeft - oLeft) <= 2) {
+            const minY = Math.min(selTop, oTop) - 10;
+            const maxY = Math.max(selBottom, oBottom) + 10;
+            svgHtml += `
+              <g>
+                <line x1="${oLeft}" y1="${minY}" x2="${oLeft}" y2="${maxY}" stroke="#10b981" stroke-width="1.5" stroke-dasharray="3,3" />
+                <circle cx="${oLeft}" cy="${selTop}" r="3" fill="#10b981" />
+                <circle cx="${oLeft}" cy="${oTop}" r="3" fill="#10b981" />
+                <rect x="${oLeft - 45}" y="${(minY + maxY)/2 - 7}" width="90" height="14" rx="3" fill="#022c22" stroke="#10b981" stroke-width="0.8" opacity="0.95" />
+                <text x="${oLeft}" y="${(minY + maxY)/2 + 3}" fill="#6ee7b7" font-size="7.5" font-weight="800" text-anchor="middle" font-family="'Montserrat', sans-serif">ALINHADO ESQ ${oLeft}px</text>
+              </g>
+            `;
+          }
+
+          // E) Alinhamento de Direita (right == other.right)
+          if (Math.abs(selRight - oRight) <= 2) {
+            const minY = Math.min(selTop, oTop) - 10;
+            const maxY = Math.max(selBottom, oBottom) + 10;
+            svgHtml += `
+              <g>
+                <line x1="${oRight}" y1="${minY}" x2="${oRight}" y2="${maxY}" stroke="#10b981" stroke-width="1.5" stroke-dasharray="3,3" />
+                <circle cx="${oRight}" cy="${selBottom}" r="3" fill="#10b981" />
+                <circle cx="${oRight}" cy="${oRight}" r="3" fill="#10b981" />
+                <rect x="${oRight - 45}" y="${(minY + maxY)/2 - 7}" width="90" height="14" rx="3" fill="#022c22" stroke="#10b981" stroke-width="0.8" opacity="0.95" />
+                <text x="${oRight}" y="${(minY + maxY)/2 + 3}" fill="#6ee7b7" font-size="7.5" font-weight="800" text-anchor="middle" font-family="'Montserrat', sans-serif">ALINHADO DIR ${oRight}px</text>
+              </g>
+            `;
+          }
+
+          // F) Alinhamento de Centro X (center X == other.center X)
+          if (Math.abs(selCenterX - oCenterX) <= 2) {
+            const minY = Math.min(selTop, oTop) - 10;
+            const maxY = Math.max(selBottom, oBottom) + 10;
+            svgHtml += `
+              <g>
+                <line x1="${oCenterX}" y1="${minY}" x2="${oCenterX}" y2="${maxY}" stroke="#eab308" stroke-width="1.5" stroke-dasharray="4,3" />
+                <circle cx="${selCenterX}" cy="${oCenterY}" r="3.5" fill="#eab308" />
+                <circle cx="${oCenterX}" cy="${oCenterY}" r="3.5" fill="#eab308" />
+              </g>
+            `;
+          }
+        });
+
+        // 3. LIMITES E BOUNDING BOX DA CAMADA SELECIONADA ("que pegar as camadas, é limite dela também")
+        const bx = selItem.x;
+        const by = selItem.y;
+        const bw = selItem.width;
+        const bh = selItem.height;
+
+        // Bounding box com cantos destacados e preenchimento sutil
+        svgHtml += `
+          <!-- Limites da Camada Selecionada -->
+          <g>
+            <!-- Bounding Box -->
+            <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" fill="rgba(245, 158, 11, 0.05)" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5,4" rx="${selItem.borderRadius || 0}" />
+            
+            <!-- Cantoneiras nos 4 Vértices -->
+            <path d="M ${bx - 4} ${by + 8} L ${bx - 4} ${by - 4} L ${bx + 8} ${by - 4}" stroke="#fbbf24" stroke-width="2" fill="none" />
+            <path d="M ${bx + bw + 4} ${by + 8} L ${bx + bw + 4} ${by - 4} L ${bx + bw - 8} ${by - 4}" stroke="#fbbf24" stroke-width="2" fill="none" />
+            <path d="M ${bx - 4} ${by + bh - 8} L ${bx - 4} ${by + bh + 4} L ${bx + 8} ${by + bh + 4}" stroke="#fbbf24" stroke-width="2" fill="none" />
+            <path d="M ${bx + bw + 4} ${by + bh - 8} L ${bx + bw + 4} ${by + bh + 4} L ${bx + bw - 8} ${by + bh + 4}" stroke="#fbbf24" stroke-width="2" fill="none" />
+
+            <!-- Linhas de Projeção até as Bordas do Cartão -->
+            <line x1="0" y1="${by}" x2="${bx}" y2="${by}" stroke="#f59e0b" stroke-width="0.8" stroke-dasharray="2,3" opacity="0.6" />
+            <line x1="${bx}" y1="0" x2="${bx}" y2="${by}" stroke="#f59e0b" stroke-width="0.8" stroke-dasharray="2,3" opacity="0.6" />
+
+            <!-- Tag de Coordenadas e Dimensões do Limite -->
+            <g transform="translate(${Math.max(10, Math.min(840, bx))}, ${by > 32 ? by - 24 : by + bh + 8})">
+              <rect x="0" y="0" width="200" height="20" rx="5" fill="#090e1a" stroke="#f59e0b" stroke-width="1" opacity="0.95" />
+              <text x="100" y="14" fill="#fbbf24" font-size="9" font-weight="800" text-anchor="middle" font-family="'Montserrat', sans-serif">X:${bx} Y:${by} | L:${bw}px A:${bh}px</text>
+            </g>
+          </g>
+        `;
+      }
+
+      svg.innerHTML = svgHtml;
     }
 
     /* =========================================================
@@ -2739,6 +3041,7 @@
       studioState.selectedId = id;
       renderInteractiveElements();
       syncFloatingPanel();
+      renderAlignmentGuides();
     }
 
     function onElementPointerDown(e, id) {
@@ -2752,6 +3055,7 @@
       if (studioState.isDesignLocked) {
         renderInteractiveElements();
         syncFloatingPanel();
+        renderAlignmentGuides();
         return;
       }
 
@@ -2769,6 +3073,7 @@
 
       renderInteractiveElements();
       syncFloatingPanel();
+      renderAlignmentGuides();
 
       window.addEventListener('pointermove', onGlobalPointerMove);
       window.addEventListener('pointerup', onGlobalPointerUp);
@@ -2784,9 +3089,54 @@
       const deltaY = (e.clientY - startY) / studioState.zoom;
 
       if (isDragging) {
-        item.x = Math.round(startItem.x + deltaX);
-        item.y = Math.round(startItem.y + deltaY);
+        let nextX = Math.round(startItem.x + deltaX);
+        let nextY = Math.round(startItem.y + deltaY);
+
+        // Smart Snapping magnético com linhas guias e outros elementos
+        if (studioState.showGuides !== false) {
+          const snapDist = 4;
+          // Alvos em X: Lateral esquerda (268), Centro do cartão (525), Lateral direita (1006)
+          const targetsX = [
+            268,
+            Math.round(525 - item.width / 2),
+            1006 - item.width
+          ];
+          // Alvos de outros elementos em X
+          studioState.elements.forEach(o => {
+            if (o.id === item.id) return;
+            targetsX.push(o.x); // esquerda com esquerda
+            targetsX.push(o.x + o.width - item.width); // direita com direita
+            targetsX.push(Math.round(o.x + o.width / 2 - item.width / 2)); // centro com centro
+          });
+          for (const tx of targetsX) {
+            if (Math.abs(nextX - tx) <= snapDist) {
+              nextX = tx;
+              break;
+            }
+          }
+
+          // Alvos em Y: Centro do cartão (331)
+          const targetsY = [
+            Math.round(331 - item.height / 2)
+          ];
+          studioState.elements.forEach(o => {
+            if (o.id === item.id) return;
+            targetsY.push(o.y); // topo com topo
+            targetsY.push(o.y + o.height - item.height); // base com base
+            targetsY.push(Math.round(o.y + o.height / 2 - item.height / 2)); // centro com centro
+          });
+          for (const ty of targetsY) {
+            if (Math.abs(nextY - ty) <= snapDist) {
+              nextY = ty;
+              break;
+            }
+          }
+        }
+
+        item.x = nextX;
+        item.y = nextY;
         updateItemStyle(item);
+        renderAlignmentGuides();
       } else if (isResizing) {
         let newX = startItem.x;
         let newY = startItem.y;
@@ -2821,6 +3171,7 @@
         item.width = Math.round(newW);
         item.height = Math.round(newH);
         updateItemStyle(item);
+        renderAlignmentGuides();
       }
 
       syncFloatingPanelInputs();
@@ -2829,6 +3180,7 @@
     function onGlobalPointerUp() {
       if (isDragging || isResizing) {
         autoSaveStudioDesign();
+        renderAlignmentGuides();
       }
       isDragging = false;
       isResizing = false;
@@ -2852,6 +3204,16 @@
       if (!studioState.isDesignLocked) {
         updateFloatingPanelPosition();
       }
+      renderAlignmentGuides();
+    }
+
+    function syncFloatingPanelInputs() {
+      const item = studioState.elements.find(i => i.id === studioState.selectedId);
+      if (!item) return;
+      const dirW = document.getElementById('inputDirectWidth');
+      const dirH = document.getElementById('inputDirectHeight');
+      if (dirW) dirW.value = item.width;
+      if (dirH) dirH.value = item.height;
     }
 
     /* Alterna entre Modo Fixo (Bloqueado) e Modo Design (Livre) */
@@ -2955,7 +3317,40 @@
         }
       }
 
+      updateAlignmentButtonsUI(item);
       updateFloatingPanelPosition();
+    }
+
+    /* Atualiza o destaque visual dos botões de alinhamento do texto editável e do rótulo fixo de forma independente */
+    function updateAlignmentButtonsUI(item) {
+      if (!item) return;
+      const align = item.textAlign || 'left';
+      const labelAlign = item.labelAlign || (item.textAlign === 'center' ? 'center' : 'left');
+
+      ['Left', 'Center', 'Right'].forEach(dir => {
+        const btn = document.getElementById(`btnAlign${dir}`);
+        if (btn) {
+          if (dir.toLowerCase() === align) {
+            btn.className = 'w-7 h-6 rounded flex items-center justify-center bg-pe-gold text-pe-dark font-extrabold shadow-sm transition cursor-pointer';
+          } else {
+            btn.className = 'w-7 h-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer';
+          }
+        }
+
+        const labelBtn = document.getElementById(`btnLabelAlign${dir}`);
+        if (labelBtn) {
+          if (dir.toLowerCase() === labelAlign) {
+            labelBtn.className = 'w-7 h-6 rounded flex items-center justify-center bg-sky-500 text-white font-extrabold shadow-sm transition cursor-pointer';
+          } else {
+            labelBtn.className = 'w-7 h-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer';
+          }
+        }
+      });
+
+      const labelBox = document.getElementById('labelAlignControlBox');
+      if (labelBox) {
+        labelBox.style.display = item.labelTag ? 'flex' : 'none';
+      }
     }
 
     function updateFloatingPanelPosition() {
@@ -3206,11 +3601,15 @@
 
           if (item.labelTag) {
             const lbl = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'text');
+            const effLabelAlign = item.labelAlign || (item.textAlign === 'center' ? 'center' : 'left');
             let lx = item.x + 8;
             let ly = item.y - 4;
-            if (item.textAlign === 'center') {
+            if (effLabelAlign === 'center') {
               lx = item.x + item.width / 2;
               lbl.setAttribute('text-anchor', 'middle');
+            } else if (effLabelAlign === 'right') {
+              lx = item.x + item.width - 8;
+              lbl.setAttribute('text-anchor', 'end');
             } else {
               lbl.setAttribute('text-anchor', 'start');
             }
@@ -3379,9 +3778,13 @@
             ctx.fillStyle = '#ffffff';
             ctx.font = `800 ${Math.round(9.5 * scale)}px 'Montserrat', sans-serif`;
             ctx.textBaseline = 'bottom';
-            if (item.textAlign === 'center') {
+            const effLabelAlign = item.labelAlign || (item.textAlign === 'center' ? 'center' : 'left');
+            if (effLabelAlign === 'center') {
               ctx.textAlign = 'center';
               ctx.fillText(item.labelTag, (item.x + item.width / 2) * scale, (item.y - 3) * scale);
+            } else if (effLabelAlign === 'right') {
+              ctx.textAlign = 'right';
+              ctx.fillText(item.labelTag, (item.x + item.width - 8) * scale, (item.y - 3) * scale);
             } else {
               ctx.textAlign = 'left';
               ctx.fillText(item.labelTag, (item.x + 8) * scale, (item.y - 3) * scale);
@@ -4101,6 +4504,19 @@
             if (!item) return;
             item.textAlign = align.toLowerCase();
             renderInteractiveElements();
+            syncFloatingPanel();
+            autoSaveStudioDesign();
+          });
+        }
+
+        const labelBtn = document.getElementById(`btnLabelAlign${align}`);
+        if (labelBtn) {
+          labelBtn.addEventListener('click', () => {
+            const item = studioState.elements.find(i => i.id === studioState.selectedId);
+            if (!item) return;
+            item.labelAlign = align.toLowerCase();
+            renderInteractiveElements();
+            syncFloatingPanel();
             autoSaveStudioDesign();
           });
         }
@@ -6238,6 +6654,7 @@
 
         // Inicialização do Studio CR80 Interativo Oficial
         initStudioEvents();
+        updateGuidesButtonUI();
         applyCurrentSvgBackground();
         renderInteractiveElements();
         selectElement('field-nome');
