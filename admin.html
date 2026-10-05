@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261005_v23_fix_ultimate_download';
+      const APP_REV = '20261005_v24_fix_clean_direct_download';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -4164,13 +4164,7 @@
       let isBlobUrl = false;
 
       if (blobOrDataUrl instanceof Blob) {
-        // Alguns navegadores exigem que o Blob seja octet-stream para não abrir na tela
-        let finalBlob = blobOrDataUrl;
-        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-        if (!isSafari) {
-          try { finalBlob = new Blob([blobOrDataUrl], { type: 'application/octet-stream' }); } catch (e) {}
-        }
-        downloadUrl = URL.createObjectURL(finalBlob);
+        downloadUrl = URL.createObjectURL(blobOrDataUrl);
         isBlobUrl = true;
       }
 
@@ -4182,20 +4176,17 @@
       a.href = downloadUrl;
       a.download = fileName;
       a.style.display = 'none';
-      a.target = '_blank'; // Ajuda no Safari/iOS
       document.body.appendChild(a);
 
-      // Disparo duplo (MouseEvent + click) garante 100% dos navegadores desktop e mobile
       try {
-        const evt = new MouseEvent('click', { view: window, bubbles: true, cancelable: true });
-        a.dispatchEvent(evt);
-      } catch (err) {
         a.click();
+      } catch (err) {
+        console.warn('Erro a.click():', err);
       }
 
       setTimeout(() => {
         try { if (a.parentNode) a.parentNode.removeChild(a); } catch (e) {}
-      }, 10000);
+      }, 5000);
 
       if (isBlobUrl) {
         setTimeout(() => { try { URL.revokeObjectURL(downloadUrl); } catch (e) {} }, 180000);
@@ -4229,8 +4220,6 @@
       container.style.opacity = '1';
       container.style.transform = 'translateY(0)';
       
-      // NOTA: Removido o onclick="handleManualDownloadClick(...)" do botão Baixar!
-      // O navegador lidará com o download de forma 100% nativa sem interceptação de JS!
       container.innerHTML = `
         <div class="flex items-start gap-3">
           <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
@@ -4242,7 +4231,7 @@
               Arquivo: <strong class="text-white font-mono">${escapeHtml(fileName)}</strong>
             </p>
             <p class="text-[11px] text-slate-400 mt-0.5">
-              Se o download não iniciou, clique no botão abaixo para baixar:
+              Se o download não iniciou automaticamente, clique abaixo:
             </p>
           </div>
           <button type="button" onclick="closeDownloadToast()" class="text-slate-400 hover:text-white text-xs cursor-pointer p-1">
@@ -4250,16 +4239,16 @@
           </button>
         </div>
         <div class="flex items-center gap-2 pt-2 border-t border-slate-700/60">
-          <a href="${downloadUrl}" download="${fileName}" class="flex-1 py-2 px-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs uppercase rounded-xl transition shadow-lg flex items-center justify-center gap-2 cursor-pointer text-center">
+          <a href="${downloadUrl}" download="${fileName}" class="flex-1 py-2.5 px-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs uppercase rounded-xl transition shadow-lg flex items-center justify-center gap-2 cursor-pointer text-center">
             <i class="fa-solid fa-download text-sm"></i>
-            <span>Baixar Manual</span>
+            <span>Baixar Agora</span>
           </a>
           ${safeViewUrl ? `
-          <a href="${safeViewUrl}" target="_blank" class="py-2 px-3 bg-sky-950/60 hover:bg-sky-900/60 border border-sky-700/50 text-sky-200 font-bold text-xs uppercase rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer text-center" title="Abrir e visualizar em nova aba">
+          <a href="${safeViewUrl}" target="_blank" class="py-2.5 px-3 bg-sky-950/60 hover:bg-sky-900/60 border border-sky-700/50 text-sky-200 font-bold text-xs uppercase rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer text-center" title="Abrir e visualizar em nova aba">
             <i class="fa-solid fa-eye text-xs"></i>
             <span>Visualizar</span>
           </a>` : ''}
-          <button type="button" onclick="closeDownloadToast()" class="px-2.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition cursor-pointer">
+          <button type="button" onclick="closeDownloadToast()" class="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition cursor-pointer">
             Fechar
           </button>
         </div>
@@ -4384,27 +4373,18 @@
         const safeCode = (targetAthlete.federado || targetAthlete.codigo || 'atleta').replace(/[^a-zA-Z0-9_-]/g, '_');
         const fileName = `carteira-atleta-fpeft-${safeCode}.pdf`;
 
-        const pdfBlob = doc.output('blob');
-        if (!pdfBlob) {
-          throw new Error('Falha ao gerar o arquivo PDF binário.');
-        }
-
-        window._lastExportedPdfBlob = pdfBlob;
-        window._lastExportedPdfName = fileName;
-
-        // DISPARO NATIVO E SEGURO DIRETO VIA BLOB BINÁRIO
-        const blobUrl = executeDirectDownload(pdfBlob, fileName, 'application/pdf');
-
-        // URL para visualização no navegador em nova aba
-        let viewUrl = null;
+        // 1. Tenta download nativo via jsPDF
         try {
-          const viewBlob = new Blob([pdfBlob], { type: 'application/pdf' });
-          viewUrl = URL.createObjectURL(viewBlob);
-        } catch (e) {
-          viewUrl = blobUrl;
+          doc.save(fileName);
+        } catch (saveErr) {
+          console.warn('doc.save falhou:', saveErr);
         }
 
-        showDownloadToast(blobUrl, fileName, 'PDF', viewUrl);
+        // 2. Cria blob para garantia de download e visualização
+        const pdfBlob = doc.output('blob');
+        const blobUrl = pdfBlob ? executeDirectDownload(pdfBlob, fileName) : null;
+
+        showDownloadToast(blobUrl, fileName, 'PDF', blobUrl);
         showToast(`✓ PDF Oficial (#${safeCode}) gerado e baixado!`);
       } catch (err) {
         console.error('Erro ao gerar PDF:', err);
