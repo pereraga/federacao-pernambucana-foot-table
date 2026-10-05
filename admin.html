@@ -3736,6 +3736,13 @@
       // 2. Elementos Diagramáveis (Foto, Caixas Brancas, Textos Vetoriais Nítidos)
       for (const item of elements) {
         if (item.type === 'photo') {
+          // Fundo escuro padrão caso a imagem demore ou falhe
+          ctx.save();
+          ctx.fillStyle = item.backgroundColor || '#09152e';
+          drawRoundedRectPath(ctx, item.x * scale, item.y * scale, item.width * scale, item.height * scale, (item.borderRadius || 20) * scale);
+          ctx.fill();
+          ctx.restore();
+
           const pUrl = athlete ? (athlete.foto || athlete.foto_url || item.photoUrl) : item.photoUrl;
           if (pUrl) {
             const photoImg = await loadImageAsync(pUrl);
@@ -3745,28 +3752,78 @@
               ctx.clip();
               ctx.drawImage(photoImg, item.x * scale, item.y * scale, item.width * scale, item.height * scale);
               ctx.restore();
-
-              if (item.borderWidth) {
-                ctx.save();
-                ctx.strokeStyle = item.borderColor || '#ffffff';
-                ctx.lineWidth = item.borderWidth * scale;
-                drawRoundedRectPath(ctx, item.x * scale, item.y * scale, item.width * scale, item.height * scale, (item.borderRadius || 20) * scale);
-                ctx.stroke();
-                ctx.restore();
-              }
             }
           }
-        } else if (item.type === 'signature-line') {
+
+          if (item.borderWidth) {
+            ctx.save();
+            ctx.strokeStyle = item.borderColor || '#ffffff';
+            ctx.lineWidth = item.borderWidth * scale;
+            drawRoundedRectPath(ctx, item.x * scale, item.y * scale, item.width * scale, item.height * scale, (item.borderRadius || 20) * scale);
+            ctx.stroke();
+            ctx.restore();
+          }
+        } else if (item.type === 'qrcode') {
+          // A) Caixa de fundo branca com cantos arredondados
           ctx.save();
-          ctx.strokeStyle = '#94a3b8';
-          ctx.lineWidth = 2 * scale;
+          ctx.fillStyle = item.backgroundColor || '#ffffff';
+          drawRoundedRectPath(ctx, item.x * scale, item.y * scale, item.width * scale, item.height * scale, (item.borderRadius || 16) * scale);
+          ctx.fill();
+          ctx.restore();
+
+          // B) Elementos gráficos do QR Code idênticos ao preview
+          ctx.save();
+          const scaleFactor = Math.min((item.width - 24) / 100, (item.height - 24) / 100);
+          const offsetX = item.x + (item.width - 100 * scaleFactor) / 2;
+          const offsetY = item.y + (item.height - 100 * scaleFactor) / 2;
+          ctx.translate(offsetX * scale, offsetY * scale);
+          ctx.scale(scaleFactor * scale, scaleFactor * scale);
+
+          ctx.fillStyle = '#000000';
+          ctx.strokeStyle = '#000000';
+
+          function drawFinder(fx, fy) {
+            ctx.lineWidth = 7;
+            drawRoundedRectPath(ctx, fx, fy, 28, 28, 2);
+            ctx.stroke();
+            ctx.fillRect(fx + 8, fy + 8, 12, 12);
+          }
+          drawFinder(5, 5);
+          drawFinder(67, 5);
+          drawFinder(5, 67);
+
+          ctx.fillRect(42, 10, 8, 18);
+          ctx.fillRect(55, 15, 6, 6);
+          ctx.fillRect(42, 38, 16, 8);
+          ctx.fillRect(65, 42, 12, 12);
+          ctx.fillRect(45, 55, 10, 24);
+          ctx.fillRect(65, 65, 20, 8);
+          ctx.fillRect(75, 80, 15, 15);
+          ctx.restore();
+
+          // C) Legenda inferior do QR Code ("VERIFICAÇÃO DE AUTENTICIDADE")
+          if (item.labelTag) {
+            ctx.save();
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = `800 ${Math.round(8.5 * scale)}px 'Montserrat', sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.fillText(item.labelTag, (item.x + item.width / 2) * scale, (item.y + item.height + 4) * scale);
+            ctx.restore();
+          }
+        } else if (item.type === 'signature-line' || item.type === 'text-line') {
+          // Traço branco de assinatura oficial
+          ctx.save();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1.5 * scale;
           ctx.beginPath();
           ctx.moveTo(item.x * scale, item.y * scale);
           ctx.lineTo((item.x + item.width) * scale, item.y * scale);
           ctx.stroke();
 
+          // Texto oficial da assinatura
           ctx.fillStyle = '#e2e8f0';
-          ctx.font = `800 ${Math.round(10.5 * scale)}px 'Montserrat', sans-serif`;
+          ctx.font = `800 ${Math.round((item.fontSize || 10.5) * scale)}px 'Montserrat', sans-serif`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'top';
           ctx.fillText(item.text || 'ASSINATURA DA DIRETORIA FPEFT', (item.x + item.width / 2) * scale, (item.y + 6) * scale);
@@ -3818,8 +3875,19 @@
           if (textVal) {
             ctx.save();
             ctx.fillStyle = item.textColor || '#00204a';
-            ctx.font = `${item.fontWeight || '800'} ${Math.round((item.fontSize || 15) * scale)}px 'Montserrat', sans-serif`;
+            let currentFontSize = (item.fontSize || 15) * scale;
+            ctx.font = `${item.fontWeight || '800'} ${Math.round(currentFontSize)}px 'Montserrat', sans-serif`;
             ctx.textBaseline = 'middle';
+
+            // Auto-ajuste de escala da fonte se o texto for maior que a largura disponível da caixa
+            const paddingHorizontal = ((item.paddingLeft || 16) + (item.paddingRight || 16)) * scale;
+            const maxTextWidth = Math.max(20, (item.width * scale) - paddingHorizontal);
+            const measured = ctx.measureText(textVal).width;
+            if (measured > maxTextWidth) {
+              const fitRatio = Math.max(0.55, maxTextWidth / measured);
+              currentFontSize = currentFontSize * fitRatio;
+              ctx.font = `${item.fontWeight || '800'} ${Math.round(currentFontSize)}px 'Montserrat', sans-serif`;
+            }
 
             if (item.textAlign === 'center') {
               ctx.textAlign = 'center';
@@ -3873,35 +3941,8 @@
           format: [85.60, 53.98]
         });
 
-        // Insere a carteira renderizada a 300 DPI cobrindo exatamente o tamanho CR80
+        // Insere a carteira renderizada a 300 DPI cobrindo exatamente o tamanho CR80 (100% fiel à pré-visualização, sem camada de texto duplicada)
         doc.addImage(hdImgData, 'PNG', 0, 0, 85.60, 53.98, undefined, 'FAST');
-
-        // Adiciona camada de textos vetoriais selecionáveis
-        const scaleX = 85.60 / 1050;
-        const scaleY = 53.98 / 662;
-
-        doc.setFont('helvetica', 'bold');
-        studioState.elements.forEach(item => {
-          let tVal = item.text || '';
-          if (item.targetKey === 'nome') tVal = a.nome;
-          else if (item.targetKey === 'cpf') tVal = a.cpf;
-          else if (item.targetKey === 'nasc') tVal = a.nascimento;
-          else if (item.targetKey === 'fone') tVal = a.telefone;
-          else if (item.targetKey === 'categoria') tVal = a.categoria;
-          else if (item.targetKey === 'modalidade' || item.targetKey === 'filiacao') tVal = a.modalidade;
-          else if (item.targetKey === 'federado') tVal = a.federado;
-          else if (item.targetKey === 'municipio') tVal = a.municipio;
-          else if (item.targetKey === 'validade') tVal = a.validade;
-
-          if (item.type !== 'photo' && item.type !== 'signature-line' && tVal) {
-            const fontSizePt = Math.max(5, (item.fontSize || 14) * 0.58);
-            doc.setFontSize(fontSizePt);
-            doc.setTextColor(0, 32, 74);
-            const tx = (item.x + (item.paddingLeft || 16)) * scaleX;
-            const ty = (item.y + item.height / 2 + 1) * scaleY;
-            doc.text(String(tVal), tx, ty, { baseline: 'middle' });
-          }
-        });
 
         const safeCode = (a.federado || a.codigo || 'atleta').replace(/[^a-zA-Z0-9_-]/g, '_');
         const fileName = `carteira-atleta-fpeft-${safeCode}.pdf`;
@@ -3924,9 +3965,21 @@
     async function exportHdPng() {
       showToast('Processando PNG em Alta Definição (300 DPI)...');
       try {
-        const code = (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '') || (document.getElementById('athleteCode') ? document.getElementById('athleteCode').value : 'atleta');
+        const a = {
+          codigo: (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '') || (document.getElementById('athleteCode') ? document.getElementById('athleteCode').value : 'PE-2026/048'),
+          nome: document.getElementById('athleteName').value || 'Atleta',
+          cpf: document.getElementById('athleteCpf').value || '',
+          nascimento: document.getElementById('athleteBirth').value || '',
+          telefone: document.getElementById('athletePhone').value || '',
+          categoria: (document.getElementById('athleteCategory') ? document.getElementById('athleteCategory').value : 'ASPIRANTE') || 'ASPIRANTE',
+          modalidade: (document.getElementById('athleteModality') ? document.getElementById('athleteModality').value : 'SOLO (INDIVIDUAL)') || 'SOLO (INDIVIDUAL)',
+          federado: (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '') || 'PE-2026/048',
+          municipio: document.getElementById('athleteCity').value || '',
+          validade: document.getElementById('athleteValidity').value || '12/2026'
+        };
+        const code = a.federado || a.codigo || 'atleta';
         const safeCode = code.replace(/[^a-zA-Z0-9_-]/g, '_');
-        const hdCanvas = await renderCarteiraToHdCanvas(studioState.elements, null, 3);
+        const hdCanvas = await renderCarteiraToHdCanvas(studioState.elements, a, 3);
         const pngUrl = hdCanvas.toDataURL('image/png', 1.0);
 
         const downloadLink = document.createElement('a');
