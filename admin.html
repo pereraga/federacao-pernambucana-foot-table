@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261005_v22_fix_safari_crossbrowser_download';
+      const APP_REV = '20261005_v23_fix_ultimate_download';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -4164,42 +4164,41 @@
       let isBlobUrl = false;
 
       if (blobOrDataUrl instanceof Blob) {
-        // NÃO mudar o MIME type. Usa o original (application/pdf ou image/png) para evitar bugs de extensão.
-        downloadUrl = URL.createObjectURL(blobOrDataUrl);
+        // Alguns navegadores exigem que o Blob seja octet-stream para não abrir na tela
+        let finalBlob = blobOrDataUrl;
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        if (!isSafari) {
+          try { finalBlob = new Blob([blobOrDataUrl], { type: 'application/octet-stream' }); } catch (e) {}
+        }
+        downloadUrl = URL.createObjectURL(finalBlob);
         isBlobUrl = true;
       }
 
-      // 1. Suporte legado msSaveOrOpenBlob (Edge antigo/IE)
       if (isBlobUrl && window.navigator && window.navigator.msSaveOrOpenBlob) {
-        try {
-          window.navigator.msSaveOrOpenBlob(blobOrDataUrl, fileName);
-          return downloadUrl;
-        } catch (e) {}
+        try { window.navigator.msSaveOrOpenBlob(blobOrDataUrl, fileName); return downloadUrl; } catch (e) {}
       }
 
-      // 2. Método padrão Web (FileSaver.js style)
       const a = document.createElement('a');
       a.href = downloadUrl;
       a.download = fileName;
       a.style.display = 'none';
+      a.target = '_blank'; // Ajuda no Safari/iOS
       document.body.appendChild(a);
 
-      // Disparo nativo simples
-      a.click();
+      // Disparo duplo (MouseEvent + click) garante 100% dos navegadores desktop e mobile
+      try {
+        const evt = new MouseEvent('click', { view: window, bubbles: true, cancelable: true });
+        a.dispatchEvent(evt);
+      } catch (err) {
+        a.click();
+      }
 
-      // Limpeza após tempo generoso (20s) para garantir captura pelo SO
       setTimeout(() => {
-        try {
-          if (a.parentNode) a.parentNode.removeChild(a);
-        } catch (e) {}
-        
-        // Se a gente manter a URL viva muito tempo, pesa na RAM. Vamos liberar após o uso do Toast (3 min).
-      }, 20000);
+        try { if (a.parentNode) a.parentNode.removeChild(a); } catch (e) {}
+      }, 10000);
 
       if (isBlobUrl) {
-        setTimeout(() => {
-          try { URL.revokeObjectURL(downloadUrl); } catch (e) {}
-        }, 180000); // 3 minutos para uso no Toast
+        setTimeout(() => { try { URL.revokeObjectURL(downloadUrl); } catch (e) {} }, 180000);
       }
 
       return downloadUrl;
