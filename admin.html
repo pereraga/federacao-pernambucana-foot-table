@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>FPEFT ADM | Painel de Controle Oficial</title>
   <link rel="icon" type="image/png" href="assets/images/logo-federacao.png" />
 
@@ -3907,12 +3910,30 @@
       return canvas;
     }
 
+    let _isExportingCarteiraPdf = false;
+    let _isExportingCarteiraPng = false;
+
     /* =========================================================
        MODO 1: EXPORTAR PDF EM ALTA DEFINIÇÃO (CR80 VETORIAL)
        Formato oficial CR80 (85.60 mm x 53.98 mm) - Letras e Arte Nítidas
+       Emite RIGOROSAMENTE 1 ÚNICO arquivo PDF por vez (sem duplicação de downloads)
        ========================================================= */
     async function exportCarteiraPDF(athlete = null) {
-      showToast('Gerando Carteira Oficial em PDF de Alta Qualidade...');
+      if (_isExportingCarteiraPdf) {
+        showToast('⏳ Aguarde, o PDF já está sendo gerado...');
+        return;
+      }
+      _isExportingCarteiraPdf = true;
+
+      const btn = document.getElementById('btnExportPDF');
+      const originalHtml = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.classList.add('opacity-75', 'cursor-not-allowed');
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-sm"></i> <span>Gerando PDF (1 arquivo)...</span>';
+      }
+
+      showToast('Gerando 1 Carteira Oficial em PDF de Alta Qualidade...');
       const a = athlete || {
         codigo: (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '') || (document.getElementById('athleteCode') ? document.getElementById('athleteCode').value : 'PE-2026/048'),
         nome: document.getElementById('athleteName').value || 'Atleta',
@@ -3941,28 +3962,48 @@
           format: [85.60, 53.98]
         });
 
-        // Insere a carteira renderizada a 300 DPI cobrindo exatamente o tamanho CR80 (100% fiel à pré-visualização, sem camada de texto duplicada)
+        // Insere a carteira renderizada a 300 DPI cobrindo exatamente o tamanho CR80 (100% fiel à pré-visualização, SEM camada duplicada de texto)
         doc.addImage(hdImgData, 'PNG', 0, 0, 85.60, 53.98, undefined, 'FAST');
 
         const safeCode = (a.federado || a.codigo || 'atleta').replace(/[^a-zA-Z0-9_-]/g, '_');
         const fileName = `carteira-atleta-fpeft-${safeCode}.pdf`;
         doc.save(fileName);
-        showToast('PDF Oficial em Alta Qualidade baixado com sucesso!');
-        // Ao gerar a carteira, atualiza automaticamente o código de federado para a próxima carteira
-        setTimeout(() => {
-          generateFederatedNumber(true);
-        }, 1000);
+        showToast(`✓ PDF Oficial (#${safeCode}) baixado com sucesso (1 arquivo)!`);
       } catch (err) {
         console.error('Erro ao gerar PDF:', err);
         showToast('Erro ao exportar PDF: ' + (err.message || 'Falha na exportação'));
+      } finally {
+        setTimeout(() => {
+          _isExportingCarteiraPdf = false;
+          if (btn) {
+            btn.disabled = false;
+            btn.classList.remove('opacity-75', 'cursor-not-allowed');
+            btn.innerHTML = originalHtml;
+          }
+        }, 1200);
       }
     }
 
     /* =========================================================
        MODO 2: EXPORTAR PNG EM ALTA DEFINIÇÃO (300 DPI)
        Resolução gráfica 3150x1986 px com letras nítidas sem pixelização
+       Emite RIGOROSAMENTE 1 ÚNICO arquivo PNG por vez
        ========================================================= */
     async function exportHdPng() {
+      if (_isExportingCarteiraPng) {
+        showToast('⏳ Aguarde, o PNG já está sendo gerado...');
+        return;
+      }
+      _isExportingCarteiraPng = true;
+
+      const btn = document.getElementById('btnExportPNG');
+      const originalHtml = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.classList.add('opacity-75', 'cursor-not-allowed');
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-sm"></i> <span>Gerando PNG...</span>';
+      }
+
       showToast('Processando PNG em Alta Definição (300 DPI)...');
       try {
         const a = {
@@ -3989,14 +4030,19 @@
         downloadLink.click();
         document.body.removeChild(downloadLink);
 
-        showToast('PNG HD (300 DPI - Letras Nítidas) baixado com sucesso!');
-        // Ao gerar a carteira, atualiza automaticamente o código de federado para a próxima carteira
-        setTimeout(() => {
-          generateFederatedNumber(true);
-        }, 1000);
+        showToast('PNG HD (300 DPI - Letras Nítidas) baixado com sucesso (1 arquivo)!');
       } catch (err) {
         console.error('Erro ao exportar PNG:', err);
         showToast('Erro ao exportar PNG: ' + (err.message || 'Falha na exportação'));
+      } finally {
+        setTimeout(() => {
+          _isExportingCarteiraPng = false;
+          if (btn) {
+            btn.disabled = false;
+            btn.classList.remove('opacity-75', 'cursor-not-allowed');
+            btn.innerHTML = originalHtml;
+          }
+        }, 1200);
       }
     }
 
@@ -4575,11 +4621,7 @@
         }
       });
 
-      // Exportações: Modo PDF e Modo PNG HD (Exclusivos)
-      const expPdf = document.getElementById('btnExportPDF');
-      const expPng = document.getElementById('btnExportPNG');
-      if (expPdf) expPdf.addEventListener('click', () => exportCarteiraPDF());
-      if (expPng) expPng.addEventListener('click', () => exportHdPng());
+      // Exportações: Gerenciadas com segurança via onclick e mutex exclusivo (1 download por vez)
 
       // Teclas do Teclado para Setas
       window.addEventListener('keydown', (e) => {
@@ -4949,27 +4991,45 @@
       try {
         await handleSaveAthlete();
 
-        const code = (document.getElementById('athleteCode').value || '').trim();
+        const aObj = {
+          codigo: code,
+          nome: name,
+          cpf: (document.getElementById('athleteCpf').value || '').trim(),
+          nascimento: (document.getElementById('athleteBirth').value || '').trim(),
+          telefone: (document.getElementById('athletePhone').value || '').trim(),
+          categoria: (document.getElementById('athleteCategory') ? document.getElementById('athleteCategory').value : 'ASPIRANTE') || 'ASPIRANTE',
+          modalidade: (document.getElementById('athleteModality') ? document.getElementById('athleteModality').value : 'SOLO (INDIVIDUAL)') || 'SOLO (INDIVIDUAL)',
+          federado: (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '') || code,
+          municipio: (document.getElementById('athleteCity').value || '').trim(),
+          validade: (document.getElementById('athleteValidity').value || '12/2026').trim()
+        };
+
+        // Emite RIGOROSAMENTE 1 ÚNICO PDF oficial para download
+        await exportCarteiraPDF(aObj);
+
         const feedback = document.getElementById('athleteFeedback');
         if (feedback) {
           feedback.classList.remove('hidden');
           feedback.className = "text-xs p-3.5 rounded-xl font-bold bg-amber-950/70 border border-amber-500/50 text-amber-200 shadow-xl space-y-2.5";
           feedback.innerHTML = `
             <div class="flex items-start gap-2.5">
-              <span class="text-lg text-amber-400">⏳</span>
+              <span class="text-lg text-emerald-400">✓</span>
               <div>
-                <p class="font-extrabold text-amber-300 text-xs uppercase tracking-wide">Cadastro Concluído com Sucesso!</p>
+                <p class="font-extrabold text-emerald-300 text-xs uppercase tracking-wide">Cadastro Concluído & 1 Carteira PDF Emitida!</p>
                 <p class="text-[11px] font-normal text-slate-200 mt-0.5 leading-snug">
-                  Atleta <strong>#${escapeHtml(code)} - ${escapeHtml(name)}</strong> enviado ao banco de dados com status <strong>PENDENTE</strong>.
+                  Atleta <strong>#${escapeHtml(code)} - ${escapeHtml(name)}</strong> enviado ao banco de dados e 1 arquivo PDF baixado.
                 </p>
                 <p class="text-[10px] text-amber-300/80 font-medium mt-1">
-                  Requer homologação oficial na aba de <strong>Jogadores Cadastrados</strong>.
+                  Status: <strong>PENDENTE</strong>. Homologação oficial disponível na aba <strong>Jogadores Cadastrados</strong>.
                 </p>
               </div>
             </div>
             <div class="pt-1 flex flex-wrap items-center gap-2">
               <button type="button" onclick="switchTab('jogadores')" class="px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-black font-extrabold text-[10px] uppercase rounded-lg transition shadow flex items-center gap-1.5 cursor-pointer">
                 <span>Ver na Aba Jogadores</span> <i class="fa-solid fa-arrow-right text-[9px]"></i>
+              </button>
+              <button type="button" onclick="exportCarteiraPDF()" class="px-3 py-1.5 bg-rose-700 hover:bg-rose-600 text-white font-bold text-[10px] uppercase rounded-lg transition flex items-center gap-1.5 cursor-pointer" title="Baixar novamente 1 cópia do PDF">
+                <i class="fa-solid fa-file-pdf"></i> <span>Baixar Novamente (PDF)</span>
               </button>
               <button type="button" onclick="prepararProximoCadastro()" class="px-3 py-1.5 bg-[#0e172a] hover:bg-[#1a2942] border border-slate-600 text-white font-bold text-[10px] uppercase rounded-lg transition flex items-center gap-1.5 cursor-pointer">
                 <i class="fa-solid fa-plus text-sky-400"></i> <span>Cadastrar Próximo</span>
@@ -4978,11 +5038,7 @@
           `;
         }
 
-        showToast(`✓ Atleta #${code} enviado ao banco como Pendente de Homologação!`);
-        // Ao concluir e gerar carteira, renova automaticamente o código de federado para o próximo atleta
-        setTimeout(() => {
-          generateFederatedNumber(true);
-        }, 1000);
+        showToast(`✓ Atleta #${code} salvo e 1 PDF baixado com sucesso!`);
       } catch (err) {
         console.error('Erro ao enviar carteira ao banco:', err);
         showToast('❌ Ocorreu um erro ao enviar para o banco de dados.');
@@ -4996,6 +5052,7 @@
 
     function prepararProximoCadastro() {
       clearAthleteForm();
+      generateFederatedNumber(true);
       const feedback = document.getElementById('athleteFeedback');
       if (feedback) feedback.classList.add('hidden');
       const nameInput = document.getElementById('athleteName');
