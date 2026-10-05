@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261005_v15_btn_name_update';
+      const APP_REV = '20261005_v16_remove_fundo_controls';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -767,72 +767,7 @@
                 </form>
               </div>
 
-              <!-- 2. Fundo da Carteirinha (CR80) & Calibração -->
-              <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 shadow-xl space-y-3.5">
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold uppercase tracking-wider text-slate-200 flex items-center gap-2">
-                    <i class="fa-solid fa-layer-group text-sky-400"></i> Fundo da Carteirinha
-                  </span>
-                  <span class="text-[10px] text-slate-400">Padrão CR80 Horizontal</span>
-                </div>
-
-                <!-- Botões de Troca de Fundo (PDF) e Restauração Oficial -->
-                <div class="grid grid-cols-2 gap-2">
-                  <label class="py-2 px-2.5 bg-[#05080e] hover:bg-[#121c32] border border-[#1c253b] hover:border-sky-500/50 rounded-xl text-[11px] font-bold text-sky-300 flex items-center justify-center gap-1.5 transition cursor-pointer text-center" title="Importar PDF, SVG ou Imagem">
-                    <i class="fa-solid fa-file-pdf text-rose-400"></i> Trocar Fundo (PDF)
-                    <input type="file" id="uploadSvgInput" accept=".pdf,image/*,.svg" class="hidden">
-                  </label>
-                  <button type="button" id="btnRestoreFpeftTemplate" class="py-2 px-2.5 bg-sky-950/40 hover:bg-sky-900/50 border border-sky-800/50 text-[11px] font-bold text-sky-200 rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer" title="Restaurar a arte oficial Carteira Atleta.pdf">
-                    <i class="fa-solid fa-rotate-left text-pe-gold"></i> Arte Oficial (PDF)
-                  </button>
-                </div>
-
-                <!-- Painel de Calibração / Ajuste Fino do Fundo -->
-                <div id="bgAdjustControls" class="space-y-2.5">
-                  <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-bold text-sky-300 flex items-center gap-1.5">
-                      <i class="fa-solid fa-sliders text-sky-400"></i> Enquadramento do Fundo (CR80)
-                    </span>
-                    <button type="button" id="btnResetBgTransform" class="text-[10px] text-slate-400 hover:text-sky-300 transition cursor-pointer">Resetar</button>
-                  </div>
-
-                  <div class="grid grid-cols-3 gap-1 bg-[#05080e] p-1 rounded-lg border border-[#1c253b] text-[10px]">
-                    <button type="button" id="btnBgFitCover" class="py-1 rounded bg-sky-600 text-white font-medium text-center transition cursor-pointer">Preencher</button>
-                    <button type="button" id="btnBgFitContain" class="py-1 rounded hover:bg-slate-800 text-slate-300 text-center transition cursor-pointer">Conter</button>
-                    <button type="button" id="btnBgFitExact" class="py-1 rounded hover:bg-slate-800 text-slate-300 text-center transition cursor-pointer">100% Cartão</button>
-                  </div>
-
-                  <div>
-                    <div class="flex justify-between items-center text-[10px] text-slate-400 mb-1">
-                      <span>Zoom / Escala Manual</span>
-                      <div class="flex items-center gap-1">
-                        <input type="number" id="inputBgPercent" min="20" max="300" value="100" class="w-12 bg-[#05080e] border border-slate-700 rounded px-1 py-0.5 text-center font-mono text-[10px] text-sky-300 focus:outline-none">
-                        <span class="text-sky-300 font-mono">%</span>
-                      </div>
-                    </div>
-                    <input type="range" id="inputBgScale" min="20" max="300" value="100" class="w-full h-1.5 bg-slate-800 rounded appearance-none cursor-pointer">
-                  </div>
-
-                  <div class="grid grid-cols-2 gap-2">
-                    <div>
-                      <div class="flex justify-between text-[10px] text-slate-400 mb-1">
-                        <span>Posição X</span>
-                        <span id="bgPosXLabel" class="font-mono text-sky-300">0px</span>
-                      </div>
-                      <input type="range" id="inputBgPosX" min="-300" max="300" value="0" class="w-full h-1.5 bg-slate-800 rounded appearance-none cursor-pointer">
-                    </div>
-                    <div>
-                      <div class="flex justify-between text-[10px] text-slate-400 mb-1">
-                        <span>Posição Y</span>
-                        <span id="bgPosYLabel" class="font-mono text-sky-300">0px</span>
-                      </div>
-                      <input type="range" id="inputBgPosY" min="-200" max="200" value="0" class="w-full h-1.5 bg-slate-800 rounded appearance-none cursor-pointer">
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 3. Lista de Camadas Diagramáveis -->
+              <!-- 2. Lista de Camadas Diagramáveis -->
               <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 shadow-xl">
                 <span class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center justify-between mb-2.5">
                   <span class="flex items-center gap-2"><i class="fa-solid fa-layer-group text-pe-gold"></i> Camadas e Caixas</span>
