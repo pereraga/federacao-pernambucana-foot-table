@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261005_v13_title_update';
+      const APP_REV = '20261005_v14_remove_supabase_badge';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -424,12 +424,6 @@
         </div>
 
         <div class="flex items-center gap-3">
-          <!-- Status Conexão Supabase -->
-          <div class="flex items-center gap-2 bg-[#090e1a] border border-[#1c253b] px-3 py-1.5 rounded-xl text-xs">
-            <span id="adminDbStatusDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
-            <span id="adminDbStatusText" class="text-slate-300 font-mono text-[11px]">Conectando...</span>
-          </div>
-
           <!-- Botão Recarregar -->
           <button onclick="location.reload()" class="p-2 rounded-xl bg-[#090e1a] hover:bg-white/10 text-slate-400 hover:text-white text-xs transition" title="Atualizar Painel">
             🔄
