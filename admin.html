@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261005_v16_remove_fundo_controls';
+      const APP_REV = '20261005_v17_sidebar_toggle_collapse';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -109,6 +109,10 @@
       box-shadow: 0 4px 20px -2px rgba(245, 184, 0, 0.45);
     }
     .active-nav-pill svg {
+      color: #080b12 !important;
+      stroke: #080b12 !important;
+    }
+    .active-nav-pill i {
       color: #080b12 !important;
     }
     /* Estilos do Studio CR80 Interativo */
@@ -247,6 +251,108 @@
       -webkit-text-fill-color: #ffffff !important;
       transition: background-color 5000s ease-in-out 0s !important;
     }
+
+    /* ========================================================= */
+    /* TRANSIÇÃO SUAVE DA SIDEBAR & MODO ÍCONES (COLLAPSIBLE)    */
+    /* ========================================================= */
+    #sidebar {
+      transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), 
+                  min-width 0.35s cubic-bezier(0.4, 0, 0.2, 1), 
+                  max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    .sidebar-text {
+      display: inline-block;
+      opacity: 1;
+      max-width: 260px;
+      transform: translateX(0);
+      transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1) 0.05s, 
+                  max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1), 
+                  transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                  margin 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                  padding 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
+      overflow: hidden;
+      vertical-align: middle;
+    }
+    @media (min-width: 768px) {
+      #sidebar.sidebar-collapsed {
+        width: 80px !important;
+        min-width: 80px !important;
+        max-width: 80px !important;
+      }
+    }
+    @media (max-width: 767px) {
+      #sidebar.sidebar-collapsed nav {
+        display: none !important;
+      }
+      #sidebar.sidebar-collapsed #sidebarUserBox {
+        display: none !important;
+      }
+      #sidebar.sidebar-collapsed #sidebarFooter {
+        display: none !important;
+      }
+    }
+    #sidebar.sidebar-collapsed .sidebar-text {
+      opacity: 0 !important;
+      max-width: 0 !important;
+      width: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      transform: translateX(-12px) !important;
+      pointer-events: none !important;
+      transition: opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1), 
+                  max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                  transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+                  margin 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                  padding 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    #sidebar.sidebar-collapsed nav {
+      padding-left: 0.6rem !important;
+      padding-right: 0.6rem !important;
+    }
+    #sidebar.sidebar-collapsed .nav-item {
+      padding-left: 0.5rem !important;
+      padding-right: 0.5rem !important;
+      justify-content: center !important;
+    }
+    #sidebar.sidebar-collapsed .nav-item > div {
+      justify-content: center !important;
+      gap: 0 !important;
+      width: 100% !important;
+    }
+    #sidebar.sidebar-collapsed .nav-indicator {
+      display: none !important;
+    }
+    #sidebar.sidebar-collapsed .sidebar-header-content {
+      flex-direction: column !important;
+      align-items: center !important;
+      gap: 0.6rem !important;
+    }
+    #sidebar.sidebar-collapsed #sidebarUserBox {
+      padding-left: 0.5rem !important;
+      padding-right: 0.5rem !important;
+      justify-content: center !important;
+    }
+    #sidebar.sidebar-collapsed #sidebarUserBox > div {
+      justify-content: center !important;
+      gap: 0 !important;
+    }
+    #sidebar.sidebar-collapsed #sidebarFooter {
+      padding: 0.75rem 0.5rem !important;
+    }
+    #sidebar.sidebar-collapsed #sidebarFooter a,
+    #sidebar.sidebar-collapsed #sidebarFooter button {
+      padding-left: 0.25rem !important;
+      padding-right: 0.25rem !important;
+      gap: 0 !important;
+      font-size: 0 !important;
+    }
+    #sidebar.sidebar-collapsed #sidebarFooter span:not(.sidebar-text) {
+      font-size: 1.1rem !important;
+    }
+    #sidebar.sidebar-collapsed #btnExpandWhenCollapsed {
+      display: flex !important;
+    }
   </style>
 </head>
 <body class="bg-[#080b12] text-slate-100 min-h-screen font-sans antialiased selection:bg-pe-gold selection:text-pe-dark">
@@ -258,154 +364,182 @@
     <!-- ========================================================= -->
     <aside id="sidebar" class="w-full md:w-64 lg:w-72 bg-[#05080e] border-r border-[#151c2e] flex flex-col shrink-0 z-40 transition-all md:min-h-screen">
       
-      <!-- Topo da Sidebar: Logo & Identidade -->
-      <div class="p-5 border-b border-[#151c2e] relative">
+      <!-- Topo da Sidebar: Logo & Identidade com Botão Toggle -->
+      <div class="p-4 border-b border-[#151c2e] relative sidebar-header-container">
         <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
-        <div class="flex items-center gap-3">
-          <div class="rounded-full bg-[#06173a] border-2 border-pe-gold p-0.5 overflow-hidden shrink-0 shadow" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px;">
-            <img src="assets/images/logo-federacao.png" alt="Federação Pernambucana" class="w-full h-full object-contain rounded-full" />
+        <div class="flex items-center justify-between gap-2 sidebar-header-content">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="rounded-full bg-[#06173a] border-2 border-pe-gold p-0.5 overflow-hidden shrink-0 shadow cursor-pointer" onclick="toggleSidebarCollapse()" style="width: 42px; height: 42px; min-width: 42px; min-height: 42px;" title="Clique para alternar tamanho do menu">
+              <img src="assets/images/logo-federacao.png" alt="Federação Pernambucana" class="w-full h-full object-contain rounded-full" />
+            </div>
+            <div class="min-w-0 sidebar-text">
+              <h1 class="font-oswald text-base uppercase font-bold text-white tracking-wide truncate">
+                FPEFT <span class="text-pe-gold">ADM</span>
+              </h1>
+              <span class="block text-[10px] text-slate-400 font-bold uppercase tracking-wider truncate">
+                Painel Oficial
+              </span>
+            </div>
           </div>
-          <div class="min-w-0">
-            <h1 class="font-oswald text-base uppercase font-bold text-white tracking-wide truncate">
-              FPEFT <span class="text-pe-gold">ADM</span>
-            </h1>
-            <span class="block text-[10px] text-slate-400 font-bold uppercase tracking-wider truncate">
-              Painel de Controle Oficial
-            </span>
-          </div>
+          <!-- Botão Toggle com Ícone & Animação -->
+          <button id="btnToggleSidebar" onclick="toggleSidebarCollapse()" class="p-2 rounded-xl text-slate-400 hover:text-pe-gold hover:bg-white/5 transition flex items-center justify-center cursor-pointer shrink-0 border border-transparent hover:border-[#1c253b]" title="Recolher menu lateral (somente ícones)">
+            <i id="sidebarToggleIcon" class="fa-solid fa-angles-left text-xs transition-transform duration-300"></i>
+          </button>
         </div>
       </div>
 
       <!-- Perfil do Administrador Logado -->
-      <div class="px-5 py-3.5 bg-[#080d16] border-b border-[#151c2e]/80 flex items-center justify-between">
+      <div id="sidebarUserBox" class="px-5 py-3.5 bg-[#080d16] border-b border-[#151c2e]/80 flex items-center justify-between transition-all" title="gabrielacessor@foot-table.pe.gov.br (MASTER)">
         <div class="flex items-center gap-2.5 min-w-0">
-          <div class="w-2.5 h-2.5 rounded-full bg-pe-gold animate-pulse shrink-0"></div>
-          <div class="min-w-0">
+          <div class="w-2.5 h-2.5 rounded-full bg-pe-gold animate-pulse shrink-0" title="Online - ADM MASTER"></div>
+          <div class="min-w-0 sidebar-text">
             <span id="sidebarAdminUser" class="block text-xs font-bold text-white truncate">gabrielacessor@foot-table.pe.gov.br</span>
             <span id="sidebarAdminRole" class="text-[9px] uppercase tracking-wider text-pe-gold font-bold">👑 ADM MASTER • Presidência</span>
           </div>
         </div>
-        <span class="text-[10px] bg-pe-gold/20 text-pe-gold px-2 py-0.5 rounded font-mono font-bold">MASTER</span>
+        <span class="text-[10px] bg-pe-gold/20 text-pe-gold px-2 py-0.5 rounded font-mono font-bold sidebar-text shrink-0">MASTER</span>
       </div>
 
       <!-- Menu de Navegação Vertical -->
       <nav class="flex-1 p-3.5 space-y-2 overflow-y-auto">
         
-        <div class="px-3 pt-1 pb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
-          Abas do Sistema
+        <div class="px-2 pt-1 pb-1 flex items-center justify-between sidebar-nav-heading">
+          <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500 sidebar-text">
+            Abas do Sistema
+          </span>
+          <button id="btnToggleTextMode" onclick="toggleSidebarCollapse()" class="sidebar-text text-[10px] font-bold text-sky-400 hover:text-pe-gold transition flex items-center gap-1.5 cursor-pointer py-1 px-2 rounded-lg bg-sky-950/40 hover:bg-sky-900/50 border border-sky-800/40" title="Ocultar textos e deixar apenas ícones">
+            <i class="fa-solid fa-table-columns text-[9px]"></i>
+            <span>Modo Ícones</span>
+          </button>
         </div>
 
+        <!-- Botão de Expandir visível apenas quando recolhido -->
+        <button id="btnExpandWhenCollapsed" onclick="toggleSidebarCollapse()" class="hidden w-full py-2.5 px-2 rounded-2xl bg-sky-950/40 hover:bg-pe-gold/20 hover:text-pe-gold border border-sky-800/40 text-sky-300 transition cursor-pointer flex items-center justify-center mb-1 group" title="Expandir menu (mostrar textos e ícones)">
+          <i class="fa-solid fa-angles-right text-xs group-hover:translate-x-0.5 transition-transform"></i>
+        </button>
+
         <!-- 1. Aba Início (Ativo por padrão com Amarelo Oficial) -->
-        <button onclick="switchTab('inicio')" id="navBtn-inicio" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all cursor-pointer group active-nav-pill">
+        <button onclick="switchTab('inicio')" id="navBtn-inicio" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all cursor-pointer group active-nav-pill" title="Início">
           <div class="flex items-center gap-3.5">
             <!-- Ícone Casa / Início -->
             <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
               <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
             </svg>
-            <span class="text-sm font-semibold tracking-wide">Início</span>
+            <span class="sidebar-text text-sm font-semibold tracking-wide">Início</span>
           </div>
-          <span class="nav-indicator w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0"></span>
+          <span class="nav-indicator w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0 sidebar-text"></span>
         </button>
 
         <!-- 2. Aba Studio de Emissão (CR80 Oficial) -->
-        <button onclick="switchTab('atletas')" id="navBtn-atletas" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
+        <button onclick="switchTab('atletas')" id="navBtn-atletas" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group" title="Studio de Emissão">
           <div class="flex items-center gap-3.5">
             <!-- Ícone Studio / Carteira -->
             <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 2a1 1 0 00-1 1v1a1 1 0 002 0V3a1 1 0 00-1-1zM4 4h3a3 3 0 006 0h3a2 2 0 012 2v9a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm2.5 7a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm2.45 4a2.5 2.5 0 00-4.9 0h4.9zM12 9a1 1 0 100 2h3a1 1 0 100-2h-3zm1 4a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z" clip-rule="evenodd"/>
             </svg>
-            <span class="text-sm font-semibold tracking-wide">Studio de Emissão</span>
+            <span class="sidebar-text text-sm font-semibold tracking-wide">Studio de Emissão</span>
           </div>
-          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0"></span>
+          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0 sidebar-text"></span>
         </button>
 
         <!-- 3. Aba Jogadores Cadastrados (Nova Aba Oficial de Gestão e Homologação) -->
-        <button onclick="switchTab('jogadores')" id="navBtn-jogadores" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
+        <button onclick="switchTab('jogadores')" id="navBtn-jogadores" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group" title="Jogadores Cadastrados">
           <div class="flex items-center gap-3.5">
             <!-- Ícone Jogadores / Grupo -->
-            <i class="fa-solid fa-users w-5 text-center text-slate-400 group-hover:text-white"></i>
-            <span class="text-sm font-semibold tracking-wide">Jogadores Cadastrados</span>
+            <i class="fa-solid fa-users w-5 text-center text-slate-400 group-hover:text-white shrink-0"></i>
+            <span class="sidebar-text text-sm font-semibold tracking-wide">Jogadores Cadastrados</span>
           </div>
-          <div class="flex items-center gap-1.5">
+          <div class="flex items-center gap-1.5 sidebar-text">
             <span id="navPendingBadge" class="hidden text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40 px-2 py-0.5 rounded-full"></span>
             <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0"></span>
           </div>
         </button>
 
-        <!-- 3. Aba Estúdio da Carteira -->
-        <button onclick="switchTab('estudio')" id="navBtn-estudio" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
+        <!-- 4. Aba Estúdio da Carteira -->
+        <button onclick="switchTab('estudio')" id="navBtn-estudio" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group" title="Estúdio da Carteira">
           <div class="flex items-center gap-3.5">
             <!-- Ícone Estúdio / Dimensões -->
             <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
             </svg>
-            <span class="text-sm font-semibold tracking-wide">Estúdio da Carteira</span>
+            <span class="sidebar-text text-sm font-semibold tracking-wide">Estúdio da Carteira</span>
           </div>
-          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0"></span>
+          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0 sidebar-text"></span>
         </button>
 
-        <!-- 4. Aba Notícias & Torneios -->
-        <button onclick="switchTab('noticias')" id="navBtn-noticias" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
+        <!-- 5. Aba Notícias & Torneios -->
+        <button onclick="switchTab('noticias')" id="navBtn-noticias" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group" title="Notícias & Torneios">
           <div class="flex items-center gap-3.5">
             <!-- Ícone Notícias / Jornal -->
             <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
             </svg>
-            <span class="text-sm font-semibold tracking-wide">Notícias & Torneios</span>
+            <span class="sidebar-text text-sm font-semibold tracking-wide">Notícias & Torneios</span>
           </div>
-          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0"></span>
+          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0 sidebar-text"></span>
         </button>
 
-        <!-- 5. Aba E-mails Institucionais & Gestão -->
-        <button onclick="switchTab('emails')" id="navBtn-emails" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
+        <!-- 6. Aba E-mails Institucionais & Gestão -->
+        <button onclick="switchTab('emails')" id="navBtn-emails" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group" title="E-mail Institucional">
           <div class="flex items-center gap-3.5">
             <!-- Ícone Envelope / E-mail Institucional -->
             <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
             </svg>
-            <span class="text-sm font-semibold tracking-wide">E-mail Institucional</span>
+            <span class="sidebar-text text-sm font-semibold tracking-wide">E-mail Institucional</span>
           </div>
-          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0"></span>
+          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0 sidebar-text"></span>
         </button>
 
-        <!-- 6. Aba Banco de Dados & Ajustes (Keep-Alive) -->
-        <button onclick="switchTab('config')" id="navBtn-config" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
+        <!-- 7. Aba Banco de Dados & Ajustes (Keep-Alive) -->
+        <button onclick="switchTab('config')" id="navBtn-config" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group" title="Banco & Ajustes">
           <div class="flex items-center gap-3.5">
             <!-- Ícone Engrenagem / Banco -->
             <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
             </svg>
-            <span class="text-sm font-semibold tracking-wide">Banco & Ajustes</span>
+            <span class="sidebar-text text-sm font-semibold tracking-wide">Banco & Ajustes</span>
           </div>
-          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0"></span>
+          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0 sidebar-text"></span>
         </button>
 
-        <!-- 6. Guia Completo do Painel -->
-        <button onclick="switchTab('guia')" id="navBtn-guia" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group">
+        <!-- 8. Guia Completo do Painel -->
+        <button onclick="switchTab('guia')" id="navBtn-guia" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group" title="Guia do Painel">
           <div class="flex items-center gap-3.5">
             <!-- Ícone Manual / Guia -->
             <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
-            <span class="text-sm font-semibold tracking-wide">Guia do Painel</span>
+            <span class="sidebar-text text-sm font-semibold tracking-wide">Guia do Painel</span>
           </div>
-          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0"></span>
+          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0 sidebar-text"></span>
         </button>
 
       </nav>
 
       <!-- Rodapé da Sidebar: Ver Site & Sair -->
-      <div class="p-4 border-t border-[#151c2e] bg-[#04060b] space-y-2">
-        <a href="index.html" class="w-full bg-[#0c1424] hover:bg-[#121e36] border border-pe-cardBorder text-white font-bold text-xs uppercase px-3 py-2.5 rounded-xl transition flex items-center justify-center gap-2">
-          <span>🌐</span> Ver Site Público
+      <div id="sidebarFooter" class="p-4 border-t border-[#151c2e] bg-[#04060b] space-y-2">
+        <a href="index.html" class="w-full bg-[#0c1424] hover:bg-[#121e36] border border-pe-cardBorder text-white font-bold text-xs uppercase px-3 py-2.5 rounded-xl transition flex items-center justify-center gap-2" title="Ver Site Público">
+          <span class="text-base shrink-0">🌐</span>
+          <span class="sidebar-text">Ver Site Público</span>
         </a>
-        <button onclick="handleLogout()" class="w-full border border-red-500/30 hover:bg-red-950/40 text-red-400 font-bold text-xs uppercase px-3 py-2 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer">
-          <span>🚪</span> Sair do Sistema
+        <button onclick="handleLogout()" class="w-full border border-red-500/30 hover:bg-red-950/40 text-red-400 font-bold text-xs uppercase px-3 py-2 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer" title="Sair do Sistema">
+          <span class="text-base shrink-0">🚪</span>
+          <span class="sidebar-text">Sair do Sistema</span>
         </button>
       </div>
 
     </aside>
+    <script>
+      (function() {
+        try {
+          if (localStorage.getItem('fpeft_sidebar_collapsed') === 'true') {
+            document.getElementById('sidebar')?.classList.add('sidebar-collapsed');
+          }
+        } catch(e) {}
+      })();
+    </script>
 
     <!-- ========================================================= -->
     <!-- ÁREA PRINCIPAL DE CONTEÚDO                                -->
@@ -415,6 +549,10 @@
       <!-- Topbar Superior -->
       <header class="bg-[#05080e]/95 backdrop-blur border-b border-[#151c2e] px-4 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-30">
         <div class="flex items-center gap-3">
+          <!-- Botão Toggle de Navegação na Topbar -->
+          <button id="btnTopbarToggleSidebar" onclick="toggleSidebarCollapse()" class="p-2 rounded-xl bg-[#090e1a] hover:bg-white/10 text-slate-400 hover:text-pe-gold text-xs transition flex items-center justify-center cursor-pointer border border-[#151c2e]" title="Alternar menu lateral (expandir / recolher)">
+            <i class="fa-solid fa-bars text-sm"></i>
+          </button>
           <span id="headerPageTitle" class="font-oswald text-xl uppercase font-bold text-white tracking-wide">
             Início & Carteiras Homologadas
           </span>
@@ -1915,8 +2053,50 @@
     }
 
     /* =========================================================
-       SISTEMA DE NAVEGAÇÃO LATERAL (ABAS OFICIAIS)
+       SISTEMA DE NAVEGAÇÃO LATERAL (ABAS OFICIAIS & MODO ÍCONES)
        ========================================================= */
+    function toggleSidebarCollapse() {
+      const sidebar = document.getElementById('sidebar');
+      if (!sidebar) return;
+      const isCollapsed = sidebar.classList.toggle('sidebar-collapsed');
+      try {
+        localStorage.setItem('fpeft_sidebar_collapsed', isCollapsed ? 'true' : 'false');
+      } catch (e) {}
+      updateSidebarToggleButtons(isCollapsed);
+    }
+
+    function updateSidebarToggleButtons(isCollapsed) {
+      const icon = document.getElementById('sidebarToggleIcon');
+      if (icon) {
+        if (isCollapsed) {
+          icon.className = 'fa-solid fa-angles-right text-xs transition-transform duration-300';
+        } else {
+          icon.className = 'fa-solid fa-angles-left text-xs transition-transform duration-300';
+        }
+      }
+
+      const btnToggle = document.getElementById('btnToggleSidebar');
+      if (btnToggle) {
+        btnToggle.title = isCollapsed 
+          ? 'Expandir menu lateral (mostrar nomes e textos)' 
+          : 'Recolher menu lateral (mostrar apenas ícones)';
+      }
+
+      const btnTextMode = document.getElementById('btnToggleTextMode');
+      if (btnTextMode) {
+        btnTextMode.title = isCollapsed 
+          ? 'Expandir textos do menu' 
+          : 'Ocultar textos (deixar apenas ícones)';
+      }
+
+      const topbarBtn = document.getElementById('btnTopbarToggleSidebar');
+      if (topbarBtn) {
+        topbarBtn.title = isCollapsed
+          ? 'Expandir menu lateral'
+          : 'Recolher menu lateral (somente ícones)';
+      }
+    }
+
     const ALL_TABS = ['inicio', 'atletas', 'jogadores', 'estudio', 'noticias', 'emails', 'config', 'guia'];
     const TAB_TITLES = {
       inicio: '🏠 Início & Carteiras Homologadas',
@@ -7075,6 +7255,10 @@
             clearQuickAthleteSearch();
           }
         }, 50);
+
+        // Sincroniza estado inicial do botão de alternância da sidebar
+        const isCollapsed = localStorage.getItem('fpeft_sidebar_collapsed') === 'true';
+        updateSidebarToggleButtons(isCollapsed);
 
         // Ao atualizar o site (F5 ou abertura), gera automaticamente um novo código de federado único
         generateFederatedNumber(true);
