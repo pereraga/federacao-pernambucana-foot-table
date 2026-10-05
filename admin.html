@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261005_v7_limpo_sem_duplicata';
+      const APP_REV = '20261005_v8_pdf_blob_download';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -3688,15 +3688,35 @@
     /* =========================================================
        HELPER: CARREGAMENTO ASSÍNCRONO DE IMAGEM
        ========================================================= */
-    function loadImageAsync(src) {
+    function loadImageAsync(src, timeoutMs = 3500) {
       return new Promise((resolve) => {
         if (!src) return resolve(null);
         const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = () => resolve(img);
+        // Apenas aplica crossOrigin em URLs remotas http/https, nunca em data: ou blob:
+        if (typeof src === 'string' && (src.startsWith('http://') || src.startsWith('https://'))) {
+          img.crossOrigin = 'anonymous';
+        }
+        let settled = false;
+        const timer = setTimeout(() => {
+          if (!settled) {
+            settled = true;
+            resolve(null);
+          }
+        }, timeoutMs);
+
+        img.onload = () => {
+          if (!settled) {
+            settled = true;
+            clearTimeout(timer);
+            resolve(img);
+          }
+        };
         img.onerror = () => {
-          console.warn('Falha ao carregar imagem para exportação:', src);
-          resolve(null);
+          if (!settled) {
+            settled = true;
+            clearTimeout(timer);
+            resolve(null);
+          }
         };
         img.src = src;
       });
@@ -3974,11 +3994,23 @@
 
       try {
         const hdCanvas = await renderCarteiraToHdCanvas(studioState.elements, a, 3);
-        const hdImgData = hdCanvas.toDataURL('image/png', 1.0);
+        let hdImgData = null;
+        try {
+          hdImgData = hdCanvas.toDataURL('image/png', 1.0);
+        } catch (taintErr) {
+          console.warn('CORS/Taint no canvas detectado, executando render de contingência limpo:', taintErr);
+          const safeElements = studioState.elements.map(el => el.type === 'photo' ? { ...el, photoUrl: '' } : el);
+          const safeCanvas = await renderCarteiraToHdCanvas(safeElements, { ...a, foto: '' }, 3);
+          hdImgData = safeCanvas.toDataURL('image/png', 1.0);
+        }
 
-        const jsPdfLib = window.jspdf && window.jspdf.jsPDF ? window.jspdf.jsPDF : window.jsPDF;
+        let jsPdfLib = null;
+        if (window.jspdf && window.jspdf.jsPDF) jsPdfLib = window.jspdf.jsPDF;
+        else if (window.jsPDF) jsPdfLib = window.jsPDF;
+        else if (typeof jsPDF === 'function') jsPdfLib = jsPDF;
+
         if (!jsPdfLib) {
-          throw new Error('Biblioteca jsPDF não inicializada.');
+          throw new Error('Biblioteca jsPDF não inicializada no navegador.');
         }
 
         const doc = new jsPdfLib({
@@ -3992,20 +4024,43 @@
 
         const safeCode = (a.federado || a.codigo || 'atleta').replace(/[^a-zA-Z0-9_-]/g, '_');
         const fileName = `carteira-atleta-fpeft-${safeCode}.pdf`;
-        doc.save(fileName);
+
+        // Download Infalível: Gera Blob nativo e dispara âncora de download direto no navegador
+        let downloadDispatched = false;
+        try {
+          const pdfBlob = doc.output('blob');
+          if (pdfBlob && pdfBlob.size > 0) {
+            const blobUrl = URL.createObjectURL(pdfBlob);
+            const downloadLink = document.createElement('a');
+            downloadLink.href = blobUrl;
+            downloadLink.download = fileName;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            setTimeout(() => {
+              if (document.body.contains(downloadLink)) document.body.removeChild(downloadLink);
+              URL.revokeObjectURL(blobUrl);
+            }, 1500);
+            downloadDispatched = true;
+          }
+        } catch (blobErr) {
+          console.warn('Fallback doc.output(blob):', blobErr);
+        }
+
+        if (!downloadDispatched) {
+          doc.save(fileName);
+        }
+
         showToast(`✓ PDF Oficial (#${safeCode}) baixado com sucesso (1 arquivo)!`);
       } catch (err) {
         console.error('Erro ao gerar PDF:', err);
         showToast('Erro ao exportar PDF: ' + (err.message || 'Falha na exportação'));
       } finally {
-        setTimeout(() => {
-          _isExportingCarteiraPdf = false;
-          if (btn) {
-            btn.disabled = false;
-            btn.classList.remove('opacity-75', 'cursor-not-allowed');
-            btn.innerHTML = originalHtml;
-          }
-        }, 1200);
+        _isExportingCarteiraPdf = false;
+        if (btn) {
+          btn.disabled = false;
+          btn.classList.remove('opacity-75', 'cursor-not-allowed');
+          btn.innerHTML = originalHtml;
+        }
       }
     }
 
@@ -4053,30 +4108,40 @@
         };
         const safeCode = activeFed.replace(/[^a-zA-Z0-9_-]/g, '_');
         const hdCanvas = await renderCarteiraToHdCanvas(studioState.elements, a, 3);
-        const pngUrl = hdCanvas.toDataURL('image/png', 1.0);
+        let pngUrl = null;
+        try {
+          pngUrl = hdCanvas.toDataURL('image/png', 1.0);
+        } catch (taintErr) {
+          const safeElements = studioState.elements.map(el => el.type === 'photo' ? { ...el, photoUrl: '' } : el);
+          const safeCanvas = await renderCarteiraToHdCanvas(safeElements, { ...a, foto: '' }, 3);
+          pngUrl = safeCanvas.toDataURL('image/png', 1.0);
+        }
 
         const downloadLink = document.createElement('a');
         downloadLink.href = pngUrl;
         downloadLink.download = `carteira-atleta-fpeft-HD-${safeCode}.png`;
         document.body.appendChild(downloadLink);
         downloadLink.click();
-        document.body.removeChild(downloadLink);
+        setTimeout(() => {
+          if (document.body.contains(downloadLink)) document.body.removeChild(downloadLink);
+        }, 1500);
 
         showToast('PNG HD (300 DPI - Letras Nítidas) baixado com sucesso (1 arquivo)!');
       } catch (err) {
         console.error('Erro ao exportar PNG:', err);
         showToast('Erro ao exportar PNG: ' + (err.message || 'Falha na exportação'));
       } finally {
-        setTimeout(() => {
-          _isExportingCarteiraPng = false;
-          if (btn) {
-            btn.disabled = false;
-            btn.classList.remove('opacity-75', 'cursor-not-allowed');
-            btn.innerHTML = originalHtml;
-          }
-        }, 1200);
+        _isExportingCarteiraPng = false;
+        if (btn) {
+          btn.disabled = false;
+          btn.classList.remove('opacity-75', 'cursor-not-allowed');
+          btn.innerHTML = originalHtml;
+        }
       }
     }
+
+    window.exportCarteiraPDF = exportCarteiraPDF;
+    window.exportHdPng = exportHdPng;
 
     /* Gestão das 4 Bases de Categoria: Aspirante, Iniciante, Amador, Profissional */
     function selectCategoryBase(cat) {
