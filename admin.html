@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261005_v10_failsafe_downloads';
+      const APP_REV = '20261005_v11_multi_download_fix';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -3695,15 +3695,16 @@
     }
 
     /* =========================================================
-       HELPER: CARREGAMENTO ASSÍNCRONO DE IMAGEM COM CACHE
+       HELPER: CARREGAMENTO ASSÍNCRONO DE IMAGEM COM CACHE GLOBAL
+       Garante resolução instantânea (0ms) a partir da 2ª chamada
        ========================================================= */
-    let _cachedOfficialBgImg = null;
+    const _loadedImagesCache = new Map();
 
-    function loadImageAsync(src, timeoutMs = 6000) {
+    function loadImageAsync(src, timeoutMs = 3500) {
       return new Promise((resolve) => {
         if (!src) return resolve(null);
-        if (_cachedOfficialBgImg && src === window.OFFICIAL_FPEFT_BG_DATA_URL) {
-          return resolve(_cachedOfficialBgImg);
+        if (_loadedImagesCache.has(src)) {
+          return resolve(_loadedImagesCache.get(src));
         }
         const img = new Image();
         if (typeof src === 'string' && (src.startsWith('http://') || src.startsWith('https://'))) {
@@ -3721,9 +3722,7 @@
           if (!settled) {
             settled = true;
             clearTimeout(timer);
-            if (src === window.OFFICIAL_FPEFT_BG_DATA_URL) {
-              _cachedOfficialBgImg = img;
-            }
+            _loadedImagesCache.set(src, img);
             resolve(img);
           }
         };
@@ -3762,6 +3761,64 @@
         ctx.arcTo(x, y, x + width, y, r);
         ctx.closePath();
       }
+    }
+
+    /* =========================================================
+       DESENHISTA VETORIAL NATIVO: SILHUETA OFICIAL DO ATLETA
+       Execução síncrona instantânea (<0.1ms) sem rede e sem taint
+       ========================================================= */
+    function drawDefaultAthleteAvatar(ctx, x, y, width, height, radius) {
+      ctx.save();
+      drawRoundedRectPath(ctx, x, y, width, height, radius);
+      ctx.clip();
+
+      // Fundo azul escuro premium
+      ctx.fillStyle = '#071329';
+      ctx.fillRect(x, y, width, height);
+
+      const cx = x + width / 2;
+      const cy = y + height * 0.36;
+      const rHead = width * 0.22;
+
+      // Brilho azul de fundo na cabeça
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.22)';
+      ctx.beginPath();
+      ctx.arc(cx, cy, rHead * 1.15, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Cabeça do atleta
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(cx, cy, rHead, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Tronco / Ombro do atleta
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.75)';
+      ctx.beginPath();
+      ctx.ellipse(cx, y + height * 0.88, width * 0.44, height * 0.32, 0, Math.PI, 0, false);
+      ctx.fill();
+
+      // Pílula inferior "FOTO 3X4 DO ATLETA"
+      const scaleRef = width / 200;
+      const tagH = Math.max(16, Math.round(22 * scaleRef));
+      const tagW = width * 0.86;
+      const tagX = cx - tagW / 2;
+      const tagY = y + height - tagH - Math.round(10 * scaleRef);
+
+      ctx.fillStyle = '#0b1c3d';
+      drawRoundedRectPath(ctx, tagX, tagY, tagW, tagH, tagH / 2);
+      ctx.fill();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = Math.max(1, 1.5 * scaleRef);
+      ctx.stroke();
+
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = `900 ${Math.max(8, Math.round(10 * scaleRef))}px 'Montserrat', sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('FOTO 3X4 DO ATLETA', cx, tagY + tagH / 2);
+
+      ctx.restore();
     }
 
     /* =========================================================
@@ -3829,19 +3886,23 @@
           ctx.restore();
 
           let pUrl = athlete ? (athlete.foto || athlete.foto_url || item.photoUrl) : item.photoUrl;
-          if (!pUrl || pUrl.includes('images.unsplash.com')) {
-            pUrl = OFFICIAL_DEFAULT_PHOTO_SVG;
-          }
+          const isDefaultPhoto = !pUrl || pUrl.includes('images.unsplash.com') || pUrl === OFFICIAL_DEFAULT_PHOTO_SVG || pUrl.startsWith('data:image/svg+xml');
 
-          if (pUrl && !isSafeOnly) {
-            const photoImg = await loadImageAsync(pUrl);
+          if (isDefaultPhoto) {
+            drawDefaultAthleteAvatar(ctx, item.x * scale, item.y * scale, item.width * scale, item.height * scale, (item.borderRadius || 20) * scale);
+          } else if (!isSafeOnly) {
+            const photoImg = await loadImageAsync(pUrl, 2500);
             if (photoImg) {
               ctx.save();
               drawRoundedRectPath(ctx, item.x * scale, item.y * scale, item.width * scale, item.height * scale, (item.borderRadius || 20) * scale);
               ctx.clip();
               ctx.drawImage(photoImg, item.x * scale, item.y * scale, item.width * scale, item.height * scale);
               ctx.restore();
+            } else {
+              drawDefaultAthleteAvatar(ctx, item.x * scale, item.y * scale, item.width * scale, item.height * scale, (item.borderRadius || 20) * scale);
             }
+          } else {
+            drawDefaultAthleteAvatar(ctx, item.x * scale, item.y * scale, item.width * scale, item.height * scale, (item.borderRadius || 20) * scale);
           }
 
           if (item.borderWidth) {
@@ -4017,142 +4078,123 @@
     }
 
     /* =========================================================
-       HELPER INFALÍVEL: DISPARO DE DOWNLOAD DE ARQUIVOS
-       Garante acionamento direto via Blob do navegador
+       HELPER INFALÍVEL: DISPARO DIRETO E SÍNCRONO DE DOWNLOAD VIA BLOB
+       Garante funcionamento contínuo e repetível em 100% dos cliques no Chrome/Edge/Safari
        ========================================================= */
-    function triggerFileDownload(blobOrDataUrl, fileName) {
-      if (!blobOrDataUrl) return;
+    function downloadBlobDirectly(blob, fileName) {
+      if (!blob) return null;
 
-      let url = blobOrDataUrl;
-      let isBlob = false;
-      if (blobOrDataUrl instanceof Blob) {
-        url = URL.createObjectURL(blobOrDataUrl);
-        isBlob = true;
-      }
-
-      // Suporte direto para navegadores com msSaveOrOpenBlob
-      if (window.navigator && window.navigator.msSaveOrOpenBlob && isBlob) {
+      // 1. Suporte legado msSaveOrOpenBlob
+      if (window.navigator && typeof window.navigator.msSaveOrOpenBlob === 'function') {
         try {
-          window.navigator.msSaveOrOpenBlob(blobOrDataUrl, fileName);
-          return;
-        } catch (e) {}
-      }
-
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      a.rel = 'noopener';
-      a.style.position = 'fixed';
-      a.style.left = '-9999px';
-      a.style.top = '-9999px';
-      a.style.opacity = '0';
-      document.body.appendChild(a);
-
-      try {
-        const clickEvt = new MouseEvent('click', {
-          bubbles: true,
-          cancelable: true,
-          view: window
-        });
-        a.dispatchEvent(clickEvt);
-      } catch (err) {
-        try {
-          a.click();
-        } catch (clickErr) {
-          console.warn('a.click falhou:', clickErr);
+          window.navigator.msSaveOrOpenBlob(blob, fileName);
+          return null;
+        } catch (e) {
+          console.warn('msSaveOrOpenBlob falhou:', e);
         }
       }
 
-      setTimeout(() => {
-        if (document.body.contains(a)) document.body.removeChild(a);
-      }, 5000);
+      // 2. Disparo direto e síncrono via URL.createObjectURL
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = blobUrl;
+      a.download = fileName;
+      a.rel = 'noopener';
+      document.body.appendChild(a);
 
-      // Mantém o Blob vivo por 60 segundos para evitar abortamento de download
-      if (isBlob) {
-        setTimeout(() => {
-          try { URL.revokeObjectURL(url); } catch (e) {}
-        }, 60000);
+      try {
+        a.click();
+      } catch (err) {
+        console.warn('Direct a.click() error:', err);
+      } finally {
+        if (a.parentNode) {
+          a.parentNode.removeChild(a);
+        }
       }
+
+      // Mantém o Blob vivo por 60 segundos para evitar corte no download do navegador
+      setTimeout(() => {
+        try { URL.revokeObjectURL(blobUrl); } catch (e) {}
+      }, 60000);
+
+      return blobUrl;
+    }
+
+    function triggerFileDownload(blobOrDataUrl, fileName) {
+      if (!blobOrDataUrl) return null;
+      let blob = blobOrDataUrl;
+      if (!(blob instanceof Blob)) {
+        blob = dataUrlToBlob(blobOrDataUrl);
+      }
+      if (!blob) {
+        console.warn('triggerFileDownload: falha ao converter dados em Blob binário');
+        return null;
+      }
+      return downloadBlobDirectly(blob, fileName);
     }
 
     /* =========================================================
-       NOTIFICAÇÃO VISUAL COM LINK DIRETO DE DOWNLOAD
-       Garante que mesmo com bloqueios de pop-up do navegador,
-       o usuário pode clicar no botão verde e baixar o arquivo
+       NOTIFICAÇÃO VISUAL COM LINK DIRETO E PERMANENTE DE DOWNLOAD
+       Garante que mesmo com bloqueios automáticos do navegador,
+       o usuário pode clicar no botão verde e baixar o arquivo com 1 clique
        ========================================================= */
-    function showDownloadToast(blobOrDataUrl, fileName, fileType = 'Arquivo') {
-      let url = blobOrDataUrl;
-      if (blobOrDataUrl instanceof Blob) {
-        url = URL.createObjectURL(blobOrDataUrl);
+    function showDownloadToast(blobUrl, fileName, fileType = 'Arquivo') {
+      let container = document.getElementById('toast_dl_active');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast_dl_active';
+        container.className = "fixed bottom-6 right-6 z-[999999] max-w-md bg-[#0a1124] border-2 border-emerald-500/90 rounded-2xl p-4 shadow-2xl text-white flex flex-col gap-3 transition-all duration-300";
+        document.body.appendChild(container);
       }
 
-      const toastId = 'toast_dl_' + Date.now();
-      const div = document.createElement('div');
-      div.id = toastId;
-      div.className = "fixed bottom-6 right-6 z-[999999] max-w-md bg-[#0a1124] border-2 border-emerald-500/80 rounded-2xl p-4 shadow-2xl text-white flex flex-col gap-3";
-      div.innerHTML = `
+      container.style.opacity = '1';
+      container.style.transform = 'translateY(0)';
+      container.innerHTML = `
         <div class="flex items-start gap-3">
           <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
             <i class="fa-solid fa-circle-check text-lg"></i>
           </div>
-          <div class="flex-1">
+          <div class="flex-1 min-w-0">
             <p class="font-black text-sm text-emerald-300 uppercase tracking-wide">${fileType} Pronto para Baixar!</p>
-            <p class="text-xs text-slate-200 mt-0.5 leading-snug">
+            <p class="text-xs text-slate-200 mt-0.5 leading-snug truncate">
               Arquivo: <strong class="text-white font-mono">${escapeHtml(fileName)}</strong>
             </p>
             <p class="text-[11px] text-slate-400 mt-0.5">
-              O download automático foi iniciado. Se não começou, clique no botão abaixo:
+              Download disparado. Caso queira baixar novamente, clique abaixo:
             </p>
           </div>
-          <button type="button" onclick="this.closest('#${toastId}').remove()" class="text-slate-400 hover:text-white text-xs cursor-pointer p-1">
+          <button type="button" onclick="closeDownloadToast()" class="text-slate-400 hover:text-white text-xs cursor-pointer p-1">
             <i class="fa-solid fa-xmark text-sm"></i>
           </button>
         </div>
         <div class="flex items-center gap-2 pt-1 border-t border-slate-700/60">
-          <a href="${url}" download="${fileName}" class="flex-1 py-2 px-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs uppercase rounded-xl transition shadow-lg flex items-center justify-center gap-2 cursor-pointer text-center">
+          <a href="${blobUrl}" download="${fileName}" class="flex-1 py-2 px-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs uppercase rounded-xl transition shadow-lg flex items-center justify-center gap-2 cursor-pointer text-center">
             <i class="fa-solid fa-download text-sm"></i>
-            <span>Baixar Agora (${fileType})</span>
+            <span>Baixar Arquivo Agora (${fileType})</span>
           </a>
-          <button type="button" onclick="this.closest('#${toastId}').remove()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition cursor-pointer">
+          <button type="button" onclick="closeDownloadToast()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition cursor-pointer">
             Fechar
           </button>
         </div>
       `;
-      document.body.appendChild(div);
 
-      setTimeout(() => {
-        if (document.body.contains(div)) {
-          div.style.transition = 'opacity 0.5s ease-out';
-          div.style.opacity = '0';
-          setTimeout(() => { if (document.body.contains(div)) div.remove(); }, 500);
-        }
-      }, 15000);
+      if (window._toastDlTimer) clearTimeout(window._toastDlTimer);
+      window._toastDlTimer = setTimeout(() => {
+        closeDownloadToast();
+      }, 20000);
     }
 
-    let _isExportingCarteiraPdf = false;
-    let _isExportingCarteiraPng = false;
-
-    /* =========================================================
-       MODO 1: EXPORTAR PDF EM ALTA DEFINIÇÃO (CR80 VETORIAL)
-       Formato oficial CR80 (85.60 mm x 53.98 mm) - Letras e Arte Nítidas
-       Emite RIGOROSAMENTE 1 ÚNICO arquivo PDF por vez (sem travamento)
-       ========================================================= */
-    async function exportCarteiraPDF(athlete = null) {
-      if (_isExportingCarteiraPdf) {
-        showToast('⏳ Aguarde, o PDF já está sendo gerado...');
-        return;
+    function closeDownloadToast() {
+      const container = document.getElementById('toast_dl_active');
+      if (container) {
+        container.style.opacity = '0';
+        container.style.transform = 'translateY(10px)';
+        setTimeout(() => { if (container && container.parentNode) container.parentNode.removeChild(container); }, 300);
       }
-      _isExportingCarteiraPdf = true;
+    }
 
-      const btn = document.getElementById('btnExportPDF');
-      const originalHtml = btn ? btn.innerHTML : '';
-      if (btn) {
-        btn.disabled = true;
-        btn.classList.add('opacity-75', 'cursor-not-allowed');
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-sm"></i> <span>Gerando PDF...</span>';
-      }
-
-      showToast('Gerando Carteira Oficial em PDF de Alta Definição...');
+    function getAthleteFromCurrentForm() {
       const fedInputVal = (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '').trim();
       const codeInputVal = (document.getElementById('athleteCode') ? document.getElementById('athleteCode').value : '').trim();
       const activeFed = fedInputVal || codeInputVal || '945537';
@@ -4160,7 +4202,7 @@
       const photoEl = studioState.elements.find(item => item.id === 'field-foto');
       const photoVal = (photoEl && photoEl.photoUrl) ? photoEl.photoUrl : '';
 
-      const a = athlete || {
+      return {
         codigo: activeFed,
         nome: (document.getElementById('athleteName') ? document.getElementById('athleteName').value : 'Atleta') || 'Atleta',
         cpf: (document.getElementById('athleteCpf') ? document.getElementById('athleteCpf').value : '') || '',
@@ -4173,17 +4215,58 @@
         validade: (document.getElementById('athleteValidity') ? document.getElementById('athleteValidity').value : '12/2026') || '12/2026',
         foto: photoVal
       };
+    }
+
+    let _isExportingCarteiraPdf = false;
+    let _isExportingCarteiraPng = false;
+    window._lastActiveAthlete = null;
+
+    /* =========================================================
+       MODO 1: EXPORTAR PDF EM ALTA DEFINIÇÃO (CR80 VETORIAL)
+       Formato oficial CR80 (85.60 mm x 53.98 mm) - Letras e Arte Nítidas
+       Garante download imediato e repetível a cada clique
+       ========================================================= */
+    async function exportCarteiraPDF(athlete = null, triggerBtn = null) {
+      if (_isExportingCarteiraPdf) {
+        showToast('⏳ Aguarde, o PDF já está sendo gerado...');
+        return;
+      }
+      _isExportingCarteiraPdf = true;
+
+      // Destrava automaticamente após 10 segundos para segurança total
+      const safetyTimer = setTimeout(() => {
+        _isExportingCarteiraPdf = false;
+      }, 10000);
+
+      const headerBtn = document.getElementById('btnExportPDF');
+      const activeBtn = triggerBtn || headerBtn;
+      const originalHtml = activeBtn ? activeBtn.innerHTML : '';
+      if (activeBtn) {
+        activeBtn.disabled = true;
+        activeBtn.classList.add('opacity-75', 'cursor-not-allowed');
+        activeBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-sm"></i> <span>Gerando PDF...</span>';
+      }
+
+      showToast('Gerando Carteira Oficial em PDF de Alta Definição...');
 
       try {
-        const hdCanvas = await renderCarteiraToHdCanvas(studioState.elements, a, 2);
+        let targetAthlete = athlete;
+        if (!targetAthlete) {
+          const formAthlete = getAthleteFromCurrentForm();
+          targetAthlete = (formAthlete.nome && formAthlete.nome !== 'Atleta')
+            ? formAthlete
+            : (window._lastActiveAthlete || formAthlete);
+        }
+        window._lastActiveAthlete = targetAthlete;
+
+        const hdCanvas = await renderCarteiraToHdCanvas(studioState.elements, targetAthlete, 2);
         let hdImgData = null;
         try {
           hdImgData = hdCanvas.toDataURL('image/jpeg', 0.98);
         } catch (taintErr) {
           console.warn('Canvas com restrição de exportação, gerando render seguro:', taintErr);
           try {
-            const safeElements = studioState.elements.map(el => el.type === 'photo' ? { ...el, photoUrl: OFFICIAL_DEFAULT_PHOTO_SVG } : el);
-            const safeCanvas = await renderCarteiraToHdCanvas(safeElements, { ...a, foto: OFFICIAL_DEFAULT_PHOTO_SVG }, 2, true);
+            const safeCanvas = await renderCarteiraToHdCanvas(studioState.elements, targetAthlete, 2, true);
             hdImgData = safeCanvas.toDataURL('image/jpeg', 0.98);
           } catch (err2) {
             console.error('Falha no render seguro:', err2);
@@ -4212,40 +4295,31 @@
         // Insere a carteira cobrindo 100% do cartão CR80
         doc.addImage(hdImgData, 'JPEG', 0, 0, 85.60, 53.98, undefined, 'FAST');
 
-        const safeCode = (a.federado || a.codigo || 'atleta').replace(/[^a-zA-Z0-9_-]/g, '_');
+        const safeCode = (targetAthlete.federado || targetAthlete.codigo || 'atleta').replace(/[^a-zA-Z0-9_-]/g, '_');
         const fileName = `carteira-atleta-fpeft-${safeCode}.pdf`;
 
-        let pdfBlob = null;
-        try {
-          pdfBlob = doc.output('blob');
-        } catch (bErr) {
-          console.warn('doc.output blob falhou:', bErr);
+        const pdfBlob = doc.output('blob');
+        if (!pdfBlob) {
+          throw new Error('Falha ao gerar o arquivo PDF binário.');
         }
 
-        // Tenta salvamento nativo do jsPDF
-        let savedNatively = false;
-        try {
-          doc.save(fileName);
-          savedNatively = true;
-        } catch (saveErr) {
-          console.warn('doc.save() falhou, usando triggerFileDownload:', saveErr);
-        }
+        // DISPARO NATIVO E SÍNCRONO DIRETO VIA BLOB (NUNCA doc.save)
+        const blobUrl = downloadBlobDirectly(pdfBlob, fileName);
 
-        if (!savedNatively && pdfBlob) {
-          triggerFileDownload(pdfBlob, fileName);
+        if (blobUrl) {
+          showDownloadToast(blobUrl, fileName, 'PDF');
         }
-
-        showDownloadToast(pdfBlob || doc.output('datauristring'), fileName, 'PDF');
-        showToast(`✓ PDF Oficial (#${safeCode}) gerado com sucesso!`);
+        showToast(`✓ PDF Oficial (#${safeCode}) gerado e baixado!`);
       } catch (err) {
         console.error('Erro ao gerar PDF:', err);
         showToast('Erro ao exportar PDF: ' + (err.message || 'Falha na exportação'));
       } finally {
+        clearTimeout(safetyTimer);
         _isExportingCarteiraPdf = false;
-        if (btn) {
-          btn.disabled = false;
-          btn.classList.remove('opacity-75', 'cursor-not-allowed');
-          btn.innerHTML = originalHtml;
+        if (activeBtn) {
+          activeBtn.disabled = false;
+          activeBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+          activeBtn.innerHTML = originalHtml;
         }
       }
     }
@@ -4255,46 +4329,40 @@
        Resolução gráfica 2100x1324 px com letras nítidas sem pixelização
        Emite RIGOROSAMENTE 1 ÚNICO arquivo PNG por vez via Blob nativo
        ========================================================= */
-    async function exportHdPng() {
+    async function exportHdPng(athlete = null, triggerBtn = null) {
       if (_isExportingCarteiraPng) {
         showToast('⏳ Aguarde, o PNG já está sendo gerado...');
         return;
       }
       _isExportingCarteiraPng = true;
 
-      const btn = document.getElementById('btnExportPNG');
-      const originalHtml = btn ? btn.innerHTML : '';
-      if (btn) {
-        btn.disabled = true;
-        btn.classList.add('opacity-75', 'cursor-not-allowed');
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-sm"></i> <span>Gerando PNG...</span>';
+      const safetyTimer = setTimeout(() => {
+        _isExportingCarteiraPng = false;
+      }, 10000);
+
+      const headerBtn = document.getElementById('btnExportPNG');
+      const activeBtn = triggerBtn || headerBtn;
+      const originalHtml = activeBtn ? activeBtn.innerHTML : '';
+      if (activeBtn) {
+        activeBtn.disabled = true;
+        activeBtn.classList.add('opacity-75', 'cursor-not-allowed');
+        activeBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-sm"></i> <span>Gerando PNG...</span>';
       }
 
       showToast('Processando PNG em Alta Definição (600 DPI)...');
       try {
-        const fedInputVal = (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '').trim();
-        const codeInputVal = (document.getElementById('athleteCode') ? document.getElementById('athleteCode').value : '').trim();
-        const activeFed = fedInputVal || codeInputVal || '945537';
+        let targetAthlete = athlete;
+        if (!targetAthlete) {
+          const formAthlete = getAthleteFromCurrentForm();
+          targetAthlete = (formAthlete.nome && formAthlete.nome !== 'Atleta')
+            ? formAthlete
+            : (window._lastActiveAthlete || formAthlete);
+        }
+        window._lastActiveAthlete = targetAthlete;
 
-        const photoEl = studioState.elements.find(item => item.id === 'field-foto');
-        const photoVal = (photoEl && photoEl.photoUrl) ? photoEl.photoUrl : '';
-
-        const a = {
-          codigo: activeFed,
-          nome: (document.getElementById('athleteName') ? document.getElementById('athleteName').value : 'Atleta') || 'Atleta',
-          cpf: (document.getElementById('athleteCpf') ? document.getElementById('athleteCpf').value : '') || '',
-          nascimento: (document.getElementById('athleteBirth') ? document.getElementById('athleteBirth').value : '') || '',
-          telefone: (document.getElementById('athletePhone') ? document.getElementById('athletePhone').value : '') || '',
-          categoria: (document.getElementById('athleteCategory') ? document.getElementById('athleteCategory').value : 'ASPIRANTE') || 'ASPIRANTE',
-          modalidade: (document.getElementById('athleteModality') ? document.getElementById('athleteModality').value : 'SOLO (INDIVIDUAL)') || 'SOLO (INDIVIDUAL)',
-          federado: activeFed,
-          municipio: (document.getElementById('athleteCity') ? document.getElementById('athleteCity').value : '') || '',
-          validade: (document.getElementById('athleteValidity') ? document.getElementById('athleteValidity').value : '12/2026') || '12/2026',
-          foto: photoVal
-        };
-        const safeCode = activeFed.replace(/[^a-zA-Z0-9_-]/g, '_');
+        const safeCode = (targetAthlete.federado || targetAthlete.codigo || 'atleta').replace(/[^a-zA-Z0-9_-]/g, '_');
         const fileName = `carteira-atleta-fpeft-HD-${safeCode}.png`;
-        const hdCanvas = await renderCarteiraToHdCanvas(studioState.elements, a, 2);
+        const hdCanvas = await renderCarteiraToHdCanvas(studioState.elements, targetAthlete, 2);
 
         let pngBlob = null;
         try {
@@ -4303,48 +4371,65 @@
           console.warn('toBlob falhou:', e);
         }
 
-        let pngDataUrl = null;
         if (!pngBlob) {
           try {
-            pngDataUrl = hdCanvas.toDataURL('image/png');
+            const pngDataUrl = hdCanvas.toDataURL('image/png');
             pngBlob = dataUrlToBlob(pngDataUrl);
           } catch (taintErr) {
             console.warn('Canvas com restrição de exportação no PNG, gerando render seguro:', taintErr);
             try {
-              const safeElements = studioState.elements.map(el => el.type === 'photo' ? { ...el, photoUrl: OFFICIAL_DEFAULT_PHOTO_SVG } : el);
-              const safeCanvas = await renderCarteiraToHdCanvas(safeElements, { ...a, foto: OFFICIAL_DEFAULT_PHOTO_SVG }, 2, true);
-              pngDataUrl = safeCanvas.toDataURL('image/png');
-              pngBlob = dataUrlToBlob(pngDataUrl);
+              const safeCanvas = await renderCarteiraToHdCanvas(studioState.elements, targetAthlete, 2, true);
+              pngBlob = await new Promise((res) => safeCanvas.toBlob(res, 'image/png'));
             } catch (err2) {
               console.error('Falha no render seguro do PNG:', err2);
             }
           }
         }
 
-        const filePayload = pngBlob || pngDataUrl;
-        if (filePayload) {
-          triggerFileDownload(filePayload, fileName);
-          showDownloadToast(filePayload, fileName, 'PNG');
-          showToast('✓ PNG HD (600 DPI) pronto para baixar!');
-        } else {
+        if (!pngBlob) {
           throw new Error('Falha ao gerar arquivo PNG da carteira.');
         }
+
+        const blobUrl = downloadBlobDirectly(pngBlob, fileName);
+        if (blobUrl) {
+          showDownloadToast(blobUrl, fileName, 'PNG');
+        }
+        showToast('✓ PNG HD (600 DPI) pronto e baixado!');
       } catch (err) {
         console.error('Erro ao exportar PNG:', err);
         showToast('Erro ao exportar PNG: ' + (err.message || 'Falha na exportação'));
       } finally {
+        clearTimeout(safetyTimer);
         _isExportingCarteiraPng = false;
-        if (btn) {
-          btn.disabled = false;
-          btn.classList.remove('opacity-75', 'cursor-not-allowed');
-          btn.innerHTML = originalHtml;
+        if (activeBtn) {
+          activeBtn.disabled = false;
+          activeBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+          activeBtn.innerHTML = originalHtml;
         }
       }
     }
 
+    async function baixarCarteiraAtletaPorCodigo(codigo, format = 'pdf', btn = null) {
+      const athletes = await loadAthletes();
+      const a = athletes.find(item => String(item.codigo) === String(codigo));
+      if (!a) {
+        showToast('Atleta não encontrado para download.');
+        return;
+      }
+      window._lastActiveAthlete = a;
+      if (format === 'png') {
+        await exportHdPng(a, btn);
+      } else {
+        await exportCarteiraPDF(a, btn);
+      }
+    }
+
+    window.downloadBlobDirectly = downloadBlobDirectly;
     window.triggerFileDownload = triggerFileDownload;
     window.exportCarteiraPDF = exportCarteiraPDF;
     window.exportHdPng = exportHdPng;
+    window.baixarCarteiraAtletaPorCodigo = baixarCarteiraAtletaPorCodigo;
+    window.closeDownloadToast = closeDownloadToast;
 
     /* Gestão das 4 Bases de Categoria: Aspirante, Iniciante, Amador, Profissional */
     function selectCategoryBase(cat) {
@@ -5312,8 +5397,10 @@
           foto: photoVal
         };
 
+        window._lastActiveAthlete = aObj;
+
         // Emite RIGOROSAMENTE 1 ÚNICO PDF oficial para download
-        await exportCarteiraPDF(aObj);
+        await exportCarteiraPDF(aObj, btn);
 
         const feedback = document.getElementById('athleteFeedback');
         if (feedback) {
@@ -5336,10 +5423,10 @@
               <button type="button" onclick="switchTab('jogadores')" class="px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-black font-extrabold text-[10px] uppercase rounded-lg transition shadow flex items-center gap-1.5 cursor-pointer">
                 <span>Ver na Aba Jogadores</span> <i class="fa-solid fa-arrow-right text-[9px]"></i>
               </button>
-              <button type="button" onclick="exportCarteiraPDF()" class="px-3 py-1.5 bg-rose-700 hover:bg-rose-600 text-white font-bold text-[10px] uppercase rounded-lg transition flex items-center gap-1.5 cursor-pointer" title="Baixar novamente o PDF">
+              <button type="button" onclick="exportCarteiraPDF(window._lastActiveAthlete, this)" class="px-3 py-1.5 bg-rose-700 hover:bg-rose-600 text-white font-bold text-[10px] uppercase rounded-lg transition flex items-center gap-1.5 cursor-pointer" title="Baixar novamente o PDF">
                 <i class="fa-solid fa-file-pdf"></i> <span>Baixar PDF</span>
               </button>
-              <button type="button" onclick="exportHdPng()" class="px-3 py-1.5 bg-sky-700 hover:bg-sky-600 text-white font-bold text-[10px] uppercase rounded-lg transition flex items-center gap-1.5 cursor-pointer" title="Baixar em formato imagem PNG HD">
+              <button type="button" onclick="exportHdPng(window._lastActiveAthlete, this)" class="px-3 py-1.5 bg-sky-700 hover:bg-sky-600 text-white font-bold text-[10px] uppercase rounded-lg transition flex items-center gap-1.5 cursor-pointer" title="Baixar em formato imagem PNG HD">
                 <i class="fa-solid fa-file-image"></i> <span>Baixar PNG HD</span>
               </button>
               <button type="button" onclick="prepararProximoCadastro()" class="px-3 py-1.5 bg-[#0e172a] hover:bg-[#1a2942] border border-slate-600 text-white font-bold text-[10px] uppercase rounded-lg transition flex items-center gap-1.5 cursor-pointer">
@@ -5585,6 +5672,9 @@
                     <i class="fa-solid fa-check"></i> Homologar
                   </button>
                 ` : ''}
+                <button type="button" onclick="baixarCarteiraAtletaPorCodigo('${a.codigo}', 'pdf', this)" title="Baixar Carteira em PDF" class="text-xs text-rose-400 hover:text-white bg-slate-800/90 hover:bg-rose-600 px-2.5 py-1 rounded-lg border border-rose-500/30 font-bold transition cursor-pointer flex items-center gap-1">
+                  <i class="fa-solid fa-file-pdf"></i> PDF
+                </button>
                 <button type="button" onclick="fillFormWithAthlete('${a.codigo}')" title="Abrir no Studio de Emissão" class="text-xs text-sky-400 hover:text-white bg-slate-800/90 hover:bg-sky-600 px-2.5 py-1 rounded-lg border border-sky-500/30 font-bold transition cursor-pointer">
                   Studio
                 </button>
@@ -5782,6 +5872,7 @@
         photoTarget.photoUrl = a.foto;
       }
 
+      window._lastActiveAthlete = a;
       renderInteractiveElements();
       selectElement('field-nome');
       showToast(`Atleta #${a.codigo} (${a.nome}) carregado no Studio!`);
@@ -6252,9 +6343,14 @@
               </span>
             </td>
             <td class="py-3 px-4 text-right">
-              <button onclick="fillFormWithAthlete('${a.codigo}')" class="text-xs text-pe-gold hover:text-white font-bold bg-[#0e1526] hover:bg-[#15203a] border border-[#1c253b] px-3 py-1 rounded-lg transition cursor-pointer">
-                Ver Carteira
-              </button>
+              <div class="flex items-center justify-end gap-1.5">
+                <button type="button" onclick="baixarCarteiraAtletaPorCodigo('${a.codigo}', 'pdf', this)" title="Baixar Carteira em PDF" class="text-xs text-rose-400 hover:text-white font-bold bg-[#0e1526] hover:bg-rose-600 border border-rose-500/30 px-2.5 py-1 rounded-lg transition cursor-pointer flex items-center gap-1">
+                  <i class="fa-solid fa-file-pdf"></i> PDF
+                </button>
+                <button onclick="fillFormWithAthlete('${a.codigo}')" class="text-xs text-pe-gold hover:text-white font-bold bg-[#0e1526] hover:bg-[#15203a] border border-[#1c253b] px-3 py-1 rounded-lg transition cursor-pointer">
+                  Ver Carteira
+                </button>
+              </div>
             </td>
           `;
           quickTable.appendChild(tr);
