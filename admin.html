@@ -873,7 +873,13 @@
                   </div>
                 </div>
 
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <!-- Botão Gravar Padrão Fixo Oficial -->
+                  <button type="button" onclick="saveOfficialLayoutToCloud()" title="Gravar este design como Padrão Fixo Oficial na nuvem para todos os computadores e usuários" class="px-2.5 py-1.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer shadow-md">
+                    <i class="fa-solid fa-cloud-arrow-up text-slate-950"></i>
+                    <span>Gravar Padrão Fixo</span>
+                  </button>
+
                   <!-- Botão Restaurar Posições Oficiais -->
                   <button type="button" onclick="restoreOfficialElementPositions()" title="Restaurar posições exatas do design oficial da Federação" class="px-2.5 py-1.5 bg-[#05080e] hover:bg-[#121c32] text-slate-300 hover:text-white border border-[#1c253b] rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer">
                     <i class="fa-solid fa-arrows-rotate text-sky-400"></i>
@@ -2032,13 +2038,13 @@
         targetKey: 'federado',
         text: '973321',
         x: 44,
-        y: 544,
+        y: 554,
         width: 200,
         height: 32,
         borderRadius: 16,
         backgroundColor: '#ffffff',
         textColor: '#00204a',
-        fontSize: 13,
+        fontSize: 14,
         fontWeight: '800',
         fontFamily: 'Montserrat',
         textAlign: 'center',
@@ -2076,7 +2082,7 @@
         targetKey: 'cpf',
         text: '714.309.664-40',
         x: 268,
-        y: 355,
+        y: 365,
         width: 226,
         height: 34,
         borderRadius: 17,
@@ -2098,7 +2104,7 @@
         targetKey: 'nasc',
         text: '24/03/2003',
         x: 508,
-        y: 355,
+        y: 365,
         width: 222,
         height: 34,
         borderRadius: 17,
@@ -2120,7 +2126,7 @@
         targetKey: 'fone',
         text: '(81) 98463-4126',
         x: 744,
-        y: 355,
+        y: 365,
         width: 262,
         height: 34,
         borderRadius: 17,
@@ -2142,7 +2148,7 @@
         targetKey: 'modalidade',
         text: 'SOLO (INDIVIDUAL)',
         x: 268,
-        y: 445,
+        y: 440,
         width: 195,
         height: 34,
         borderRadius: 17,
@@ -2164,7 +2170,7 @@
         targetKey: 'municipio',
         text: 'RECIFE - PE',
         x: 476,
-        y: 445,
+        y: 440,
         width: 165,
         height: 34,
         borderRadius: 17,
@@ -2186,7 +2192,7 @@
         targetKey: 'categoria',
         text: 'AMADOR',
         x: 654,
-        y: 445,
+        y: 440,
         width: 190,
         height: 34,
         borderRadius: 17,
@@ -2203,14 +2209,14 @@
       {
         id: 'field-qrcode',
         label: 'QR Code de Autenticidade',
-        labelTag: '',
+        labelTag: 'VERIFICAÇÃO DE AUTENTICIDADE',
         type: 'qrcode',
         targetKey: 'qr',
-        x: 860,
-        y: 432,
-        width: 146,
-        height: 146,
-        borderRadius: 18,
+        x: 864,
+        y: 416,
+        width: 142,
+        height: 136,
+        borderRadius: 16,
         backgroundColor: '#ffffff',
         locked: false
       },
@@ -2221,9 +2227,9 @@
         type: 'text-box',
         targetKey: 'validade',
         text: '12/2026',
-        x: 868,
-        y: 602,
-        width: 130,
+        x: 864,
+        y: 594,
+        width: 142,
         height: 32,
         borderRadius: 16,
         backgroundColor: '#ffffff',
@@ -2243,9 +2249,9 @@
         type: 'text-line',
         targetKey: 'assinatura',
         text: 'ASSINATURA DA DIRETORIA FPEFT',
-        x: 330,
-        y: 592,
-        width: 420,
+        x: 310,
+        y: 590,
+        width: 440,
         height: 28,
         textColor: '#ffffff',
         fontSize: 11,
@@ -2255,7 +2261,7 @@
       }
     ];
 
-    const STUDIO_LAYOUT_VERSION = 'v2026_cr80_grid_v4_clean';
+    const STUDIO_LAYOUT_VERSION = 'v2026_cr80_padrao_oficial_v5_perfeito';
 
     const studioState = {
       zoom: 0.8,
@@ -2276,18 +2282,69 @@
       elements: JSON.parse(JSON.stringify(OFFICIAL_DEFAULT_ELEMENTS))
     };
 
+    let _syncStudioDebounce = null;
     /* Sincroniza design com Supabase para que qualquer usuário/máquina receba as alterações */
-    async function syncStudioDesignToSupabase() {
-      if (typeof supabaseClient !== 'undefined' && supabaseClient) {
-        try {
-          await supabaseClient.from('keep_alive_logs').insert([{
-            source: 'studio_layout_sync',
-            status: JSON.stringify(studioState.elements)
-          }]);
-        } catch (e) {
-          console.warn('Erro ao sincronizar design na nuvem:', e);
-        }
+    async function syncStudioDesignToSupabase(immediate = false) {
+      if (typeof supabaseClient === 'undefined' || !supabaseClient) return;
+      if (!immediate) {
+        if (_syncStudioDebounce) clearTimeout(_syncStudioDebounce);
+        _syncStudioDebounce = setTimeout(() => syncStudioDesignToSupabase(true), 800);
+        return;
       }
+      try {
+        await supabaseClient.from('keep_alive_logs').insert([{
+          source: 'studio_layout_sync',
+          status: JSON.stringify(studioState.elements)
+        }]);
+      } catch (e) {
+        console.warn('Erro ao sincronizar design na nuvem:', e);
+      }
+    }
+
+    /* Grava explicitamente o design atual como Padrão Fixo Oficial na nuvem Supabase */
+    async function saveOfficialLayoutToCloud() {
+      try {
+        toggleDesignLock(true);
+        localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(studioState.elements));
+        localStorage.setItem('fpeft_studio_layout_version', STUDIO_LAYOUT_VERSION);
+        await syncStudioDesignToSupabase(true);
+        showToast('⭐ Padrão Fixo Oficial gravado com sucesso na nuvem para todos os computadores!');
+      } catch (err) {
+        console.error('Erro ao gravar padrão oficial:', err);
+        showToast('Erro ao sincronizar padrão na nuvem.');
+      }
+    }
+
+    /* Sanitiza e corrige qualquer elemento com sobreposição ou posições obsoletas */
+    function sanitizeStudioElements(elements) {
+      if (!Array.isArray(elements) || elements.length === 0) {
+        return JSON.parse(JSON.stringify(OFFICIAL_DEFAULT_ELEMENTS));
+      }
+      elements.forEach(el => {
+        if (el.id === 'field-cpf' || el.id === 'field-nasc' || el.id === 'field-fone') {
+          if (el.y < 365) el.y = 365;
+        }
+        if (el.id === 'field-modalidade' || el.id === 'field-municipio' || el.id === 'field-categoria') {
+          if (el.y < 435) el.y = 440;
+        }
+        if (el.id === 'field-qrcode') {
+          if (el.height > 136 || el.y > 425) {
+            el.y = 416;
+            el.width = 142;
+            el.height = 136;
+          }
+          el.labelTag = 'VERIFICAÇÃO DE AUTENTICIDADE';
+        }
+        if (el.id === 'field-validade') {
+          if (el.y < 594) el.y = 594;
+          el.width = 142;
+          el.labelTag = 'VALIDADE';
+        }
+        if (el.id === 'field-federado') {
+          if (el.y < 550) el.y = 554;
+        }
+      });
+      return elements;
     }
 
     /* Busca o design oficial na nuvem Supabase ao inicializar */
@@ -2303,8 +2360,8 @@
           if (data && data.length > 0 && data[0].status) {
             const parsed = JSON.parse(data[0].status);
             if (Array.isArray(parsed) && parsed.length > 0) {
-              studioState.elements = parsed;
-              localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(parsed));
+              studioState.elements = sanitizeStudioElements(parsed);
+              localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(studioState.elements));
               localStorage.setItem('fpeft_studio_layout_version', STUDIO_LAYOUT_VERSION);
               renderInteractiveElements();
             }
@@ -2323,7 +2380,7 @@
         if (studioState.bgTransform) {
           localStorage.setItem('fpeft_studio_bg_transform', JSON.stringify(studioState.bgTransform));
         }
-        syncStudioDesignToSupabase();
+        syncStudioDesignToSupabase(false);
       } catch (err) {
         console.warn('Erro ao salvar design automaticamente:', err);
       }
@@ -2337,7 +2394,7 @@
       }
       const savedVersion = localStorage.getItem('fpeft_studio_layout_version');
       if (savedVersion !== STUDIO_LAYOUT_VERSION) {
-        // Atualiza e migra qualquer cache antigo para o novo layout oficial de 3 colunas
+        // Atualiza e migra qualquer cache antigo para o novo layout oficial limpo sem sobreposições
         localStorage.setItem('fpeft_studio_layout_version', STUDIO_LAYOUT_VERSION);
         localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(OFFICIAL_DEFAULT_ELEMENTS));
         studioState.elements = JSON.parse(JSON.stringify(OFFICIAL_DEFAULT_ELEMENTS));
@@ -2346,34 +2403,7 @@
         if (savedCustomElements) {
           const parsed = JSON.parse(savedCustomElements);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            parsed.forEach(el => {
-              if (el.id === 'field-filiacao' || el.id === 'field-modalidade') {
-                el.id = 'field-modalidade';
-                el.label = 'Modalidade';
-                el.labelTag = 'MODALIDADE';
-                el.targetKey = 'modalidade';
-                if (!el.text || el.text === 'SPORT CLUB DO RECIFE') el.text = 'SOLO (INDIVIDUAL)';
-              }
-              if (el.id === 'field-categoria') {
-                el.label = 'Categoria';
-                el.labelTag = 'CATEGORIA';
-                el.targetKey = 'categoria';
-                if (!el.text || el.text === 'SOLO (INDIVIDUAL)' || el.text === 'MASTER / PRINCIPAL') el.text = 'ASPIRANTE';
-              }
-              if (el.id === 'field-federado') {
-                if (el.text && (el.text.startsWith('PE-2026/') || el.text.includes('/'))) {
-                  el.text = '973321';
-                }
-              }
-              if (el.id === 'field-qrcode') {
-                el.labelTag = '';
-              }
-              if (el.id === 'field-validade') {
-                if (el.y < 602) el.y = 602;
-                el.labelTag = 'VALIDADE';
-              }
-            });
-            studioState.elements = parsed;
+            studioState.elements = sanitizeStudioElements(parsed);
           }
         }
       }
@@ -2864,15 +2894,17 @@
       }
     }
 
-    /* Restaura o layout com as posições originais da Carteira Atleta.svg */
-    function restoreOfficialElementPositions() {
+    /* Restaura o layout com as posições originais da Carteira Atleta */
+    async function restoreOfficialElementPositions() {
       studioState.elements = JSON.parse(JSON.stringify(OFFICIAL_DEFAULT_ELEMENTS));
       try {
-        localStorage.removeItem('fpeft_studio_custom_elements');
+        localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(OFFICIAL_DEFAULT_ELEMENTS));
+        localStorage.setItem('fpeft_studio_layout_version', STUDIO_LAYOUT_VERSION);
       } catch (e) {}
       renderInteractiveElements();
       syncFloatingPanel();
-      showToast('✓ Layout oficial da carteira restaurado com sucesso!');
+      await syncStudioDesignToSupabase(true);
+      showToast('✓ Layout oficial restaurado e sincronizado na nuvem com sucesso!');
     }
 
     /* =========================================================
