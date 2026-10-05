@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261005_v14_remove_supabase_badge';
+      const APP_REV = '20261005_v15_btn_name_update';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -750,7 +750,7 @@
                   <div class="pt-3 space-y-2 border-t border-[#1c253b]">
                     <button type="button" id="btnConcluirCadastro" onclick="concluirCadastroEnviarBanco()" class="w-full bg-gradient-to-r from-pe-gold via-amber-400 to-pe-gold hover:from-amber-400 hover:to-pe-gold text-pe-dark font-black text-xs uppercase tracking-wider py-3.5 px-4 rounded-xl transition shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 cursor-pointer border border-amber-300 active:scale-[0.99]">
                       <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
-                      <span>Concluir Cadastro & Enviar ao Banco de Dados</span>
+                      <span>Concluir Cadastro de Federado</span>
                     </button>
                     <div class="flex items-center justify-between text-[11px] text-slate-400 px-1">
                       <span class="flex items-center gap-1.5 text-amber-300 font-medium">
