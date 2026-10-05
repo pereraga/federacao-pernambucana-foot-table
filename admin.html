@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261005_v8_pdf_blob_download';
+      const APP_REV = '20261005_v9_instant_blob_fix';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -3738,19 +3738,22 @@
     }
 
     /* =========================================================
-       RENDERIZADOR NATIVO EM ALTA RESOLUÇÃO (300 DPI CR80)
+       RENDERIZADOR NATIVO EM ALTA RESOLUÇÃO (600 DPI CR80)
        Garante curvas perfeitas e letras nítidas sem defeito de pixel
        ========================================================= */
-    async function renderCarteiraToHdCanvas(elements = studioState.elements, athlete = null, scale = 3) {
+    async function renderCarteiraToHdCanvas(elements = studioState.elements, athlete = null, scale = 2) {
       if (document.fonts && document.fonts.ready) {
         try {
-          await document.fonts.ready;
+          await Promise.race([
+            document.fonts.ready,
+            new Promise(res => setTimeout(res, 300))
+          ]);
         } catch (e) {}
       }
 
       const canvas = document.createElement('canvas');
-      canvas.width = Math.round(1050 * scale); // 3150 px
-      canvas.height = Math.round(662 * scale); // 1986 px
+      canvas.width = Math.round(1050 * scale); // 2100 px (600 DPI)
+      canvas.height = Math.round(662 * scale); // 1324 px (600 DPI)
       const ctx = canvas.getContext('2d');
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
@@ -3947,13 +3950,36 @@
       return canvas;
     }
 
+    /* =========================================================
+       HELPER INFALÍVEL: DISPARO DE DOWNLOAD DE ARQUIVOS
+       Garante acionamento direto via Blob do navegador
+       ========================================================= */
+    function triggerFileDownload(blobOrDataUrl, fileName) {
+      let url = blobOrDataUrl;
+      let shouldRevoke = false;
+      if (blobOrDataUrl instanceof Blob) {
+        url = URL.createObjectURL(blobOrDataUrl);
+        shouldRevoke = true;
+      }
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        if (document.body.contains(a)) document.body.removeChild(a);
+        if (shouldRevoke) URL.revokeObjectURL(url);
+      }, 2000);
+    }
+
     let _isExportingCarteiraPdf = false;
     let _isExportingCarteiraPng = false;
 
     /* =========================================================
        MODO 1: EXPORTAR PDF EM ALTA DEFINIÇÃO (CR80 VETORIAL)
        Formato oficial CR80 (85.60 mm x 53.98 mm) - Letras e Arte Nítidas
-       Emite RIGOROSAMENTE 1 ÚNICO arquivo PDF por vez (sem duplicação de downloads)
+       Emite RIGOROSAMENTE 1 ÚNICO arquivo PDF por vez (sem travamento)
        ========================================================= */
     async function exportCarteiraPDF(athlete = null) {
       if (_isExportingCarteiraPdf) {
@@ -3967,10 +3993,10 @@
       if (btn) {
         btn.disabled = true;
         btn.classList.add('opacity-75', 'cursor-not-allowed');
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-sm"></i> <span>Gerando PDF (1 arquivo)...</span>';
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-sm"></i> <span>Gerando PDF...</span>';
       }
 
-      showToast('Gerando 1 Carteira Oficial em PDF de Alta Qualidade...');
+      showToast('Gerando Carteira Oficial em PDF de Alta Definição...');
       const fedInputVal = (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '').trim();
       const codeInputVal = (document.getElementById('athleteCode') ? document.getElementById('athleteCode').value : '').trim();
       const activeFed = fedInputVal || codeInputVal || '945537';
@@ -3993,15 +4019,15 @@
       };
 
       try {
-        const hdCanvas = await renderCarteiraToHdCanvas(studioState.elements, a, 3);
+        const hdCanvas = await renderCarteiraToHdCanvas(studioState.elements, a, 2);
         let hdImgData = null;
         try {
-          hdImgData = hdCanvas.toDataURL('image/png', 1.0);
+          hdImgData = hdCanvas.toDataURL('image/jpeg', 0.98);
         } catch (taintErr) {
-          console.warn('CORS/Taint no canvas detectado, executando render de contingência limpo:', taintErr);
+          console.warn('Canvas com restrição CORS na foto, gerando render seguro:', taintErr);
           const safeElements = studioState.elements.map(el => el.type === 'photo' ? { ...el, photoUrl: '' } : el);
-          const safeCanvas = await renderCarteiraToHdCanvas(safeElements, { ...a, foto: '' }, 3);
-          hdImgData = safeCanvas.toDataURL('image/png', 1.0);
+          const safeCanvas = await renderCarteiraToHdCanvas(safeElements, { ...a, foto: '' }, 2);
+          hdImgData = safeCanvas.toDataURL('image/jpeg', 0.98);
         }
 
         let jsPdfLib = null;
@@ -4019,38 +4045,15 @@
           format: [85.60, 53.98]
         });
 
-        // Insere a carteira renderizada a 300 DPI cobrindo exatamente o tamanho CR80 (100% fiel à pré-visualização, SEM camada duplicada de texto)
-        doc.addImage(hdImgData, 'PNG', 0, 0, 85.60, 53.98, undefined, 'FAST');
+        // Insere a carteira cobrindo 100% do cartão CR80 (Processamento nativo instantâneo via DCTDecode)
+        doc.addImage(hdImgData, 'JPEG', 0, 0, 85.60, 53.98, undefined, 'FAST');
 
         const safeCode = (a.federado || a.codigo || 'atleta').replace(/[^a-zA-Z0-9_-]/g, '_');
         const fileName = `carteira-atleta-fpeft-${safeCode}.pdf`;
 
-        // Download Infalível: Gera Blob nativo e dispara âncora de download direto no navegador
-        let downloadDispatched = false;
-        try {
-          const pdfBlob = doc.output('blob');
-          if (pdfBlob && pdfBlob.size > 0) {
-            const blobUrl = URL.createObjectURL(pdfBlob);
-            const downloadLink = document.createElement('a');
-            downloadLink.href = blobUrl;
-            downloadLink.download = fileName;
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            setTimeout(() => {
-              if (document.body.contains(downloadLink)) document.body.removeChild(downloadLink);
-              URL.revokeObjectURL(blobUrl);
-            }, 1500);
-            downloadDispatched = true;
-          }
-        } catch (blobErr) {
-          console.warn('Fallback doc.output(blob):', blobErr);
-        }
-
-        if (!downloadDispatched) {
-          doc.save(fileName);
-        }
-
-        showToast(`✓ PDF Oficial (#${safeCode}) baixado com sucesso (1 arquivo)!`);
+        const pdfBlob = doc.output('blob');
+        triggerFileDownload(pdfBlob, fileName);
+        showToast(`✓ PDF Oficial (#${safeCode}) baixado com sucesso!`);
       } catch (err) {
         console.error('Erro ao gerar PDF:', err);
         showToast('Erro ao exportar PDF: ' + (err.message || 'Falha na exportação'));
@@ -4065,9 +4068,9 @@
     }
 
     /* =========================================================
-       MODO 2: EXPORTAR PNG EM ALTA DEFINIÇÃO (300 DPI)
-       Resolução gráfica 3150x1986 px com letras nítidas sem pixelização
-       Emite RIGOROSAMENTE 1 ÚNICO arquivo PNG por vez
+       MODO 2: EXPORTAR PNG EM ALTA DEFINIÇÃO (600 DPI)
+       Resolução gráfica 2100x1324 px com letras nítidas sem pixelização
+       Emite RIGOROSAMENTE 1 ÚNICO arquivo PNG por vez via Blob nativo
        ========================================================= */
     async function exportHdPng() {
       if (_isExportingCarteiraPng) {
@@ -4084,7 +4087,7 @@
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-sm"></i> <span>Gerando PNG...</span>';
       }
 
-      showToast('Processando PNG em Alta Definição (300 DPI)...');
+      showToast('Processando PNG em Alta Definição (600 DPI)...');
       try {
         const fedInputVal = (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '').trim();
         const codeInputVal = (document.getElementById('athleteCode') ? document.getElementById('athleteCode').value : '').trim();
@@ -4107,26 +4110,29 @@
           foto: photoVal
         };
         const safeCode = activeFed.replace(/[^a-zA-Z0-9_-]/g, '_');
-        const hdCanvas = await renderCarteiraToHdCanvas(studioState.elements, a, 3);
-        let pngUrl = null;
-        try {
-          pngUrl = hdCanvas.toDataURL('image/png', 1.0);
-        } catch (taintErr) {
+        const hdCanvas = await renderCarteiraToHdCanvas(studioState.elements, a, 2);
+
+        // Gera Blob PNG assíncrono nativo (evita qualquer bloqueio do navegador)
+        let pngBlob = await new Promise((res) => {
+          try {
+            hdCanvas.toBlob(res, 'image/png');
+          } catch (e) {
+            res(null);
+          }
+        });
+
+        if (!pngBlob) {
           const safeElements = studioState.elements.map(el => el.type === 'photo' ? { ...el, photoUrl: '' } : el);
-          const safeCanvas = await renderCarteiraToHdCanvas(safeElements, { ...a, foto: '' }, 3);
-          pngUrl = safeCanvas.toDataURL('image/png', 1.0);
+          const safeCanvas = await renderCarteiraToHdCanvas(safeElements, { ...a, foto: '' }, 2);
+          pngBlob = await new Promise((res) => safeCanvas.toBlob(res, 'image/png'));
         }
 
-        const downloadLink = document.createElement('a');
-        downloadLink.href = pngUrl;
-        downloadLink.download = `carteira-atleta-fpeft-HD-${safeCode}.png`;
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        setTimeout(() => {
-          if (document.body.contains(downloadLink)) document.body.removeChild(downloadLink);
-        }, 1500);
-
-        showToast('PNG HD (300 DPI - Letras Nítidas) baixado com sucesso (1 arquivo)!');
+        if (pngBlob) {
+          triggerFileDownload(pngBlob, `carteira-atleta-fpeft-HD-${safeCode}.png`);
+          showToast('✓ PNG HD (600 DPI) baixado com sucesso!');
+        } else {
+          throw new Error('Falha ao gerar arquivo PNG da carteira.');
+        }
       } catch (err) {
         console.error('Erro ao exportar PNG:', err);
         showToast('Erro ao exportar PNG: ' + (err.message || 'Falha na exportação'));
@@ -4140,6 +4146,7 @@
       }
     }
 
+    window.triggerFileDownload = triggerFileDownload;
     window.exportCarteiraPDF = exportCarteiraPDF;
     window.exportHdPng = exportHdPng;
 
