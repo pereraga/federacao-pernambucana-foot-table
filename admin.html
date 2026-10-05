@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261005_v11_multi_download_fix';
+      const APP_REV = '20261005_v12_remove_info_banner';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -584,41 +584,6 @@
         <!-- ===================================================== -->
         <div id="tabContent-atletas" class="space-y-8 hidden">
           
-          <!-- Box Informativo: Tecnologia Vetorial CR80 -->
-          <div class="bg-gradient-to-r from-[#06173a] via-[#091e4a] to-[#040813] border border-[#1c253b] rounded-2xl p-5 sm:p-6 relative overflow-hidden shadow-xl">
-            <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
-            <div class="flex items-start gap-4">
-              <span class="text-3xl">🪪</span>
-              <div class="space-y-2 text-xs">
-                <div class="flex flex-wrap items-center gap-2">
-                  <h3 class="font-oswald text-lg uppercase font-bold text-white tracking-wide">
-                    Studio Oficial CR80 FPEFT • Carteiras & Atletas
-                  </h3>
-                  <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-pe-gold/20 text-pe-gold border border-pe-gold/40">
-                    Padrão CR80 (85.6mm × 53.98mm) • 300 DPI
-                  </span>
-                </div>
-                <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-slate-300">
-                  <li class="flex items-start gap-1.5">
-                    <span class="text-pe-gold font-bold">●</span>
-                    <span><strong>Edição Visual Direta:</strong> Arraste caixas, use as alças para redimensionar ou utilize o painel flutuante com setas direcionais e controle de curvatura.</span>
-                  </li>
-                  <li class="flex items-start gap-1.5">
-                    <span class="text-pe-gold font-bold">●</span>
-                    <span><strong>Fundo SVG & Auto-Ajuste:</strong> Template oficial FPEFT ou upload de imagem/SVG próprio com preenchimento 100% automático sem cortes.</span>
-                  </li>
-                  <li class="flex items-start gap-1.5">
-                    <span class="text-pe-gold font-bold">●</span>
-                    <span><strong>Exportação Gráfica:</strong> Baixe o SVG Puro vetorizado (para Corel/Illustrator) ou gere PNG HD a 300 DPI pronto para impressão gráfica.</span>
-                  </li>
-                  <li class="flex items-start gap-1.5">
-                    <span class="text-pe-gold font-bold">●</span>
-                    <span><strong>Banco de Dados Conectado:</strong> Salve o atleta para que ele possa consultar e emitir a carteira no portal público com o código de 6 dígitos.</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
 
           <!-- Cabeçalho de Ações do Studio -->
           <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-[#070b14] border border-[#1c253b] p-4 rounded-2xl shadow-lg">
