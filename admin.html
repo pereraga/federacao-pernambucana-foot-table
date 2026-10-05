@@ -6,6 +6,17 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
+  <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
+  <script>
+    (function() {
+      const APP_REV = '20261005_v4';
+      if (!window.location.search.includes('v=' + APP_REV)) {
+        const u = new URL(window.location.href);
+        u.searchParams.set('v', APP_REV);
+        window.location.replace(u.toString());
+      }
+    })();
+  </script>
   <title>FPEFT ADM | Painel de Controle Oficial</title>
   <link rel="icon" type="image/png" href="assets/images/logo-federacao.png" />
 
@@ -611,7 +622,10 @@
                 </div>
               </div>
               <div>
-                <h2 class="font-oswald text-xl uppercase font-bold text-white leading-tight">Studio de Emissão & Diagramação</h2>
+                <div class="flex items-center gap-2">
+                  <h2 class="font-oswald text-xl uppercase font-bold text-white leading-tight">Studio de Emissão & Diagramação</h2>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 tracking-wider">V4.0 (1 PDF NÍTIDO)</span>
+                </div>
                 <p class="text-xs text-slate-400">Edite visualmente, preencha os dados e exporte em alta definição</p>
               </div>
             </div>
@@ -3934,17 +3948,21 @@
       }
 
       showToast('Gerando 1 Carteira Oficial em PDF de Alta Qualidade...');
+      const fedInputVal = (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '').trim();
+      const codeInputVal = (document.getElementById('athleteCode') ? document.getElementById('athleteCode').value : '').trim();
+      const activeFed = fedInputVal || codeInputVal || '945537';
+
       const a = athlete || {
-        codigo: (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '') || (document.getElementById('athleteCode') ? document.getElementById('athleteCode').value : 'PE-2026/048'),
-        nome: document.getElementById('athleteName').value || 'Atleta',
-        cpf: document.getElementById('athleteCpf').value || '',
-        nascimento: document.getElementById('athleteBirth').value || '',
-        telefone: document.getElementById('athletePhone').value || '',
+        codigo: activeFed,
+        nome: (document.getElementById('athleteName') ? document.getElementById('athleteName').value : 'Atleta') || 'Atleta',
+        cpf: (document.getElementById('athleteCpf') ? document.getElementById('athleteCpf').value : '') || '',
+        nascimento: (document.getElementById('athleteBirth') ? document.getElementById('athleteBirth').value : '') || '',
+        telefone: (document.getElementById('athletePhone') ? document.getElementById('athletePhone').value : '') || '',
         categoria: (document.getElementById('athleteCategory') ? document.getElementById('athleteCategory').value : 'ASPIRANTE') || 'ASPIRANTE',
         modalidade: (document.getElementById('athleteModality') ? document.getElementById('athleteModality').value : 'SOLO (INDIVIDUAL)') || 'SOLO (INDIVIDUAL)',
-        federado: (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '') || 'PE-2026/048',
-        municipio: document.getElementById('athleteCity').value || '',
-        validade: document.getElementById('athleteValidity').value || '12/2026'
+        federado: activeFed,
+        municipio: (document.getElementById('athleteCity') ? document.getElementById('athleteCity').value : '') || '',
+        validade: (document.getElementById('athleteValidity') ? document.getElementById('athleteValidity').value : '12/2026') || '12/2026'
       };
 
       try {
@@ -4006,20 +4024,23 @@
 
       showToast('Processando PNG em Alta Definição (300 DPI)...');
       try {
+        const fedInputVal = (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '').trim();
+        const codeInputVal = (document.getElementById('athleteCode') ? document.getElementById('athleteCode').value : '').trim();
+        const activeFed = fedInputVal || codeInputVal || '945537';
+
         const a = {
-          codigo: (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '') || (document.getElementById('athleteCode') ? document.getElementById('athleteCode').value : 'PE-2026/048'),
-          nome: document.getElementById('athleteName').value || 'Atleta',
-          cpf: document.getElementById('athleteCpf').value || '',
-          nascimento: document.getElementById('athleteBirth').value || '',
-          telefone: document.getElementById('athletePhone').value || '',
+          codigo: activeFed,
+          nome: (document.getElementById('athleteName') ? document.getElementById('athleteName').value : 'Atleta') || 'Atleta',
+          cpf: (document.getElementById('athleteCpf') ? document.getElementById('athleteCpf').value : '') || '',
+          nascimento: (document.getElementById('athleteBirth') ? document.getElementById('athleteBirth').value : '') || '',
+          telefone: (document.getElementById('athletePhone') ? document.getElementById('athletePhone').value : '') || '',
           categoria: (document.getElementById('athleteCategory') ? document.getElementById('athleteCategory').value : 'ASPIRANTE') || 'ASPIRANTE',
           modalidade: (document.getElementById('athleteModality') ? document.getElementById('athleteModality').value : 'SOLO (INDIVIDUAL)') || 'SOLO (INDIVIDUAL)',
-          federado: (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '') || 'PE-2026/048',
-          municipio: document.getElementById('athleteCity').value || '',
-          validade: document.getElementById('athleteValidity').value || '12/2026'
+          federado: activeFed,
+          municipio: (document.getElementById('athleteCity') ? document.getElementById('athleteCity').value : '') || '',
+          validade: (document.getElementById('athleteValidity') ? document.getElementById('athleteValidity').value : '12/2026') || '12/2026'
         };
-        const code = a.federado || a.codigo || 'atleta';
-        const safeCode = code.replace(/[^a-zA-Z0-9_-]/g, '_');
+        const safeCode = activeFed.replace(/[^a-zA-Z0-9_-]/g, '_');
         const hdCanvas = await renderCarteiraToHdCanvas(studioState.elements, a, 3);
         const pngUrl = hdCanvas.toDataURL('image/png', 1.0);
 
