@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261005_v17_sidebar_toggle_collapse';
+      const APP_REV = '20261005_v18_fix_download_pipeline';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -3805,6 +3805,15 @@
           }
         };
         img.src = src;
+
+        if (img.complete && img.naturalWidth > 0) {
+          if (!settled) {
+            settled = true;
+            clearTimeout(timer);
+            _loadedImagesCache.set(src, img);
+            resolve(img);
+          }
+        }
       });
     }
 
@@ -4149,75 +4158,103 @@
     }
 
     /* =========================================================
-       HELPER INFALÍVEL: DISPARO DIRETO E SÍNCRONO DE DOWNLOAD VIA BLOB
-       Garante funcionamento contínuo e repetível em 100% dos cliques no Chrome/Edge/Safari
+       HELPER INFALÍVEL: DISPARO DIRETO E SEGURO DE DOWNLOAD
+       Garante que o Chrome/Edge/Safari nunca cancelem ou bloqueiem
+       o download do PDF ou PNG no Windows/Mac/Mobile
        ========================================================= */
-    function downloadBlobDirectly(blob, fileName) {
-      if (!blob) return null;
+    function executeDirectDownload(blobOrDataUrl, fileName, mimeType = 'application/octet-stream') {
+      if (!blobOrDataUrl) return null;
 
-      // 1. Suporte legado msSaveOrOpenBlob
-      if (window.navigator && typeof window.navigator.msSaveOrOpenBlob === 'function') {
+      let downloadUrl = null;
+      let isBlobUrl = false;
+
+      if (blobOrDataUrl instanceof Blob) {
+        // Envelopa o Blob garantindo MIME 'application/octet-stream' para forçar download binário direto no SO
+        let binBlob = blobOrDataUrl;
         try {
-          window.navigator.msSaveOrOpenBlob(blob, fileName);
-          return null;
+          binBlob = new Blob([blobOrDataUrl], { type: 'application/octet-stream' });
         } catch (e) {
-          console.warn('msSaveOrOpenBlob falhou:', e);
+          binBlob = blobOrDataUrl;
         }
+        downloadUrl = URL.createObjectURL(binBlob);
+        isBlobUrl = true;
+      } else if (typeof blobOrDataUrl === 'string') {
+        downloadUrl = blobOrDataUrl;
+      } else {
+        return null;
       }
 
-      // 2. Disparo direto e síncrono via URL.createObjectURL
-      const blobUrl = URL.createObjectURL(blob);
+      // 1. Suporte legado msSaveOrOpenBlob
+      if (isBlobUrl && window.navigator && typeof window.navigator.msSaveOrOpenBlob === 'function') {
+        try {
+          window.navigator.msSaveOrOpenBlob(blobOrDataUrl, fileName);
+          return downloadUrl;
+        } catch (e) {}
+      }
+
+      // 2. Elemento âncora <a> invisível mas conectado ao layout (NUNCA display: none)
       const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = blobUrl;
+      a.href = downloadUrl;
       a.download = fileName;
-      a.rel = 'noopener';
+      a.style.position = 'fixed';
+      a.style.left = '-9999px';
+      a.style.top = '-9999px';
+      a.style.width = '2px';
+      a.style.height = '2px';
+      a.style.opacity = '0';
+      a.style.pointerEvents = 'none';
+      a.removeAttribute('rel');
       document.body.appendChild(a);
 
+      // Disparo duplo de clique
       try {
         a.click();
       } catch (err) {
-        console.warn('Direct a.click() error:', err);
-      } finally {
-        if (a.parentNode) {
-          a.parentNode.removeChild(a);
-        }
+        try {
+          const evt = new MouseEvent('click', { bubbles: true, cancelable: true, view: window });
+          a.dispatchEvent(evt);
+        } catch (e2) {}
       }
 
-      // Mantém o Blob vivo por 60 segundos para evitar corte no download do navegador
+      // NUNCA remova o <a> imediatamente no mesmo tick (o Chrome cancela o download se o elemento sumir rápido)
       setTimeout(() => {
-        try { URL.revokeObjectURL(blobUrl); } catch (e) {}
-      }, 60000);
+        try {
+          if (a.parentNode) a.parentNode.removeChild(a);
+        } catch (e) {}
+      }, 5000);
 
-      return blobUrl;
+      // Mantém a URL do Blob viva por 3 minutos
+      if (isBlobUrl) {
+        setTimeout(() => {
+          try { URL.revokeObjectURL(downloadUrl); } catch (e) {}
+        }, 180000);
+      }
+
+      return downloadUrl;
+    }
+
+    function downloadBlobDirectly(blob, fileName) {
+      return executeDirectDownload(blob, fileName);
     }
 
     function triggerFileDownload(blobOrDataUrl, fileName) {
-      if (!blobOrDataUrl) return null;
-      let blob = blobOrDataUrl;
-      if (!(blob instanceof Blob)) {
-        blob = dataUrlToBlob(blobOrDataUrl);
-      }
-      if (!blob) {
-        console.warn('triggerFileDownload: falha ao converter dados em Blob binário');
-        return null;
-      }
-      return downloadBlobDirectly(blob, fileName);
+      return executeDirectDownload(blobOrDataUrl, fileName);
     }
 
     /* =========================================================
-       NOTIFICAÇÃO VISUAL COM LINK DIRETO E PERMANENTE DE DOWNLOAD
-       Garante que mesmo com bloqueios automáticos do navegador,
-       o usuário pode clicar no botão verde e baixar o arquivo com 1 clique
+       MODAL FLUTUANTE DE DOWNLOAD COM BAIXAR E VISUALIZAR
+       Oferece download direto + opção de visualização instantânea
        ========================================================= */
-    function showDownloadToast(blobUrl, fileName, fileType = 'Arquivo') {
+    function showDownloadToast(downloadUrl, fileName, fileType = 'Arquivo', viewUrl = null) {
       let container = document.getElementById('toast_dl_active');
       if (!container) {
         container = document.createElement('div');
         container.id = 'toast_dl_active';
-        container.className = "fixed bottom-6 right-6 z-[999999] max-w-md bg-[#0a1124] border-2 border-emerald-500/90 rounded-2xl p-4 shadow-2xl text-white flex flex-col gap-3 transition-all duration-300";
+        container.className = "fixed bottom-6 right-6 z-[999999] max-w-md bg-[#0a1124] border-2 border-emerald-500 rounded-2xl p-4 shadow-2xl text-white flex flex-col gap-3 transition-all duration-300";
         document.body.appendChild(container);
       }
+
+      const safeViewUrl = viewUrl || downloadUrl;
 
       container.style.opacity = '1';
       container.style.transform = 'translateY(0)';
@@ -4227,24 +4264,29 @@
             <i class="fa-solid fa-circle-check text-lg"></i>
           </div>
           <div class="flex-1 min-w-0">
-            <p class="font-black text-sm text-emerald-300 uppercase tracking-wide">${fileType} Pronto para Baixar!</p>
+            <p class="font-black text-sm text-emerald-300 uppercase tracking-wide">${fileType} Gerado com Sucesso!</p>
             <p class="text-xs text-slate-200 mt-0.5 leading-snug truncate">
               Arquivo: <strong class="text-white font-mono">${escapeHtml(fileName)}</strong>
             </p>
             <p class="text-[11px] text-slate-400 mt-0.5">
-              Download disparado. Caso queira baixar novamente, clique abaixo:
+              O download começou automaticamente. Você também pode salvar manualmente ou visualizar abaixo:
             </p>
           </div>
           <button type="button" onclick="closeDownloadToast()" class="text-slate-400 hover:text-white text-xs cursor-pointer p-1">
             <i class="fa-solid fa-xmark text-sm"></i>
           </button>
         </div>
-        <div class="flex items-center gap-2 pt-1 border-t border-slate-700/60">
-          <a href="${blobUrl}" download="${fileName}" class="flex-1 py-2 px-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs uppercase rounded-xl transition shadow-lg flex items-center justify-center gap-2 cursor-pointer text-center">
+        <div class="flex items-center gap-2 pt-2 border-t border-slate-700/60">
+          <a href="${downloadUrl}" download="${fileName}" onclick="handleManualDownloadClick(event, '${fileType}')" class="flex-1 py-2 px-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs uppercase rounded-xl transition shadow-lg flex items-center justify-center gap-2 cursor-pointer text-center">
             <i class="fa-solid fa-download text-sm"></i>
-            <span>Baixar Arquivo Agora (${fileType})</span>
+            <span>Baixar Arquivo (${fileType})</span>
           </a>
-          <button type="button" onclick="closeDownloadToast()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition cursor-pointer">
+          ${safeViewUrl ? `
+          <a href="${safeViewUrl}" target="_blank" class="py-2 px-3 bg-sky-950/60 hover:bg-sky-900/60 border border-sky-700/50 text-sky-200 font-bold text-xs uppercase rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer text-center" title="Abrir e visualizar em nova aba">
+            <i class="fa-solid fa-eye text-xs"></i>
+            <span>Visualizar</span>
+          </a>` : ''}
+          <button type="button" onclick="closeDownloadToast()" class="px-2.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition cursor-pointer">
             Fechar
           </button>
         </div>
@@ -4253,7 +4295,19 @@
       if (window._toastDlTimer) clearTimeout(window._toastDlTimer);
       window._toastDlTimer = setTimeout(() => {
         closeDownloadToast();
-      }, 20000);
+      }, 30000);
+    }
+
+    function handleManualDownloadClick(e, fileType) {
+      try {
+        if (fileType === 'PDF' && window._lastExportedPdfBlob && window._lastExportedPdfName) {
+          executeDirectDownload(window._lastExportedPdfBlob, window._lastExportedPdfName, 'application/pdf');
+        } else if (fileType === 'PNG' && window._lastExportedPngBlob && window._lastExportedPngName) {
+          executeDirectDownload(window._lastExportedPngBlob, window._lastExportedPngName, 'image/png');
+        }
+      } catch (err) {
+        console.warn('Manual download click handler error:', err);
+      }
     }
 
     function closeDownloadToast() {
@@ -4374,12 +4428,22 @@
           throw new Error('Falha ao gerar o arquivo PDF binário.');
         }
 
-        // DISPARO NATIVO E SÍNCRONO DIRETO VIA BLOB (NUNCA doc.save)
-        const blobUrl = downloadBlobDirectly(pdfBlob, fileName);
+        window._lastExportedPdfBlob = pdfBlob;
+        window._lastExportedPdfName = fileName;
 
-        if (blobUrl) {
-          showDownloadToast(blobUrl, fileName, 'PDF');
+        // DISPARO NATIVO E SEGURO DIRETO VIA BLOB BINÁRIO
+        const blobUrl = executeDirectDownload(pdfBlob, fileName, 'application/pdf');
+
+        // URL para visualização no navegador em nova aba
+        let viewUrl = null;
+        try {
+          const viewBlob = new Blob([pdfBlob], { type: 'application/pdf' });
+          viewUrl = URL.createObjectURL(viewBlob);
+        } catch (e) {
+          viewUrl = blobUrl;
         }
+
+        showDownloadToast(blobUrl, fileName, 'PDF', viewUrl);
         showToast(`✓ PDF Oficial (#${safeCode}) gerado e baixado!`);
       } catch (err) {
         console.error('Erro ao gerar PDF:', err);
@@ -4461,10 +4525,20 @@
           throw new Error('Falha ao gerar arquivo PNG da carteira.');
         }
 
-        const blobUrl = downloadBlobDirectly(pngBlob, fileName);
-        if (blobUrl) {
-          showDownloadToast(blobUrl, fileName, 'PNG');
+        window._lastExportedPngBlob = pngBlob;
+        window._lastExportedPngName = fileName;
+
+        const blobUrl = executeDirectDownload(pngBlob, fileName, 'image/png');
+
+        let viewUrl = null;
+        try {
+          const viewBlob = new Blob([pngBlob], { type: 'image/png' });
+          viewUrl = URL.createObjectURL(viewBlob);
+        } catch (e) {
+          viewUrl = blobUrl;
         }
+
+        showDownloadToast(blobUrl, fileName, 'PNG', viewUrl);
         showToast('✓ PNG HD (600 DPI) pronto e baixado!');
       } catch (err) {
         console.error('Erro ao exportar PNG:', err);
@@ -4495,12 +4569,14 @@
       }
     }
 
+    window.executeDirectDownload = executeDirectDownload;
     window.downloadBlobDirectly = downloadBlobDirectly;
     window.triggerFileDownload = triggerFileDownload;
     window.exportCarteiraPDF = exportCarteiraPDF;
     window.exportHdPng = exportHdPng;
     window.baixarCarteiraAtletaPorCodigo = baixarCarteiraAtletaPorCodigo;
     window.closeDownloadToast = closeDownloadToast;
+    window.handleManualDownloadClick = handleManualDownloadClick;
 
     /* Gestão das 4 Bases de Categoria: Aspirante, Iniciante, Amador, Profissional */
     function selectCategoryBase(cat) {
