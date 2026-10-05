@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261005_v4';
+      const APP_REV = '20261005_v7_limpo_sem_duplicata';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -624,7 +624,7 @@
               <div>
                 <div class="flex items-center gap-2">
                   <h2 class="font-oswald text-xl uppercase font-bold text-white leading-tight">Studio de Emissão & Diagramação</h2>
-                  <span class="px-2 py-0.5 rounded text-[10px] font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 tracking-wider">V4.0 (1 PDF NÍTIDO)</span>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 tracking-wider">V7.0 (1 PDF FIEL 300 DPI)</span>
                 </div>
                 <p class="text-xs text-slate-400">Edite visualmente, preencha os dados e exporte em alta definição</p>
               </div>
@@ -632,6 +632,9 @@
 
             <!-- Botões de Ação do Cabeçalho -->
             <div class="flex flex-wrap items-center gap-2">
+              <button type="button" onclick="window.location.reload(true)" class="bg-[#10192e] hover:bg-[#1a2947] border border-slate-700 hover:border-sky-500 text-slate-300 hover:text-white font-bold text-xs uppercase px-3 py-2.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow" title="Recarregar e sincronizar a versão mais recente">
+                <i class="fa-solid fa-arrows-rotate text-sky-400"></i> Atualizar Painel
+              </button>
               <button type="button" id="btnExportPDF" onclick="exportCarteiraPDF()" class="bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer shadow-lg shadow-rose-950/30" title="Exportar Carteira em PDF Vetorial de Alta Resolução">
                 <i class="fa-solid fa-file-pdf text-white text-sm"></i> Exportar PDF
               </button>
@@ -2336,7 +2339,7 @@
       }
     ];
 
-    const STUDIO_LAYOUT_VERSION = 'v2026_cr80_padrao_oficial_v6_guias_alinhamento';
+    const STUDIO_LAYOUT_VERSION = 'v2026_cr80_padrao_oficial_v7_limpo_sem_duplicata';
 
     const studioState = {
       zoom: 0.8,
@@ -3952,6 +3955,9 @@
       const codeInputVal = (document.getElementById('athleteCode') ? document.getElementById('athleteCode').value : '').trim();
       const activeFed = fedInputVal || codeInputVal || '945537';
 
+      const photoEl = studioState.elements.find(item => item.id === 'field-foto');
+      const photoVal = (photoEl && photoEl.photoUrl) ? photoEl.photoUrl : '';
+
       const a = athlete || {
         codigo: activeFed,
         nome: (document.getElementById('athleteName') ? document.getElementById('athleteName').value : 'Atleta') || 'Atleta',
@@ -3962,7 +3968,8 @@
         modalidade: (document.getElementById('athleteModality') ? document.getElementById('athleteModality').value : 'SOLO (INDIVIDUAL)') || 'SOLO (INDIVIDUAL)',
         federado: activeFed,
         municipio: (document.getElementById('athleteCity') ? document.getElementById('athleteCity').value : '') || '',
-        validade: (document.getElementById('athleteValidity') ? document.getElementById('athleteValidity').value : '12/2026') || '12/2026'
+        validade: (document.getElementById('athleteValidity') ? document.getElementById('athleteValidity').value : '12/2026') || '12/2026',
+        foto: photoVal
       };
 
       try {
@@ -4028,6 +4035,9 @@
         const codeInputVal = (document.getElementById('athleteCode') ? document.getElementById('athleteCode').value : '').trim();
         const activeFed = fedInputVal || codeInputVal || '945537';
 
+        const photoEl = studioState.elements.find(item => item.id === 'field-foto');
+        const photoVal = (photoEl && photoEl.photoUrl) ? photoEl.photoUrl : '';
+
         const a = {
           codigo: activeFed,
           nome: (document.getElementById('athleteName') ? document.getElementById('athleteName').value : 'Atleta') || 'Atleta',
@@ -4038,7 +4048,8 @@
           modalidade: (document.getElementById('athleteModality') ? document.getElementById('athleteModality').value : 'SOLO (INDIVIDUAL)') || 'SOLO (INDIVIDUAL)',
           federado: activeFed,
           municipio: (document.getElementById('athleteCity') ? document.getElementById('athleteCity').value : '') || '',
-          validade: (document.getElementById('athleteValidity') ? document.getElementById('athleteValidity').value : '12/2026') || '12/2026'
+          validade: (document.getElementById('athleteValidity') ? document.getElementById('athleteValidity').value : '12/2026') || '12/2026',
+          foto: photoVal
         };
         const safeCode = activeFed.replace(/[^a-zA-Z0-9_-]/g, '_');
         const hdCanvas = await renderCarteiraToHdCanvas(studioState.elements, a, 3);
@@ -5012,6 +5023,9 @@
       try {
         await handleSaveAthlete();
 
+        const photoEl = studioState.elements.find(item => item.id === 'field-foto');
+        const photoVal = (photoEl && photoEl.photoUrl) ? photoEl.photoUrl : '';
+
         const aObj = {
           codigo: code,
           nome: name,
@@ -5022,7 +5036,8 @@
           modalidade: (document.getElementById('athleteModality') ? document.getElementById('athleteModality').value : 'SOLO (INDIVIDUAL)') || 'SOLO (INDIVIDUAL)',
           federado: (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '') || code,
           municipio: (document.getElementById('athleteCity').value || '').trim(),
-          validade: (document.getElementById('athleteValidity').value || '12/2026').trim()
+          validade: (document.getElementById('athleteValidity').value || '12/2026').trim(),
+          foto: photoVal
         };
 
         // Emite RIGOROSAMENTE 1 ÚNICO PDF oficial para download
