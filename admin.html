@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261005_v18_fix_download_pipeline';
+      const APP_REV = '20261005_v19_fix_download_native';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -4192,21 +4192,13 @@
         } catch (e) {}
       }
 
-      // 2. Elemento âncora <a> invisível mas conectado ao layout (NUNCA display: none)
+      // 2. Elemento âncora <a> invisível nativo
       const a = document.createElement('a');
       a.href = downloadUrl;
       a.download = fileName;
-      a.style.position = 'fixed';
-      a.style.left = '-9999px';
-      a.style.top = '-9999px';
-      a.style.width = '2px';
-      a.style.height = '2px';
-      a.style.opacity = '0';
-      a.style.pointerEvents = 'none';
-      a.removeAttribute('rel');
+      a.style.display = 'none';
       document.body.appendChild(a);
 
-      // Disparo duplo de clique
       try {
         a.click();
       } catch (err) {
@@ -4216,18 +4208,17 @@
         } catch (e2) {}
       }
 
-      // NUNCA remova o <a> imediatamente no mesmo tick (o Chrome cancela o download se o elemento sumir rápido)
       setTimeout(() => {
         try {
           if (a.parentNode) a.parentNode.removeChild(a);
         } catch (e) {}
-      }, 5000);
+      }, 100);
 
-      // Mantém a URL do Blob viva por 3 minutos
+      // Mantém a URL do Blob viva temporariamente
       if (isBlobUrl) {
         setTimeout(() => {
           try { URL.revokeObjectURL(downloadUrl); } catch (e) {}
-        }, 180000);
+        }, 180000); // 3 minutos para permitir clicar no Toast
       }
 
       return downloadUrl;
@@ -4243,7 +4234,6 @@
 
     /* =========================================================
        MODAL FLUTUANTE DE DOWNLOAD COM BAIXAR E VISUALIZAR
-       Oferece download direto + opção de visualização instantânea
        ========================================================= */
     function showDownloadToast(downloadUrl, fileName, fileType = 'Arquivo', viewUrl = null) {
       let container = document.getElementById('toast_dl_active');
@@ -4258,6 +4248,9 @@
 
       container.style.opacity = '1';
       container.style.transform = 'translateY(0)';
+      
+      // NOTA: Removido o onclick="handleManualDownloadClick(...)" do botão Baixar!
+      // O navegador lidará com o download de forma 100% nativa sem interceptação de JS!
       container.innerHTML = `
         <div class="flex items-start gap-3">
           <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
@@ -4269,7 +4262,7 @@
               Arquivo: <strong class="text-white font-mono">${escapeHtml(fileName)}</strong>
             </p>
             <p class="text-[11px] text-slate-400 mt-0.5">
-              O download começou automaticamente. Você também pode salvar manualmente ou visualizar abaixo:
+              Se o download não iniciou, clique no botão abaixo para baixar:
             </p>
           </div>
           <button type="button" onclick="closeDownloadToast()" class="text-slate-400 hover:text-white text-xs cursor-pointer p-1">
@@ -4277,9 +4270,9 @@
           </button>
         </div>
         <div class="flex items-center gap-2 pt-2 border-t border-slate-700/60">
-          <a href="${downloadUrl}" download="${fileName}" onclick="handleManualDownloadClick(event, '${fileType}')" class="flex-1 py-2 px-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs uppercase rounded-xl transition shadow-lg flex items-center justify-center gap-2 cursor-pointer text-center">
+          <a href="${downloadUrl}" download="${fileName}" class="flex-1 py-2 px-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs uppercase rounded-xl transition shadow-lg flex items-center justify-center gap-2 cursor-pointer text-center">
             <i class="fa-solid fa-download text-sm"></i>
-            <span>Baixar Arquivo (${fileType})</span>
+            <span>Baixar Manual</span>
           </a>
           ${safeViewUrl ? `
           <a href="${safeViewUrl}" target="_blank" class="py-2 px-3 bg-sky-950/60 hover:bg-sky-900/60 border border-sky-700/50 text-sky-200 font-bold text-xs uppercase rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer text-center" title="Abrir e visualizar em nova aba">
@@ -4296,18 +4289,6 @@
       window._toastDlTimer = setTimeout(() => {
         closeDownloadToast();
       }, 30000);
-    }
-
-    function handleManualDownloadClick(e, fileType) {
-      try {
-        if (fileType === 'PDF' && window._lastExportedPdfBlob && window._lastExportedPdfName) {
-          executeDirectDownload(window._lastExportedPdfBlob, window._lastExportedPdfName, 'application/pdf');
-        } else if (fileType === 'PNG' && window._lastExportedPngBlob && window._lastExportedPngName) {
-          executeDirectDownload(window._lastExportedPngBlob, window._lastExportedPngName, 'image/png');
-        }
-      } catch (err) {
-        console.warn('Manual download click handler error:', err);
-      }
     }
 
     function closeDownloadToast() {
@@ -4576,7 +4557,6 @@
     window.exportHdPng = exportHdPng;
     window.baixarCarteiraAtletaPorCodigo = baixarCarteiraAtletaPorCodigo;
     window.closeDownloadToast = closeDownloadToast;
-    window.handleManualDownloadClick = handleManualDownloadClick;
 
     /* Gestão das 4 Bases de Categoria: Aspirante, Iniciante, Amador, Profissional */
     function selectCategoryBase(cat) {
