@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261005_v30_clean_dados_atleta_title';
+      const APP_REV = '20261005_v31_president_signature_upload';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -879,8 +879,28 @@
                       <input type="text" id="inputQrText" value="https://fpeft.vercel.app/" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-2.5 py-1.5 text-[11px] font-mono text-white outline-none" />
                     </div>
                     <div>
-                      <label class="block text-slate-400 font-bold mb-1 text-[10px]">Assinatura Presidente</label>
-                      <input type="text" id="inputAssinatura" value="ASSINATURA DO PRESIDENTE FPEFT" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-2.5 py-1.5 text-[10px] uppercase text-white outline-none font-fpeft" />
+                      <div class="flex items-center justify-between mb-1">
+                        <label class="block text-slate-400 font-bold text-[10px]">Assinatura Presidente</label>
+                        <label for="inputSignatureFile" class="text-[9px] font-bold text-pe-gold hover:text-amber-300 flex items-center gap-1 cursor-pointer transition select-none" title="Upar imagem transparente da assinatura (PNG/SVG)">
+                          <i class="fa-solid fa-file-arrow-up"></i> Upar Imagem
+                        </label>
+                        <input type="file" id="inputSignatureFile" accept="image/*" class="hidden" onchange="handlePresidentSignatureUpload(event)" />
+                      </div>
+                      <div class="flex items-center gap-1.5">
+                        <input type="text" id="inputAssinatura" value="ASSINATURA DO PRESIDENTE FPEFT" class="flex-1 bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-2.5 py-1.5 text-[10px] uppercase text-white outline-none font-fpeft" />
+                        <button type="button" id="btnRemoveSignatureImg" onclick="removePresidentSignatureImage()" class="hidden px-2 py-1.5 bg-rose-950/60 hover:bg-rose-900/80 border border-rose-700/50 text-rose-300 rounded-xl text-[10px] transition cursor-pointer" title="Remover imagem da assinatura">
+                          <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                      </div>
+                      <div id="signatureImgPreviewContainer" class="hidden mt-1.5 flex items-center justify-between px-2 py-1 bg-[#05080e] border border-emerald-500/40 rounded-lg text-[10px] text-emerald-400">
+                        <span class="flex items-center gap-1.5 truncate">
+                          <i class="fa-solid fa-circle-check text-xs"></i>
+                          <span>Assinatura (Imagem) ativa</span>
+                        </span>
+                        <button type="button" onclick="removePresidentSignatureImage()" class="text-rose-400 hover:text-rose-300 text-xs cursor-pointer ml-1">
+                          <i class="fa-solid fa-xmark"></i>
+                        </button>
+                      </div>
                     </div>
                   </div>
 
@@ -2531,6 +2551,55 @@
       }
     }
 
+    /* Gestão do Upload e Remoção da Imagem da Assinatura do Presidente */
+    function handlePresidentSignatureUpload(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) {
+        showToast('Por favor, selecione um arquivo de imagem válido (PNG, JPG, SVG).');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const dataUrl = evt.target.result;
+        const target = studioState.elements.find(item => item.id === 'field-assinatura' || item.type === 'text-line' || item.type === 'signature-line');
+        if (target) {
+          target.signatureUrl = dataUrl;
+          autoSaveStudioDesign();
+          renderInteractiveElements();
+          updateSignatureUIState(true);
+          showToast('✓ Imagem da Assinatura do Presidente aplicada na carteira!');
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removePresidentSignatureImage() {
+      const target = studioState.elements.find(item => item.id === 'field-assinatura' || item.type === 'text-line' || item.type === 'signature-line');
+      if (target) {
+        delete target.signatureUrl;
+        autoSaveStudioDesign();
+        renderInteractiveElements();
+        updateSignatureUIState(false);
+        const fileInp = document.getElementById('inputSignatureFile');
+        if (fileInp) fileInp.value = '';
+        showToast('Imagem da assinatura removida com sucesso.');
+      }
+    }
+
+    function updateSignatureUIState(hasImg) {
+      const prevContainer = document.getElementById('signatureImgPreviewContainer');
+      const btnRemove = document.getElementById('btnRemoveSignatureImg');
+      if (prevContainer) {
+        if (hasImg) prevContainer.classList.remove('hidden');
+        else prevContainer.classList.add('hidden');
+      }
+      if (btnRemove) {
+        if (hasImg) btnRemove.classList.remove('hidden');
+        else btnRemove.classList.add('hidden');
+      }
+    }
+
     /* Carrega preferências e design salvo automaticamente pelo usuário */
     try {
       const savedLock = localStorage.getItem('fpeft_studio_design_locked');
@@ -2556,6 +2625,10 @@
             studioState.bgTransform = parsedBg;
           }
         } catch (e) {}
+      }
+      const signItem = studioState.elements.find(i => i.id === 'field-assinatura' || i.type === 'text-line');
+      if (signItem && signItem.signatureUrl) {
+        setTimeout(() => updateSignatureUIState(true), 100);
       }
     } catch (e) {
       console.warn('Erro ao restaurar preferências do Studio:', e);
@@ -2807,7 +2880,11 @@
           div.style.flexDirection = 'column';
           div.style.alignItems = 'center';
           div.style.justifyContent = 'center';
+          const signatureImgHtml = item.signatureUrl 
+            ? `<img src="${item.signatureUrl}" class="max-h-12 max-w-[280px] object-contain -mb-1 pointer-events-none select-none drop-shadow" />` 
+            : '';
           div.innerHTML = `
+            ${signatureImgHtml}
             <div class="w-full h-[1.5px] bg-white/90 mb-1"></div>
             <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-200 select-none pointer-events-none leading-tight font-fpeft">${escapeHtml(item.text || 'ASSINATURA DA DIRETORIA FPEFT')}</span>
           `;
@@ -4026,6 +4103,20 @@
             ctx.restore();
           }
         } else if (item.type === 'signature-line' || item.type === 'text-line') {
+          // Imagem da Assinatura do Presidente se houver
+          if (item.signatureUrl && !isSafeOnly) {
+            const sigImg = await loadImageAsync(item.signatureUrl, 2500);
+            if (sigImg) {
+              ctx.save();
+              const maxSigW = item.width * scale * 0.85;
+              const ratio = (sigImg.naturalWidth && sigImg.naturalHeight) ? (sigImg.naturalHeight / sigImg.naturalWidth) : 0.35;
+              const sigW = Math.min(maxSigW, 260 * scale);
+              const sigH = sigW * ratio;
+              ctx.drawImage(sigImg, (item.x + item.width / 2) * scale - sigW / 2, item.y * scale - sigH + (3 * scale), sigW, sigH);
+              ctx.restore();
+            }
+          }
+
           // Traço branco de assinatura oficial
           ctx.save();
           ctx.strokeStyle = '#ffffff';
