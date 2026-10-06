@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261005_v31_president_signature_upload';
+      const APP_REV = '20261005_v32_remove_modo_icones_btn';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -407,10 +407,6 @@
           <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500 sidebar-text">
             Abas do Sistema
           </span>
-          <button id="btnToggleTextMode" onclick="toggleSidebarCollapse()" class="sidebar-text text-[10px] font-bold text-sky-400 hover:text-pe-gold transition flex items-center gap-1.5 cursor-pointer py-1 px-2 rounded-lg bg-sky-950/40 hover:bg-sky-900/50 border border-sky-800/40" title="Ocultar textos e deixar apenas ícones">
-            <i class="fa-solid fa-table-columns text-[9px]"></i>
-            <span>Modo Ícones</span>
-          </button>
         </div>
 
         <!-- Botão de Expandir visível apenas quando recolhido -->
@@ -2100,13 +2096,6 @@
         btnToggle.title = isCollapsed 
           ? 'Expandir menu lateral (mostrar nomes e textos)' 
           : 'Recolher menu lateral (mostrar apenas ícones)';
-      }
-
-      const btnTextMode = document.getElementById('btnToggleTextMode');
-      if (btnTextMode) {
-        btnTextMode.title = isCollapsed 
-          ? 'Expandir textos do menu' 
-          : 'Ocultar textos (deixar apenas ícones)';
       }
 
       const topbarBtn = document.getElementById('btnTopbarToggleSidebar');
