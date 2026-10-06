@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261005_v26_fix_png_direct_download';
+      const APP_REV = '20261005_v27_fix_png_canvas';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -4447,12 +4447,18 @@
 
         const safeCode = (targetAthlete.federado || targetAthlete.codigo || 'atleta').replace(/[^a-zA-Z0-9_-]/g, '_');
         const fileName = `carteira-atleta-fpeft-HD-${safeCode}.png`;
+        const hdCanvas = await renderCarteiraToHdCanvas(studioState.elements, targetAthlete, 2);
+
         // 1. Gera DataURL direto para download instantâneo
         let pngDataUrl = null;
         try {
           pngDataUrl = hdCanvas.toDataURL('image/png');
-        } catch (e) {
-          console.warn('toDataURL falhou:', e);
+        } catch (taintErr) {
+          console.warn('toDataURL falhou, tentando canvas seguro:', taintErr);
+          try {
+            const safeCanvas = await renderCarteiraToHdCanvas(studioState.elements, targetAthlete, 2, true);
+            pngDataUrl = safeCanvas.toDataURL('image/png');
+          } catch (e2) {}
         }
 
         let pngBlob = null;
