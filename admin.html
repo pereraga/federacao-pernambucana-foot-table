@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261005_v33_remove_collapsed_expand_btn';
+      const APP_REV = '20261005_v34_modality_pattern';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -814,8 +814,8 @@
                       <input type="hidden" id="athleteModality" value="SOLO (INDIVIDUAL)" />
                       <!-- Botões de Seleção Direta de Modalidade -->
                       <div class="grid grid-cols-2 gap-1.5" id="modalityPillsContainer">
-                        <button type="button" onclick="selectModalityBase('SOLO (INDIVIDUAL)')" data-mod="SOLO (INDIVIDUAL)" class="mod-pill-btn flex items-center justify-center text-xs py-2 px-1.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none">Solo Individual</button>
-                        <button type="button" onclick="selectModalityBase('DUPLA')" data-mod="DUPLA" class="mod-pill-btn flex items-center justify-center text-xs py-2 px-1.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none">Dupla</button>
+                        <button type="button" onclick="selectModalityBase('SOLO (INDIVIDUAL)')" data-mod="SOLO (INDIVIDUAL)" class="mod-pill-btn flex items-center justify-center text-xs py-2 px-1.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none">Solo ( Individual )</button>
+                        <button type="button" onclick="selectModalityBase('DUPLA (EQUIPE)')" data-mod="DUPLA (EQUIPE)" class="mod-pill-btn flex items-center justify-center text-xs py-2 px-1.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none">Dupla ( Equipe )</button>
                       </div>
                     </div>
                     <div>
@@ -4663,7 +4663,7 @@
       const upper = (mod || 'SOLO (INDIVIDUAL)').toUpperCase().trim();
       let matchedVal = 'SOLO (INDIVIDUAL)';
       if (upper.includes('DUPLA') || upper.includes('EQUIPE')) {
-        matchedVal = 'DUPLA';
+        matchedVal = 'DUPLA (EQUIPE)';
       } else {
         matchedVal = 'SOLO (INDIVIDUAL)';
       }
