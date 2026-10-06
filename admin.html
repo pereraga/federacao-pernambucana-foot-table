@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261005_v24_fix_clean_direct_download';
+      const APP_REV = '20261005_v25_sync_live_design';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -3925,11 +3925,20 @@
       // 1. Fundo Oficial de Alta Resolução do Cartão CR80
       let bgDrawn = false;
       if (!isSafeOnly) {
-        let bgImgSrc = 'assets/Carteira_Atleta_HD.png';
-        if (window.OFFICIAL_FPEFT_BG_DATA_URL) bgImgSrc = window.OFFICIAL_FPEFT_BG_DATA_URL;
-        if (studioState.customImageUrl) bgImgSrc = studioState.customImageUrl;
-        else if (studioState.customSvgContent) {
+        let bgImgSrc = null;
+        if (studioState.customImageUrl) {
+          bgImgSrc = studioState.customImageUrl;
+        } else if (studioState.customSvgContent) {
           bgImgSrc = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(studioState.customSvgContent);
+        } else {
+          const officialSvg = getCurrentBackgroundSvgString();
+          if (officialSvg && typeof officialSvg === 'string' && officialSvg.includes('<svg')) {
+            bgImgSrc = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(officialSvg);
+          } else if (window.OFFICIAL_FPEFT_BG_DATA_URL) {
+            bgImgSrc = window.OFFICIAL_FPEFT_BG_DATA_URL;
+          } else {
+            bgImgSrc = 'assets/Carteira_Atleta_HD.png';
+          }
         }
 
         const bgImg = await loadImageAsync(bgImgSrc);
