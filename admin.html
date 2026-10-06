@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261005_v34_modality_pattern';
+      const APP_REV = '20261006_v35_homologacao_pendente_block_pdf';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -4344,6 +4344,7 @@
         federado: activeFed,
         municipio: (document.getElementById('athleteCity') ? document.getElementById('athleteCity').value : '') || '',
         validade: (document.getElementById('athleteValidity') ? document.getElementById('athleteValidity').value : '12/2026') || '12/2026',
+        status: (document.getElementById('athleteStatus') ? document.getElementById('athleteStatus').value : 'PENDENTE') || 'PENDENTE',
         foto: photoVal
       };
     }
@@ -4389,6 +4390,20 @@
             : (window._lastActiveAthlete || formAthlete);
         }
         window._lastActiveAthlete = targetAthlete;
+
+        const athleteStatus = ((targetAthlete && targetAthlete.status) || (document.getElementById('athleteStatus') ? document.getElementById('athleteStatus').value : 'PENDENTE')).toUpperCase().trim();
+        const isHomologado = athleteStatus === 'HOMOLOGADO' || athleteStatus === 'REGULAR';
+        if (!isHomologado) {
+          clearTimeout(safetyTimer);
+          _isExportingCarteiraPdf = false;
+          if (activeBtn) {
+            activeBtn.disabled = false;
+            activeBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+            activeBtn.innerHTML = originalHtml;
+          }
+          showToast('⚠️ Cadastro com Homologação Pendente! Não é permitido imprimir ou baixar em PDF enquanto o atleta não for homologado.');
+          return;
+        }
 
         const hdCanvas = await renderCarteiraToHdCanvas(studioState.elements, targetAthlete, 2);
         let hdImgData = null;
@@ -4491,6 +4506,20 @@
             : (window._lastActiveAthlete || formAthlete);
         }
         window._lastActiveAthlete = targetAthlete;
+
+        const athleteStatus = ((targetAthlete && targetAthlete.status) || (document.getElementById('athleteStatus') ? document.getElementById('athleteStatus').value : 'PENDENTE')).toUpperCase().trim();
+        const isHomologado = athleteStatus === 'HOMOLOGADO' || athleteStatus === 'REGULAR';
+        if (!isHomologado) {
+          clearTimeout(safetyTimer);
+          _isExportingCarteiraPng = false;
+          if (activeBtn) {
+            activeBtn.disabled = false;
+            activeBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+            activeBtn.innerHTML = originalHtml;
+          }
+          showToast('⚠️ Cadastro com Homologação Pendente! Não é permitido exportar PNG ou PDF enquanto o atleta não for homologado.');
+          return;
+        }
 
         const safeCode = (targetAthlete.federado || targetAthlete.codigo || 'atleta').replace(/[^a-zA-Z0-9_-]/g, '_');
         const fileName = `carteira-atleta-fpeft-HD-${safeCode}.png`;
@@ -5547,40 +5576,32 @@
           federado: fedNum || code,
           municipio: (document.getElementById('athleteCity').value || '').trim(),
           validade: (document.getElementById('athleteValidity').value || '12/2026').trim(),
+          status: 'PENDENTE',
           foto: photoVal
         };
 
         window._lastActiveAthlete = aObj;
 
-        // Emite RIGOROSAMENTE 1 ÚNICO PDF oficial para download
-        await exportCarteiraPDF(aObj, btn);
-
         const feedback = document.getElementById('athleteFeedback');
         if (feedback) {
           feedback.classList.remove('hidden');
-          feedback.className = "text-xs p-3.5 rounded-xl font-bold bg-amber-950/70 border border-amber-500/50 text-amber-200 shadow-xl space-y-2.5";
+          feedback.className = "text-xs p-3.5 rounded-xl font-bold bg-amber-950/80 border border-amber-500/50 text-amber-200 shadow-xl space-y-2.5";
           feedback.innerHTML = `
             <div class="flex items-start gap-2.5">
-              <span class="text-lg text-emerald-400">✓</span>
+              <span class="text-lg text-amber-400">⏳</span>
               <div>
-                <p class="font-extrabold text-emerald-300 text-xs uppercase tracking-wide">Cadastro Concluído & Carteira Emitida!</p>
+                <p class="font-extrabold text-amber-300 text-xs uppercase tracking-wide">Cadastro Salvo - Homologação Pendente</p>
                 <p class="text-[11px] font-normal text-slate-200 mt-0.5 leading-snug">
-                  Atleta <strong>#${escapeHtml(code)} - ${escapeHtml(name)}</strong> gravado no banco de dados e carteira oficial processada.
+                  Atleta <strong>#${escapeHtml(code)} - ${escapeHtml(name)}</strong> gravado com sucesso no banco de dados.
                 </p>
-                <p class="text-[10px] text-amber-300/80 font-medium mt-1">
-                  Status: <strong>PENDENTE</strong>. Homologação oficial disponível na aba <strong>Jogadores Cadastrados</strong>.
+                <p class="text-[10px] text-amber-300 font-medium mt-1 bg-amber-900/40 p-2 rounded-lg border border-amber-500/30">
+                  ⚠️ <strong>Aviso:</strong> Este cadastro está com <strong>HOMOLOGAÇÃO PENDENTE</strong>. Não é permitido imprimir nem baixar a carteira em PDF/PNG até a homologação oficial na aba <strong>Jogadores Cadastrados</strong>.
                 </p>
               </div>
             </div>
             <div class="pt-1 flex flex-wrap items-center gap-2">
-              <button type="button" onclick="switchTab('jogadores')" class="px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-black font-extrabold text-[10px] uppercase rounded-lg transition shadow flex items-center gap-1.5 cursor-pointer">
-                <span>Ver na Aba Jogadores</span> <i class="fa-solid fa-arrow-right text-[9px]"></i>
-              </button>
-              <button type="button" onclick="exportCarteiraPDF(window._lastActiveAthlete, this)" class="px-3 py-1.5 bg-rose-700 hover:bg-rose-600 text-white font-bold text-[10px] uppercase rounded-lg transition flex items-center gap-1.5 cursor-pointer" title="Baixar novamente o PDF">
-                <i class="fa-solid fa-file-pdf"></i> <span>Baixar PDF</span>
-              </button>
-              <button type="button" onclick="exportHdPng(window._lastActiveAthlete, this)" class="px-3 py-1.5 bg-sky-700 hover:bg-sky-600 text-white font-bold text-[10px] uppercase rounded-lg transition flex items-center gap-1.5 cursor-pointer" title="Baixar em formato imagem PNG HD">
-                <i class="fa-solid fa-file-image"></i> <span>Baixar PNG HD</span>
+              <button type="button" onclick="switchTab('jogadores'); setJogadoresFilterStatus('PENDENTE');" class="px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-black font-extrabold text-[10px] uppercase rounded-lg transition shadow flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-check-double"></i> <span>Homologar na Aba Jogadores</span>
               </button>
               <button type="button" onclick="prepararProximoCadastro()" class="px-3 py-1.5 bg-[#0e172a] hover:bg-[#1a2942] border border-slate-600 text-white font-bold text-[10px] uppercase rounded-lg transition flex items-center gap-1.5 cursor-pointer">
                 <i class="fa-solid fa-plus text-sky-400"></i> <span>Cadastrar Próximo</span>
@@ -5589,7 +5610,7 @@
           `;
         }
 
-        showToast(`✓ Atleta #${code} salvo e carteira gerada com sucesso!`);
+        showToast(`⚠️ Atleta #${code} salvo com Homologação Pendente!`);
       } catch (err) {
         console.error('Erro ao enviar carteira ao banco:', err);
         showToast('❌ Ocorreu um erro ao enviar para o banco: ' + (err.message || 'Falha no cadastro'));

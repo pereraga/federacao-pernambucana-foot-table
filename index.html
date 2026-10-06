@@ -283,19 +283,29 @@
             </div>
             <div class="text-right">
               <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">Status Federado</span>
-              <span class="text-[10px] font-bold uppercase text-emerald-400 flex items-center gap-1">
+              <span id="cardBadgeStatus" class="text-[10px] font-bold uppercase text-emerald-400 flex items-center justify-end gap-1">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> REGULAR
               </span>
             </div>
           </div>
         </div>
 
+        <!-- Aviso de Homologação Pendente (Dinâmico) -->
+        <div id="cardPendingWarning" class="hidden max-w-[560px] mx-auto mt-4 p-4 rounded-xl bg-amber-950/80 border border-amber-500/50 text-amber-200 text-xs shadow-lg space-y-1.5">
+          <div class="flex items-center gap-2 font-extrabold text-amber-400">
+            <span class="text-base">⏳</span> <span>HOMOLOGAÇÃO PENDENTE</span>
+          </div>
+          <p class="text-slate-300 text-[11px] leading-relaxed">
+            Este cadastro foi registrado e está aguardando a homologação oficial da Federação. <strong>A impressão e o download em PDF/PNG da carteira digital estão temporariamente bloqueados</strong> até a conclusão da validação.
+          </p>
+        </div>
+
         <!-- Ações de Extração da Carteira -->
         <div class="max-w-[560px] mx-auto mt-4 grid grid-cols-2 gap-3">
-          <button id="btnDownloadCardPng" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase tracking-wider py-3 rounded-xl transition shadow flex items-center justify-center gap-2">
+          <button id="btnDownloadCardPng" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase tracking-wider py-3 rounded-xl transition shadow flex items-center justify-center gap-2 cursor-pointer">
             <span>💾</span> Baixar PNG
           </button>
-          <button id="btnPrintCard" class="bg-pe-accent hover:bg-slate-700 text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition flex items-center justify-center gap-2">
+          <button id="btnPrintCard" class="bg-pe-accent hover:bg-slate-700 text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer">
             <span>🖨️</span> Imprimir / PDF
           </button>
         </div>
@@ -669,6 +679,8 @@
               nascimento: data.nascimento,
               municipio: data.municipio,
               modalidade: data.modalidade || 'SOLO (INDIVIDUAL)',
+              categoria: data.categoria || 'ASPIRANTE',
+              status: data.status || 'PENDENTE',
               foto: data.foto_url
             };
           }
@@ -680,7 +692,20 @@
       // 2. Se não encontrou no Supabase, consulta na base local
       if (!athlete) {
         const athletes = getStoredAthletes();
-        athlete = athletes.find(a => String(a.codigo) === String(code));
+        const found = athletes.find(a => String(a.codigo) === String(code));
+        if (found) {
+          athlete = {
+            codigo: found.codigo,
+            nome: found.nome,
+            cpf: found.cpf,
+            nascimento: found.nascimento,
+            municipio: found.municipio,
+            modalidade: found.modalidade || 'SOLO (INDIVIDUAL)',
+            categoria: found.categoria || 'ASPIRANTE',
+            status: found.status || 'PENDENTE',
+            foto: found.foto || found.foto_url
+          };
+        }
       }
 
       if (!athlete) {
@@ -692,6 +717,8 @@
         badgeArea.classList.add('hidden');
         return;
       }
+
+      window._currentSearchedAthlete = athlete;
 
       feedback.classList.add('hidden');
       badgeArea.classList.remove('hidden');
@@ -707,6 +734,57 @@
       document.getElementById('cardBadgeCode').textContent = `ID: #${athlete.codigo}`;
       document.getElementById('cardBadgePhoto').src = athlete.foto || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80";
 
+      // Verifica status de homologação
+      const upperStatus = (athlete.status || 'PENDENTE').toUpperCase().trim();
+      const isHomologado = upperStatus === 'HOMOLOGADO' || upperStatus === 'REGULAR';
+      
+      const statusBadge = document.getElementById('cardBadgeStatus');
+      const pendingWarning = document.getElementById('cardPendingWarning');
+      const btnDownload = document.getElementById('btnDownloadCardPng');
+      const btnPrint = document.getElementById('btnPrintCard');
+
+      if (statusBadge) {
+        if (isHomologado) {
+          statusBadge.className = "text-[10px] font-bold uppercase text-emerald-400 flex items-center justify-end gap-1";
+          statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> REGULAR';
+        } else {
+          statusBadge.className = "text-[10px] font-bold uppercase text-amber-400 flex items-center justify-end gap-1 font-mono";
+          statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span> HOMOLOGAÇÃO PENDENTE';
+        }
+      }
+
+      if (pendingWarning) {
+        if (isHomologado) {
+          pendingWarning.classList.add('hidden');
+        } else {
+          pendingWarning.classList.remove('hidden');
+        }
+      }
+
+      if (btnDownload) {
+        if (isHomologado) {
+          btnDownload.disabled = false;
+          btnDownload.className = "bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase tracking-wider py-3 rounded-xl transition shadow flex items-center justify-center gap-2 cursor-pointer";
+          btnDownload.title = "Baixar Carteira em PNG";
+        } else {
+          btnDownload.disabled = true;
+          btnDownload.className = "bg-slate-800/80 border border-slate-700/60 text-slate-500 font-bold text-xs uppercase tracking-wider py-3 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed opacity-60";
+          btnDownload.title = "Download bloqueado: Homologação Pendente";
+        }
+      }
+
+      if (btnPrint) {
+        if (isHomologado) {
+          btnPrint.disabled = false;
+          btnPrint.className = "bg-pe-accent hover:bg-slate-700 text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer";
+          btnPrint.title = "Imprimir ou Salvar em PDF";
+        } else {
+          btnPrint.disabled = true;
+          btnPrint.className = "bg-slate-800/80 border border-slate-700/60 text-slate-500 font-bold text-xs uppercase tracking-wider py-3 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed opacity-60";
+          btnPrint.title = "Impressão bloqueada: Homologação Pendente";
+        }
+      }
+
       badgeArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
@@ -719,6 +797,12 @@
        EXPORTAR / BAIXAR CARTEIRA EM PNG E IMPRIMIR
        ======================================================= */
     document.getElementById('btnDownloadCardPng').addEventListener('click', () => {
+      const athlete = window._currentSearchedAthlete;
+      const upperStatus = (athlete && athlete.status ? athlete.status : 'PENDENTE').toUpperCase().trim();
+      if (upperStatus !== 'HOMOLOGADO' && upperStatus !== 'REGULAR') {
+        alert('⚠️ ATENÇÃO: Esta carteira digital está com HOMOLOGAÇÃO PENDENTE.\n\nA impressão e o download em PDF/PNG só são permitidos após a homologação oficial pela Federação.');
+        return;
+      }
       const card = document.getElementById('athleteCredentialCard');
       const athleteName = document.getElementById('cardBadgeName').textContent;
       
@@ -734,6 +818,12 @@
     });
 
     document.getElementById('btnPrintCard').addEventListener('click', () => {
+      const athlete = window._currentSearchedAthlete;
+      const upperStatus = (athlete && athlete.status ? athlete.status : 'PENDENTE').toUpperCase().trim();
+      if (upperStatus !== 'HOMOLOGADO' && upperStatus !== 'REGULAR') {
+        alert('⚠️ ATENÇÃO: Esta carteira digital está com HOMOLOGAÇÃO PENDENTE.\n\nA impressão da carteira em PDF é bloqueada até a validação e homologação oficial pela Federação.');
+        return;
+      }
       window.print();
     });
 
