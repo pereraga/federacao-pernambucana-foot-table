@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261006_v35_homologacao_pendente_block_pdf';
+      const APP_REV = '20261006_v36_homologacao_state_sync';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -5600,8 +5600,11 @@
               </div>
             </div>
             <div class="pt-1 flex flex-wrap items-center gap-2">
+              <button type="button" onclick="homologarAthlete('${escapeHtml(code)}')" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-[10px] uppercase rounded-lg transition shadow flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-check"></i> <span>Homologar Este Atleta Agora</span>
+              </button>
               <button type="button" onclick="switchTab('jogadores'); setJogadoresFilterStatus('PENDENTE');" class="px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-black font-extrabold text-[10px] uppercase rounded-lg transition shadow flex items-center gap-1.5 cursor-pointer">
-                <i class="fa-solid fa-check-double"></i> <span>Homologar na Aba Jogadores</span>
+                <i class="fa-solid fa-list-check"></i> <span>Ver Lista de Pendentes</span>
               </button>
               <button type="button" onclick="prepararProximoCadastro()" class="px-3 py-1.5 bg-[#0e172a] hover:bg-[#1a2942] border border-slate-600 text-white font-bold text-[10px] uppercase rounded-lg transition flex items-center gap-1.5 cursor-pointer">
                 <i class="fa-solid fa-plus text-sky-400"></i> <span>Cadastrar Próximo</span>
@@ -5661,22 +5664,27 @@
         try {
           const { data, error } = await supabaseClient.from('atletas').select('*').order('created_at', { ascending: false });
           if (!error && Array.isArray(data)) {
-            list = data.map(d => ({
-              id: d.id,
-              codigo: d.codigo,
-              nome: d.nome,
-              cpf: d.cpf,
-              nascimento: d.nascimento,
-              telefone: d.telefone,
-              municipio: d.municipio,
-              categoria: d.categoria || 'ASPIRANTE',
-              modalidade: d.modalidade,
-              status: d.status || 'HOMOLOGADO',
-              clube: d.clube,
-              federado: d.federado || (String(d.codigo).startsWith('PE-') ? d.codigo : `PE-2026/${String(d.codigo).slice(-3)}`),
-              validade: d.validade,
-              foto: d.foto_url
-            }));
+            const localMap = new Map(list.map(a => [String(a.codigo), a]));
+            list = data.map(d => {
+              const localMatch = localMap.get(String(d.codigo));
+              const effectiveStatus = (d.status && String(d.status).trim()) ? d.status : (localMatch && localMatch.status ? localMatch.status : 'HOMOLOGADO');
+              return {
+                id: d.id,
+                codigo: d.codigo,
+                nome: d.nome,
+                cpf: d.cpf,
+                nascimento: d.nascimento,
+                telefone: d.telefone,
+                municipio: d.municipio,
+                categoria: d.categoria || 'ASPIRANTE',
+                modalidade: d.modalidade,
+                status: effectiveStatus,
+                clube: d.clube,
+                federado: d.federado || (String(d.codigo).startsWith('PE-') ? d.codigo : `PE-2026/${String(d.codigo).slice(-3)}`),
+                validade: d.validade,
+                foto: d.foto_url
+              };
+            });
             localStorage.setItem('pe_athletes_db', JSON.stringify(list));
           }
         } catch (e) {
@@ -5910,31 +5918,71 @@
        HOMOLOGAÇÃO DE ATLETAS (INDIVIDUAL E EM MASSA)
        ========================================================= */
     async function homologarAthlete(codigo) {
-      let athletes = await loadAthletes();
-      const a = athletes.find(item => String(item.codigo) === String(codigo));
-      if (!a) return;
+      let athletes = JSON.parse(localStorage.getItem('pe_athletes_db')) || [];
+      const a = athletes.find(item => String(item.codigo) === String(codigo) || String(item.federado) === String(codigo));
+      if (a) {
+        a.status = 'HOMOLOGADO';
+        localStorage.setItem('pe_athletes_db', JSON.stringify(athletes));
+        currentCachedAthletes = athletes;
+      }
 
-      a.status = 'HOMOLOGADO';
+      // Se o formulário ou a tela do Studio estiver com este atleta aberto, atualiza imediatamente para HOMOLOGADO
+      const currentFormCode = (document.getElementById('athleteCode') ? document.getElementById('athleteCode').value : '') || (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '');
+      if (String(currentFormCode) === String(codigo) || (window._lastActiveAthlete && (String(window._lastActiveAthlete.codigo) === String(codigo) || String(window._lastActiveAthlete.federado) === String(codigo)))) {
+        const statusSelect = document.getElementById('athleteStatus');
+        if (statusSelect) statusSelect.value = 'HOMOLOGADO';
+        if (window._lastActiveAthlete) window._lastActiveAthlete.status = 'HOMOLOGADO';
+
+        const feedback = document.getElementById('athleteFeedback');
+        if (feedback) {
+          feedback.classList.remove('hidden');
+          feedback.className = "text-xs p-3.5 rounded-xl font-bold bg-emerald-950/80 border border-emerald-500/50 text-emerald-200 shadow-xl space-y-2.5";
+          feedback.innerHTML = `
+            <div class="flex items-start gap-2.5">
+              <span class="text-lg text-emerald-400">✓</span>
+              <div>
+                <p class="font-extrabold text-emerald-300 text-xs uppercase tracking-wide">Atleta Homologado Oficialmente!</p>
+                <p class="text-[11px] font-normal text-slate-200 mt-0.5 leading-snug">
+                  Atleta <strong>#${escapeHtml(codigo)} - ${escapeHtml((a && a.nome) || 'Atleta')}</strong> homologado com sucesso. A emissão de carteira (PDF e PNG) está liberada!
+                </p>
+              </div>
+            </div>
+            <div class="pt-1 flex flex-wrap items-center gap-2">
+              <button type="button" onclick="exportCarteiraPDF(window._lastActiveAthlete, this)" class="px-3 py-1.5 bg-rose-700 hover:bg-rose-600 text-white font-bold text-[10px] uppercase rounded-lg transition flex items-center gap-1.5 cursor-pointer shadow">
+                <i class="fa-solid fa-file-pdf"></i> <span>Baixar PDF Oficial</span>
+              </button>
+              <button type="button" onclick="exportHdPng(window._lastActiveAthlete, this)" class="px-3 py-1.5 bg-sky-700 hover:bg-sky-600 text-white font-bold text-[10px] uppercase rounded-lg transition flex items-center gap-1.5 cursor-pointer shadow">
+                <i class="fa-solid fa-file-image"></i> <span>Baixar PNG HD</span>
+              </button>
+              <button type="button" onclick="prepararProximoCadastro()" class="px-3 py-1.5 bg-[#0e172a] hover:bg-[#1a2942] border border-slate-600 text-white font-bold text-[10px] uppercase rounded-lg transition flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-plus text-sky-400"></i> <span>Cadastrar Próximo</span>
+              </button>
+            </div>
+          `;
+        }
+      }
 
       if (supabaseClient) {
         try {
-          await supabaseClient.from('atletas').update({ status: 'HOMOLOGADO' }).eq('codigo', codigo);
+          const { error } = await supabaseClient.from('atletas').update({ status: 'HOMOLOGADO' }).eq('codigo', codigo);
+          if (error) {
+            console.warn("Supabase update status aviso:", error);
+            await supabaseClient.from('atletas').update({ status: 'HOMOLOGADO' }).eq('federado', codigo);
+          }
         } catch (e) {
           console.warn("Supabase update status error:", e);
         }
       }
 
-      localStorage.setItem('pe_athletes_db', JSON.stringify(athletes));
-      currentCachedAthletes = athletes;
-      showToast(`✓ Atleta #${codigo} (${a.nome}) homologado oficialmente no site!`);
-      renderJogadoresCadastradosTable();
+      showToast(`✓ Atleta #${codigo} (${(a && a.nome) || ''}) homologado com sucesso!`);
+      await renderJogadoresCadastradosTable();
       updateDashboardData();
     }
 
     async function homologarTodosPendentes() {
-      let athletes = await loadAthletes();
+      let localAthletes = JSON.parse(localStorage.getItem('pe_athletes_db')) || [];
       let updatedCount = 0;
-      athletes.forEach(a => {
+      localAthletes.forEach(a => {
         if (a.status !== 'HOMOLOGADO' && a.status !== 'REGULAR') {
           a.status = 'HOMOLOGADO';
           updatedCount++;
@@ -5946,6 +5994,42 @@
         return;
       }
 
+      localStorage.setItem('pe_athletes_db', JSON.stringify(localAthletes));
+      currentCachedAthletes = localAthletes;
+
+      // Se o formulário ativo estiver com PENDENTE, atualiza para HOMOLOGADO
+      const statusSelect = document.getElementById('athleteStatus');
+      if (statusSelect && statusSelect.value === 'PENDENTE') {
+        statusSelect.value = 'HOMOLOGADO';
+      }
+      if (window._lastActiveAthlete) {
+        window._lastActiveAthlete.status = 'HOMOLOGADO';
+      }
+
+      const feedback = document.getElementById('athleteFeedback');
+      if (feedback && !feedback.classList.contains('hidden')) {
+        feedback.className = "text-xs p-3.5 rounded-xl font-bold bg-emerald-950/80 border border-emerald-500/50 text-emerald-200 shadow-xl space-y-2.5";
+        feedback.innerHTML = `
+          <div class="flex items-start gap-2.5">
+            <span class="text-lg text-emerald-400">✓</span>
+            <div>
+              <p class="font-extrabold text-emerald-300 text-xs uppercase tracking-wide">Todos os Atletas Homologados!</p>
+              <p class="text-[11px] font-normal text-slate-200 mt-0.5 leading-snug">
+                Todos os atletas pendentes foram homologados oficialmente. A emissão de carteira (PDF e PNG) está liberada!
+              </p>
+            </div>
+          </div>
+          <div class="pt-1 flex flex-wrap items-center gap-2">
+            <button type="button" onclick="exportCarteiraPDF(window._lastActiveAthlete, this)" class="px-3 py-1.5 bg-rose-700 hover:bg-rose-600 text-white font-bold text-[10px] uppercase rounded-lg transition flex items-center gap-1.5 cursor-pointer shadow">
+              <i class="fa-solid fa-file-pdf"></i> <span>Baixar PDF</span>
+            </button>
+            <button type="button" onclick="exportHdPng(window._lastActiveAthlete, this)" class="px-3 py-1.5 bg-sky-700 hover:bg-sky-600 text-white font-bold text-[10px] uppercase rounded-lg transition flex items-center gap-1.5 cursor-pointer shadow">
+              <i class="fa-solid fa-file-image"></i> <span>Baixar PNG HD</span>
+            </button>
+          </div>
+        `;
+      }
+
       if (supabaseClient) {
         try {
           await supabaseClient.from('atletas').update({ status: 'HOMOLOGADO' }).neq('status', 'HOMOLOGADO');
@@ -5954,10 +6038,8 @@
         }
       }
 
-      localStorage.setItem('pe_athletes_db', JSON.stringify(athletes));
-      currentCachedAthletes = athletes;
       showToast(`✓ Todos os ${updatedCount} jogadores foram homologados com sucesso!`);
-      renderJogadoresCadastradosTable();
+      await renderJogadoresCadastradosTable();
       updateDashboardData();
     }
 
