@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261005_v25_sync_live_design';
+      const APP_REV = '20261005_v26_fix_png_direct_download';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -4447,48 +4447,48 @@
 
         const safeCode = (targetAthlete.federado || targetAthlete.codigo || 'atleta').replace(/[^a-zA-Z0-9_-]/g, '_');
         const fileName = `carteira-atleta-fpeft-HD-${safeCode}.png`;
-        const hdCanvas = await renderCarteiraToHdCanvas(studioState.elements, targetAthlete, 2);
+        // 1. Gera DataURL direto para download instantâneo
+        let pngDataUrl = null;
+        try {
+          pngDataUrl = hdCanvas.toDataURL('image/png');
+        } catch (e) {
+          console.warn('toDataURL falhou:', e);
+        }
 
         let pngBlob = null;
-        try {
-          pngBlob = await new Promise((res) => hdCanvas.toBlob(res, 'image/png'));
-        } catch (e) {
-          console.warn('toBlob falhou:', e);
-        }
-
-        if (!pngBlob) {
+        if (pngDataUrl) {
+          pngBlob = dataUrlToBlob(pngDataUrl);
+        } else {
           try {
-            const pngDataUrl = hdCanvas.toDataURL('image/png');
-            pngBlob = dataUrlToBlob(pngDataUrl);
-          } catch (taintErr) {
-            console.warn('Canvas com restrição de exportação no PNG, gerando render seguro:', taintErr);
-            try {
-              const safeCanvas = await renderCarteiraToHdCanvas(studioState.elements, targetAthlete, 2, true);
-              pngBlob = await new Promise((res) => safeCanvas.toBlob(res, 'image/png'));
-            } catch (err2) {
-              console.error('Falha no render seguro do PNG:', err2);
-            }
-          }
+            pngBlob = await new Promise((res) => hdCanvas.toBlob(res, 'image/png'));
+          } catch (e) {}
         }
 
-        if (!pngBlob) {
+        if (!pngBlob && !pngDataUrl) {
           throw new Error('Falha ao gerar arquivo PNG da carteira.');
         }
+
+        const downloadUrl = pngDataUrl || (pngBlob ? URL.createObjectURL(pngBlob) : null);
+
+        // 2. Disparo direto nativo de download
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = fileName;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        try {
+          a.click();
+        } catch (err) {
+          console.warn('a.click falhou:', err);
+        }
+        setTimeout(() => {
+          try { if (a.parentNode) a.parentNode.removeChild(a); } catch (e) {}
+        }, 5000);
 
         window._lastExportedPngBlob = pngBlob;
         window._lastExportedPngName = fileName;
 
-        const blobUrl = executeDirectDownload(pngBlob, fileName, 'image/png');
-
-        let viewUrl = null;
-        try {
-          const viewBlob = new Blob([pngBlob], { type: 'image/png' });
-          viewUrl = URL.createObjectURL(viewBlob);
-        } catch (e) {
-          viewUrl = blobUrl;
-        }
-
-        showDownloadToast(blobUrl, fileName, 'PNG', viewUrl);
+        showDownloadToast(downloadUrl, fileName, 'PNG HD', downloadUrl);
         showToast('✓ PNG HD (600 DPI) pronto e baixado!');
       } catch (err) {
         console.error('Erro ao exportar PNG:', err);
