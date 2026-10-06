@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261005_v27_fix_png_canvas';
+      const APP_REV = '20261005_v28_fix_layout_persistence';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -2461,71 +2461,55 @@
     }
 
     /* Grava explicitamente o design atual como Padrão Fixo Oficial na nuvem Supabase */
+    /* Grava explicitamente o design atual como Padrão Fixo Oficial na nuvem Supabase */
     async function saveOfficialLayoutToCloud() {
       try {
-        toggleDesignLock(true);
         localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(studioState.elements));
         localStorage.setItem('fpeft_studio_layout_version', STUDIO_LAYOUT_VERSION);
+        if (studioState.bgTransform) {
+          localStorage.setItem('fpeft_studio_bg_transform', JSON.stringify(studioState.bgTransform));
+        }
         await syncStudioDesignToSupabase(true);
-        showToast('⭐ Padrão Fixo Oficial gravado com sucesso na nuvem para todos os computadores!');
+        showToast('⭐ Padrão Fixo gravado com sucesso! Salvo permanentemente neste navegador e na nuvem.');
       } catch (err) {
         console.error('Erro ao gravar padrão oficial:', err);
         showToast('Erro ao sincronizar padrão na nuvem.');
       }
     }
 
-    /* Sanitiza e corrige qualquer elemento com sobreposição ou posições obsoletas */
+    /* Sanitiza elementos garantindo integridade sem NUNCA sobrescrever posições ou dimensões customizadas */
     function sanitizeStudioElements(elements) {
       if (!Array.isArray(elements) || elements.length === 0) {
         return JSON.parse(JSON.stringify(OFFICIAL_DEFAULT_ELEMENTS));
       }
-      elements.forEach(el => {
-        if (el.id === 'field-cpf' || el.id === 'field-nasc' || el.id === 'field-fone') {
-          if (el.y < 365) el.y = 365;
-        }
-        if (el.id === 'field-modalidade' || el.id === 'field-municipio' || el.id === 'field-categoria') {
-          if (el.y < 435) el.y = 440;
-        }
-        if (el.id === 'field-qrcode') {
-          if (el.height > 136 || el.y > 425) {
-            el.y = 416;
-            el.width = 142;
-            el.height = 136;
-          }
-          el.labelTag = 'VERIFICAÇÃO DE AUTENTICIDADE';
-        }
-        if (el.id === 'field-validade') {
-          if (el.y < 594) el.y = 594;
-          el.width = 142;
-          el.labelTag = 'VALIDADE';
-        }
-        if (el.id === 'field-federado') {
-          if (el.y < 550) el.y = 554;
-        }
-        if (!el.labelAlign) {
-          el.labelAlign = el.textAlign === 'center' ? 'center' : (el.id === 'field-nome' ? 'left' : 'center');
-        }
+      return elements.map(el => {
+        const defaultMatch = OFFICIAL_DEFAULT_ELEMENTS.find(d => d.id === el.id) || {};
+        return {
+          ...defaultMatch,
+          ...el // Posições (x, y, width, height, etc) salvas pelo usuário têm prioridade TOTAL e nunca são zeradas
+        };
       });
-      return elements;
     }
 
     /* Busca o design oficial na nuvem Supabase ao inicializar */
     async function fetchStudioDesignFromSupabase() {
       if (typeof supabaseClient !== 'undefined' && supabaseClient) {
         try {
-          const { data, error } = await supabaseClient
-            .from('keep_alive_logs')
-            .select('*')
-            .eq('source', 'studio_layout_sync')
-            .order('pinged_at', { ascending: false })
-            .limit(1);
-          if (data && data.length > 0 && data[0].status) {
-            const parsed = JSON.parse(data[0].status);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              studioState.elements = sanitizeStudioElements(parsed);
-              localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(studioState.elements));
-              localStorage.setItem('fpeft_studio_layout_version', STUDIO_LAYOUT_VERSION);
-              renderInteractiveElements();
+          const hasLocalSave = !!localStorage.getItem('fpeft_studio_custom_elements');
+          if (!hasLocalSave) {
+            const { data, error } = await supabaseClient
+              .from('keep_alive_logs')
+              .select('*')
+              .eq('source', 'studio_layout_sync')
+              .order('pinged_at', { ascending: false })
+              .limit(1);
+            if (data && data.length > 0 && data[0].status) {
+              const parsed = JSON.parse(data[0].status);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                studioState.elements = sanitizeStudioElements(parsed);
+                localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(studioState.elements));
+                renderInteractiveElements();
+              }
             }
           }
         } catch (e) {
@@ -2538,7 +2522,6 @@
     function autoSaveStudioDesign() {
       try {
         localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(studioState.elements));
-        localStorage.setItem('fpeft_studio_layout_version', STUDIO_LAYOUT_VERSION);
         if (studioState.bgTransform) {
           localStorage.setItem('fpeft_studio_bg_transform', JSON.stringify(studioState.bgTransform));
         }
@@ -2548,7 +2531,7 @@
       }
     }
 
-    /* Carrega preferências e design salvo automaticamente, garantindo que novos computadores e e-mails vejam o design oficial atualizado */
+    /* Carrega preferências e design salvo automaticamente pelo usuário */
     try {
       const savedLock = localStorage.getItem('fpeft_studio_design_locked');
       if (savedLock !== null) {
@@ -2558,19 +2541,11 @@
       if (savedGuides !== null) {
         studioState.showGuides = savedGuides === 'true';
       }
-      const savedVersion = localStorage.getItem('fpeft_studio_layout_version');
-      if (savedVersion !== STUDIO_LAYOUT_VERSION) {
-        // Atualiza e migra qualquer cache antigo para o novo layout oficial limpo sem sobreposições
-        localStorage.setItem('fpeft_studio_layout_version', STUDIO_LAYOUT_VERSION);
-        localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(OFFICIAL_DEFAULT_ELEMENTS));
-        studioState.elements = JSON.parse(JSON.stringify(OFFICIAL_DEFAULT_ELEMENTS));
-      } else {
-        const savedCustomElements = localStorage.getItem('fpeft_studio_custom_elements');
-        if (savedCustomElements) {
-          const parsed = JSON.parse(savedCustomElements);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            studioState.elements = sanitizeStudioElements(parsed);
-          }
+      const savedCustomElements = localStorage.getItem('fpeft_studio_custom_elements');
+      if (savedCustomElements) {
+        const parsed = JSON.parse(savedCustomElements);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          studioState.elements = sanitizeStudioElements(parsed);
         }
       }
       const savedBgTransform = localStorage.getItem('fpeft_studio_bg_transform');
