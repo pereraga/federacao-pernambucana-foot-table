@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261005_v32_remove_modo_icones_btn';
+      const APP_REV = '20261005_v33_remove_collapsed_expand_btn';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -350,9 +350,6 @@
     #sidebar.sidebar-collapsed #sidebarFooter span:not(.sidebar-text) {
       font-size: 1.1rem !important;
     }
-    #sidebar.sidebar-collapsed #btnExpandWhenCollapsed {
-      display: flex !important;
-    }
   </style>
 </head>
 <body class="bg-[#080b12] text-slate-100 min-h-screen font-sans antialiased selection:bg-pe-gold selection:text-pe-dark">
@@ -408,11 +405,6 @@
             Abas do Sistema
           </span>
         </div>
-
-        <!-- Botão de Expandir visível apenas quando recolhido -->
-        <button id="btnExpandWhenCollapsed" onclick="toggleSidebarCollapse()" class="hidden w-full py-2.5 px-2 rounded-2xl bg-sky-950/40 hover:bg-pe-gold/20 hover:text-pe-gold border border-sky-800/40 text-sky-300 transition cursor-pointer flex items-center justify-center mb-1 group" title="Expandir menu (mostrar textos e ícones)">
-          <i class="fa-solid fa-angles-right text-xs group-hover:translate-x-0.5 transition-transform"></i>
-        </button>
 
         <!-- 1. Aba Início (Ativo por padrão com Amarelo Oficial) -->
         <button onclick="switchTab('inicio')" id="navBtn-inicio" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all cursor-pointer group active-nav-pill" title="Início">
