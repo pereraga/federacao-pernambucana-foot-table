@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261005_v28_fix_layout_persistence';
+      const APP_REV = '20261005_v29_update_studio_title';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -2100,7 +2100,7 @@
     const ALL_TABS = ['inicio', 'atletas', 'jogadores', 'estudio', 'noticias', 'emails', 'config', 'guia'];
     const TAB_TITLES = {
       inicio: '🏠 Início & Carteiras Homologadas',
-      atletas: '1. 🪪 Studio de Emissão & Diagramação CR80',
+      atletas: 'Studio de Emissão de Carteira de Federados CR80',
       jogadores: '2. 👥 Jogadores Cadastrados & Homologação',
       estudio: '3. 🎨 Aba Estúdio da Carteira (Dimensões & Textos)',
       noticias: '4. 📰 Aba Notícias & Torneios',
