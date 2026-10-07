@@ -816,14 +816,8 @@
                       <input type="hidden" id="athleteModality" value="SOLO (INDIVIDUAL)" />
                       <!-- Botões de Seleção Direta de Modalidade (Permite Seleção Única ou Múltipla) -->
                       <div class="grid grid-cols-2 gap-1.5" id="modalityPillsContainer">
-                        <button type="button" onclick="toggleModalityOption('SOLO')" id="btnModSolo" data-mod="SOLO" class="mod-pill-btn flex items-center justify-center gap-1 text-[10px] sm:text-[10.5px] whitespace-nowrap py-2 px-1 rounded-xl font-black text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none leading-none tracking-tight" title="Clique para marcar/desmarcar Solo (Individual)">
-                          <i class="fa-solid fa-square-check text-xs" id="iconModSolo"></i>
-                          <span>Solo (Individual)</span>
-                        </button>
-                        <button type="button" onclick="toggleModalityOption('DUPLA')" id="btnModDupla" data-mod="DUPLA" class="mod-pill-btn flex items-center justify-center gap-1 text-[10px] sm:text-[10.5px] whitespace-nowrap py-2 px-1 rounded-xl font-black text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none leading-none tracking-tight" title="Clique para marcar/desmarcar Dupla (Equipe)">
-                          <i class="fa-regular fa-square text-xs text-slate-500" id="iconModDupla"></i>
-                          <span>Dupla (Equipe)</span>
-                        </button>
+                        <button type="button" onclick="toggleModalityOption('SOLO')" id="btnModSolo" data-mod="SOLO" class="mod-pill-btn flex items-center justify-center text-[10.5px] whitespace-nowrap py-2 px-1 rounded-xl font-black text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none leading-none tracking-tight" title="Clique para ativar/desativar Solo (Individual)">Solo (Individual)</button>
+                        <button type="button" onclick="toggleModalityOption('DUPLA')" id="btnModDupla" data-mod="DUPLA" class="mod-pill-btn flex items-center justify-center text-[10.5px] whitespace-nowrap py-2 px-1 rounded-xl font-black text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none leading-none tracking-tight" title="Clique para ativar/desativar Dupla (Equipe)">Dupla (Equipe)</button>
                       </div>
                     </div>
                     <div>
@@ -5153,23 +5147,14 @@
       const hasSolo = upper.includes('SOLO');
       const hasDupla = upper.includes('DUPLA') || upper.includes('EQUIPE');
 
-      const activeClass = "mod-pill-btn flex items-center justify-center gap-1 text-[10px] sm:text-[10.5px] whitespace-nowrap py-2 px-1 rounded-xl font-black text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none leading-none tracking-tight";
-      const inactiveClass = "mod-pill-btn flex items-center justify-center gap-1 text-[10px] sm:text-[10.5px] whitespace-nowrap py-2 px-1 rounded-xl font-black text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none leading-none tracking-tight";
+      const activeClass = "mod-pill-btn flex items-center justify-center text-[10.5px] whitespace-nowrap py-2 px-1 rounded-xl font-black text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none leading-none tracking-tight";
+      const inactiveClass = "mod-pill-btn flex items-center justify-center text-[10.5px] whitespace-nowrap py-2 px-1 rounded-xl font-black text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none leading-none tracking-tight";
 
       const btnSolo = document.getElementById('btnModSolo') || document.querySelector('.mod-pill-btn[data-mod="SOLO"]');
       const btnDupla = document.getElementById('btnModDupla') || document.querySelector('.mod-pill-btn[data-mod="DUPLA"]');
-      const iconSolo = document.getElementById('iconModSolo');
-      const iconDupla = document.getElementById('iconModDupla');
 
       if (btnSolo) btnSolo.className = hasSolo ? activeClass : inactiveClass;
-      if (iconSolo) {
-        iconSolo.className = hasSolo ? "fa-solid fa-square-check text-xs text-pe-dark" : "fa-regular fa-square text-xs text-slate-500";
-      }
-
       if (btnDupla) btnDupla.className = hasDupla ? activeClass : inactiveClass;
-      if (iconDupla) {
-        iconDupla.className = hasDupla ? "fa-solid fa-square-check text-xs text-pe-dark" : "fa-regular fa-square text-xs text-slate-500";
-      }
     }
 
     /* =========================================================
