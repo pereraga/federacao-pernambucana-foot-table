@@ -814,10 +814,10 @@
                         <label class="block text-slate-300 font-bold">Modalidade</label>
                       </div>
                       <input type="hidden" id="athleteModality" value="SOLO (INDIVIDUAL)" />
-                      <!-- Botões de Seleção Direta de Modalidade -->
+                      <!-- Botões de Seleção Direta de Modalidade (Permite Seleção Única ou Múltipla) -->
                       <div class="grid grid-cols-2 gap-1.5" id="modalityPillsContainer">
-                        <button type="button" onclick="selectModalityBase('SOLO (INDIVIDUAL)')" data-mod="SOLO (INDIVIDUAL)" class="mod-pill-btn flex items-center justify-center text-[10.5px] whitespace-nowrap py-2 px-1 rounded-xl font-black text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none leading-none tracking-tight">Solo (Individual)</button>
-                        <button type="button" onclick="selectModalityBase('DUPLA (EQUIPE)')" data-mod="DUPLA (EQUIPE)" class="mod-pill-btn flex items-center justify-center text-[10.5px] whitespace-nowrap py-2 px-1 rounded-xl font-black text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none leading-none tracking-tight">Dupla (Equipe)</button>
+                        <button type="button" onclick="toggleModalityOption('SOLO')" data-mod="SOLO" class="mod-pill-btn flex items-center justify-center text-[10.5px] whitespace-nowrap py-2 px-1 rounded-xl font-black text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none leading-none tracking-tight" title="Clique para ativar ou desativar Solo (Individual)">Solo (Individual)</button>
+                        <button type="button" onclick="toggleModalityOption('DUPLA')" data-mod="DUPLA" class="mod-pill-btn flex items-center justify-center text-[10.5px] whitespace-nowrap py-2 px-1 rounded-xl font-black text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none leading-none tracking-tight" title="Clique para ativar ou desativar Dupla (Equipe)">Dupla (Equipe)</button>
                       </div>
                     </div>
                     <div>
@@ -5060,16 +5060,45 @@
       });
     }
 
-    /* Gestão das 2 Opções de Modalidade: Solo Individual e Dupla */
-    function selectModalityBase(mod) {
-      setAthleteModalityValue(mod);
+    /* Gestão das Opções de Modalidade: Solo Individual, Dupla e Ambas (Solo + Dupla) */
+    function toggleModalityOption(clickedOption) {
+      const currentVal = (document.getElementById('athleteModality')?.value || 'SOLO (INDIVIDUAL)').toUpperCase();
+      let hasSolo = currentVal.includes('SOLO');
+      let hasDupla = currentVal.includes('DUPLA') || currentVal.includes('EQUIPE');
+
+      const isClickSolo = String(clickedOption || '').toUpperCase().includes('SOLO');
+      const isClickDupla = String(clickedOption || '').toUpperCase().includes('DUPLA') || String(clickedOption || '').toUpperCase().includes('EQUIPE');
+
+      if (isClickSolo) {
+        hasSolo = !hasSolo;
+        if (!hasSolo && !hasDupla) hasDupla = true; // garante ao menos 1 modalidade ativa
+      } else if (isClickDupla) {
+        hasDupla = !hasDupla;
+        if (!hasSolo && !hasDupla) hasSolo = true; // garante ao menos 1 modalidade ativa
+      }
+
+      let finalVal = 'SOLO (INDIVIDUAL)';
+      if (hasSolo && hasDupla) {
+        finalVal = 'SOLO & DUPLA';
+      } else if (hasDupla) {
+        finalVal = 'DUPLA (EQUIPE)';
+      } else {
+        finalVal = 'SOLO (INDIVIDUAL)';
+      }
+
+      setAthleteModalityValue(finalVal);
       const target = studioState.elements.find(item => item.targetKey === 'modalidade' || item.targetKey === 'filiacao' || item.id === 'field-modalidade');
       if (target) {
-        target.text = (mod || 'SOLO (INDIVIDUAL)').toUpperCase();
+        target.text = finalVal;
         renderInteractiveElements();
       }
       autoSaveStudioDesign();
-      showToast(`Modalidade selecionada: ${mod}`);
+      broadcastLiveDesignChange(true);
+      showToast(`Modalidade definida: ${finalVal}`);
+    }
+
+    function selectModalityBase(mod) {
+      toggleModalityOption(mod);
     }
 
     function onModalitySelectChange(val) {
@@ -5080,18 +5109,26 @@
         renderInteractiveElements();
       }
       autoSaveStudioDesign();
+      broadcastLiveDesignChange(true);
     }
 
     function setAthleteModalityValue(mod) {
       const sel = document.getElementById('athleteModality');
       if (!sel) return;
       const upper = (mod || 'SOLO (INDIVIDUAL)').toUpperCase().trim();
+      
+      const hasSolo = upper.includes('SOLO');
+      const hasDupla = upper.includes('DUPLA') || upper.includes('EQUIPE');
+
       let matchedVal = 'SOLO (INDIVIDUAL)';
-      if (upper.includes('DUPLA') || upper.includes('EQUIPE')) {
+      if (hasSolo && hasDupla) {
+        matchedVal = 'SOLO & DUPLA';
+      } else if (hasDupla) {
         matchedVal = 'DUPLA (EQUIPE)';
       } else {
         matchedVal = 'SOLO (INDIVIDUAL)';
       }
+
       if (sel.tagName === 'SELECT') {
         let found = Array.from(sel.options).some(o => o.value === matchedVal);
         if (!found) {
@@ -5107,15 +5144,21 @@
 
     function updateModalityPillsUI(selectedMod) {
       const upper = (selectedMod || '').toUpperCase().trim();
-      const isDupla = upper.includes('DUPLA') || upper.includes('EQUIPE');
+      const hasSolo = upper.includes('SOLO');
+      const hasDupla = upper.includes('DUPLA') || upper.includes('EQUIPE');
+
+      const activeClass = "mod-pill-btn flex items-center justify-center text-[10.5px] whitespace-nowrap py-2 px-1 rounded-xl font-black text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none leading-none tracking-tight";
+      const inactiveClass = "mod-pill-btn flex items-center justify-center text-[10.5px] whitespace-nowrap py-2 px-1 rounded-xl font-black text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none leading-none tracking-tight";
+
       document.querySelectorAll('.mod-pill-btn').forEach(btn => {
         const modAttr = (btn.getAttribute('data-mod') || btn.textContent).trim().toUpperCase();
-        const btnIsDupla = modAttr.includes('DUPLA') || modAttr.includes('EQUIPE');
-        const isActive = isDupla ? btnIsDupla : !btnIsDupla;
-        if (isActive) {
-          btn.className = "mod-pill-btn flex items-center justify-center text-[10.5px] whitespace-nowrap py-2 px-1 rounded-xl font-black text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none leading-none tracking-tight";
-        } else {
-          btn.className = "mod-pill-btn flex items-center justify-center text-[10.5px] whitespace-nowrap py-2 px-1 rounded-xl font-black text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none leading-none tracking-tight";
+        const isDuplaBtn = modAttr.includes('DUPLA') || modAttr.includes('EQUIPE');
+        const isSoloBtn = modAttr.includes('SOLO') || modAttr.includes('INDIVIDUAL');
+
+        if (isSoloBtn) {
+          btn.className = hasSolo ? activeClass : inactiveClass;
+        } else if (isDuplaBtn) {
+          btn.className = hasDupla ? activeClass : inactiveClass;
         }
       });
     }
