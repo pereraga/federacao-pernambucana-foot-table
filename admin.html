@@ -2061,6 +2061,9 @@
           if (typeof fetchStudioDesignFromSupabase === 'function') {
             await fetchStudioDesignFromSupabase(true);
           }
+          if (typeof initSupabaseRealtimeLiveDesign === 'function') {
+            initSupabaseRealtimeLiveDesign();
+          }
           if (typeof renderJogadoresCadastradosTable === 'function') {
             renderJogadoresCadastradosTable();
           }
@@ -2493,6 +2496,184 @@
         isDesignLocked: studioState.isDesignLocked !== false,
         signatureUrl: (signItem && signItem.signatureUrl) ? signItem.signatureUrl : null
       };
+    }
+
+    /* =========================================================
+       SISTEMA DE TRANSMISSÃO EM TEMPO REAL DO DESIGN (MULTI-TELAS)
+       Transmite apenas geometria/estilo visual SEM sobrescrever
+       os dados pessoais do atleta preenchidos em cada tela.
+       ========================================================= */
+    const LIVE_DESIGN_CHANNEL_NAME = 'fpeft_live_carteira_design';
+    let _liveDesignBc = null;
+    let _supabaseRealtimeChannel = null;
+    let _lastBroadcastTime = 0;
+    let _broadcastThrottleTimer = null;
+
+    try {
+      if (window.BroadcastChannel) {
+        _liveDesignBc = new BroadcastChannel(LIVE_DESIGN_CHANNEL_NAME);
+        _liveDesignBc.onmessage = (event) => {
+          if (event.data && event.data.type === 'LIVE_DESIGN_CHANGE' && event.data.layout) {
+            applyIncomingLiveDesign(event.data.layout);
+          }
+        };
+      }
+    } catch (e) {}
+
+    // Escuta evento de storage para fallback instantâneo entre abas/janelas
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'fpeft_live_design_ping' && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          if (parsed && parsed.layout) {
+            applyIncomingLiveDesign(parsed.layout);
+          }
+        } catch (err) {}
+      }
+    });
+
+    /* Inicializa canal Realtime do Supabase (WebSocket) para sincronizar múltiplas telas/máquinas */
+    function initSupabaseRealtimeLiveDesign() {
+      if (!supabaseClient || _supabaseRealtimeChannel) return;
+      try {
+        _supabaseRealtimeChannel = supabaseClient.channel('carteira_live_design_room');
+        _supabaseRealtimeChannel
+          .on('broadcast', { event: 'live_design_update' }, (msg) => {
+            if (msg && msg.payload) {
+              applyIncomingLiveDesign(msg.payload);
+            }
+          })
+          .subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+              console.log('✓ Canal Realtime Supabase conectado para transmissão ao vivo!');
+            }
+          });
+      } catch (e) {
+        console.warn('Aviso ao conectar Realtime Supabase:', e);
+      }
+    }
+
+    /* Extrai estritamente o layout geométrico/visual da carteira (sem dados do atleta) */
+    function extractPureDesignLayout() {
+      const signItem = studioState.elements.find(e => e.id === 'field-assinatura' || e.type === 'text-line' || e.type === 'signature-line');
+      return {
+        elements: studioState.elements.map(el => ({
+          id: el.id,
+          type: el.type,
+          x: el.x,
+          y: el.y,
+          width: el.width,
+          height: el.height,
+          borderRadius: el.borderRadius,
+          backgroundColor: el.backgroundColor,
+          textColor: el.textColor,
+          fontSize: el.fontSize,
+          fontWeight: el.fontWeight,
+          fontFamily: el.fontFamily,
+          textAlign: el.textAlign,
+          labelAlign: el.labelAlign,
+          paddingLeft: el.paddingLeft,
+          paddingRight: el.paddingRight,
+          borderWidth: el.borderWidth,
+          borderColor: el.borderColor,
+          labelTag: el.labelTag,
+          signatureUrl: el.signatureUrl,
+          locked: el.locked
+        })),
+        bgTransform: studioState.bgTransform || { mode: 'exact', scale: 1, x: 0, y: 0 },
+        customImageUrl: studioState.customImageUrl || null,
+        customSvgContent: studioState.customSvgContent || null,
+        signatureUrl: (signItem && signItem.signatureUrl) ? signItem.signatureUrl : null,
+        timestamp: Date.now()
+      };
+    }
+
+    /* Transmite a mudança de design para todas as outras telas abertas */
+    function broadcastLiveDesignChange(immediate = false) {
+      const now = Date.now();
+      if (!immediate && now - _lastBroadcastTime < 25) { // 40 FPS durante arrasto suave
+        if (_broadcastThrottleTimer) return;
+        _broadcastThrottleTimer = setTimeout(() => {
+          _broadcastThrottleTimer = null;
+          broadcastLiveDesignChange(true);
+        }, 25);
+        return;
+      }
+      _lastBroadcastTime = now;
+
+      const layout = extractPureDesignLayout();
+
+      // 1. BroadcastChannel (mesmo computador, abas/janelas com 0ms de latência)
+      try {
+        if (_liveDesignBc) {
+          _liveDesignBc.postMessage({ type: 'LIVE_DESIGN_CHANGE', layout });
+        }
+      } catch (e) {}
+
+      // 2. Storage Ping (Fallback)
+      try {
+        localStorage.setItem('fpeft_live_design_ping', JSON.stringify({ t: now, layout }));
+      } catch (e) {}
+
+      // 3. Supabase Realtime (Entre computadores ou telas remotas)
+      if (_supabaseRealtimeChannel && typeof _supabaseRealtimeChannel.send === 'function') {
+        try {
+          _supabaseRealtimeChannel.send({
+            type: 'broadcast',
+            event: 'live_design_update',
+            payload: layout
+          });
+        } catch (e) {}
+      }
+    }
+
+    /* Aplica o design recebido em tempo real mantendo os dados do atleta preenchidos nesta tela */
+    function applyIncomingLiveDesign(incoming) {
+      if (!incoming || !Array.isArray(incoming.elements)) return;
+
+      incoming.elements.forEach(incEl => {
+        const curEl = studioState.elements.find(e => e.id === incEl.id);
+        if (curEl) {
+          curEl.x = incEl.x;
+          curEl.y = incEl.y;
+          curEl.width = incEl.width;
+          curEl.height = incEl.height;
+          if (incEl.borderRadius !== undefined) curEl.borderRadius = incEl.borderRadius;
+          if (incEl.backgroundColor !== undefined) curEl.backgroundColor = incEl.backgroundColor;
+          if (incEl.textColor !== undefined) curEl.textColor = incEl.textColor;
+          if (incEl.fontSize !== undefined) curEl.fontSize = incEl.fontSize;
+          if (incEl.fontWeight !== undefined) curEl.fontWeight = incEl.fontWeight;
+          if (incEl.fontFamily !== undefined) curEl.fontFamily = incEl.fontFamily;
+          if (incEl.textAlign !== undefined) curEl.textAlign = incEl.textAlign;
+          if (incEl.labelAlign !== undefined) curEl.labelAlign = incEl.labelAlign;
+          if (incEl.paddingLeft !== undefined) curEl.paddingLeft = incEl.paddingLeft;
+          if (incEl.paddingRight !== undefined) curEl.paddingRight = incEl.paddingRight;
+          if (incEl.borderWidth !== undefined) curEl.borderWidth = incEl.borderWidth;
+          if (incEl.borderColor !== undefined) curEl.borderColor = incEl.borderColor;
+          if (incEl.labelTag !== undefined) curEl.labelTag = incEl.labelTag;
+          if (incEl.signatureUrl !== undefined) curEl.signatureUrl = incEl.signatureUrl;
+          // NÃO altera curEl.text (nome/CPF/cidade) nem curEl.photoUrl (foto do atleta preenchido nesta tela)
+        }
+      });
+
+      if (incoming.bgTransform) {
+        studioState.bgTransform = incoming.bgTransform;
+      }
+      if (incoming.customImageUrl !== undefined) {
+        studioState.customImageUrl = incoming.customImageUrl;
+      }
+      if (incoming.customSvgContent !== undefined) {
+        studioState.customSvgContent = incoming.customSvgContent;
+      }
+
+      // Re-renderiza a tela ao vivo
+      renderInteractiveElements();
+      applyCurrentSvgBackground();
+
+      // Atualiza inputs do painel flutuante se aberto
+      if (studioState.selectedId && typeof syncFloatingPanelInputs === 'function') {
+        syncFloatingPanelInputs();
+      }
     }
 
     /* Sincroniza design com Supabase para que qualquer usuário/máquina receba as alterações */
@@ -3530,11 +3711,13 @@
       }
 
       syncFloatingPanelInputs();
+      broadcastLiveDesignChange(false);
     }
 
     function onGlobalPointerUp() {
       if (isDragging || isResizing) {
         autoSaveStudioDesign();
+        broadcastLiveDesignChange(true);
         renderAlignmentGuides();
       }
       isDragging = false;
@@ -3755,6 +3938,7 @@
       const el = document.getElementById(item.id);
       if (el) el.style.borderRadius = `${val}px`;
       autoSaveStudioDesign();
+      broadcastLiveDesignChange(true);
     }
 
     function nudgeSelected(dx, dy) {
@@ -3765,6 +3949,7 @@
       item.y += dy * studioState.nudgeStep;
       updateItemStyle(item);
       autoSaveStudioDesign();
+      broadcastLiveDesignChange(true);
     }
 
     function renderLayersSidebar() {

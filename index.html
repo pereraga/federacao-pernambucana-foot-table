@@ -1029,6 +1029,17 @@
     /* =======================================================
        SINCRONIZAÇÃO EM TEMPO REAL
        ======================================================= */
+    try {
+      if (window.BroadcastChannel) {
+        const liveBc = new BroadcastChannel('fpeft_live_carteira_design');
+        liveBc.onmessage = (event) => {
+          if (event.data && event.data.type === 'LIVE_DESIGN_CHANGE') {
+            applySavedBadgeLayout();
+          }
+        };
+      }
+    } catch (e) {}
+
     window.addEventListener('storage', (e) => {
       if (e.key === 'pe_news_db' || e.key === 'pe_futmesa_news') {
         renderPublicNews();
@@ -1036,7 +1047,7 @@
       if (e.key === 'pe_athletes_db' && !document.getElementById('publicBadgeResultArea').classList.contains('hidden')) {
         executePublicSearch();
       }
-      if (e.key === 'pe_badge_layout_config') {
+      if (e.key === 'pe_badge_layout_config' || e.key === 'fpeft_live_design_ping' || e.key === 'fpeft_studio_custom_elements') {
         applySavedBadgeLayout();
       }
     });
