@@ -827,10 +827,10 @@
                       <input type="hidden" id="athleteCategory" value="AMADOR" />
                       <!-- Botões de Seleção Direta das 4 Bases -->
                       <div class="grid grid-cols-4 gap-1" id="categoryPillsContainer">
-                        <button type="button" onclick="selectCategoryBase('ASPIRANTE')" data-cat="ASPIRANTE" class="cat-pill-btn flex items-center justify-center text-[10px] py-2 px-0.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none">Aspirante</button>
-                        <button type="button" onclick="selectCategoryBase('INICIANTE')" data-cat="INICIANTE" class="cat-pill-btn flex items-center justify-center text-[10px] py-2 px-0.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none">Iniciante</button>
-                        <button type="button" onclick="selectCategoryBase('AMADOR')" data-cat="AMADOR" class="cat-pill-btn flex items-center justify-center text-[10px] py-2 px-0.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none">Amador</button>
-                        <button type="button" onclick="selectCategoryBase('PROFISSIONAL')" data-cat="PROFISSIONAL" class="cat-pill-btn flex items-center justify-center text-[10px] py-2 px-0.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none">Profissional</button>
+                        <button type="button" onclick="selectCategoryBase('ASPIRANTE')" data-cat="ASPIRANTE" class="cat-pill-btn flex items-center justify-center text-[8px] xl:text-[8.5px] py-2 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none leading-none tracking-tighter" title="Aspirante">Aspirante</button>
+                        <button type="button" onclick="selectCategoryBase('INICIANTE')" data-cat="INICIANTE" class="cat-pill-btn flex items-center justify-center text-[8px] xl:text-[8.5px] py-2 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none leading-none tracking-tighter" title="Iniciante">Iniciante</button>
+                        <button type="button" onclick="selectCategoryBase('AMADOR')" data-cat="AMADOR" class="cat-pill-btn flex items-center justify-center text-[8px] xl:text-[8.5px] py-2 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none leading-none tracking-tighter" title="Amador">Amador</button>
+                        <button type="button" onclick="selectCategoryBase('PROFISSIONAL')" data-cat="PROFISSIONAL" class="cat-pill-btn flex items-center justify-center text-[8px] xl:text-[8.5px] py-2 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none leading-none tracking-tighter" title="Profissional">Profissional</button>
                       </div>
                     </div>
                   </div>
@@ -5053,9 +5053,9 @@
       document.querySelectorAll('.cat-pill-btn').forEach(btn => {
         const catAttr = (btn.getAttribute('data-cat') || btn.textContent).trim().toUpperCase();
         if (catAttr === upper) {
-          btn.className = "cat-pill-btn flex items-center justify-center text-[10px] py-2 px-0.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none";
+          btn.className = "cat-pill-btn flex items-center justify-center text-[8px] xl:text-[8.5px] py-2 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none leading-none tracking-tighter";
         } else {
-          btn.className = "cat-pill-btn flex items-center justify-center text-[10px] py-2 px-0.5 rounded-xl font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none";
+          btn.className = "cat-pill-btn flex items-center justify-center text-[8px] xl:text-[8.5px] py-2 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none leading-none tracking-tighter";
         }
       });
     }
