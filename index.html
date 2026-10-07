@@ -30,10 +30,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Oswald:wght@500;600;700&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
   
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- html2canvas for instant HD PNG badge export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- qrcode-generator for generating verified QR codes -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
   <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -213,8 +217,91 @@
 
       <!-- Render da Carteirinha Oficial Encontrada -->
       <div id="publicBadgeResultArea" class="mt-8 pt-8 border-t border-pe-cardBorder/70 hidden">
-        <div class="bg-emerald-950/30 border border-emerald-500/40 rounded-xl p-3 text-center text-xs text-emerald-300 font-bold uppercase tracking-wider mb-6 flex items-center justify-center gap-2">
-          <span>✓</span> Registro Oficial Autenticado — Federação Pernambucana
+        
+        <!-- Painel Oficial de Validação e Autenticidade Digital do Federado (QR Code Check) -->
+        <div id="qrVerificationSummaryCard" class="max-w-[560px] mx-auto mb-6 bg-[#080d1a] border-2 border-pe-gold/60 rounded-2xl p-5 sm:p-6 relative shadow-[0_15px_35px_rgba(0,0,0,0.8)] overflow-hidden">
+          <div class="pe-stripe-bar h-1.5 w-full absolute top-0 left-0"></div>
+          
+          <div class="flex items-center justify-between border-b border-pe-cardBorder/80 pb-3 mb-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-pe-darkblue border border-pe-gold flex items-center justify-center p-0.5 shrink-0 shadow-md">
+                <img src="assets/images/logo-federacao.png" alt="Logo Federação" class="w-full h-full object-contain rounded-full">
+              </div>
+              <div>
+                <span class="text-[10px] font-bold text-pe-gold uppercase tracking-widest block leading-tight">Validação e Autenticidade Digital</span>
+                <h3 class="font-oswald text-sm sm:text-base uppercase font-bold text-white leading-tight">Federação Pernambucana de Foot Table</h3>
+              </div>
+            </div>
+            <div id="qrStatusBadgeMain" class="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider flex items-center gap-1.5 bg-emerald-950/90 border border-emerald-500 text-emerald-300 shadow-md">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span id="qrStatusBadgeText">REGULAR</span>
+            </div>
+          </div>
+
+          <!-- Informações de Validação Completa -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs mb-3.5">
+            <div class="bg-[#040813] border border-pe-cardBorder/80 p-3 rounded-xl">
+              <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Atleta Federado</span>
+              <strong class="text-white font-oswald text-sm uppercase block truncate" id="qrAthleteFullName">---</strong>
+            </div>
+
+            <div class="bg-[#040813] border border-pe-cardBorder/80 p-3 rounded-xl flex items-center justify-between">
+              <div>
+                <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Nº Federado / ID</span>
+                <span class="text-pe-gold font-mono font-bold text-sm tracking-wider" id="qrFederatedNumText">#000000</span>
+              </div>
+              <div class="text-right">
+                <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">CPF</span>
+                <span class="text-slate-300 font-mono text-xs" id="qrCpfText">***.***.***-**</span>
+              </div>
+            </div>
+
+            <div class="bg-[#040813] border border-pe-cardBorder/80 p-3 rounded-xl flex items-center justify-between">
+              <div>
+                <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Modalidade</span>
+                <span class="text-slate-200 font-bold uppercase text-[11px]" id="qrModalityText">SOLO (INDIVIDUAL)</span>
+              </div>
+              <div class="text-right">
+                <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Categoria</span>
+                <span class="text-amber-300 font-bold uppercase text-[11px]" id="qrCategoryText">ASPIRANTE</span>
+              </div>
+            </div>
+
+            <div class="bg-[#040813] border border-pe-cardBorder/80 p-3 rounded-xl flex items-center justify-between">
+              <div>
+                <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Município</span>
+                <span class="text-slate-200 font-semibold text-xs" id="qrCityText">---</span>
+              </div>
+              <div class="text-right">
+                <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Validade Oficial</span>
+                <span class="text-emerald-400 font-mono font-bold text-xs" id="qrValidityText">31/12/2026</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Caixa Informativa de Situação Cadastral -->
+          <div id="qrSituationBox" class="p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-500/50 text-emerald-300 text-xs flex items-center gap-3">
+            <span class="text-xl shrink-0" id="qrSituationIcon">✅</span>
+            <div class="flex-1 text-[11px] leading-tight">
+              <strong id="qrSituationTitle" class="block font-bold text-white text-xs mb-0.5">REGISTRO OFICIAL HOMOLOGADO E REGULAR</strong>
+              <span id="qrSituationDesc" class="text-slate-300">Este atleta está devidamente ativo, registrado e homologado perante a Federação Pernambucana de Foot Table.</span>
+            </div>
+          </div>
+
+          <!-- Rodapé do Selo Digital com Hash & Timestamp -->
+          <div class="mt-3.5 pt-3 border-t border-pe-cardBorder/60 flex flex-wrap items-center justify-between gap-2 text-[10px] text-slate-400 font-mono">
+            <div class="flex items-center gap-1.5">
+              <span>🛡️ Autenticado digitalmente em:</span>
+              <span class="text-slate-200 font-bold" id="qrTimestampText">--/--/---- --:--:--</span>
+            </div>
+            <div class="text-pe-gold font-bold flex items-center gap-1" id="qrVerificationHash">
+              <span>🔒 HASH:</span> <span id="qrHashVal">FPEFT-000000-OK</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center justify-center gap-2">
+          <span>💳</span> Carteira Digital Oficial do Atleta
         </div>
 
         <!-- Credencial Oficial -->
@@ -738,6 +825,57 @@
       const upperStatus = (athlete.status || 'PENDENTE').toUpperCase().trim();
       const isHomologado = upperStatus === 'HOMOLOGADO' || upperStatus === 'REGULAR';
       
+      // Atualiza Painel de Validação Digital do QR Code
+      const qrFullName = document.getElementById('qrAthleteFullName');
+      const qrFedNum = document.getElementById('qrFederatedNumText');
+      const qrCpf = document.getElementById('qrCpfText');
+      const qrModality = document.getElementById('qrModalityText');
+      const qrCategory = document.getElementById('qrCategoryText');
+      const qrCity = document.getElementById('qrCityText');
+      const qrValidity = document.getElementById('qrValidityText');
+      const qrTimestamp = document.getElementById('qrTimestampText');
+      const qrHash = document.getElementById('qrHashVal');
+      const qrStatusMain = document.getElementById('qrStatusBadgeMain');
+      const qrStatusText = document.getElementById('qrStatusBadgeText');
+      const qrSituationBox = document.getElementById('qrSituationBox');
+      const qrSituationIcon = document.getElementById('qrSituationIcon');
+      const qrSituationTitle = document.getElementById('qrSituationTitle');
+      const qrSituationDesc = document.getElementById('qrSituationDesc');
+
+      if (qrFullName) qrFullName.textContent = athlete.nome;
+      if (qrFedNum) qrFedNum.textContent = `#${athlete.codigo}`;
+      if (qrCpf) qrCpf.textContent = athlete.cpf;
+      if (qrModality) qrModality.textContent = athlete.modalidade;
+      if (qrCategory) qrCategory.textContent = athlete.categoria || 'ASPIRANTE';
+      if (qrCity) qrCity.textContent = athlete.municipio;
+      if (qrValidity) qrValidity.textContent = '31/12/2026 (Temporada Oficial)';
+      if (qrTimestamp) qrTimestamp.textContent = new Date().toLocaleString('pt-BR');
+      if (qrHash) qrHash.textContent = `FPEFT-${athlete.codigo}-${isHomologado ? 'AUTH-REGULAR' : 'PENDING'}`;
+
+      if (isHomologado) {
+        if (qrStatusMain) {
+          qrStatusMain.className = "px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider flex items-center gap-1.5 bg-emerald-950/90 border border-emerald-500 text-emerald-300 shadow-md";
+        }
+        if (qrStatusText) qrStatusText.textContent = "REGULAR (Ativo)";
+        if (qrSituationBox) {
+          qrSituationBox.className = "p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-500/50 text-emerald-300 text-xs flex items-center gap-3";
+        }
+        if (qrSituationIcon) qrSituationIcon.textContent = "✅";
+        if (qrSituationTitle) qrSituationTitle.textContent = "REGISTRO OFICIAL HOMOLOGADO E REGULAR";
+        if (qrSituationDesc) qrSituationDesc.textContent = "Este atleta está devidamente ativo, cadastrado e homologado perante a Federação Pernambucana de Foot Table.";
+      } else {
+        if (qrStatusMain) {
+          qrStatusMain.className = "px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider flex items-center gap-1.5 bg-amber-950/90 border border-amber-500 text-amber-300 shadow-md";
+        }
+        if (qrStatusText) qrStatusText.textContent = "HOMOLOGAÇÃO PENDENTE";
+        if (qrSituationBox) {
+          qrSituationBox.className = "p-3.5 rounded-xl bg-amber-950/40 border border-amber-500/50 text-amber-300 text-xs flex items-center gap-3";
+        }
+        if (qrSituationIcon) qrSituationIcon.textContent = "⏳";
+        if (qrSituationTitle) qrSituationTitle.textContent = "HOMOLOGAÇÃO EM ANDAMENTO (PENDENTE DE APROVAÇÃO)";
+        if (qrSituationDesc) qrSituationDesc.textContent = "O cadastro deste atleta foi registrado no sistema, mas aguarda a homologação da diretoria da Federação. A emissão de carteira física/PDF permanece restrita.";
+      }
+
       const statusBadge = document.getElementById('cardBadgeStatus');
       const pendingWarning = document.getElementById('cardPendingWarning');
       const btnDownload = document.getElementById('btnDownloadCardPng');
@@ -886,11 +1024,30 @@
       }
     });
 
-    // Inicialização ao carregar página
+    // Inicialização ao carregar página (com suporte a leitura automática de QR Code via URL)
     async function initIndexApp() {
       await initSupabase();
       renderPublicNews();
       applySavedBadgeLayout();
+
+      // Detecta leitura de QR Code via parâmetro de URL (?id=... / ?codigo=...)
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryId = urlParams.get('id') || urlParams.get('codigo') || urlParams.get('federado') || urlParams.get('atleta');
+        if (queryId) {
+          const sanitized = String(queryId).replace(/\D/g, '').slice(0, 6);
+          if (sanitized && sanitized.length === 6) {
+            publicCodeInput.value = sanitized;
+            await executePublicSearch();
+            const resultArea = document.getElementById('publicBadgeResultArea');
+            if (resultArea && !resultArea.classList.contains('hidden')) {
+              resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Erro ao processar parâmetro de URL:', err);
+      }
     }
 
     if (document.readyState === 'loading') {

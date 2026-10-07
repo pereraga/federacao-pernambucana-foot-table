@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261006_v36_homologacao_state_sync';
+      const APP_REV = '20261006_v37_real_scannable_qr_validation';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -39,6 +39,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- QR Code Generator -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
   <!-- html2canvas for instant HD PNG badge export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- JSZip for Bulk CR80 Badge Export -->
@@ -2782,6 +2784,33 @@
     }
 
     /* =========================================================
+       GERADOR DE MATRIZ DE QR CODE REAL E ESCANEÁVEL
+       ========================================================= */
+    function generateQrMatrix(text) {
+      if (!text) return null;
+      if (typeof qrcode === 'function') {
+        try {
+          const qr = qrcode(0, 'M');
+          qr.addData(String(text));
+          qr.make();
+          const count = qr.getModuleCount();
+          const matrix = [];
+          for (let r = 0; r < count; r++) {
+            const row = [];
+            for (let c = 0; c < count; c++) {
+              row.push(qr.isDark(r, c));
+            }
+            matrix.push(row);
+          }
+          return matrix;
+        } catch (e) {
+          console.warn("QRCode generator err:", e);
+        }
+      }
+      return null;
+    }
+
+    /* =========================================================
        RENDERIZAÇÃO DOS ELEMENTOS INTERATIVOS NO CANVAS CR80
        Suporta MODO FIXO (Emissão Segura) e MODO DESIGN (Livre)
        ========================================================= */
@@ -2850,10 +2879,42 @@
           div.style.alignItems = 'center';
           div.style.justifyContent = 'center';
           div.style.boxShadow = '0 8px 24px rgba(0,0,0,0.45)';
+
+          const athleteCode = (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '') || (document.getElementById('athleteCode') ? document.getElementById('athleteCode').value : '') || '973321';
+          let qrUrl = (item.text && item.text.startsWith('http')) ? item.text : `https://fpeft.vercel.app/?id=${athleteCode}`;
+          if (qrUrl === 'https://fpeft.vercel.app/' || qrUrl === 'https://fpeft.vercel.app') {
+            qrUrl = `https://fpeft.vercel.app/?id=${athleteCode}`;
+          }
+
+          let qrContentHtml = '';
+          const qrMatrix = generateQrMatrix(qrUrl);
+          if (qrMatrix && qrMatrix.length > 0) {
+            const moduleCount = qrMatrix.length;
+            const size = Math.min(item.width - 16, item.height - 16);
+            const cell = size / moduleCount;
+            let svgCells = '';
+            for (let r = 0; r < moduleCount; r++) {
+              for (let c = 0; c < moduleCount; c++) {
+                if (qrMatrix[r][c]) {
+                  svgCells += `<rect x="${c * cell}" y="${r * cell}" width="${cell + 0.2}" height="${cell + 0.2}" fill="#000000"/>`;
+                }
+              }
+            }
+            qrContentHtml = `
+              <div class="w-full h-full flex flex-col items-center justify-center bg-white pointer-events-none rounded-[8px] overflow-hidden" title="${escapeHtml(qrUrl)}">
+                <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" class="pointer-events-none select-none">${svgCells}</svg>
+              </div>
+            `;
+          } else {
+            qrContentHtml = `
+              <div class="w-full h-full flex flex-col items-center justify-center bg-white pointer-events-none rounded-[8px] overflow-hidden">
+                <i class="fa-solid fa-qrcode text-slate-950 text-5xl"></i>
+              </div>
+            `;
+          }
+
           div.innerHTML = `
-            <div class="w-full h-full flex flex-col items-center justify-center bg-white pointer-events-none rounded-[8px] overflow-hidden">
-              <i class="fa-solid fa-qrcode text-slate-950 text-6xl"></i>
-            </div>
+            ${qrContentHtml}
             ${item.labelTag ? `<span class="field-bottom-label select-none pointer-events-none">${escapeHtml(item.labelTag)}</span>` : ''}
           `;
         } else if (item.type === 'text-line') {
@@ -3667,28 +3728,37 @@
           bg.setAttribute('fill', '#ffffff');
           gQr.appendChild(bg);
 
-          const qrInner = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
-          const scaleFactor = Math.min((item.width - 24) / 100, (item.height - 24) / 100);
-          const offsetX = item.x + (item.width - 100 * scaleFactor) / 2;
-          const offsetY = item.y + (item.height - 100 * scaleFactor) / 2;
-          qrInner.setAttribute('transform', `translate(${offsetX}, ${offsetY}) scale(${scaleFactor})`);
-          qrInner.setAttribute('fill', '#000000');
-          qrInner.innerHTML = `
-            <rect x="5" y="5" width="28" height="28" rx="2" fill="none" stroke="#000" stroke-width="7"/>
-            <rect x="13" y="13" width="12" height="12"/>
-            <rect x="67" y="5" width="28" height="28" rx="2" fill="none" stroke="#000" stroke-width="7"/>
-            <rect x="75" y="13" width="12" height="12"/>
-            <rect x="5" y="67" width="28" height="28" rx="2" fill="none" stroke="#000" stroke-width="7"/>
-            <rect x="13" y="75" width="12" height="12"/>
-            <rect x="42" y="10" width="8" height="18"/>
-            <rect x="55" y="15" width="6" height="6"/>
-            <rect x="42" y="38" width="16" height="8"/>
-            <rect x="65" y="42" width="12" height="12"/>
-            <rect x="45" y="55" width="10" height="24"/>
-            <rect x="65" y="65" width="20" height="8"/>
-            <rect x="75" y="80" width="15" height="15"/>
-          `;
-          gQr.appendChild(qrInner);
+          const athleteCode = (targetAthlete.federado || targetAthlete.codigo || '973321').replace(/\D/g, '').slice(0, 6) || targetAthlete.codigo || '973321';
+          let qrUrl = (item.text && item.text.startsWith('http')) ? item.text : `https://fpeft.vercel.app/?id=${athleteCode}`;
+          if (qrUrl === 'https://fpeft.vercel.app/' || qrUrl === 'https://fpeft.vercel.app') {
+            qrUrl = `https://fpeft.vercel.app/?id=${athleteCode}`;
+          }
+
+          const qrMatrix = generateQrMatrix(qrUrl);
+          if (qrMatrix && qrMatrix.length > 0) {
+            const moduleCount = qrMatrix.length;
+            const pad = 12;
+            const size = Math.min(item.width - pad * 2, item.height - pad * 2);
+            const cell = size / moduleCount;
+            const startX = item.x + (item.width - size) / 2;
+            const startY = item.y + (item.height - size) / 2;
+
+            const gCells = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+            gCells.setAttribute('fill', '#000000');
+            for (let r = 0; r < moduleCount; r++) {
+              for (let c = 0; c < moduleCount; c++) {
+                if (qrMatrix[r][c]) {
+                  const rect = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                  rect.setAttribute('x', startX + c * cell);
+                  rect.setAttribute('y', startY + r * cell);
+                  rect.setAttribute('width', cell + 0.2);
+                  rect.setAttribute('height', cell + 0.2);
+                  gCells.appendChild(rect);
+                }
+              }
+            }
+            gQr.appendChild(gCells);
+          }
 
           if (item.labelTag) {
             const lbl = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'text');
@@ -4043,35 +4113,38 @@
           ctx.fill();
           ctx.restore();
 
-          // B) Elementos gráficos do QR Code idênticos ao preview
-          ctx.save();
-          const scaleFactor = Math.min((item.width - 24) / 100, (item.height - 24) / 100);
-          const offsetX = item.x + (item.width - 100 * scaleFactor) / 2;
-          const offsetY = item.y + (item.height - 100 * scaleFactor) / 2;
-          ctx.translate(offsetX * scale, offsetY * scale);
-          ctx.scale(scaleFactor * scale, scaleFactor * scale);
-
-          ctx.fillStyle = '#000000';
-          ctx.strokeStyle = '#000000';
-
-          function drawFinder(fx, fy) {
-            ctx.lineWidth = 7;
-            drawRoundedRectPath(ctx, fx, fy, 28, 28, 2);
-            ctx.stroke();
-            ctx.fillRect(fx + 8, fy + 8, 12, 12);
+          // B) Gera QR Code Real e 100% Escaneável
+          const athleteCode = (targetAthlete.federado || targetAthlete.codigo || '973321').replace(/\D/g, '').slice(0, 6) || targetAthlete.codigo || '973321';
+          let qrUrl = (item.text && item.text.startsWith('http')) ? item.text : `https://fpeft.vercel.app/?id=${athleteCode}`;
+          if (qrUrl === 'https://fpeft.vercel.app/' || qrUrl === 'https://fpeft.vercel.app') {
+            qrUrl = `https://fpeft.vercel.app/?id=${athleteCode}`;
           }
-          drawFinder(5, 5);
-          drawFinder(67, 5);
-          drawFinder(5, 67);
 
-          ctx.fillRect(42, 10, 8, 18);
-          ctx.fillRect(55, 15, 6, 6);
-          ctx.fillRect(42, 38, 16, 8);
-          ctx.fillRect(65, 42, 12, 12);
-          ctx.fillRect(45, 55, 10, 24);
-          ctx.fillRect(65, 65, 20, 8);
-          ctx.fillRect(75, 80, 15, 15);
-          ctx.restore();
+          const qrMatrix = generateQrMatrix(qrUrl);
+          if (qrMatrix && qrMatrix.length > 0) {
+            ctx.save();
+            const moduleCount = qrMatrix.length;
+            const pad = 12;
+            const qrSize = Math.min(item.width - pad * 2, item.height - pad * 2);
+            const cell = qrSize / moduleCount;
+            const startX = item.x + (item.width - qrSize) / 2;
+            const startY = item.y + (item.height - qrSize) / 2;
+
+            ctx.fillStyle = '#000000';
+            for (let r = 0; r < moduleCount; r++) {
+              for (let c = 0; c < moduleCount; c++) {
+                if (qrMatrix[r][c]) {
+                  ctx.fillRect(
+                    (startX + c * cell) * scale,
+                    (startY + r * cell) * scale,
+                    cell * scale + 0.3,
+                    cell * scale + 0.3
+                  );
+                }
+              }
+            }
+            ctx.restore();
+          }
 
           // C) Legenda inferior do QR Code ("VERIFICAÇÃO DE AUTENTICIDADE")
           if (item.labelTag) {
@@ -4779,8 +4852,14 @@
           const target = studioState.elements.find(item => item.targetKey === 'federado' || item.id === 'field-federado');
           if (target) {
             target.text = v;
-            renderInteractiveElements();
           }
+          const qrLink = `https://fpeft.vercel.app/?id=${v || '973321'}`;
+          const qrInp = document.getElementById('inputQrText');
+          if (qrInp) qrInp.value = qrLink;
+          const qrTarget = studioState.elements.find(item => item.targetKey === 'qr' || item.id === 'field-qrcode');
+          if (qrTarget) qrTarget.text = qrLink;
+
+          renderInteractiveElements();
           autoSaveStudioDesign();
         });
       }
@@ -4795,9 +4874,15 @@
             const target = studioState.elements.find(item => item.targetKey === 'federado' || item.id === 'field-federado');
             if (target) {
               target.text = v;
-              renderInteractiveElements();
             }
           }
+          const qrLink = `https://fpeft.vercel.app/?id=${v || '973321'}`;
+          const qrInp = document.getElementById('inputQrText');
+          if (qrInp) qrInp.value = qrLink;
+          const qrTarget = studioState.elements.find(item => item.targetKey === 'qr' || item.id === 'field-qrcode');
+          if (qrTarget) qrTarget.text = qrLink;
+
+          renderInteractiveElements();
           autoSaveStudioDesign();
         });
       }
@@ -5426,8 +5511,15 @@
       const fedTarget = studioState.elements.find(item => item.targetKey === 'federado' || item.id === 'field-federado');
       if (fedTarget) {
         fedTarget.text = uniqueCode;
-        renderInteractiveElements();
       }
+
+      const qrLink = 'https://fpeft.vercel.app/?id=' + uniqueCode;
+      const qrInp = document.getElementById('inputQrText');
+      if (qrInp) qrInp.value = qrLink;
+      const qrTarget = studioState.elements.find(item => item.targetKey === 'qr' || item.id === 'field-qrcode');
+      if (qrTarget) qrTarget.text = qrLink;
+
+      renderInteractiveElements();
       autoSaveStudioDesign();
       if (!silent) {
         showToast(`Código 6D único gerado: #${uniqueCode}`);
@@ -6123,6 +6215,11 @@
       setElText('municipio', (a.municipio || 'RECIFE - PE').toUpperCase());
       setElText('validade', a.validade || '12/2026');
 
+      const qrLink = `https://fpeft.vercel.app/?id=${a.codigo}`;
+      const qrInp = document.getElementById('inputQrText');
+      if (qrInp) qrInp.value = qrLink;
+      setElText('qr', qrLink);
+
       const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
       if (photoTarget && a.foto) {
         photoTarget.photoUrl = a.foto;
@@ -6148,6 +6245,14 @@
       if (catTarget) catTarget.text = 'AMADOR';
       const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
       if (photoTarget) photoTarget.photoUrl = '';
+      
+      const fedCode = (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '') || '973321';
+      const qrLink = `https://fpeft.vercel.app/?id=${fedCode}`;
+      const qrInp = document.getElementById('inputQrText');
+      if (qrInp) qrInp.value = qrLink;
+      const qrTarget = studioState.elements.find(item => item.targetKey === 'qr' || item.id === 'field-qrcode');
+      if (qrTarget) qrTarget.text = qrLink;
+
       renderInteractiveElements();
       showToast('Formulário limpo. Pronto para novo atleta.');
     }
