@@ -786,25 +786,25 @@
                       <label class="block text-slate-300 font-bold">Nome do Atleta *</label>
                       <button type="button" class="text-sky-400 hover:underline text-[10px]" onclick="selectElement('field-nome')">Selecionar no cartão</button>
                     </div>
-                    <input type="text" id="athleteName" required value="GABRIEL PEREIRA ALVES" placeholder="Nome Completo" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-white uppercase font-bold outline-none font-fpeft" />
+                    <input type="text" id="athleteName" required value="" placeholder="NOME DO ATLETA" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-white uppercase font-bold outline-none font-fpeft" />
                   </div>
 
                   <!-- CPF e Data de Nascimento -->
                   <div class="grid grid-cols-2 gap-3">
                     <div>
                       <label class="block text-slate-300 font-bold mb-1">CPF</label>
-                      <input type="text" id="athleteCpf" maxlength="14" value="714.309.664-40" placeholder="000.000.000-00" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-slate-200 font-mono outline-none" />
+                      <input type="text" id="athleteCpf" maxlength="14" value="XXX.XXX.XXX-XX" placeholder="XXX.XXX.XXX-XX" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-slate-200 font-mono outline-none" />
                     </div>
                     <div>
                       <label class="block text-slate-300 font-bold mb-1">Nascimento</label>
-                      <input type="text" id="athleteBirth" value="24/03/2003" placeholder="DD/MM/AAAA" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-slate-200 font-mono outline-none" />
+                      <input type="text" id="athleteBirth" value="XX/XX/XXXX" placeholder="XX/XX/XXXX" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-slate-200 font-mono outline-none" />
                     </div>
                   </div>
 
                   <!-- Telefone / WhatsApp -->
                   <div>
                     <label class="block text-slate-300 font-bold mb-1">Telefone / WhatsApp</label>
-                    <input type="text" id="athletePhone" value="(81) 98463-4126" placeholder="(81) 90000-0000" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-slate-200 font-mono outline-none" />
+                    <input type="text" id="athletePhone" value="(XX) XXXXX-XXXX" placeholder="(XX) XXXXX-XXXX" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-slate-200 font-mono outline-none" />
                   </div>
 
                   <!-- Modalidade & Categoria -->
@@ -2226,7 +2226,7 @@
         labelTag: 'NOME DO ATLETA',
         type: 'text-box',
         targetKey: 'nome',
-        text: 'GABRIEL PEREIRA ALVES',
+        text: '',
         x: 268,
         y: 295,
         width: 738,
@@ -2249,7 +2249,7 @@
         labelTag: 'CPF',
         type: 'text-box',
         targetKey: 'cpf',
-        text: '714.309.664-40',
+        text: 'XXX.XXX.XXX-XX',
         x: 268,
         y: 365,
         width: 226,
@@ -2272,7 +2272,7 @@
         labelTag: 'DATA DE NASCIMENTO',
         type: 'text-box',
         targetKey: 'nasc',
-        text: '24/03/2003',
+        text: 'XX/XX/XXXX',
         x: 508,
         y: 365,
         width: 222,
@@ -2295,7 +2295,7 @@
         labelTag: 'TELEFONE / WHATSAPP',
         type: 'text-box',
         targetKey: 'fone',
-        text: '(81) 98463-4126',
+        text: '(XX) XXXXX-XXXX',
         x: 744,
         y: 365,
         width: 262,
@@ -6601,6 +6601,15 @@
       if (statusSelect) statusSelect.value = 'PENDENTE';
       setAthleteModalityValue('SOLO (INDIVIDUAL)');
       setAthleteCategoryValue('AMADOR');
+      
+      const nameTarget = studioState.elements.find(item => item.id === 'field-nome' || item.targetKey === 'nome');
+      if (nameTarget) nameTarget.text = '';
+      const cpfTarget = studioState.elements.find(item => item.id === 'field-cpf' || item.targetKey === 'cpf');
+      if (cpfTarget) cpfTarget.text = 'XXX.XXX.XXX-XX';
+      const nascTarget = studioState.elements.find(item => item.id === 'field-nasc' || item.targetKey === 'nasc');
+      if (nascTarget) nascTarget.text = 'XX/XX/XXXX';
+      const foneTarget = studioState.elements.find(item => item.id === 'field-fone' || item.targetKey === 'fone');
+      if (foneTarget) foneTarget.text = '(XX) XXXXX-XXXX';
       const catTarget = studioState.elements.find(item => item.targetKey === 'categoria');
       if (catTarget) catTarget.text = 'AMADOR';
       const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
