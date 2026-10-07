@@ -2499,44 +2499,28 @@
     }
 
     /* =========================================================
-       SISTEMA DE TRANSMISSÃO EM TEMPO REAL DO DESIGN (MULTI-TELAS)
-       Transmite apenas geometria/estilo visual SEM sobrescrever
-       os dados pessoais do atleta preenchidos em cada tela.
+       SISTEMA DE TRANSMISSÃO 100% EM TEMPO REAL NA NUVEM (SUPABASE)
+       Transmissão remota instantânea via WebSockets da Nuvem Oficial.
+       Transmite estritamente o layout geométrico/visual SEM sobrescrever
+       os dados individuais dos atletas preenchidos em cada tela.
        ========================================================= */
-    const LIVE_DESIGN_CHANNEL_NAME = 'fpeft_live_carteira_design';
-    let _liveDesignBc = null;
+    const CLOUD_REALTIME_ROOM = 'carteira_cloud_live_design';
     let _supabaseRealtimeChannel = null;
     let _lastBroadcastTime = 0;
     let _broadcastThrottleTimer = null;
 
-    try {
-      if (window.BroadcastChannel) {
-        _liveDesignBc = new BroadcastChannel(LIVE_DESIGN_CHANNEL_NAME);
-        _liveDesignBc.onmessage = (event) => {
-          if (event.data && event.data.type === 'LIVE_DESIGN_CHANGE' && event.data.layout) {
-            applyIncomingLiveDesign(event.data.layout);
-          }
-        };
-      }
-    } catch (e) {}
-
-    // Escuta evento de storage para fallback instantâneo entre abas/janelas
-    window.addEventListener('storage', (e) => {
-      if (e.key === 'fpeft_live_design_ping' && e.newValue) {
-        try {
-          const parsed = JSON.parse(e.newValue);
-          if (parsed && parsed.layout) {
-            applyIncomingLiveDesign(parsed.layout);
-          }
-        } catch (err) {}
-      }
-    });
-
-    /* Inicializa canal Realtime do Supabase (WebSocket) para sincronizar múltiplas telas/máquinas */
+    /* Inicializa canal Realtime na Nuvem Supabase (WebSocket) */
     function initSupabaseRealtimeLiveDesign() {
-      if (!supabaseClient || _supabaseRealtimeChannel) return;
+      if (!supabaseClient) return;
+      if (_supabaseRealtimeChannel) {
+        try { supabaseClient.removeChannel(_supabaseRealtimeChannel); } catch (e) {}
+      }
+
       try {
-        _supabaseRealtimeChannel = supabaseClient.channel('carteira_live_design_room');
+        _supabaseRealtimeChannel = supabaseClient.channel(CLOUD_REALTIME_ROOM, {
+          config: { broadcast: { self: false } }
+        });
+
         _supabaseRealtimeChannel
           .on('broadcast', { event: 'live_design_update' }, (msg) => {
             if (msg && msg.payload) {
@@ -2545,11 +2529,14 @@
           })
           .subscribe((status) => {
             if (status === 'SUBSCRIBED') {
-              console.log('✓ Canal Realtime Supabase conectado para transmissão ao vivo!');
+              console.log('✓ Canal Realtime Supabase (Nuvem Oficial) conectado e pronto para transmissão ao vivo!');
+              updateCloudSyncStatus('synced');
+            } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+              updateCloudSyncStatus('error');
             }
           });
       } catch (e) {
-        console.warn('Aviso ao conectar Realtime Supabase:', e);
+        console.warn('Aviso ao conectar Realtime na Nuvem:', e);
       }
     }
 
@@ -2588,10 +2575,10 @@
       };
     }
 
-    /* Transmite a mudança de design para todas as outras telas abertas */
+    /* Transmite a mudança de design em tempo real EXCLUSIVAMENTE via Nuvem Supabase */
     function broadcastLiveDesignChange(immediate = false) {
       const now = Date.now();
-      if (!immediate && now - _lastBroadcastTime < 25) { // 40 FPS durante arrasto suave
+      if (!immediate && now - _lastBroadcastTime < 25) { // 40 FPS para movimento ultra-suave
         if (_broadcastThrottleTimer) return;
         _broadcastThrottleTimer = setTimeout(() => {
           _broadcastThrottleTimer = null;
@@ -2603,19 +2590,7 @@
 
       const layout = extractPureDesignLayout();
 
-      // 1. BroadcastChannel (mesmo computador, abas/janelas com 0ms de latência)
-      try {
-        if (_liveDesignBc) {
-          _liveDesignBc.postMessage({ type: 'LIVE_DESIGN_CHANGE', layout });
-        }
-      } catch (e) {}
-
-      // 2. Storage Ping (Fallback)
-      try {
-        localStorage.setItem('fpeft_live_design_ping', JSON.stringify({ t: now, layout }));
-      } catch (e) {}
-
-      // 3. Supabase Realtime (Entre computadores ou telas remotas)
+      // Transmissão direta pelo WebSocket na Nuvem Oficial Supabase
       if (_supabaseRealtimeChannel && typeof _supabaseRealtimeChannel.send === 'function') {
         try {
           _supabaseRealtimeChannel.send({
@@ -2623,11 +2598,13 @@
             event: 'live_design_update',
             payload: layout
           });
-        } catch (e) {}
+        } catch (e) {
+          console.warn('Erro ao transmitir pelo WebSocket da Nuvem:', e);
+        }
       }
     }
 
-    /* Aplica o design recebido em tempo real mantendo os dados do atleta preenchidos nesta tela */
+    /* Aplica o design recebido da Nuvem em tempo real mantendo os dados do atleta preenchidos nesta tela */
     function applyIncomingLiveDesign(incoming) {
       if (!incoming || !Array.isArray(incoming.elements)) return;
 
@@ -2652,7 +2629,7 @@
           if (incEl.borderColor !== undefined) curEl.borderColor = incEl.borderColor;
           if (incEl.labelTag !== undefined) curEl.labelTag = incEl.labelTag;
           if (incEl.signatureUrl !== undefined) curEl.signatureUrl = incEl.signatureUrl;
-          // NÃO altera curEl.text (nome/CPF/cidade) nem curEl.photoUrl (foto do atleta preenchido nesta tela)
+          // NÃO altera curEl.text (nome/CPF/cidade) nem curEl.photoUrl (foto do atleta desta tela)
         }
       });
 
@@ -2666,7 +2643,7 @@
         studioState.customSvgContent = incoming.customSvgContent;
       }
 
-      // Re-renderiza a tela ao vivo
+      // Re-renderiza a tela ao vivo com o novo layout da nuvem
       renderInteractiveElements();
       applyCurrentSvgBackground();
 

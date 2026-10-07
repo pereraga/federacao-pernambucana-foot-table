@@ -594,6 +594,7 @@
           if (dot) dot.className = "w-2 h-2 rounded-full bg-emerald-400";
           if (text) text.textContent = "Supabase: Conectado (Nuvem)";
           if (typeof renderPublicNews === 'function') renderPublicNews();
+          if (typeof initIndexCloudRealtime === 'function') initIndexCloudRealtime();
           return true;
         } catch (err) {
           console.warn("Erro ao instanciar Supabase:", err);
@@ -1027,18 +1028,26 @@
     }
 
     /* =======================================================
-       SINCRONIZAÇÃO EM TEMPO REAL
+       SINCRONIZAÇÃO EM TEMPO REAL NA NUVEM (SUPABASE)
        ======================================================= */
-    try {
-      if (window.BroadcastChannel) {
-        const liveBc = new BroadcastChannel('fpeft_live_carteira_design');
-        liveBc.onmessage = (event) => {
-          if (event.data && event.data.type === 'LIVE_DESIGN_CHANGE') {
-            applySavedBadgeLayout();
-          }
-        };
+    let _indexRealtimeChannel = null;
+    function initIndexCloudRealtime() {
+      if (!supabaseClient || _indexRealtimeChannel) return;
+      try {
+        _indexRealtimeChannel = supabaseClient.channel('carteira_cloud_live_design', {
+          config: { broadcast: { self: false } }
+        });
+        _indexRealtimeChannel
+          .on('broadcast', { event: 'live_design_update' }, (msg) => {
+            if (msg && msg.payload) {
+              applySavedBadgeLayout();
+            }
+          })
+          .subscribe();
+      } catch (e) {
+        console.warn('Realtime cloud error in index:', e);
       }
-    } catch (e) {}
+    }
 
     window.addEventListener('storage', (e) => {
       if (e.key === 'pe_news_db' || e.key === 'pe_futmesa_news') {
