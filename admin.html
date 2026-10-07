@@ -954,6 +954,12 @@
                 </div>
 
                 <div class="flex items-center gap-2 flex-wrap">
+                  <!-- Indicador de Status da Nuvem do Banco de Dados -->
+                  <div id="cloudSyncStatusBadge" class="px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 shadow-sm" title="Status da sincronização com o banco de dados oficial Supabase">
+                    <i id="cloudSyncStatusIcon" class="fa-solid fa-cloud-check text-emerald-400"></i>
+                    <span id="cloudSyncStatusText" class="hidden xl:inline">Nuvem Sincronizada</span>
+                  </div>
+
                   <!-- Botão Linhas Guia Inteligentes de Alinhamento -->
                   <button type="button" id="btnToggleGuides" onclick="toggleAlignmentGuides()" title="Ativar/Desativar Linhas Guia e Limites de Alinhamento" class="px-2.5 py-1.5 bg-[#05080e] hover:bg-[#121c32] text-slate-300 hover:text-pe-gold border border-[#1c253b] rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer">
                     <i class="fa-solid fa-ruler-combined text-pe-gold"></i>
@@ -961,16 +967,22 @@
                     <span id="guidesStateBadge" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">ON</span>
                   </button>
 
-                  <!-- Botão Gravar Padrão Fixo Oficial -->
-                  <button type="button" onclick="saveOfficialLayoutToCloud()" title="Gravar este design como Padrão Fixo Oficial na nuvem para todos os computadores e usuários" class="px-2.5 py-1.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer shadow-md">
+                  <!-- Botão Gravar Padrão Fixo Oficial na Nuvem -->
+                  <button type="button" id="btnSaveOfficialCloud" onclick="saveOfficialLayoutToCloud()" title="Gravar este design como Padrão Fixo Oficial no banco de dados na nuvem para todos os computadores" class="px-3 py-1.5 bg-gradient-to-r from-amber-500 via-pe-gold to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer shadow-lg hover:scale-[1.02]">
                     <i class="fa-solid fa-cloud-arrow-up text-slate-950"></i>
                     <span>Gravar Padrão Fixo</span>
                   </button>
 
+                  <!-- Botão Atualizar da Nuvem -->
+                  <button type="button" onclick="fetchStudioDesignFromSupabase(true)" title="Baixar e aplicar o design oficial mais recente salvo no banco de dados da nuvem" class="px-2.5 py-1.5 bg-[#05080e] hover:bg-[#121c32] text-slate-300 hover:text-pe-gold border border-[#1c253b] rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer">
+                    <i class="fa-solid fa-cloud-arrow-down text-sky-400"></i>
+                    <span class="hidden md:inline">Baixar da Nuvem</span>
+                  </button>
+
                   <!-- Botão Restaurar Posições Oficiais -->
                   <button type="button" onclick="restoreOfficialElementPositions()" title="Restaurar posições exatas do design oficial da Federação" class="px-2.5 py-1.5 bg-[#05080e] hover:bg-[#121c32] text-slate-300 hover:text-white border border-[#1c253b] rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer">
-                    <i class="fa-solid fa-arrows-rotate text-sky-400"></i>
-                    <span class="hidden md:inline">Restaurar Layout</span>
+                    <i class="fa-solid fa-arrows-rotate text-amber-400"></i>
+                    <span class="hidden md:inline">Restaurar Padrão</span>
                   </button>
 
                   <!-- Zoom Controls -->
@@ -2047,7 +2059,7 @@
           if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-pe-gold";
           if (text) text.textContent = "Supabase Conectado (Nuvem Oficial)";
           if (typeof fetchStudioDesignFromSupabase === 'function') {
-            fetchStudioDesignFromSupabase();
+            await fetchStudioDesignFromSupabase(true);
           }
           if (typeof renderJogadoresCadastradosTable === 'function') {
             renderJogadoresCadastradosTable();
@@ -2445,6 +2457,44 @@
     };
 
     let _syncStudioDebounce = null;
+
+    /* Atualiza o status visual da sincronização com o banco de dados da nuvem */
+    function updateCloudSyncStatus(status) {
+      const badge = document.getElementById('cloudSyncStatusBadge');
+      const icon = document.getElementById('cloudSyncStatusIcon');
+      const text = document.getElementById('cloudSyncStatusText');
+      if (!badge) return;
+
+      if (status === 'syncing' || status === 'loading') {
+        badge.className = 'px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 bg-blue-950/80 border border-blue-500/50 text-blue-300 shadow-sm';
+        if (icon) icon.className = 'fa-solid fa-arrows-rotate fa-spin text-blue-400';
+        if (text) text.textContent = status === 'loading' ? 'Baixando da Nuvem...' : 'Sincronizando Nuvem...';
+      } else if (status === 'synced') {
+        badge.className = 'px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 shadow-sm';
+        if (icon) icon.className = 'fa-solid fa-cloud-check text-emerald-400';
+        if (text) text.textContent = 'Nuvem Sincronizada';
+      } else if (status === 'error') {
+        badge.className = 'px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 bg-amber-950/80 border border-amber-500/50 text-amber-300 shadow-sm';
+        if (icon) icon.className = 'fa-solid fa-cloud text-amber-400';
+        if (text) text.textContent = 'Nuvem Local';
+      }
+    }
+
+    /* Monta o pacote de dados completo do layout do Studio */
+    function buildStudioPayload() {
+      const signItem = studioState.elements.find(e => e.id === 'field-assinatura' || e.type === 'text-line' || e.type === 'signature-line');
+      return {
+        version: STUDIO_LAYOUT_VERSION,
+        updated_at: new Date().toISOString(),
+        elements: studioState.elements,
+        bgTransform: studioState.bgTransform || { mode: 'exact', scale: 1, x: 0, y: 0 },
+        customImageUrl: studioState.customImageUrl || null,
+        customSvgContent: studioState.customSvgContent || null,
+        isDesignLocked: studioState.isDesignLocked !== false,
+        signatureUrl: (signItem && signItem.signatureUrl) ? signItem.signatureUrl : null
+      };
+    }
+
     /* Sincroniza design com Supabase para que qualquer usuário/máquina receba as alterações */
     async function syncStudioDesignToSupabase(immediate = false) {
       if (typeof supabaseClient === 'undefined' || !supabaseClient) return;
@@ -2453,27 +2503,79 @@
         _syncStudioDebounce = setTimeout(() => syncStudioDesignToSupabase(true), 800);
         return;
       }
+
+      updateCloudSyncStatus('syncing');
+      const payload = buildStudioPayload();
+      const payloadStr = JSON.stringify(payload);
+
       try {
-        await supabaseClient.from('keep_alive_logs').insert([{
-          source: 'studio_layout_sync',
-          status: JSON.stringify(studioState.elements)
-        }]);
+        // 1. Tenta gravar na tabela de configurações chave-valor
+        try {
+          await supabaseClient.from('configuracoes').upsert([{
+            chave: 'carteira_studio_layout',
+            valor: payloadStr,
+            updated_at: payload.updated_at
+          }], { onConflict: 'chave' });
+        } catch (e1) {}
+
+        // 2. Grava também no log central para persistência e histórico
+        try {
+          await supabaseClient.from('keep_alive_logs').insert([{
+            source: 'studio_layout_sync',
+            status: payloadStr
+          }]);
+        } catch (e2) {}
+
+        // 3. Persiste localmente com carimbo de tempo
+        localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(studioState.elements));
+        localStorage.setItem('fpeft_studio_layout_data', payloadStr);
+        if (studioState.bgTransform) {
+          localStorage.setItem('fpeft_studio_bg_transform', JSON.stringify(studioState.bgTransform));
+        }
+
+        // Notifica outras abas no mesmo computador
+        try {
+          if (window.BroadcastChannel) {
+            const bc = new BroadcastChannel('fpeft_studio_design_channel');
+            bc.postMessage({ type: 'STUDIO_DESIGN_UPDATED', payload });
+            bc.close();
+          }
+        } catch (e) {}
+
+        updateCloudSyncStatus('synced');
       } catch (e) {
         console.warn('Erro ao sincronizar design na nuvem:', e);
+        updateCloudSyncStatus('error');
       }
     }
 
-    /* Grava explicitamente o design atual como Padrão Fixo Oficial na nuvem Supabase */
-    /* Grava explicitamente o design atual como Padrão Fixo Oficial na nuvem Supabase */
+    /* Grava explicitamente o design atual como Padrão Fixo Oficial no Banco de Dados */
     async function saveOfficialLayoutToCloud() {
       try {
+        const btn = document.getElementById('btnSaveOfficialCloud');
+        if (btn) {
+          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-slate-950"></i><span>Gravando na Nuvem...</span>';
+          btn.disabled = true;
+        }
+
+        // Persiste localmente
         localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(studioState.elements));
         localStorage.setItem('fpeft_studio_layout_version', STUDIO_LAYOUT_VERSION);
         if (studioState.bgTransform) {
           localStorage.setItem('fpeft_studio_bg_transform', JSON.stringify(studioState.bgTransform));
         }
+
+        // Envia imediatamente para o banco de dados na nuvem
         await syncStudioDesignToSupabase(true);
-        showToast('⭐ Padrão Fixo gravado com sucesso! Salvo permanentemente neste navegador e na nuvem.');
+
+        showToast('⭐ Padrão Fixo Oficial gravado com sucesso no Banco de Dados! Todos os computadores e o site público receberão este layout idêntico.');
+
+        setTimeout(() => {
+          if (btn) {
+            btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up text-slate-950"></i><span>Gravar Padrão Fixo</span>';
+            btn.disabled = false;
+          }
+        }, 1200);
       } catch (err) {
         console.error('Erro ao gravar padrão oficial:', err);
         showToast('Erro ao sincronizar padrão na nuvem.');
@@ -2489,36 +2591,95 @@
         const defaultMatch = OFFICIAL_DEFAULT_ELEMENTS.find(d => d.id === el.id) || {};
         return {
           ...defaultMatch,
-          ...el // Posições (x, y, width, height, etc) salvas pelo usuário têm prioridade TOTAL e nunca são zeradas
+          ...el // Posições (x, y, width, height, etc) salvas pelo usuário têm prioridade TOTAL
         };
       });
     }
 
-    /* Busca o design oficial na nuvem Supabase ao inicializar */
-    async function fetchStudioDesignFromSupabase() {
-      if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+    /* Busca e aplica o design oficial na nuvem Supabase ao inicializar em QUALQUER computador */
+    async function fetchStudioDesignFromSupabase(force = false) {
+      if (typeof supabaseClient === 'undefined' || !supabaseClient) return false;
+      updateCloudSyncStatus('loading');
+
+      try {
+        let cloudData = null;
+
+        // 1. Tenta carregar da tabela configuracoes
         try {
-          const hasLocalSave = !!localStorage.getItem('fpeft_studio_custom_elements');
-          if (!hasLocalSave) {
+          const { data, error } = await supabaseClient
+            .from('configuracoes')
+            .select('*')
+            .eq('chave', 'carteira_studio_layout')
+            .maybeSingle();
+          if (!error && data && data.valor) {
+            cloudData = typeof data.valor === 'string' ? JSON.parse(data.valor) : data.valor;
+          }
+        } catch (e1) {}
+
+        // 2. Se não encontrou, busca do log central mais recente
+        if (!cloudData) {
+          try {
             const { data, error } = await supabaseClient
               .from('keep_alive_logs')
               .select('*')
               .eq('source', 'studio_layout_sync')
               .order('pinged_at', { ascending: false })
               .limit(1);
-            if (data && data.length > 0 && data[0].status) {
-              const parsed = JSON.parse(data[0].status);
-              if (Array.isArray(parsed) && parsed.length > 0) {
-                studioState.elements = sanitizeStudioElements(parsed);
-                localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(studioState.elements));
-                renderInteractiveElements();
-              }
+            if (!error && data && data.length > 0 && data[0].status) {
+              cloudData = typeof data[0].status === 'string' ? JSON.parse(data[0].status) : data[0].status;
             }
-          }
-        } catch (e) {
-          console.warn('Erro ao carregar design da nuvem:', e);
+          } catch (e2) {}
         }
+
+        if (cloudData) {
+          const rawElements = Array.isArray(cloudData) ? cloudData : cloudData.elements;
+          if (Array.isArray(rawElements) && rawElements.length > 0) {
+            studioState.elements = sanitizeStudioElements(rawElements);
+            localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(studioState.elements));
+          }
+
+          if (cloudData.bgTransform && typeof cloudData.bgTransform === 'object') {
+            studioState.bgTransform = cloudData.bgTransform;
+            localStorage.setItem('fpeft_studio_bg_transform', JSON.stringify(studioState.bgTransform));
+          }
+
+          if (cloudData.customImageUrl) {
+            studioState.customImageUrl = cloudData.customImageUrl;
+          }
+          if (cloudData.customSvgContent) {
+            studioState.customSvgContent = cloudData.customSvgContent;
+          }
+
+          localStorage.setItem('fpeft_studio_layout_data', JSON.stringify(cloudData));
+
+          // Renderiza novamente a tela com o layout perfeito
+          renderInteractiveElements();
+          applyCurrentSvgBackground();
+
+          // Sincroniza estado da assinatura da diretoria
+          const signItem = studioState.elements.find(i => i.id === 'field-assinatura' || i.type === 'text-line' || i.type === 'signature-line');
+          if (signItem && signItem.signatureUrl) {
+            updateSignatureUIState(true);
+          } else {
+            updateSignatureUIState(false);
+          }
+
+          if (typeof syncInspectorWithSelected === 'function') {
+            syncInspectorWithSelected();
+          }
+
+          updateCloudSyncStatus('synced');
+          if (force) {
+            showToast('✓ Design oficial atualizado diretamente do banco de dados na nuvem!');
+          }
+          return true;
+        }
+        updateCloudSyncStatus('synced');
+      } catch (e) {
+        console.warn('Erro ao carregar design da nuvem:', e);
+        updateCloudSyncStatus('error');
       }
+      return false;
     }
 
     /* Salva automaticamente o design (posições, dimensões, estilo e transformações) no localStorage e Supabase */
@@ -7556,6 +7717,32 @@
         console.warn("Aviso na inicialização do painel:", e);
       }
     }
+
+    // Sincronização em tempo real entre abas e dispositivos
+    if (window.BroadcastChannel) {
+      try {
+        const studioBc = new BroadcastChannel('fpeft_studio_design_channel');
+        studioBc.onmessage = (event) => {
+          if (event.data && event.data.type === 'STUDIO_DESIGN_UPDATED' && event.data.payload) {
+            const payload = event.data.payload;
+            if (payload.elements && Array.isArray(payload.elements)) {
+              studioState.elements = sanitizeStudioElements(payload.elements);
+              if (payload.bgTransform) studioState.bgTransform = payload.bgTransform;
+              renderInteractiveElements();
+              applyCurrentSvgBackground();
+              updateCloudSyncStatus('synced');
+            }
+          }
+        };
+      } catch (e) {}
+    }
+
+    // Ao focar a janela, verifica se houve alterações no banco de dados na nuvem
+    window.addEventListener('focus', () => {
+      if (typeof fetchStudioDesignFromSupabase === 'function' && typeof supabaseClient !== 'undefined' && supabaseClient) {
+        fetchStudioDesignFromSupabase(false);
+      }
+    });
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initApp);

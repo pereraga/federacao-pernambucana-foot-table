@@ -968,8 +968,25 @@
     /* =======================================================
        APLICAR PERSONALIZAÇÃO DE LAYOUT DA CARTEIRA (DO ADMIN)
        ======================================================= */
-    function applySavedBadgeLayout() {
-      const savedLayout = JSON.parse(localStorage.getItem('pe_badge_layout_config'));
+    async function applySavedBadgeLayout() {
+      let savedLayout = JSON.parse(localStorage.getItem('pe_badge_layout_config'));
+
+      if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+        try {
+          const { data } = await supabaseClient
+            .from('configuracoes')
+            .select('*')
+            .eq('chave', 'carteira_studio_layout')
+            .maybeSingle();
+          if (data && data.valor) {
+            const parsed = typeof data.valor === 'string' ? JSON.parse(data.valor) : data.valor;
+            if (parsed) {
+              localStorage.setItem('fpeft_studio_layout_data', JSON.stringify(parsed));
+            }
+          }
+        } catch (e) {}
+      }
+
       if (!savedLayout) return;
 
       const card = document.getElementById('athleteCredentialCard');
