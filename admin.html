@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261008_v39_no_overlap_pills';
+      const APP_REV = '20261008_v40_modalidade_spacing_clean';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -808,7 +808,7 @@
                   </div>
 
                   <!-- Modalidade & Categoria -->
-                  <div class="grid grid-cols-[145px_1fr] gap-2.5">
+                  <div class="grid grid-cols-[165px_1fr] gap-2">
                     <div>
                       <div class="flex items-center justify-between mb-1">
                         <label class="block text-slate-300 font-bold">Modalidade</label>
@@ -816,8 +816,8 @@
                       <input type="hidden" id="athleteModality" value="SOLO (INDIVIDUAL)" />
                       <!-- Botões de Seleção Direta de Modalidade (Permite Seleção Única ou Múltipla) -->
                       <div class="grid grid-cols-2 gap-1" id="modalityPillsContainer">
-                        <button type="button" onclick="toggleModalityOption('SOLO')" id="btnModSolo" data-mod="SOLO" class="mod-pill-btn flex items-center justify-center text-[8.5px] whitespace-nowrap py-1.5 px-1 rounded-xl font-black text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none leading-none tracking-tight" title="Clique para ativar/desativar Solo (Individual)">Solo (Individual)</button>
-                        <button type="button" onclick="toggleModalityOption('DUPLA')" id="btnModDupla" data-mod="DUPLA" class="mod-pill-btn flex items-center justify-center text-[8.5px] whitespace-nowrap py-1.5 px-1 rounded-xl font-black text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none leading-none tracking-tight" title="Clique para ativar/desativar Dupla (Equipe)">Dupla (Equipe)</button>
+                        <button type="button" onclick="toggleModalityOption('SOLO')" id="btnModSolo" data-mod="SOLO" class="mod-pill-btn flex items-center justify-center text-[7.5px] whitespace-nowrap py-1.5 px-1 rounded-lg font-bold text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none leading-none tracking-tight" title="Clique para ativar/desativar Solo (Individual)">Solo (Individual)</button>
+                        <button type="button" onclick="toggleModalityOption('DUPLA')" id="btnModDupla" data-mod="DUPLA" class="mod-pill-btn flex items-center justify-center text-[7.5px] whitespace-nowrap py-1.5 px-1 rounded-lg font-bold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none leading-none tracking-tight" title="Clique para ativar/desativar Dupla (Equipe)">Dupla (Equipe)</button>
                       </div>
                     </div>
                     <div>
@@ -5205,8 +5205,8 @@
       const hasSolo = upper.includes('SOLO');
       const hasDupla = upper.includes('DUPLA') || upper.includes('EQUIPE');
 
-      const activeClass = "mod-pill-btn flex items-center justify-center text-[8.5px] whitespace-nowrap py-1.5 px-1 rounded-xl font-black text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none leading-none tracking-tight";
-      const inactiveClass = "mod-pill-btn flex items-center justify-center text-[8.5px] whitespace-nowrap py-1.5 px-1 rounded-xl font-black text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none leading-none tracking-tight";
+      const activeClass = "mod-pill-btn flex items-center justify-center text-[7.5px] whitespace-nowrap py-1.5 px-1 rounded-lg font-bold text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none leading-none tracking-tight";
+      const inactiveClass = "mod-pill-btn flex items-center justify-center text-[7.5px] whitespace-nowrap py-1.5 px-1 rounded-lg font-bold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none leading-none tracking-tight";
 
       const btnSolo = document.getElementById('btnModSolo') || document.querySelector('.mod-pill-btn[data-mod="SOLO"]');
       const btnDupla = document.getElementById('btnModDupla') || document.querySelector('.mod-pill-btn[data-mod="DUPLA"]');
