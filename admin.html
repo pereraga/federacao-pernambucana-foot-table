@@ -2058,14 +2058,25 @@
           supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
           if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-pe-gold";
           if (text) text.textContent = "Supabase Conectado (Nuvem Oficial)";
+
+          // Executa sincronização em paralelo de alta velocidade (Design + Atletas)
+          const syncTasks = [];
           if (typeof fetchStudioDesignFromSupabase === 'function') {
-            await fetchStudioDesignFromSupabase(true);
+            syncTasks.push(fetchStudioDesignFromSupabase(true));
           }
+          if (typeof loadAthletes === 'function') {
+            syncTasks.push(loadAthletes(true));
+          }
+          await Promise.allSettled(syncTasks);
+
           if (typeof initSupabaseRealtimeLiveDesign === 'function') {
             initSupabaseRealtimeLiveDesign();
           }
           if (typeof renderJogadoresCadastradosTable === 'function') {
             renderJogadoresCadastradosTable();
+          }
+          if (typeof updateDashboardData === 'function') {
+            updateDashboardData();
           }
           return true;
         } catch (e) {
@@ -2888,11 +2899,14 @@
 
           updateCloudSyncStatus('synced');
           if (force) {
-            showToast('✓ Design oficial atualizado diretamente do banco de dados na nuvem!');
+            showToast('Conexão estabelecida: Registros Atualizados');
           }
           return true;
         }
         updateCloudSyncStatus('synced');
+        if (force) {
+          showToast('Conexão estabelecida: Registros Atualizados');
+        }
       } catch (e) {
         console.warn('Erro ao carregar design da nuvem:', e);
         updateCloudSyncStatus('error');
@@ -4070,16 +4084,17 @@
       updateFloatingPanelPosition();
     }
 
-    function showToast(msg) {
+    function showToast(msg, duration = 3000) {
       const toast = document.getElementById('toastNotification');
       const msgEl = document.getElementById('toastMessage');
       if (!toast || !msgEl) return;
 
       msgEl.innerText = msg;
       toast.classList.remove('translate-y-24', 'opacity-0');
-      setTimeout(() => {
+      if (window._toastTimeout) clearTimeout(window._toastTimeout);
+      window._toastTimeout = setTimeout(() => {
         toast.classList.add('translate-y-24', 'opacity-0');
-      }, 3000);
+      }, duration);
     }
 
     function escapeHtml(str) {
@@ -6378,42 +6393,65 @@
       showToast('Atleta homologado! Pronto para o próximo cadastro contínuo.');
     }
 
-    async function loadAthletes() {
-      let list = JSON.parse(localStorage.getItem('pe_athletes_db')) || [];
+    let _loadAthletesPromise = null;
+    let _lastAthletesFetchTime = 0;
 
-      if (supabaseClient) {
-        try {
-          const { data, error } = await supabaseClient.from('atletas').select('*').order('created_at', { ascending: false });
-          if (!error && Array.isArray(data)) {
-            const localMap = new Map(list.map(a => [String(a.codigo), a]));
-            list = data.map(d => {
-              const localMatch = localMap.get(String(d.codigo));
-              const effectiveStatus = (d.status && String(d.status).trim()) ? d.status : (localMatch && localMatch.status ? localMatch.status : 'HOMOLOGADO');
-              return {
-                id: d.id,
-                codigo: d.codigo,
-                nome: d.nome,
-                cpf: d.cpf,
-                nascimento: d.nascimento,
-                telefone: d.telefone,
-                municipio: d.municipio,
-                categoria: d.categoria || 'ASPIRANTE',
-                modalidade: d.modalidade,
-                status: effectiveStatus,
-                clube: d.clube,
-                federado: d.federado || (String(d.codigo).startsWith('PE-') ? d.codigo : `PE-2026/${String(d.codigo).slice(-3)}`),
-                validade: d.validade,
-                foto: d.foto_url
-              };
-            });
-            localStorage.setItem('pe_athletes_db', JSON.stringify(list));
-          }
-        } catch (e) {
-          console.warn("Falha ao consultar Supabase:", e);
-        }
+    async function loadAthletes(force = false) {
+      const now = Date.now();
+      if (!force && currentCachedAthletes && currentCachedAthletes.length > 0 && (now - _lastAthletesFetchTime < 4000)) {
+        return currentCachedAthletes;
       }
-      currentCachedAthletes = list;
-      return list;
+      if (_loadAthletesPromise && !force) {
+        return _loadAthletesPromise;
+      }
+
+      _loadAthletesPromise = (async () => {
+        let list = JSON.parse(localStorage.getItem('pe_athletes_db')) || [];
+        if (list.length > 0 && (!currentCachedAthletes || currentCachedAthletes.length === 0)) {
+          currentCachedAthletes = list;
+        }
+
+        if (supabaseClient) {
+          try {
+            const { data, error } = await supabaseClient.from('atletas').select('*').order('created_at', { ascending: false });
+            if (!error && Array.isArray(data)) {
+              const localMap = new Map(list.map(a => [String(a.codigo), a]));
+              list = data.map(d => {
+                const localMatch = localMap.get(String(d.codigo));
+                const effectiveStatus = (d.status && String(d.status).trim()) ? d.status : (localMatch && localMatch.status ? localMatch.status : 'HOMOLOGADO');
+                return {
+                  id: d.id,
+                  codigo: d.codigo,
+                  nome: d.nome,
+                  cpf: d.cpf,
+                  nascimento: d.nascimento,
+                  telefone: d.telefone,
+                  municipio: d.municipio,
+                  categoria: d.categoria || 'ASPIRANTE',
+                  modalidade: d.modalidade,
+                  status: effectiveStatus,
+                  clube: d.clube,
+                  federado: d.federado || (String(d.codigo).startsWith('PE-') ? d.codigo : `PE-2026/${String(d.codigo).slice(-3)}`),
+                  validade: d.validade,
+                  foto: d.foto_url
+                };
+              });
+              localStorage.setItem('pe_athletes_db', JSON.stringify(list));
+              _lastAthletesFetchTime = Date.now();
+            }
+          } catch (e) {
+            console.warn("Falha ao consultar Supabase:", e);
+          }
+        }
+        currentCachedAthletes = list;
+        return list;
+      })();
+
+      try {
+        return await _loadAthletesPromise;
+      } finally {
+        _loadAthletesPromise = null;
+      }
     }
 
     // Compatibilidade reversa
@@ -8193,9 +8231,6 @@
         applyCurrentSvgBackground();
         renderInteractiveElements();
         selectElement('field-nome');
-        if (supabaseClient) {
-          syncStudioDesignToSupabase(true);
-        }
         setTimeout(() => {
           autoFitStudioToScreen(true);
         }, 120);
