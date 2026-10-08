@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261006_v37_real_scannable_qr_validation';
+      const APP_REV = '20261008_v38_compact_athlete_panel';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -736,13 +736,13 @@
           </div>
 
           <!-- WORKSPACE DO STUDIO: Split View Formulário + Canvas CR80 -->
-          <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+          <div class="grid grid-cols-1 xl:grid-cols-[430px_minmax(0,1fr)] gap-6 items-start">
             
-            <!-- COLUNA ESQUERDA: Formulário de Dados, Fundo e Camadas (420px) -->
-            <div class="xl:col-span-5 space-y-6">
+            <!-- COLUNA ESQUERDA: Formulário de Dados, Fundo e Camadas (430px) -->
+            <div class="space-y-6 w-full max-w-[430px] mx-auto xl:mx-0">
               
               <!-- 1. Formulário Oficial de Preenchimento -->
-              <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 sm:p-6 shadow-xl relative">
+              <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 shadow-xl relative">
                 <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0 rounded-t-2xl"></div>
 
                 <div class="flex items-center justify-between mb-4">
@@ -772,10 +772,10 @@
                     </div>
                     <div>
                       <label class="block text-slate-300 font-bold mb-1">Status Federativo</label>
-                      <select id="athleteStatus" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 outline-none">
-                        <option value="PENDENTE" selected>PENDENTE DE HOMOLOGAÇÃO</option>
-                        <option value="HOMOLOGADO">HOMOLOGADO (Oficial no Site)</option>
-                        <option value="REGULAR">REGULAR (Ativo)</option>
+                      <select id="athleteStatus" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-2.5 py-2 text-slate-200 text-xs outline-none cursor-pointer">
+                        <option value="PENDENTE" selected>PENDENTE</option>
+                        <option value="HOMOLOGADO">HOMOLOGADO</option>
+                        <option value="REGULAR">REGULAR</option>
                       </select>
                     </div>
                   </div>
@@ -816,8 +816,8 @@
                       <input type="hidden" id="athleteModality" value="SOLO (INDIVIDUAL)" />
                       <!-- Botões de Seleção Direta de Modalidade (Permite Seleção Única ou Múltipla) -->
                       <div class="grid grid-cols-2 gap-1.5" id="modalityPillsContainer">
-                        <button type="button" onclick="toggleModalityOption('SOLO')" id="btnModSolo" data-mod="SOLO" class="mod-pill-btn flex items-center justify-center text-[10.5px] whitespace-nowrap py-2 px-1 rounded-xl font-black text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none leading-none tracking-tight" title="Clique para ativar/desativar Solo (Individual)">Solo (Individual)</button>
-                        <button type="button" onclick="toggleModalityOption('DUPLA')" id="btnModDupla" data-mod="DUPLA" class="mod-pill-btn flex items-center justify-center text-[10.5px] whitespace-nowrap py-2 px-1 rounded-xl font-black text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none leading-none tracking-tight" title="Clique para ativar/desativar Dupla (Equipe)">Dupla (Equipe)</button>
+                        <button type="button" onclick="toggleModalityOption('SOLO')" id="btnModSolo" data-mod="SOLO" class="mod-pill-btn flex items-center justify-center text-[10px] whitespace-nowrap py-2 px-1 rounded-xl font-black text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none leading-none tracking-tight" title="Clique para ativar/desativar Solo (Individual)">Solo (Individual)</button>
+                        <button type="button" onclick="toggleModalityOption('DUPLA')" id="btnModDupla" data-mod="DUPLA" class="mod-pill-btn flex items-center justify-center text-[10px] whitespace-nowrap py-2 px-1 rounded-xl font-black text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none leading-none tracking-tight" title="Clique para ativar/desativar Dupla (Equipe)">Dupla (Equipe)</button>
                       </div>
                     </div>
                     <div>
@@ -827,10 +827,10 @@
                       <input type="hidden" id="athleteCategory" value="AMADOR" />
                       <!-- Botões de Seleção Direta das 4 Bases -->
                       <div class="grid grid-cols-4 gap-1" id="categoryPillsContainer">
-                        <button type="button" onclick="selectCategoryBase('ASPIRANTE')" data-cat="ASPIRANTE" class="cat-pill-btn flex items-center justify-center text-[8px] xl:text-[8.5px] py-2 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none leading-none tracking-tighter" title="Aspirante">Aspirante</button>
-                        <button type="button" onclick="selectCategoryBase('INICIANTE')" data-cat="INICIANTE" class="cat-pill-btn flex items-center justify-center text-[8px] xl:text-[8.5px] py-2 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none leading-none tracking-tighter" title="Iniciante">Iniciante</button>
-                        <button type="button" onclick="selectCategoryBase('AMADOR')" data-cat="AMADOR" class="cat-pill-btn flex items-center justify-center text-[8px] xl:text-[8.5px] py-2 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none leading-none tracking-tighter" title="Amador">Amador</button>
-                        <button type="button" onclick="selectCategoryBase('PROFISSIONAL')" data-cat="PROFISSIONAL" class="cat-pill-btn flex items-center justify-center text-[8px] xl:text-[8.5px] py-2 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none leading-none tracking-tighter" title="Profissional">Profissional</button>
+                        <button type="button" onclick="selectCategoryBase('ASPIRANTE')" data-cat="ASPIRANTE" class="cat-pill-btn flex items-center justify-center text-[7.5px] py-2 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none leading-none tracking-tighter" title="Aspirante">Aspirante</button>
+                        <button type="button" onclick="selectCategoryBase('INICIANTE')" data-cat="INICIANTE" class="cat-pill-btn flex items-center justify-center text-[7.5px] py-2 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none leading-none tracking-tighter" title="Iniciante">Iniciante</button>
+                        <button type="button" onclick="selectCategoryBase('AMADOR')" data-cat="AMADOR" class="cat-pill-btn flex items-center justify-center text-[7.5px] py-2 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-pe-gold text-pe-dark border border-pe-gold shadow select-none leading-none tracking-tighter" title="Amador">Amador</button>
+                        <button type="button" onclick="selectCategoryBase('PROFISSIONAL')" data-cat="PROFISSIONAL" class="cat-pill-btn flex items-center justify-center text-[7.5px] py-2 px-0.5 rounded-lg font-extrabold text-center transition cursor-pointer bg-[#0b101d] text-slate-300 border border-[#1c253b] hover:border-pe-gold hover:text-white select-none leading-none tracking-tighter" title="Profissional">Profissional</button>
                       </div>
                     </div>
                   </div>
@@ -929,7 +929,7 @@
             </div>
 
             <!-- COLUNA DIREITA: Canvas do Studio CR80 & Painel Flutuante -->
-            <div class="xl:col-span-7 flex flex-col space-y-4">
+            <div class="flex flex-col space-y-4 min-w-0">
               
               <!-- Toolbar Superior do Canvas (Zoom e Padrão CR80) -->
               <div class="flex items-center justify-between bg-[#0b101d] border border-[#1c253b] px-4 py-2.5 rounded-2xl shadow flex-wrap gap-2.5">
