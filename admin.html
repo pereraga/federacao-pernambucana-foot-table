@@ -4090,7 +4090,7 @@
     /* =========================================================
        HELPER COMPARTILHADO: RENDERIZAÇÃO DOS DADOS NO SVG
        ========================================================= */
-    function appendAthleteElementsToSvg(svgDoc, overlayGroup, elementsList) {
+    function appendAthleteElementsToSvg(svgDoc, overlayGroup, elementsList, athlete = null) {
       elementsList.forEach(item => {
         if (item.type === 'photo') {
           const gPhoto = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -4155,7 +4155,8 @@
           bg.setAttribute('fill', '#ffffff');
           gQr.appendChild(bg);
 
-          const athleteCode = (targetAthlete.federado || targetAthlete.codigo || '973321').replace(/\D/g, '').slice(0, 6) || targetAthlete.codigo || '973321';
+          const athleteObj = athlete || window._lastActiveAthlete || {};
+          const athleteCode = (athleteObj.federado || athleteObj.codigo || '973321').replace(/\D/g, '').slice(0, 6) || athleteObj.codigo || '973321';
           let qrUrl = (item.text && item.text.startsWith('http')) ? item.text : `https://fpeft.vercel.app/?id=${athleteCode}`;
           if (qrUrl === 'https://fpeft.vercel.app/' || qrUrl === 'https://fpeft.vercel.app') {
             qrUrl = `https://fpeft.vercel.app/?id=${athleteCode}`;
@@ -4541,7 +4542,8 @@
           ctx.restore();
 
           // B) Gera QR Code Real e 100% Escaneável
-          const athleteCode = (targetAthlete.federado || targetAthlete.codigo || '973321').replace(/\D/g, '').slice(0, 6) || targetAthlete.codigo || '973321';
+          const athleteObj = athlete || window._lastActiveAthlete || {};
+          const athleteCode = (athleteObj.federado || athleteObj.codigo || '973321').replace(/\D/g, '').slice(0, 6) || athleteObj.codigo || '973321';
           let qrUrl = (item.text && item.text.startsWith('http')) ? item.text : `https://fpeft.vercel.app/?id=${athleteCode}`;
           if (qrUrl === 'https://fpeft.vercel.app/' || qrUrl === 'https://fpeft.vercel.app') {
             qrUrl = `https://fpeft.vercel.app/?id=${athleteCode}`;
@@ -7048,7 +7050,7 @@
         return item;
       });
 
-      appendAthleteElementsToSvg(svgDoc, overlayGroup, athleteElements);
+      appendAthleteElementsToSvg(svgDoc, overlayGroup, athleteElements, athlete);
       rootSvg.appendChild(overlayGroup);
 
       const serializer = new XMLSerializer();
