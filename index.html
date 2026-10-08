@@ -649,7 +649,14 @@
         list = [...(list || []), ...missing];
         localStorage.setItem('pe_news_db', JSON.stringify(list));
       }
-      return list;
+      return list.map(item => ({
+        ...item,
+        title: item.title || item.titulo || '',
+        category: item.category || item.categoria || 'INFORMATIVO',
+        content: item.content || item.conteudo || item.summary || item.resumo || '',
+        date: item.date || item.data_publicacao || '',
+        image: item.imagem_url || item.image || item.imagem || ''
+      }));
     }
 
     function getStoredAthletes() {
@@ -674,10 +681,11 @@
           if (!error && data && data.length > 0) {
             newsList = data.map(item => ({
               id: item.id,
-              title: item.titulo,
-              category: item.categoria,
-              content: item.conteudo,
-              date: item.data_publicacao
+              title: item.titulo || item.title || '',
+              category: item.categoria || item.category || 'INFORMATIVO',
+              content: item.conteudo || item.content || '',
+              date: item.data_publicacao || (item.created_at ? item.created_at.split('T')[0] : ''),
+              image: item.imagem_url || item.imagem || item.image || ''
             }));
           }
         } catch (e) {
@@ -702,15 +710,23 @@
         if (item.category && item.category.includes('REGULAMENTO')) tagColor = "bg-pe-red text-white";
 
         const card = document.createElement('article');
-        card.className = "bg-pe-card border border-pe-cardBorder hover:border-pe-gold/60 transition p-5 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4";
+        card.className = "bg-pe-card border border-pe-cardBorder hover:border-pe-gold/60 transition p-4 sm:p-5 rounded-xl flex flex-col md:flex-row items-stretch md:items-center gap-4 group";
+        
+        const imageHtml = item.image ? `
+          <div class="w-full md:w-52 h-44 md:h-32 rounded-xl overflow-hidden shrink-0 bg-[#070a13] border border-pe-cardBorder relative">
+            <img src="${item.image}" alt="${item.title || 'Foto Notícia'}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy" onerror="this.parentElement.style.display='none'">
+          </div>
+        ` : '';
+
         card.innerHTML = `
-          <div class="space-y-1.5 flex-1">
+          ${imageHtml}
+          <div class="space-y-1.5 flex-1 min-w-0">
             <div class="flex items-center gap-2">
               <span class="text-[10px] font-bold px-2 py-0.5 rounded ${tagColor} uppercase tracking-wider">${item.category || 'INFORMATIVO'}</span>
               <span class="text-[11px] text-slate-500 font-mono">${item.date || 'Recente'}</span>
             </div>
-            <h3 class="font-oswald text-base sm:text-lg uppercase font-bold text-white leading-snug">${item.title}</h3>
-            <p class="text-xs text-slate-400 leading-relaxed">${item.content}</p>
+            <h3 class="font-oswald text-base sm:text-lg uppercase font-bold text-white leading-snug group-hover:text-blue-300 transition">${item.title}</h3>
+            <p class="text-xs text-slate-400 leading-relaxed line-clamp-3">${item.content}</p>
           </div>
         `;
         container.appendChild(card);
