@@ -74,6 +74,16 @@
       theme: {
         extend: {
           colors: {
+            brand: {
+              dark: '#070a13',
+              card: '#0f172a',
+              input: '#0b1120',
+              border: '#1e293b',
+              accent: '#3b82f6',
+              gold: '#f59e0b',
+              goldLight: '#fbbf24',
+              danger: '#ef4444'
+            },
             pe: {
               blue: '#0044cc',
               darkblue: '#06173a',
@@ -87,6 +97,8 @@
             }
           },
           fontFamily: {
+            heading: ['Montserrat', 'sans-serif'],
+            body: ['Inter', 'sans-serif'],
             sans: ['Montserrat', 'sans-serif'],
             oswald: ['Oswald', 'sans-serif'],
             mono: ['JetBrains Mono', 'monospace']
@@ -103,6 +115,9 @@
     ::-webkit-scrollbar-thumb:hover { background: #f5b800; }
     .pe-stripe-bar {
       background: linear-gradient(90deg, #0044cc 0%, #0044cc 40%, #f5b800 40%, #f5b800 70%, #d32f2f 70%, #d32f2f 100%);
+    }
+    .top-gradient-bar {
+      background: linear-gradient(90deg, #3b82f6 0%, #3b82f6 33%, #fbbf24 33%, #fbbf24 66%, #ef4444 66%, #ef4444 100%);
     }
     .active-nav-pill {
       background-color: #f5b800 !important;
@@ -1368,93 +1383,264 @@
         <!-- ===================================================== -->
         <!-- 3. 📰 ABA NOTÍCIAS & TORNEIOS                         -->
         <!-- ===================================================== -->
-        <div id="tabContent-noticias" class="space-y-8 hidden">
+        <div id="tabContent-noticias" class="space-y-6 hidden">
           
-          <!-- Box Informativo: O que você encontra na Aba Notícias & Torneios -->
-          <div class="bg-gradient-to-r from-[#06173a] via-[#091e4a] to-[#040813] border border-[#1c253b] rounded-2xl p-5 sm:p-6 relative overflow-hidden shadow-xl">
-            <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
-            <div class="flex items-start gap-4">
-              <span class="text-3xl">📰</span>
-              <div class="space-y-2 text-xs">
-                <h3 class="font-oswald text-lg uppercase font-bold text-white tracking-wide">
-                  O que você encontra na Aba Notícias & Torneios:
-                </h3>
-                <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-slate-300">
-                  <li class="flex items-start gap-1.5">
-                    <span class="text-pe-gold font-bold">●</span>
-                    <span><strong>Publicação de Novas Matérias:</strong> Com Título, Categoria (Mundial Roma, Campeonato, Regulamento, Informativo, Comunicado), Data e Conteúdo.</span>
-                  </li>
-                  <li class="flex items-start gap-1.5">
-                    <span class="text-pe-gold font-bold">●</span>
-                    <span><strong>Sincronização no Supabase:</strong> As matérias salvas vão para o banco de dados Supabase e aparecem instantaneamente na página inicial pública.</span>
-                  </li>
-                  <li class="flex items-start gap-1.5">
-                    <span class="text-pe-gold font-bold">●</span>
-                    <span><strong>Gerenciamento e Exclusão:</strong> Controle total e remoção de comunicados antigos com um clique.</span>
-                  </li>
-                </ul>
+          <!-- Top Navigation & Brand Header -->
+          <div class="border-b border-[#1c253b] bg-[#070a13]/90 backdrop-blur rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
+            <div>
+              <div class="inline-flex items-center gap-2 text-xs font-bold tracking-widest text-[#f59e0b] uppercase">
+                <span class="w-2 h-2 rounded-full bg-[#f59e0b] animate-pulse"></span>
+                BOLETINS OFICIAIS & IMPRENSA
+              </div>
+              <h2 class="font-oswald text-2xl sm:text-3xl font-black tracking-tight text-white uppercase mt-0.5">
+                GERENCIAR NOTÍCIAS & TORNEIOS
+              </h2>
+            </div>
+
+            <!-- Quick Metrics -->
+            <div class="flex items-center gap-3">
+              <div class="bg-[#0f172a]/80 border border-[#1e293b] px-3.5 py-1.5 rounded-lg flex items-center gap-2 text-xs">
+                <i class="fa-solid fa-newspaper text-[#3b82f6]"></i>
+                <span class="text-slate-400">Notícias no ar:</span>
+                <span id="news-counter" class="font-bold text-white bg-blue-600/30 px-2 py-0.5 rounded text-blue-400">0</span>
+              </div>
+              <div class="bg-[#0f172a]/80 border border-[#1e293b] px-3.5 py-1.5 rounded-lg flex items-center gap-2 text-xs">
+                <i class="fa-solid fa-cloud-arrow-up text-emerald-400"></i>
+                <span class="text-slate-400">Status:</span>
+                <span class="font-semibold text-emerald-400 flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Conectado
+                </span>
               </div>
             </div>
           </div>
 
-          <div class="flex items-center justify-between">
-            <div>
-              <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Boletins Oficiais</span>
-              <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Gerenciar Notícias & Torneios</h2>
-            </div>
-          </div>
-
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            <div class="lg:col-span-5 bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 shadow-xl relative">
-              <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0 rounded-t-2xl"></div>
+            
+            <!-- LEFT COLUMN: Formulário de Adição/Edição -->
+            <section class="lg:col-span-5 bg-[#0f172a] border border-[#1e293b] rounded-2xl shadow-2xl relative overflow-hidden">
+              <!-- Top Colored Line Strip (Pernambuco / FPEFT stripes) -->
+              <div class="h-1.5 w-full top-gradient-bar"></div>
 
-              <h3 class="font-oswald text-lg uppercase font-bold text-white mb-4 flex items-center gap-2">
-                <span>✍️</span> Publicar Nova Notícia
-              </h3>
-
-              <form id="newsForm" onsubmit="handleSaveNews(event)" class="space-y-4 text-xs">
-                <div>
-                  <label class="block text-slate-300 font-bold mb-1">Título da Matéria *</label>
-                  <input type="text" id="newsTitle" required placeholder="ex: II Campeonato Mundial de Foot Table" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-white font-bold outline-none" />
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                  <div>
-                    <label class="block text-slate-300 font-bold mb-1">Categoria</label>
-                    <select id="newsCategory" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 outline-none">
-                      <option value="MUNDIAL ROMA">MUNDIAL ROMA</option>
-                      <option value="CAMPEONATO">CAMPEONATO</option>
-                      <option value="REGULAMENTO">REGULAMENTO</option>
-                      <option value="INFORMATIVO">INFORMATIVO</option>
-                      <option value="COMUNICADO">COMUNICADO</option>
-                    </select>
+              <div class="p-5 sm:p-6 space-y-5">
+                <!-- Form Header -->
+                <div class="flex items-center justify-between pb-3 border-b border-[#1e293b]/60">
+                  <div class="flex items-center gap-2.5">
+                    <span id="form-icon" class="text-brand-gold text-lg">
+                      <i class="fa-solid fa-bullhorn"></i>
+                    </span>
+                    <h3 id="form-title" class="font-oswald font-black tracking-wide text-lg text-white uppercase">
+                      Publicar Nova Notícia
+                    </h3>
                   </div>
+                  <button id="cancel-edit-btn" onclick="resetForm()" class="hidden text-xs text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 px-2.5 py-1 rounded-lg transition flex items-center gap-1 cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i> Cancelar Edição
+                  </button>
+                </div>
+
+                <form id="news-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                  <input type="hidden" id="edit-id" value="">
+
+                  <!-- Título da Matéria -->
                   <div>
-                    <label class="block text-slate-300 font-bold mb-1">Data</label>
-                    <input type="text" id="newsDate" placeholder="ex: 02/10/2026" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-200 font-mono outline-none" />
+                    <label for="news-title" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+                      Título da Matéria <span class="text-brand-gold">*</span>
+                    </label>
+                    <input 
+                      type="text" 
+                      id="news-title" 
+                      required
+                      placeholder="ex: II Campeonato Mundial de Foot Table" 
+                      class="w-full bg-[#0b1120] border border-[#1e293b] rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-accent transition shadow-inner font-medium"
+                    >
                   </div>
+
+                  <!-- Categoria e Data -->
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div>
+                      <label for="news-category" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+                        Categoria <span class="text-brand-gold">*</span>
+                      </label>
+                      <div class="relative">
+                        <select 
+                          id="news-category" 
+                          required
+                          class="w-full bg-[#0b1120] border border-[#1e293b] rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brand-accent transition appearance-none cursor-pointer pr-9 font-medium"
+                        >
+                          <option value="MUNDIAL ROMA">MUNDIAL ROMA</option>
+                          <option value="CAMPEONATO">CAMPEONATO</option>
+                          <option value="REGULAMENTO">REGULAMENTO</option>
+                          <option value="COMUNICADO">COMUNICADO</option>
+                          <option value="CONVOCAÇÃO">CONVOCAÇÃO</option>
+                          <option value="CIRCUITO PE">CIRCUITO PE</option>
+                          <option value="INFORMATIVO">INFORMATIVO</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down absolute right-3 top-3.5 text-slate-400 text-xs pointer-events-none"></i>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label for="news-date" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+                        Data Oficial <span class="text-brand-gold">*</span>
+                      </label>
+                      <input 
+                        type="date" 
+                        id="news-date" 
+                        required
+                        class="w-full bg-[#0b1120] border border-[#1e293b] rounded-lg px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-accent transition font-medium"
+                      >
+                    </div>
+                  </div>
+
+                  <!-- Destaque e Imagem Capa -->
+                  <div class="bg-[#0b1120]/70 border border-[#1e293b] rounded-lg p-3 space-y-3">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs font-medium text-slate-300 flex items-center gap-1.5">
+                        <i class="fa-solid fa-star text-brand-gold"></i>
+                        Fixar em Destaque na Home
+                      </span>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="news-featured" class="sr-only peer">
+                        <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-gold"></div>
+                      </label>
+                    </div>
+
+                    <div>
+                      <label for="news-image" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">
+                        URL da Foto / Banner de Capa
+                      </label>
+                      <input 
+                        type="url" 
+                        id="news-image" 
+                        oninput="updateImagePreview(this.value)"
+                        placeholder="https://exemplo.com/foto-campeonato.jpg" 
+                        class="w-full bg-[#070a13] border border-[#1e293b] rounded-md px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-accent transition"
+                      >
+                      <!-- Miniatura da Imagem -->
+                      <div id="image-preview-container" class="mt-2 hidden">
+                        <img id="image-preview" src="" alt="Prévia da capa" class="w-full h-24 object-cover rounded border border-[#1e293b]">
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Resumo / Linha-fina -->
+                  <div>
+                    <div class="flex justify-between items-center mb-1.5">
+                      <label for="news-summary" class="block text-xs font-semibold uppercase tracking-wider text-slate-300">
+                        Resumo / Linha-fina <span class="text-brand-gold">*</span>
+                      </label>
+                      <span id="summary-counter" class="text-[11px] text-slate-500">0/180 carac.</span>
+                    </div>
+                    <textarea 
+                      id="news-summary" 
+                      required
+                      rows="2"
+                      maxlength="180"
+                      oninput="document.getElementById('summary-counter').innerText = `${this.value.length}/180 carac.`"
+                      placeholder="Breve descrição que aparece no card de notícias da listagem..." 
+                      class="w-full bg-[#0b1120] border border-[#1e293b] rounded-lg p-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-accent transition shadow-inner"
+                    ></textarea>
+                  </div>
+
+                  <!-- Conteúdo Completo (com mini editor formatador) -->
+                  <div>
+                    <div class="flex justify-between items-center mb-1.5">
+                      <label for="news-content" class="block text-xs font-semibold uppercase tracking-wider text-slate-300">
+                        Conteúdo da Matéria Completa
+                      </label>
+                      <!-- Toolbar simples de Markdown -->
+                      <div class="flex items-center gap-1 bg-slate-800/80 px-2 py-0.5 rounded text-xs text-slate-300">
+                        <button type="button" onclick="insertFormat('**', '**')" class="hover:text-white px-1 cursor-pointer" title="Negrito"><i class="fa-solid fa-bold"></i></button>
+                        <button type="button" onclick="insertFormat('*', '*')" class="hover:text-white px-1 cursor-pointer" title="Itálico"><i class="fa-solid fa-italic"></i></button>
+                        <button type="button" onclick="insertFormat('\n- ', '')" class="hover:text-white px-1 cursor-pointer" title="Lista"><i class="fa-solid fa-list-ul"></i></button>
+                      </div>
+                    </div>
+                    <textarea 
+                      id="news-content" 
+                      rows="4" 
+                      placeholder="Escreva a nota completa, detalhes técnicos, chaves dos jogos e pronunciamentos oficiais..." 
+                      class="w-full bg-[#0b1120] border border-[#1e293b] rounded-lg p-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-accent transition shadow-inner font-mono text-xs"
+                    ></textarea>
+                  </div>
+
+                  <!-- Link Externo / PDF Oficial -->
+                  <div>
+                    <label for="news-link" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+                      Link Externo ou PDF Oficial <span class="text-slate-500 font-normal lowercase">(opcional)</span>
+                    </label>
+                    <div class="relative">
+                      <span class="absolute left-3 top-2.5 text-slate-500 text-xs">
+                        <i class="fa-solid fa-link"></i>
+                      </span>
+                      <input 
+                        type="url" 
+                        id="news-link" 
+                        placeholder="https://federacao.com/regulamento.pdf" 
+                        class="w-full bg-[#0b1120] border border-[#1e293b] rounded-lg pl-8 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-accent transition"
+                      >
+                    </div>
+                  </div>
+
+                  <!-- Botões de Ação -->
+                  <div class="pt-2">
+                    <button 
+                      type="submit" 
+                      id="submit-button"
+                      class="w-full bg-[#f59e0b] hover:bg-[#fbbf24] text-slate-950 font-oswald font-black text-sm uppercase tracking-wider py-3 px-5 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-amber-500/10 hover:shadow-amber-500/20 active:scale-[0.99] transition duration-150 cursor-pointer"
+                    >
+                      <i class="fa-solid fa-rocket"></i>
+                      <span id="submit-button-text">Publicar no Site & Supabase</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </section>
+
+            <!-- RIGHT COLUMN: Lista de Notícias no Ar -->
+            <section class="lg:col-span-7 space-y-4">
+              
+              <!-- Top Section Header & Filter Toolbar -->
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#1e293b]">
+                <div class="flex items-center gap-2">
+                  <span class="text-xl">📰</span>
+                  <h3 class="font-oswald font-black tracking-wide text-xl text-white uppercase">
+                    Notícias no Ar
+                  </h3>
                 </div>
 
-                <div>
-                  <label class="block text-slate-300 font-bold mb-1">Conteúdo / Resumo *</label>
-                  <textarea id="newsContent" rows="4" required placeholder="Digite os detalhes da notícia oficial..." class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-300 outline-none"></textarea>
+                <!-- Search Bar -->
+                <div class="relative w-full sm:w-64">
+                  <input 
+                    type="text" 
+                    id="search-input" 
+                    oninput="renderNewsList()" 
+                    placeholder="Buscar por título ou tema..." 
+                    class="w-full bg-[#0f172a] border border-[#1e293b] rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-accent transition"
+                  >
+                  <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
                 </div>
+              </div>
 
-                <div id="newsFeedback" class="hidden text-xs p-3 rounded-xl"></div>
-
-                <button type="submit" class="w-full bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase tracking-wider py-3 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer">
-                  <span>🚀</span> Publicar no Site & Supabase
+              <!-- Quick Filter Pills -->
+              <div class="flex flex-wrap items-center gap-2 pt-1" id="category-pills">
+                <button onclick="setFilterCategory('ALL')" class="cat-pill active text-[11px] font-bold px-3 py-1 rounded-full border border-blue-500/40 bg-blue-600/20 text-blue-300 cursor-pointer">
+                  TODAS
                 </button>
-              </form>
-            </div>
+                <button onclick="setFilterCategory('MUNDIAL ROMA')" class="cat-pill text-[11px] font-bold px-3 py-1 rounded-full border border-[#1e293b] bg-[#0f172a] text-slate-400 hover:text-white cursor-pointer">
+                  MUNDIAL ROMA
+                </button>
+                <button onclick="setFilterCategory('CAMPEONATO')" class="cat-pill text-[11px] font-bold px-3 py-1 rounded-full border border-[#1e293b] bg-[#0f172a] text-slate-400 hover:text-white cursor-pointer">
+                  CAMPEONATO
+                </button>
+                <button onclick="setFilterCategory('REGULAMENTO')" class="cat-pill text-[11px] font-bold px-3 py-1 rounded-full border border-[#1e293b] bg-[#0f172a] text-slate-400 hover:text-white cursor-pointer">
+                  REGULAMENTO
+                </button>
+              </div>
 
-            <!-- Lista de Notícias -->
-            <div class="lg:col-span-7 space-y-4">
-              <h3 class="font-oswald text-xl uppercase font-bold text-white flex items-center gap-2">
-                <span>📰</span> Notícias no Ar
-              </h3>
-              <div id="adminNewsList" class="space-y-3"></div>
-            </div>
+              <!-- Feed Container -->
+              <div id="news-container" class="space-y-3 pt-2">
+                <!-- Notícias serão geradas dinamicamente via JS -->
+              </div>
+            </section>
           </div>
         </div>
 
@@ -7867,113 +8053,541 @@
     }
 
     /* =========================================================
-       GERENCIAMENTO DE NOTÍCIAS (ABA 3)
+       GERENCIAMENTO DE NOTÍCIAS & TORNEIOS (ABA NOTÍCIAS)
+       Fiel ao Painel Oficial de Gerenciamento de Notícias
        ========================================================= */
-    async function loadNews() {
-      let list = JSON.parse(localStorage.getItem('pe_news_db'));
-      if (!list || !Array.isArray(list) || list.length < DEFAULT_NEWS.length) {
-        const existingIds = new Set((list || []).map(n => String(n.id)));
-        const missing = DEFAULT_NEWS.filter(n => !existingIds.has(String(n.id)));
-        list = [...(list || []), ...missing];
-        localStorage.setItem('pe_news_db', JSON.stringify(list));
+    const INITIAL_NEWS = [
+      {
+        id: 'news-1',
+        title: 'II CAMPEONATO MUNDIAL DE FUTEBOL DE MESA — ROMA AGUARDA SEUS NOVOS CAMPEÕES',
+        category: 'MUNDIAL ROMA',
+        date: '2026-09-28',
+        featured: true,
+        summary: 'O Campeonato Mundial começa de 1 a 4 de outubro em Roma, Itália, com mais de 50 países competindo em todas as categorias de Foot Table.',
+        content: 'A Federação Internacional confirmou os detalhes da cerimônia de abertura e sorteio dos grupos para o II Campeonato Mundial em Roma. A delegação brasileira embarca com recorde de inscritos visando o pódio em todas as divisões.',
+        image: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&q=80',
+        link: 'https://mundial.foottable.org'
+      },
+      {
+        id: 'news-2',
+        title: 'VITÓRIA FERNANDES CHEGA A ROMA COMO A MULHER A SER BATIDA NO CIRCUITO MUNDIAL',
+        category: 'CAMPEONATO',
+        date: '2026-09-25',
+        featured: false,
+        summary: 'A estrela brasileira lidera os rankings mundiais de simples e duplas femininas com 2.000 pontos acumulados na temporada.',
+        content: 'Com apresentações impecáveis nas etapas continentais, a atleta conquistou a admiração unânime da crítica técnica esportiva. Seus saques com efeito tornaram-se referência técnica no Foot Table moderno.',
+        image: 'https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&w=800&q=80',
+        link: ''
+      },
+      {
+        id: 'news-3',
+        title: 'HOMOLOGADO O REGULAMENTO OFICIAL DE QUADRAS E MESAS CURVAS PARA A TEMPORADA PERNAMBUCANA',
+        category: 'REGULAMENTO',
+        date: '2026-09-20',
+        featured: false,
+        summary: 'A Federação Pernambucana publicou as diretrizes técnicas atualizadas de saque e altura das redes centrais para torneios oficiais.',
+        content: 'A mesa de jogo deverá seguir medidas estritas de angulação curvada e textura de borracha sintética com homologação da comissão de árbitros antes de cada rodada do circuito estadual.',
+        image: '',
+        link: 'https://federacao.pe.gov.br/regras-oficiais.pdf'
       }
-      if (supabaseClient) {
+    ];
+
+    let newsItems = [];
+    let currentFilter = 'ALL';
+    let pendingDeleteId = null;
+
+    async function loadNewsData() {
+      // 1. Tentar ler do localStorage unificado
+      const saved = localStorage.getItem('pe_news_db') || localStorage.getItem('foot_table_news_db');
+      if (saved) {
         try {
-          const { data, error } = await supabaseClient.from('noticias').select('*').order('created_at', { ascending: false });
-          if (!error && data && data.length > 0) {
-            list = data.map(d => ({
-              id: d.id,
-              title: d.titulo,
-              category: d.categoria,
-              content: d.conteudo,
-              date: d.data_publicacao
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            newsItems = parsed.map(item => ({
+              id: item.id || ('news-' + Math.random().toString(36).substr(2, 9)),
+              title: item.title || item.titulo || '',
+              category: item.category || item.categoria || 'INFORMATIVO',
+              date: item.date || item.data_publicacao || new Date().toISOString().split('T')[0],
+              featured: !!item.featured || !!item.destaque,
+              summary: item.summary || item.resumo || (item.content ? item.content.slice(0, 180) : '') || '',
+              content: item.content || item.conteudo || '',
+              image: item.image || item.imagem || '',
+              link: item.link || ''
             }));
-            localStorage.setItem('pe_news_db', JSON.stringify(list));
+          } else {
+            newsItems = INITIAL_NEWS;
           }
         } catch (e) {
-          console.warn("Usando notícias locais:", e);
+          newsItems = INITIAL_NEWS;
+        }
+      } else {
+        newsItems = INITIAL_NEWS;
+        saveNewsData();
+      }
+
+      // 2. Se Supabase conectado, sincronizar da nuvem
+      if (supabaseClient) {
+        try {
+          const { data, error } = await supabaseClient
+            .from('noticias')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (!error && data && data.length > 0) {
+            newsItems = data.map(d => ({
+              id: d.id,
+              title: d.titulo || d.title || '',
+              category: d.categoria || d.category || 'INFORMATIVO',
+              date: d.data_publicacao || (d.created_at ? d.created_at.split('T')[0] : ''),
+              featured: !!d.destaque || !!d.featured,
+              image: d.imagem || d.image || '',
+              summary: d.resumo || d.summary || (d.conteudo ? d.conteudo.slice(0, 180) : ''),
+              content: d.conteudo || d.content || '',
+              link: d.link || ''
+            }));
+            saveNewsData(false);
+          }
+        } catch (err) {
+          console.warn("Supabase indisponível para notícias, operando offline:", err);
         }
       }
-      return list;
+
+      // Ajusta data padrão se campo existir
+      const dateInput = document.getElementById('news-date');
+      if (dateInput && !dateInput.value) {
+        dateInput.value = new Date().toISOString().split('T')[0];
+      }
+
+      renderNewsList();
+      updateCounter();
+      return newsItems;
     }
 
+    // Alias para manter compatibilidade com chamadas existentes no painel
+    async function loadNews() {
+      return await loadNewsData();
+    }
     async function renderAdminNews() {
-      const container = document.getElementById('adminNewsList');
-      const news = await loadNews();
-      container.innerHTML = "";
-
-      news.forEach(item => {
-        const div = document.createElement('div');
-        div.className = "bg-[#0b101d] border border-[#1c253b] rounded-xl p-4 flex items-start justify-between gap-4";
-        div.innerHTML = `
-          <div class="space-y-1">
-            <div class="flex items-center gap-2">
-              <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-pe-blue text-white uppercase">${item.category || 'INFORMATIVO'}</span>
-              <span class="text-[10px] text-slate-500 font-mono">${item.date || 'Recente'}</span>
-            </div>
-            <h4 class="font-oswald text-base font-bold text-white uppercase">${item.title}</h4>
-            <p class="text-xs text-slate-400 line-clamp-2">${item.content}</p>
-          </div>
-          <button onclick="deleteNews(${item.id})" class="text-red-400 hover:text-red-300 text-xs font-bold p-1 cursor-pointer">Excluir</button>
-        `;
-        container.appendChild(div);
-      });
+      return await loadNewsData();
     }
 
-    async function handleSaveNews(e) {
-      e.preventDefault();
-      const title = document.getElementById('newsTitle').value.trim();
-      const category = document.getElementById('newsCategory').value;
-      const date = document.getElementById('newsDate').value.trim() || new Date().toLocaleDateString('pt-BR');
-      const content = document.getElementById('newsContent').value.trim();
+    function saveNewsData(syncSupabase = false) {
+      localStorage.setItem('pe_news_db', JSON.stringify(newsItems));
+      localStorage.setItem('foot_table_news_db', JSON.stringify(newsItems));
+      updateCounter();
+    }
 
-      const feedback = document.getElementById('newsFeedback');
-      feedback.classList.remove('hidden');
-      feedback.className = "text-xs p-3 rounded-xl bg-blue-950/40 border border-blue-500/40 text-blue-300";
-      feedback.textContent = "Publicando notícia...";
+    function updateCounter() {
+      const counterEl = document.getElementById('news-counter');
+      if (counterEl) {
+        counterEl.innerText = newsItems.length;
+      }
+    }
 
-      const newsObj = {
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const parts = dateStr.split('-');
+      if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+      return dateStr;
+    }
+
+    function escapeHTML(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>'"]/g, 
+        tag => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          "'": '&#39;',
+          '"': '&quot;'
+        }[tag] || tag)
+      );
+    }
+
+    function renderNewsList() {
+      const container = document.getElementById('news-container');
+      if (!container) return;
+
+      const searchInput = document.getElementById('search-input');
+      const searchQuery = (searchInput ? searchInput.value : '').toLowerCase().trim();
+
+      let filtered = newsItems.filter(item => {
+        const matchesCategory = currentFilter === 'ALL' || item.category === currentFilter;
+        const matchesSearch = !searchQuery || 
+                              (item.title && item.title.toLowerCase().includes(searchQuery)) || 
+                              (item.summary && item.summary.toLowerCase().includes(searchQuery)) ||
+                              (item.category && item.category.toLowerCase().includes(searchQuery));
+        return matchesCategory && matchesSearch;
+      });
+
+      filtered.sort((a, b) => {
+        if (a.featured && !b.featured) return -1;
+        if (!a.featured && b.featured) return 1;
+        return new Date(b.date || 0) - new Date(a.date || 0);
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="border border-[#1e293b]/60 bg-[#0f172a]/40 rounded-2xl p-8 text-center text-slate-500">
+            <i class="fa-regular fa-folder-open text-3xl mb-2 text-slate-600 block"></i>
+            Nenhuma notícia encontrada com os filtros selecionados.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(item => `
+        <article class="bg-[#0f172a] border ${item.featured ? 'border-amber-500/50 shadow-lg shadow-amber-500/5' : 'border-[#1e293b]'} rounded-2xl p-4 sm:p-5 transition hover:border-slate-500 group relative">
+          
+          <div class="flex items-start justify-between gap-3 mb-2">
+            <!-- Categoria e Data -->
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+              <span class="font-bold text-[10px] tracking-wider uppercase px-2.5 py-0.5 rounded bg-blue-600 text-white shadow-sm">
+                ${escapeHTML(item.category)}
+              </span>
+              <span class="text-slate-400 font-mono text-[11px]">
+                ${formatDate(item.date)}
+              </span>
+              ${item.featured ? `
+                <span class="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400 bg-amber-400/10 border border-amber-400/30 px-2 py-0.5 rounded">
+                  <i class="fa-solid fa-star text-[9px]"></i> DESTAQUE
+                </span>
+              ` : ''}
+            </div>
+
+            <!-- Botão de Exclusão Rápida -->
+            <button 
+              onclick="promptDelete('${item.id}')"
+              class="text-xs font-semibold text-red-500 hover:text-red-400 hover:underline transition flex items-center gap-1 cursor-pointer"
+              title="Excluir Matéria"
+            >
+              Excluir
+            </button>
+          </div>
+
+          <!-- Título Oficial da Matéria -->
+          <h4 class="font-oswald font-black text-sm sm:text-base uppercase tracking-tight text-white mb-2 leading-snug group-hover:text-blue-300 transition">
+            ${escapeHTML(item.title)}
+          </h4>
+
+          <!-- Resumo da Matéria -->
+          <p class="text-xs sm:text-[13px] text-slate-400 leading-relaxed mb-3">
+            ${escapeHTML(item.summary || item.content || '')}
+          </p>
+
+          <!-- Barra de Ações do Card -->
+          <div class="flex items-center justify-between pt-2 border-t border-[#1e293b]/60 text-xs">
+            <div class="flex items-center gap-3">
+              <button 
+                onclick="editNews('${item.id}')" 
+                class="text-slate-300 hover:text-[#f59e0b] flex items-center gap-1.5 transition font-medium cursor-pointer"
+              >
+                <i class="fa-solid fa-pen-to-square text-xs"></i> Editar
+              </button>
+
+              <button 
+                onclick="openPreviewModal('${item.id}')" 
+                class="text-slate-400 hover:text-blue-400 flex items-center gap-1.5 transition font-medium cursor-pointer"
+              >
+                <i class="fa-solid fa-eye text-xs"></i> Ver Prévia
+              </button>
+            </div>
+
+            ${item.link ? `
+              <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300 flex items-center gap-1 text-[11px]">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Link anexo
+              </a>
+            ` : ''}
+          </div>
+        </article>
+      `).join('');
+    }
+
+    async function handleFormSubmit(e) {
+      if (e) e.preventDefault();
+
+      const editId = document.getElementById('edit-id').value;
+      const title = document.getElementById('news-title').value.trim();
+      const category = document.getElementById('news-category').value;
+      const date = document.getElementById('news-date').value || new Date().toISOString().split('T')[0];
+      const featured = document.getElementById('news-featured').checked;
+      const image = document.getElementById('news-image').value.trim();
+      const summary = document.getElementById('news-summary').value.trim();
+      const content = document.getElementById('news-content').value.trim();
+      const link = document.getElementById('news-link').value.trim();
+
+      const submitBtn = document.getElementById('submit-button');
+      const submitText = document.getElementById('submit-button-text');
+      const originalText = submitText.innerText;
+
+      submitBtn.disabled = true;
+      submitText.innerText = editId ? "Atualizando no banco..." : "Publicando no Supabase...";
+
+      const supabasePayload = {
         titulo: title,
         categoria: category,
-        conteudo: content,
-        data_publicacao: date
+        conteudo: content || summary,
+        data_publicacao: formatDate(date)
       };
 
-      if (supabaseClient) {
-        try {
-          await supabaseClient.from('noticias').insert([newsObj]);
-        } catch (err) {
-          console.warn("Erro ao publicar no Supabase:", err);
+      try {
+        if (editId) {
+          const index = newsItems.findIndex(n => String(n.id) === String(editId));
+          if (index !== -1) {
+            newsItems[index] = {
+              ...newsItems[index],
+              title,
+              category,
+              date,
+              featured,
+              image,
+              summary,
+              content,
+              link
+            };
+          }
+          if (supabaseClient) {
+            try {
+              await supabaseClient.from('noticias').update(supabasePayload).eq('id', editId);
+            } catch (errCloud) {
+              console.warn("Erro ao atualizar no Supabase:", errCloud);
+            }
+          }
+          showToast("Matéria oficial atualizada e sincronizada com sucesso!");
+        } else {
+          let newGeneratedId = 'news-' + Date.now();
+          if (supabaseClient) {
+            try {
+              const { data, error } = await supabaseClient.from('noticias').insert([supabasePayload]).select();
+              if (!error && data && data[0] && data[0].id) {
+                newGeneratedId = data[0].id;
+              }
+            } catch (errCloud) {
+              console.warn("Erro ao inserir no Supabase:", errCloud);
+            }
+          }
+          const newItem = {
+            id: newGeneratedId,
+            title,
+            category,
+            date,
+            featured,
+            image,
+            summary,
+            content,
+            link
+          };
+          newsItems.unshift(newItem);
+          showToast("Nova notícia publicada no site com sucesso!");
         }
+
+        saveNewsData();
+        renderNewsList();
+        resetForm();
+      } catch (err) {
+        console.error("Erro ao salvar notícia:", err);
+        showToast("Erro ao processar notícia.", true);
+      } finally {
+        submitBtn.disabled = false;
+        submitText.innerText = originalText;
       }
-
-      let localNews = JSON.parse(localStorage.getItem('pe_news_db')) || DEFAULT_NEWS;
-      localNews.unshift({ id: Date.now(), title, category, content, date });
-      localStorage.setItem('pe_news_db', JSON.stringify(localNews));
-
-      feedback.className = "text-xs p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 font-bold";
-      feedback.textContent = "✓ Notícia publicada com sucesso!";
-
-      document.getElementById('newsForm').reset();
-      renderAdminNews();
     }
 
-    async function deleteNews(id) {
-      if (!confirm("Deseja realmente excluir esta notícia?")) return;
+    function editNews(id) {
+      const item = newsItems.find(n => String(n.id) === String(id));
+      if (!item) return;
+
+      document.getElementById('edit-id').value = item.id;
+      document.getElementById('news-title').value = item.title;
+      document.getElementById('news-category').value = item.category;
+      
+      // Converte data se necessário para YYYY-MM-DD
+      let rawDate = item.date;
+      if (rawDate && rawDate.includes('/')) {
+        const parts = rawDate.split('/');
+        if (parts.length === 3) rawDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+      }
+      document.getElementById('news-date').value = rawDate || new Date().toISOString().split('T')[0];
+      
+      document.getElementById('news-featured').checked = !!item.featured;
+      document.getElementById('news-image').value = item.image || '';
+      document.getElementById('news-summary').value = item.summary || item.content || '';
+      document.getElementById('news-content').value = item.content || '';
+      document.getElementById('news-link').value = item.link || '';
+
+      updateImagePreview(item.image || '');
+      const summaryLen = (item.summary || item.content || '').length;
+      document.getElementById('summary-counter').innerText = `${summaryLen}/180 carac.`;
+
+      document.getElementById('form-title').innerText = "Editar Matéria Oficial";
+      document.getElementById('form-icon').innerHTML = '<i class="fa-solid fa-pen-nib"></i>';
+      document.getElementById('cancel-edit-btn').classList.remove('hidden');
+      document.getElementById('submit-button-text').innerText = "Salvar Alterações";
+
+      const tabNoticias = document.getElementById('tabContent-noticias');
+      if (tabNoticias) {
+        tabNoticias.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    function resetForm() {
+      const form = document.getElementById('news-form');
+      if (form) form.reset();
+      document.getElementById('edit-id').value = '';
+      document.getElementById('image-preview-container').classList.add('hidden');
+      document.getElementById('image-preview').src = '';
+      document.getElementById('summary-counter').innerText = '0/180 carac.';
+      
+      document.getElementById('form-title').innerText = "Publicar Nova Notícia";
+      document.getElementById('form-icon').innerHTML = '<i class="fa-solid fa-bullhorn"></i>';
+      document.getElementById('cancel-edit-btn').classList.add('hidden');
+      document.getElementById('submit-button-text').innerText = "Publicar no Site & Supabase";
+      
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('news-date').value = today;
+    }
+
+    function promptDelete(id) {
+      pendingDeleteId = id;
+      const modal = document.getElementById('delete-modal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeDeleteModal() {
+      pendingDeleteId = null;
+      const modal = document.getElementById('delete-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function confirmDeleteNews() {
+      if (!pendingDeleteId) return;
+
+      const deleteTargetId = pendingDeleteId;
+      newsItems = newsItems.filter(item => String(item.id) !== String(deleteTargetId));
+      saveNewsData();
+      renderNewsList();
 
       if (supabaseClient) {
         try {
-          await supabaseClient.from('noticias').delete().eq('id', id);
+          await supabaseClient.from('noticias').delete().eq('id', deleteTargetId);
         } catch (e) {
           console.warn("Erro ao remover no Supabase:", e);
         }
       }
 
-      let localNews = JSON.parse(localStorage.getItem('pe_news_db')) || DEFAULT_NEWS;
-      localNews = localNews.filter(n => n.id !== id);
-      localStorage.setItem('pe_news_db', JSON.stringify(localNews));
+      showToast("Matéria removida com sucesso do sistema.", true);
+      closeDeleteModal();
+    }
 
-      renderAdminNews();
+    function openPreviewModal(id) {
+      const item = newsItems.find(n => String(n.id) === String(id));
+      if (!item) return;
+
+      const body = document.getElementById('preview-modal-body');
+      if (!body) return;
+
+      body.innerHTML = `
+        ${item.image ? `
+          <div class="w-full h-48 sm:h-64 rounded-xl overflow-hidden border border-[#1e293b]">
+            <img src="${item.image}" alt="${escapeHTML(item.title)}" class="w-full h-full object-cover">
+          </div>
+        ` : ''}
+
+        <div class="flex items-center gap-2 text-xs">
+          <span class="bg-blue-600 text-white font-bold px-2 py-0.5 rounded text-[10px] uppercase">
+            ${escapeHTML(item.category)}
+          </span>
+          <span class="text-slate-400 font-mono">${formatDate(item.date)}</span>
+          ${item.featured ? '<span class="text-amber-400 font-bold text-[10px]"><i class="fa-solid fa-star"></i> Matéria em Destaque</span>' : ''}
+        </div>
+
+        <h3 class="font-oswald font-black text-xl text-white uppercase leading-snug">
+          ${escapeHTML(item.title)}
+        </h3>
+
+        <p class="text-sm text-slate-300 font-medium border-l-2 border-[#f59e0b] pl-3 italic">
+          ${escapeHTML(item.summary || '')}
+        </p>
+
+        <div class="text-xs text-slate-300 leading-relaxed whitespace-pre-line pt-2">
+          ${escapeHTML(item.content || item.summary || 'Nenhum texto adicional inserido para esta notícia.')}
+        </div>
+
+        ${item.link ? `
+          <div class="pt-3">
+            <a href="${item.link}" target="_blank" class="inline-flex items-center gap-2 text-xs text-blue-400 hover:text-blue-300 underline font-medium">
+              <i class="fa-solid fa-file-pdf"></i> Acessar Documento / Link Anexo
+            </a>
+          </div>
+        ` : ''}
+      `;
+
+      const modal = document.getElementById('preview-modal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closePreviewModal() {
+      const modal = document.getElementById('preview-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function updateImagePreview(url) {
+      const previewContainer = document.getElementById('image-preview-container');
+      const previewImg = document.getElementById('image-preview');
+      if (!previewContainer || !previewImg) return;
+
+      if (url && url.startsWith('http')) {
+        previewImg.src = url;
+        previewContainer.classList.remove('hidden');
+      } else {
+        previewContainer.classList.add('hidden');
+      }
+    }
+
+    function setFilterCategory(category) {
+      currentFilter = category;
+      document.querySelectorAll('#category-pills .cat-pill').forEach(btn => {
+        if (btn.innerText.trim() === category || (category === 'ALL' && btn.innerText.trim() === 'TODAS')) {
+          btn.className = "cat-pill active text-[11px] font-bold px-3 py-1 rounded-full border border-blue-500/40 bg-blue-600/20 text-blue-300 cursor-pointer";
+        } else {
+          btn.className = "cat-pill text-[11px] font-bold px-3 py-1 rounded-full border border-[#1e293b] bg-[#0f172a] text-slate-400 hover:text-white cursor-pointer";
+        }
+      });
+      renderNewsList();
+    }
+
+    function insertFormat(startTag, endTag) {
+      const textarea = document.getElementById('news-content');
+      if (!textarea) return;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selected = textarea.value.substring(start, end);
+      textarea.value = textarea.value.substring(0, start) + startTag + selected + endTag + textarea.value.substring(end);
+      textarea.focus();
+    }
+
+    function showToast(message, isDanger = false) {
+      const toast = document.getElementById('toast');
+      if (!toast) return;
+      const icon = document.getElementById('toast-icon');
+      const msg = document.getElementById('toast-message');
+
+      if (msg) msg.innerText = message;
+      if (icon) {
+        icon.innerHTML = isDanger 
+          ? '<i class="fa-solid fa-trash-can text-red-400"></i>' 
+          : '<i class="fa-solid fa-circle-check text-emerald-400"></i>';
+      }
+
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 3000);
     }
 
     /* =========================================================
@@ -8462,6 +9076,61 @@ Rodrigo Albuquerque; 333.444.555-66; Caruaru - PE; Central Foot Table; SOLO (IND
           </button>
         </div>
       </div>
+    </div>
+  <!-- Modal de Confirmação de Exclusão de Notícias -->
+  <div id="delete-modal" class="fixed inset-0 z-[10000] bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-[#0f172a] border border-[#1e293b] max-w-sm w-full rounded-2xl p-6 text-center shadow-2xl space-y-4">
+      <div class="w-12 h-12 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center mx-auto text-xl border border-red-500/30">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <div>
+        <h3 class="font-oswald font-black text-lg text-white uppercase">Confirmar Exclusão</h3>
+        <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+          Tem certeza de que deseja apagar esta matéria oficial? Esta ação removerá a publicação imediatamente do site.
+        </p>
+      </div>
+      <div class="flex items-center gap-3 pt-2">
+        <button onclick="closeDeleteModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold py-2.5 rounded-xl transition cursor-pointer">
+          Cancelar
+        </button>
+        <button id="confirm-delete-btn" onclick="confirmDeleteNews()" class="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2.5 rounded-xl shadow-lg shadow-red-600/30 transition cursor-pointer">
+          Sim, Excluir
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Prévia da Notícia Completa -->
+  <div id="preview-modal" class="fixed inset-0 z-[10000] bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-[#0f172a] border border-[#1e293b] max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-[#1e293b] pb-3">
+        <span class="text-xs font-bold text-[#f59e0b] uppercase tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-eye"></i> Prévia da Matéria Oficial
+        </span>
+        <button onclick="closePreviewModal()" class="text-slate-400 hover:text-white text-sm p-1 cursor-pointer">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="preview-modal-body" class="space-y-4">
+        <!-- Conteúdo inserido via JS -->
+      </div>
+
+      <div class="pt-3 border-t border-[#1e293b] text-right">
+        <button onclick="closePreviewModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-4 py-2 rounded-xl transition cursor-pointer">
+          Fechar Visualização
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Feedback -->
+  <div id="toast" class="fixed bottom-6 right-6 z-[10000] transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-3 bg-[#0f172a] border border-[#1e293b] px-4 py-3 rounded-xl shadow-2xl">
+    <div id="toast-icon" class="text-emerald-400">
+      <i class="fa-solid fa-circle-check"></i>
+    </div>
+    <div id="toast-message" class="text-xs font-semibold text-white">
+      Notícia atualizada com sucesso!
     </div>
   </div>
 </body>
