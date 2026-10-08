@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261008_v40_modalidade_spacing_clean';
+      const APP_REV = '20261008_v41_dynamic_screen_autofit';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -735,11 +735,11 @@
             </div>
           </div>
 
-          <!-- WORKSPACE DO STUDIO: Split View Formulário + Canvas CR80 -->
-          <div class="grid grid-cols-1 xl:grid-cols-[430px_minmax(0,1fr)] gap-6 items-start">
+          <!-- WORKSPACE DO STUDIO: Split View Formulário + Canvas CR80 com Auto-Ajuste à Tela -->
+          <div class="grid grid-cols-1 lg:grid-cols-[380px_minmax(0,1fr)] xl:grid-cols-[410px_minmax(0,1fr)] 2xl:grid-cols-[430px_minmax(0,1fr)] gap-4 lg:gap-5 xl:gap-6 items-start">
             
-            <!-- COLUNA ESQUERDA: Formulário de Dados, Fundo e Camadas (430px) -->
-            <div class="space-y-6 w-full max-w-[430px] mx-auto xl:mx-0">
+            <!-- COLUNA ESQUERDA: Formulário de Dados, Fundo e Camadas (Auto-ajustável de 380px a 430px) -->
+            <div class="space-y-5 sm:space-y-6 w-full max-w-[430px] mx-auto lg:mx-0">
               
               <!-- 1. Formulário Oficial de Preenchimento -->
               <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 shadow-xl relative">
@@ -1002,11 +1002,11 @@
                 </div>
               </div>
 
-              <!-- Viewport do Canvas CR80 Central -->
-              <div id="viewportArea" class="checkered-canvas-bg border border-[#1c253b] rounded-2xl relative flex items-center justify-center p-6 sm:p-10 min-h-[600px] overflow-auto custom-scroll shadow-2xl">
+              <!-- Viewport do Canvas CR80 Central (Auto-Ajuste Inteligente à Tela do Computador) -->
+              <div id="viewportArea" class="checkered-canvas-bg border border-[#1c253b] rounded-2xl relative flex items-center justify-center p-3 sm:p-5 lg:p-6 min-h-[360px] sm:min-h-[420px] lg:min-h-[480px] xl:min-h-[540px] 2xl:min-h-[600px] max-h-[calc(100vh-190px)] h-full overflow-hidden sm:overflow-auto custom-scroll shadow-2xl">
                 
-                <!-- Wrapper com Zoom Dinâmico -->
-                <div id="cardScaleWrapper" class="relative transition-transform duration-100 ease-out origin-center" style="transform: scale(0.8);">
+                <!-- Wrapper com Zoom Dinâmico Adaptativo -->
+                <div id="cardScaleWrapper" class="relative transition-transform duration-150 ease-out origin-center">
                   
                   <!-- Canvas CR80 (1050 x 662 px) -->
                   <div id="creditCardCanvas" class="relative w-[1050px] h-[662px] bg-slate-950 rounded-[34px] shadow-2xl overflow-hidden border border-slate-700/80 select-none">
@@ -2088,6 +2088,9 @@
         localStorage.setItem('fpeft_sidebar_collapsed', isCollapsed ? 'true' : 'false');
       } catch (e) {}
       updateSidebarToggleButtons(isCollapsed);
+      setTimeout(() => {
+        if (!_isUserManualZoom) autoFitStudioToScreen();
+      }, 310);
     }
 
     function updateSidebarToggleButtons(isCollapsed) {
@@ -2158,7 +2161,10 @@
         } else if (tabName === 'atletas') {
           applyCurrentSvgBackground();
           renderInteractiveElements();
-          setTimeout(() => updateFloatingPanelPosition(), 50);
+          setTimeout(() => {
+            if (!_isUserManualZoom) autoFitStudioToScreen();
+            updateFloatingPanelPosition();
+          }, 60);
         } else if (tabName === 'jogadores') {
           renderJogadoresCadastradosTable();
         } else if (tabName === 'estudio') {
@@ -4013,12 +4019,52 @@
       });
     }
 
-    function setZoom(val) {
+    /* =========================================================
+       SISTEMA DE AUTO-AJUSTE AO PADRÃO DA TELA (RESPONSIVO DINÂMICO)
+       Calcula em tempo real a resolução, DPI e dimensões da janela
+       do computador para enquadrar o padrão CR80 com precisão.
+       ========================================================= */
+    let _autoFitResizeTimer = null;
+    let _isUserManualZoom = false;
+
+    function autoFitStudioToScreen(force = false) {
+      const viewport = document.getElementById('viewportArea');
+      const wrapper = document.getElementById('cardScaleWrapper');
+      if (!viewport || !wrapper) return;
+
+      const tabAtletas = document.getElementById('tabContent-atletas');
+      if (tabAtletas && tabAtletas.classList.contains('hidden')) return;
+
+      const vW = viewport.clientWidth;
+      const vH = viewport.clientHeight;
+      if (vW < 40 || vH < 40) return;
+
+      const padX = window.innerWidth < 1024 ? 20 : (window.innerWidth < 1440 ? 36 : 52);
+      const padY = window.innerHeight < 700 ? 20 : (window.innerHeight < 900 ? 32 : 44);
+
+      const availW = Math.max(260, vW - padX);
+      const availH = Math.max(180, vH - padY);
+
+      // Padrão CR80 Oficial: 1050 largura x 662 altura
+      const scaleX = availW / 1050;
+      const scaleY = availH / 662;
+
+      let idealScale = Math.min(scaleX, scaleY);
+      const maxAllowed = (window.innerWidth >= 1920 && window.innerHeight >= 950) ? 1.05 : 0.95;
+      idealScale = Math.max(0.32, Math.min(idealScale, maxAllowed));
+
+      setZoom(idealScale);
+      if (force) _isUserManualZoom = false;
+    }
+
+    function setZoom(val, isManual = false) {
       const wrapper = document.getElementById('cardScaleWrapper');
       const display = document.getElementById('zoomDisplay');
       if (!wrapper || !display) return;
 
-      studioState.zoom = Math.min(1.8, Math.max(0.35, val));
+      if (isManual) _isUserManualZoom = true;
+
+      studioState.zoom = Math.min(1.8, Math.max(0.32, val));
       wrapper.style.transform = `scale(${studioState.zoom})`;
       display.innerText = `${Math.round(studioState.zoom * 100)}%`;
       updateFloatingPanelPosition();
@@ -5709,17 +5755,38 @@
       const zOut = document.getElementById('zoomOutBtn');
       const zFit = document.getElementById('zoomFitBtn');
 
-      if (zIn) zIn.addEventListener('click', () => setZoom(studioState.zoom + 0.1));
-      if (zOut) zOut.addEventListener('click', () => setZoom(studioState.zoom - 0.1));
+      if (zIn) zIn.addEventListener('click', () => setZoom(studioState.zoom + 0.08, true));
+      if (zOut) zOut.addEventListener('click', () => setZoom(studioState.zoom - 0.08, true));
       if (zFit) {
         zFit.addEventListener('click', () => {
-          const viewport = document.getElementById('viewportArea');
-          if (!viewport) return;
-          const scaleX = (viewport.clientWidth - 80) / 1050;
-          const scaleY = (viewport.clientHeight - 80) / 662;
-          setZoom(Math.min(scaleX, scaleY, 0.9));
+          _isUserManualZoom = false;
+          autoFitStudioToScreen(true);
+          showToast('Padrão CR80 enquadrado perfeitamente à tela!');
         });
       }
+
+      // Auto-Ajuste Contínuo da Tela (Observa mudanças de tamanho, DPI e janela)
+      if (window.ResizeObserver) {
+        const ro = new ResizeObserver(() => {
+          if (!_isUserManualZoom) {
+            clearTimeout(_autoFitResizeTimer);
+            _autoFitResizeTimer = setTimeout(() => autoFitStudioToScreen(), 60);
+          }
+        });
+        const vEl = document.getElementById('viewportArea');
+        if (vEl) ro.observe(vEl);
+      }
+
+      window.addEventListener('resize', () => {
+        clearTimeout(_autoFitResizeTimer);
+        _autoFitResizeTimer = setTimeout(() => {
+          if (!_isUserManualZoom) autoFitStudioToScreen();
+        }, 100);
+      });
+
+      window.addEventListener('orientationchange', () => {
+        setTimeout(() => autoFitStudioToScreen(true), 150);
+      });
 
       // Deselecionar ao clicar fora
       const vArea = document.getElementById('viewportArea');
@@ -8143,6 +8210,9 @@
         if (supabaseClient) {
           syncStudioDesignToSupabase(true);
         }
+        setTimeout(() => {
+          autoFitStudioToScreen(true);
+        }, 120);
 
         // Previne que o navegador insira emails de login automaticamente no campo de busca de atletas
         setTimeout(() => {
