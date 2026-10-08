@@ -445,19 +445,7 @@
           </div>
         </button>
 
-        <!-- 4. Aba Estúdio da Carteira -->
-        <button onclick="switchTab('estudio')" id="navBtn-estudio" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group" title="Estúdio da Carteira">
-          <div class="flex items-center gap-3.5">
-            <!-- Ícone Estúdio / Dimensões -->
-            <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-            </svg>
-            <span class="sidebar-text text-sm font-semibold tracking-wide">Estúdio da Carteira</span>
-          </div>
-          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0 sidebar-text"></span>
-        </button>
-
-        <!-- 5. Aba Notícias & Torneios -->
+        <!-- 4. Aba Notícias & Torneios -->
         <button onclick="switchTab('noticias')" id="navBtn-noticias" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group" title="Notícias & Torneios">
           <div class="flex items-center gap-3.5">
             <!-- Ícone Notícias / Jornal -->
@@ -469,7 +457,7 @@
           <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0 sidebar-text"></span>
         </button>
 
-        <!-- 6. Aba E-mails Institucionais & Gestão -->
+        <!-- 5. Aba E-mails Institucionais & Gestão -->
         <button onclick="switchTab('emails')" id="navBtn-emails" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group" title="E-mail Institucional">
           <div class="flex items-center gap-3.5">
             <!-- Ícone Envelope / E-mail Institucional -->
@@ -481,7 +469,7 @@
           <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0 sidebar-text"></span>
         </button>
 
-        <!-- 7. Aba Banco de Dados & Ajustes (Keep-Alive) -->
+        <!-- 6. Aba Banco de Dados & Ajustes (Keep-Alive) -->
         <button onclick="switchTab('config')" id="navBtn-config" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group" title="Banco & Ajustes">
           <div class="flex items-center gap-3.5">
             <!-- Ícone Engrenagem / Banco -->
@@ -494,7 +482,7 @@
           <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0 sidebar-text"></span>
         </button>
 
-        <!-- 8. Guia Completo do Painel -->
+        <!-- 7. Guia Completo do Painel -->
         <button onclick="switchTab('guia')" id="navBtn-guia" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group" title="Guia do Painel">
           <div class="flex items-center gap-3.5">
             <!-- Ícone Manual / Guia -->
@@ -1377,171 +1365,6 @@
             </div>
           </div>
         </div>
-
-        <!-- ===================================================== -->
-        <!-- 2. 🎨 ABA ESTÚDIO DA CARTEIRA                         -->
-        <!-- ===================================================== -->
-        <div id="tabContent-estudio" class="space-y-8 hidden">
-          
-          <!-- Box Informativo: O que você encontra na Aba Estúdio da Carteira -->
-          <div class="bg-gradient-to-r from-[#06173a] via-[#091e4a] to-[#040813] border border-[#1c253b] rounded-2xl p-5 sm:p-6 relative overflow-hidden shadow-xl">
-            <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
-            <div class="flex items-start gap-4">
-              <span class="text-3xl">🎨</span>
-              <div class="space-y-2 text-xs">
-                <h3 class="font-oswald text-lg uppercase font-bold text-white tracking-wide">
-                  O que você encontra na Aba Estúdio da Carteira (Dimensões & Textos Personalizados):
-                </h3>
-                <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-slate-300">
-                  <li class="flex items-start gap-1.5">
-                    <span class="text-pe-gold font-bold">●</span>
-                    <span><strong>Controle de Dimensões:</strong> Largura/Comprimento (slider para aumentar ou diminuir a largura total da carteira), Altura Mínima, Espaçamento Interno (Padding) e Arredondamento das Bordas (Border Radius).</span>
-                  </li>
-                  <li class="flex items-start gap-1.5">
-                    <span class="text-pe-gold font-bold">●</span>
-                    <span><strong>Dimensões da Foto do Atleta:</strong> Sliders para regular Largura, Altura e Arredondamento da moldura da foto.</span>
-                  </li>
-                  <li class="flex items-start gap-1.5">
-                    <span class="text-pe-gold font-bold">●</span>
-                    <span><strong>Textos Adicionais na Carteira:</strong> Botão <em>+ Adicionar Texto</em> permite adicionar novos blocos de texto na carteira (ex: "VALIDADE 2026/2027", "CHANCELA CBFT", "CATEGORIA MASTER"), com controle de tamanho da fonte, cor do texto e alinhamento.</span>
-                  </li>
-                  <li class="flex items-start gap-1.5">
-                    <span class="text-pe-gold font-bold">●</span>
-                    <span><strong>Salvar Layout Oficial:</strong> Ao clicar em salvar, o site público passa a emitir as carteiras exatamente com as dimensões e textos que você definiu!</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- Cabeçalho de Ação -->
-          <div class="flex items-center justify-between">
-            <div>
-              <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Customizador Visual</span>
-              <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Estúdio da Carteira & Dimensões</h2>
-            </div>
-            <div class="flex items-center gap-2">
-              <button onclick="saveBadgeStudioLayout()" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase px-5 py-2.5 rounded-xl transition shadow flex items-center gap-1.5 cursor-pointer">
-                <span>💾</span> Salvar Layout Oficial
-              </button>
-              <button onclick="resetBadgeStudioLayout()" class="bg-[#0b101d] border border-[#1c253b] text-slate-400 hover:text-white text-xs uppercase px-4 py-2.5 rounded-xl transition cursor-pointer">
-                Padrão
-              </button>
-            </div>
-          </div>
-
-          <!-- Grid: Controles de Dimensões + Preview -->
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
-            <div class="lg:col-span-5 bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 shadow-xl space-y-6 text-xs">
-              
-              <!-- Dimensões da Carteira -->
-              <div>
-                <h4 class="font-oswald text-base uppercase font-bold text-pe-gold mb-3 flex items-center gap-2">
-                  <span>📐</span> Controle de Dimensões da Carteira
-                </h4>
-                <div class="space-y-3">
-                  <div>
-                    <div class="flex justify-between text-slate-300 font-bold mb-1">
-                      <span>Largura / Comprimento:</span>
-                      <span id="valCardWidth" class="text-pe-gold font-mono">540px</span>
-                    </div>
-                    <input type="range" id="inputCardWidth" min="400" max="680" value="540" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
-                  </div>
-
-                  <div>
-                    <div class="flex justify-between text-slate-300 font-bold mb-1">
-                      <span>Altura Mínima:</span>
-                      <span id="valCardHeight" class="text-pe-gold font-mono">300px</span>
-                    </div>
-                    <input type="range" id="inputCardHeight" min="250" max="480" value="300" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
-                  </div>
-
-                  <div>
-                    <div class="flex justify-between text-slate-300 font-bold mb-1">
-                      <span>Espaçamento Interno (Padding):</span>
-                      <span id="valCardPadding" class="text-pe-gold font-mono">24px</span>
-                    </div>
-                    <input type="range" id="inputCardPadding" min="12" max="36" value="24" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
-                  </div>
-
-                  <div>
-                    <div class="flex justify-between text-slate-300 font-bold mb-1">
-                      <span>Arredondamento das Bordas (Border Radius):</span>
-                      <span id="valCardRadius" class="text-pe-gold font-mono">16px</span>
-                    </div>
-                    <input type="range" id="inputCardRadius" min="4" max="32" value="16" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
-                  </div>
-                </div>
-              </div>
-
-              <!-- Dimensões da Foto do Atleta -->
-              <div class="border-t border-[#1c253b] pt-4">
-                <h4 class="font-oswald text-base uppercase font-bold text-pe-gold mb-3 flex items-center gap-2">
-                  <span>🖼️</span> Dimensões da Foto do Atleta
-                </h4>
-                <div class="space-y-3">
-                  <div>
-                    <div class="flex justify-between text-slate-300 font-bold mb-1">
-                      <span>Largura da Foto:</span>
-                      <span id="valPhotoWidth" class="text-pe-gold font-mono">100px</span>
-                    </div>
-                    <input type="range" id="inputPhotoWidth" min="70" max="150" value="100" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
-                  </div>
-
-                  <div>
-                    <div class="flex justify-between text-slate-300 font-bold mb-1">
-                      <span>Altura da Foto:</span>
-                      <span id="valPhotoHeight" class="text-pe-gold font-mono">125px</span>
-                    </div>
-                    <input type="range" id="inputPhotoHeight" min="90" max="180" value="125" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
-                  </div>
-
-                  <div>
-                    <div class="flex justify-between text-slate-300 font-bold mb-1">
-                      <span>Arredondamento da Moldura da Foto:</span>
-                      <span id="valPhotoRadius" class="text-pe-gold font-mono">8px</span>
-                    </div>
-                    <input type="range" id="inputPhotoRadius" min="0" max="30" value="8" oninput="updateStudioLive()" class="w-full accent-pe-gold" />
-                  </div>
-                </div>
-              </div>
-
-              <!-- Textos Adicionais na Carteira -->
-              <div class="border-t border-[#1c253b] pt-4">
-                <div class="flex items-center justify-between mb-3">
-                  <h4 class="font-oswald text-base uppercase font-bold text-pe-gold flex items-center gap-2">
-                    <span>🔤</span> Textos Adicionais na Carteira
-                  </h4>
-                  <button onclick="addCustomTextItem()" class="bg-pe-gold text-pe-dark font-bold text-[10px] uppercase px-2.5 py-1 rounded-lg transition cursor-pointer">
-                    + Adicionar Texto
-                  </button>
-                </div>
-
-                <div id="customTextsList" class="space-y-3"></div>
-              </div>
-
-            </div>
-
-            <!-- Preview no Estúdio -->
-            <div class="lg:col-span-7 sticky top-20 space-y-4">
-              <div class="flex items-center justify-between text-xs text-slate-400">
-                <span>Visualização Dinâmica do Estúdio</span>
-                <span class="text-pe-gold font-mono">● Atualizando ao vivo</span>
-              </div>
-
-              <div class="p-6 bg-[#05080e] border border-[#1c253b] rounded-2xl flex items-center justify-center overflow-x-auto">
-                <div id="studioCardWrapper" class="transition-all"></div>
-              </div>
-
-              <div id="studioSaveNotification" class="hidden p-3 bg-emerald-950/40 border border-emerald-500/40 rounded-xl text-xs text-emerald-300 text-center font-bold">
-                ✓ Configurações de Dimensões e Textos salvas com sucesso! O site público usará este padrão.
-              </div>
-            </div>
-
-          </div>
-        </div>
-
         <!-- ===================================================== -->
         <!-- 3. 📰 ABA NOTÍCIAS & TORNEIOS                         -->
         <!-- ===================================================== -->
@@ -1895,39 +1718,8 @@
             <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
               <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
               <div class="flex items-center gap-3">
-                <span class="text-2xl">🎨</span>
-                <h3 class="font-oswald text-xl uppercase font-bold text-white">2. Aba Estúdio da Carteira (Dimensões & Textos Personalizados)</h3>
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-300">
-                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
-                  <strong class="text-white block mb-1 text-sm text-pe-gold">📐 Controle de Dimensões:</strong>
-                  <ul class="list-disc list-inside space-y-1 mt-1 text-slate-400">
-                    <li><strong>Largura / Comprimento:</strong> Slider para aumentar ou diminuir a largura total da carteira.</li>
-                    <li><strong>Altura Mínima:</strong> Slider para ajustar a altura da carteira.</li>
-                    <li><strong>Espaçamento Interno (Padding)</strong> e <strong>Arredondamento das Bordas (Border Radius)</strong>.</li>
-                  </ul>
-                </div>
-                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
-                  <strong class="text-white block mb-1 text-sm text-pe-gold">🖼️ Dimensões da Foto do Atleta:</strong>
-                  Sliders para regular Largura, Altura e Arredondamento da moldura da foto oficial do atleta.
-                </div>
-                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
-                  <strong class="text-white block mb-1 text-sm text-pe-gold">🔤 Textos Adicionais na Carteira:</strong>
-                  Botão <em>+ Adicionar Texto</em> permite adicionar novos blocos de texto na carteira (ex: "VALIDADE 2026/2027", "CHANCELA CBFT", "CATEGORIA MASTER"), com controle de tamanho da fonte, cor do texto e alinhamento.
-                </div>
-                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
-                  <strong class="text-white block mb-1 text-sm text-pe-gold">💾 Salvar Layout Oficial:</strong>
-                  Ao clicar em salvar, o site público passa a emitir as carteiras exatamente com as dimensões e textos que você definiu!
-                </div>
-              </div>
-            </div>
-
-            <!-- Item 3 -->
-            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
-              <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
-              <div class="flex items-center gap-3">
                 <span class="text-2xl">📰</span>
-                <h3 class="font-oswald text-xl uppercase font-bold text-white">3. Aba Notícias & Torneios</h3>
+                <h3 class="font-oswald text-xl uppercase font-bold text-white">2. Aba Notícias & Torneios</h3>
               </div>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-300">
                 <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
@@ -2129,15 +1921,14 @@
       }
     }
 
-    const ALL_TABS = ['inicio', 'atletas', 'jogadores', 'estudio', 'noticias', 'emails', 'config', 'guia'];
+    const ALL_TABS = ['inicio', 'atletas', 'jogadores', 'noticias', 'emails', 'config', 'guia'];
     const TAB_TITLES = {
       inicio: '🏠 Início & Carteiras Homologadas',
       atletas: 'Studio de Emissão de Carteira de Federados CR80',
       jogadores: '2. 👥 Jogadores Cadastrados & Homologação',
-      estudio: '3. 🎨 Aba Estúdio da Carteira (Dimensões & Textos)',
-      noticias: '4. 📰 Aba Notícias & Torneios',
-      emails: '5. 📧 Aba E-mails Institucionais & Gestão',
-      config: '6. ⚙️ Banco de Dados & Ajustes',
+      noticias: '3. 📰 Aba Notícias & Torneios',
+      emails: '4. 📧 Aba E-mails Institucionais & Gestão',
+      config: '5. ⚙️ Banco de Dados & Ajustes',
       guia: '📋 Guia do Painel Administrativo'
     };
 
@@ -2178,8 +1969,6 @@
           }, 60);
         } else if (tabName === 'jogadores') {
           renderJogadoresCadastradosTable();
-        } else if (tabName === 'estudio') {
-          syncStudioWithCurrentLayout();
         } else if (tabName === 'noticias') {
           renderAdminNews();
         } else if (tabName === 'emails') {
@@ -7858,52 +7647,96 @@
        ESTÚDIO DA CARTEIRA: DIMENSÕES & TEXTOS CUSTOMIZADOS (ABA 2)
        ========================================================= */
     function syncStudioWithCurrentLayout() {
-      document.getElementById('inputCardWidth').value = currentBadgeLayout.cardWidth || 540;
-      document.getElementById('valCardWidth').textContent = (currentBadgeLayout.cardWidth || 540) + 'px';
+      const inputCardWidth = document.getElementById('inputCardWidth');
+      if (inputCardWidth) {
+        inputCardWidth.value = currentBadgeLayout.cardWidth || 540;
+        const valCardWidth = document.getElementById('valCardWidth');
+        if (valCardWidth) valCardWidth.textContent = (currentBadgeLayout.cardWidth || 540) + 'px';
 
-      document.getElementById('inputCardHeight').value = currentBadgeLayout.cardMinHeight || 300;
-      document.getElementById('valCardHeight').textContent = (currentBadgeLayout.cardMinHeight || 300) + 'px';
+        const inputCardHeight = document.getElementById('inputCardHeight');
+        if (inputCardHeight) inputCardHeight.value = currentBadgeLayout.cardMinHeight || 300;
+        const valCardHeight = document.getElementById('valCardHeight');
+        if (valCardHeight) valCardHeight.textContent = (currentBadgeLayout.cardMinHeight || 300) + 'px';
 
-      document.getElementById('inputCardPadding').value = currentBadgeLayout.cardPadding || 24;
-      document.getElementById('valCardPadding').textContent = (currentBadgeLayout.cardPadding || 24) + 'px';
+        const inputCardPadding = document.getElementById('inputCardPadding');
+        if (inputCardPadding) inputCardPadding.value = currentBadgeLayout.cardPadding || 24;
+        const valCardPadding = document.getElementById('valCardPadding');
+        if (valCardPadding) valCardPadding.textContent = (currentBadgeLayout.cardPadding || 24) + 'px';
 
-      document.getElementById('inputCardRadius').value = currentBadgeLayout.cardBorderRadius || 16;
-      document.getElementById('valCardRadius').textContent = (currentBadgeLayout.cardBorderRadius || 16) + 'px';
+        const inputCardRadius = document.getElementById('inputCardRadius');
+        if (inputCardRadius) inputCardRadius.value = currentBadgeLayout.cardBorderRadius || 16;
+        const valCardRadius = document.getElementById('valCardRadius');
+        if (valCardRadius) valCardRadius.textContent = (currentBadgeLayout.cardBorderRadius || 16) + 'px';
 
-      document.getElementById('inputPhotoWidth').value = currentBadgeLayout.photoWidth || 100;
-      document.getElementById('valPhotoWidth').textContent = (currentBadgeLayout.photoWidth || 100) + 'px';
+        const inputPhotoWidth = document.getElementById('inputPhotoWidth');
+        if (inputPhotoWidth) inputPhotoWidth.value = currentBadgeLayout.photoWidth || 100;
+        const valPhotoWidth = document.getElementById('valPhotoWidth');
+        if (valPhotoWidth) valPhotoWidth.textContent = (currentBadgeLayout.photoWidth || 100) + 'px';
 
-      document.getElementById('inputPhotoHeight').value = currentBadgeLayout.photoHeight || 125;
-      document.getElementById('valPhotoHeight').textContent = (currentBadgeLayout.photoHeight || 125) + 'px';
+        const inputPhotoHeight = document.getElementById('inputPhotoHeight');
+        if (inputPhotoHeight) inputPhotoHeight.value = currentBadgeLayout.photoHeight || 125;
+        const valPhotoHeight = document.getElementById('valPhotoHeight');
+        if (valPhotoHeight) valPhotoHeight.textContent = (currentBadgeLayout.photoHeight || 125) + 'px';
 
-      document.getElementById('inputPhotoRadius').value = currentBadgeLayout.photoRadius || 8;
-      document.getElementById('valPhotoRadius').textContent = (currentBadgeLayout.photoRadius || 8) + 'px';
+        const inputPhotoRadius = document.getElementById('inputPhotoRadius');
+        if (inputPhotoRadius) inputPhotoRadius.value = currentBadgeLayout.photoRadius || 8;
+        const valPhotoRadius = document.getElementById('valPhotoRadius');
+        if (valPhotoRadius) valPhotoRadius.textContent = (currentBadgeLayout.photoRadius || 8) + 'px';
 
-      renderCustomTextsList();
+        renderCustomTextsList();
+      }
       applyLayoutToCards();
     }
 
     function updateStudioLive() {
-      currentBadgeLayout.cardWidth = parseInt(document.getElementById('inputCardWidth').value);
-      document.getElementById('valCardWidth').textContent = currentBadgeLayout.cardWidth + 'px';
+      const inputCardWidth = document.getElementById('inputCardWidth');
+      if (!inputCardWidth) return;
 
-      currentBadgeLayout.cardMinHeight = parseInt(document.getElementById('inputCardHeight').value);
-      document.getElementById('valCardHeight').textContent = currentBadgeLayout.cardMinHeight + 'px';
+      currentBadgeLayout.cardWidth = parseInt(inputCardWidth.value);
+      const valCardWidth = document.getElementById('valCardWidth');
+      if (valCardWidth) valCardWidth.textContent = currentBadgeLayout.cardWidth + 'px';
 
-      currentBadgeLayout.cardPadding = parseInt(document.getElementById('inputCardPadding').value);
-      document.getElementById('valCardPadding').textContent = currentBadgeLayout.cardPadding + 'px';
+      const inputCardHeight = document.getElementById('inputCardHeight');
+      if (inputCardHeight) {
+        currentBadgeLayout.cardMinHeight = parseInt(inputCardHeight.value);
+        const valCardHeight = document.getElementById('valCardHeight');
+        if (valCardHeight) valCardHeight.textContent = currentBadgeLayout.cardMinHeight + 'px';
+      }
 
-      currentBadgeLayout.cardBorderRadius = parseInt(document.getElementById('inputCardRadius').value);
-      document.getElementById('valCardRadius').textContent = currentBadgeLayout.cardBorderRadius + 'px';
+      const inputCardPadding = document.getElementById('inputCardPadding');
+      if (inputCardPadding) {
+        currentBadgeLayout.cardPadding = parseInt(inputCardPadding.value);
+        const valCardPadding = document.getElementById('valCardPadding');
+        if (valCardPadding) valCardPadding.textContent = currentBadgeLayout.cardPadding + 'px';
+      }
 
-      currentBadgeLayout.photoWidth = parseInt(document.getElementById('inputPhotoWidth').value);
-      document.getElementById('valPhotoWidth').textContent = currentBadgeLayout.photoWidth + 'px';
+      const inputCardRadius = document.getElementById('inputCardRadius');
+      if (inputCardRadius) {
+        currentBadgeLayout.cardBorderRadius = parseInt(inputCardRadius.value);
+        const valCardRadius = document.getElementById('valCardRadius');
+        if (valCardRadius) valCardRadius.textContent = currentBadgeLayout.cardBorderRadius + 'px';
+      }
 
-      currentBadgeLayout.photoHeight = parseInt(document.getElementById('inputPhotoHeight').value);
-      document.getElementById('valPhotoHeight').textContent = currentBadgeLayout.photoHeight + 'px';
+      const inputPhotoWidth = document.getElementById('inputPhotoWidth');
+      if (inputPhotoWidth) {
+        currentBadgeLayout.photoWidth = parseInt(inputPhotoWidth.value);
+        const valPhotoWidth = document.getElementById('valPhotoWidth');
+        if (valPhotoWidth) valPhotoWidth.textContent = currentBadgeLayout.photoWidth + 'px';
+      }
 
-      currentBadgeLayout.photoRadius = parseInt(document.getElementById('inputPhotoRadius').value);
-      document.getElementById('valPhotoRadius').textContent = currentBadgeLayout.photoRadius + 'px';
+      const inputPhotoHeight = document.getElementById('inputPhotoHeight');
+      if (inputPhotoHeight) {
+        currentBadgeLayout.photoHeight = parseInt(inputPhotoHeight.value);
+        const valPhotoHeight = document.getElementById('valPhotoHeight');
+        if (valPhotoHeight) valPhotoHeight.textContent = currentBadgeLayout.photoHeight + 'px';
+      }
+
+      const inputPhotoRadius = document.getElementById('inputPhotoRadius');
+      if (inputPhotoRadius) {
+        currentBadgeLayout.photoRadius = parseInt(inputPhotoRadius.value);
+        const valPhotoRadius = document.getElementById('valPhotoRadius');
+        if (valPhotoRadius) valPhotoRadius.textContent = currentBadgeLayout.photoRadius + 'px';
+      }
 
       applyLayoutToCards();
     }
@@ -7980,6 +7813,7 @@
 
     function renderCustomTextsList() {
       const container = document.getElementById('customTextsList');
+      if (!container) return;
       container.innerHTML = '';
 
       if (!currentBadgeLayout.customTexts || currentBadgeLayout.customTexts.length === 0) {
@@ -8021,8 +7855,10 @@
     function saveBadgeStudioLayout() {
       localStorage.setItem('pe_badge_layout_config', JSON.stringify(currentBadgeLayout));
       const notif = document.getElementById('studioSaveNotification');
-      notif.classList.remove('hidden');
-      setTimeout(() => notif.classList.add('hidden'), 3500);
+      if (notif) {
+        notif.classList.remove('hidden');
+        setTimeout(() => notif.classList.add('hidden'), 3500);
+      }
     }
 
     function resetBadgeStudioLayout() {
