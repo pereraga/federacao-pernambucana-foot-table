@@ -1513,27 +1513,20 @@
                         <span class="text-[10px] text-pe-gold font-mono">JPG, PNG, WEBP</span>
                       </div>
 
-                      <!-- Área de Upload Interativa -->
-                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                        <label class="w-full bg-gradient-to-r from-blue-950/70 to-indigo-950/70 hover:from-blue-900/80 hover:to-indigo-900/80 border border-blue-500/40 hover:border-blue-400 text-white rounded-xl p-3 flex flex-col items-center justify-center gap-1 cursor-pointer transition text-center group shadow-md">
-                          <i class="fa-solid fa-cloud-arrow-up text-lg text-blue-400 group-hover:scale-110 transition"></i>
-                          <span class="text-xs font-bold text-white">Carregar Foto do PC</span>
-                          <span class="text-[10px] text-slate-400">Clique para selecionar</span>
+                      <!-- Área de Upload Interativa Exclusiva do PC -->
+                      <div>
+                        <label class="w-full bg-gradient-to-r from-blue-950/60 via-[#0d1527] to-indigo-950/60 hover:from-blue-900/80 hover:to-indigo-900/80 border border-blue-500/40 hover:border-blue-400 text-white rounded-xl p-3.5 flex items-center justify-center gap-3 cursor-pointer transition text-center group shadow-md">
+                          <div class="w-9 h-9 rounded-full bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition shrink-0">
+                            <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
+                          </div>
+                          <div class="text-left">
+                            <span class="text-xs font-bold text-white block">Carregar Foto do Computador</span>
+                            <span class="text-[10px] text-slate-400 block">Clique para selecionar imagem do seu PC (JPG, PNG, WEBP)</span>
+                          </div>
                           <input type="file" id="news-file-input" accept="image/*" onchange="handleNewsImageUpload(event)" class="hidden">
                         </label>
-
-                        <div class="space-y-1">
-                          <label for="news-image" class="block text-[10px] uppercase font-bold text-slate-400">
-                            Ou Cole o Link / URL:
-                          </label>
-                          <input 
-                            type="text" 
-                            id="news-image" 
-                            oninput="updateImagePreview(this.value)"
-                            placeholder="https://exemplo.com/banner.jpg" 
-                            class="w-full bg-[#070a13] border border-[#1e293b] rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-accent transition font-mono"
-                          >
-                        </div>
+                        <!-- Campo interno para dados da imagem para sincronização com Supabase -->
+                        <input type="hidden" id="news-image">
                       </div>
 
                       <!-- Feedback de arquivo otimizado -->
@@ -8457,10 +8450,7 @@
       if (item.image) {
         if (infoBadge && infoText) {
           infoBadge.classList.remove('hidden');
-          const isBase64 = item.image.startsWith('data:');
-          infoText.innerHTML = isBase64 
-            ? '<i class="fa-solid fa-cloud-check text-emerald-400 mr-1"></i> Foto salva no Supabase' 
-            : '<i class="fa-solid fa-link text-blue-400 mr-1"></i> Foto vinculada por link/URL';
+          infoText.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i> Foto da matéria anexada (Supabase)';
         }
       } else {
         if (infoBadge) infoBadge.classList.add('hidden');
