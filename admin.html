@@ -8265,6 +8265,11 @@
         .replace(/"/g, '&quot;');
     }
 
+    function escapeJsString(str) {
+      if (!str) return '';
+      return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
     /* =========================================================
        ESTÚDIO DA CARTEIRA: DIMENSÕES & TEXTOS CUSTOMIZADOS (ABA 2)
        ========================================================= */
@@ -9295,8 +9300,6 @@
         roles[dirIdx].permissions = ['*'];
       }
 
-      // Remove roles obsoletos com nome Presidência
-      roles = roles.filter(r => !r.name.toLowerCase().includes('presidên') && !r.name.toLowerCase().includes('presiden'));
       localStorage.setItem('pe_custom_roles', JSON.stringify(roles));
       return roles;
     }
@@ -9672,7 +9675,7 @@
                     ✓ Já Atribuído
                   </span>
                 ` : `
-                  <button type="button" onclick="executeAssignRoleToAdmin('${escapeText(a.email)}', '${escapeText(roleName)}')" class="bg-blue-600 hover:bg-blue-500 text-white font-oswald text-xs uppercase font-bold px-3 py-1.5 rounded-lg transition cursor-pointer flex items-center gap-1 whitespace-nowrap shadow">
+                  <button type="button" onclick="executeAssignRoleToAdmin('${escapeJsString(a.email)}', '${escapeJsString(roleName)}')" class="bg-blue-600 hover:bg-blue-500 text-white font-oswald text-xs uppercase font-bold px-3 py-1.5 rounded-lg transition cursor-pointer flex items-center gap-1 whitespace-nowrap shadow">
                     <span>Atribuir</span> <span>➔</span>
                   </button>
                 `}
@@ -9702,15 +9705,14 @@
 
       const roles = loadCustomRoles();
       const roleObj = roles.find(r => r.name.toLowerCase() === (newRoleName || '').toLowerCase());
-      const permissions = newRoleName === 'Diretor Adjunto' || (roleObj && (roleObj.isMaster || (roleObj.permissions && roleObj.permissions.includes('*'))))
+      const isMasterRole = newRoleName === 'Diretor Adjunto' || (roleObj && (roleObj.isMaster || (roleObj.permissions && roleObj.permissions.includes('*'))));
+      const permissions = isMasterRole
         ? ['*']
-        : (roleObj ? (roleObj.permissions || []) : []);
+        : (roleObj && Array.isArray(roleObj.permissions) ? roleObj.permissions : []);
 
       admins[idx].cargo = newRoleName;
       admins[idx].permissions = permissions;
-      if (newRoleName === 'Diretor Adjunto') {
-        admins[idx].isMaster = true;
-      }
+      admins[idx].isMaster = !!isMasterRole;
       admins[idx].updated_at = new Date().toISOString();
 
       localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
@@ -9720,6 +9722,14 @@
           await supabaseClient.from('admin_users').upsert([admins[idx]], { onConflict: 'email' });
         } catch (e) {
           console.warn("Supabase update role:", e);
+        }
+      }
+
+      const currentUser = sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user');
+      if (currentUser && currentUser.toLowerCase() === email.toLowerCase()) {
+        const roleEl = document.getElementById('sidebarAdminRole');
+        if (roleEl) {
+          roleEl.innerHTML = `${isMasterRole ? '⚡' : '🛡️'} ${escapeText(newRoleName)}`;
         }
       }
 
@@ -9763,10 +9773,10 @@
           <div class="space-y-2 pt-2 border-t border-[#1c253b]/80 text-[11px]">
             <!-- Botões Principais de Ação -->
             <div class="grid grid-cols-2 gap-1.5">
-              <button type="button" onclick="selectRoleForNewEmail('${escapeText(role.name)}')" class="bg-pe-gold/15 hover:bg-pe-gold text-pe-gold hover:text-black border border-pe-gold/40 py-1.5 px-2 rounded-lg text-[10px] font-bold transition flex items-center justify-center gap-1 cursor-pointer whitespace-nowrap shadow-sm" title="Selecionar este cargo e ir para o formulário de criar e-mail">
+              <button type="button" onclick="selectRoleForNewEmail('${escapeJsString(role.name)}')" class="bg-pe-gold/15 hover:bg-pe-gold text-pe-gold hover:text-black border border-pe-gold/40 py-1.5 px-2 rounded-lg text-[10px] font-bold transition flex items-center justify-center gap-1 cursor-pointer whitespace-nowrap shadow-sm" title="Selecionar este cargo e ir para o formulário de criar e-mail">
                 <span>✍️</span> <span>Criar E-mail</span>
               </button>
-              <button type="button" onclick="openAssignRoleToAdminModal('${escapeText(role.name)}')" class="bg-blue-950/40 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/40 py-1.5 px-2 rounded-lg text-[10px] font-bold transition flex items-center justify-center gap-1 cursor-pointer whitespace-nowrap shadow-sm" title="Atribuir este cargo a uma conta de gestor existente">
+              <button type="button" onclick="openAssignRoleToAdminModal('${escapeJsString(role.name)}')" class="bg-blue-950/40 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/40 py-1.5 px-2 rounded-lg text-[10px] font-bold transition flex items-center justify-center gap-1 cursor-pointer whitespace-nowrap shadow-sm" title="Atribuir este cargo a uma conta de gestor existente">
                 <span>👤</span> <span>Atribuir a Conta</span>
               </button>
             </div>
@@ -9774,17 +9784,17 @@
             <!-- Controles Secundários: Editar, Esquema e Excluir -->
             <div class="flex items-center justify-between pt-1 border-t border-[#1c253b]/50">
               <div class="flex items-center gap-2">
-                <button type="button" onclick="editRolePermissions('${escapeText(role.id || role.name)}')" class="text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 cursor-pointer" title="Editar permissões nas 4 colunas">
+                <button type="button" onclick="editRolePermissions('${escapeJsString(role.id || role.name)}')" class="text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 cursor-pointer" title="Editar permissões nas 4 colunas">
                   <i class="fa-solid fa-pen-to-square text-[10px]"></i> Editar
                 </button>
-                <button type="button" onclick="openRoleOperationsModal('${escapeText(role.id || role.name)}')" class="text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1 cursor-pointer">
+                <button type="button" onclick="openRoleOperationsModal('${escapeJsString(role.id || role.name)}')" class="text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1 cursor-pointer">
                   <i class="fa-solid fa-eye text-[10px]"></i> Esquema
                 </button>
               </div>
               ${isMaster ? `
                 <span class="text-[10px] text-amber-400 font-bold font-mono">PROTEGIDO</span>
               ` : `
-                <button type="button" onclick="handleDeleteCustomRole('${escapeText(role.id || role.name)}')" class="text-red-400 hover:text-red-300 font-bold cursor-pointer">
+                <button type="button" onclick="handleDeleteCustomRole('${escapeJsString(role.id || role.name)}')" class="text-red-400 hover:text-red-300 font-bold cursor-pointer">
                   Excluir
                 </button>
               `}
@@ -9926,10 +9936,10 @@
             <span>Cargo <strong>${escapeText(roleName)}</strong> gerado com sucesso com <strong>${selectedPerms.length} de ${ALL_OPERATION_IDS.length} operações autorizadas</strong>!</span>
           </div>
           <div class="pt-2 border-t border-emerald-500/30 flex flex-wrap items-center gap-2">
-            <button type="button" onclick="selectRoleForNewEmail('${escapeText(roleName)}')" class="bg-pe-gold hover:bg-amber-300 text-black font-oswald text-xs uppercase font-bold px-3.5 py-1.5 rounded-lg transition cursor-pointer flex items-center gap-1.5 shadow">
+            <button type="button" onclick="selectRoleForNewEmail('${escapeJsString(roleName)}')" class="bg-pe-gold hover:bg-amber-300 text-black font-oswald text-xs uppercase font-bold px-3.5 py-1.5 rounded-lg transition cursor-pointer flex items-center gap-1.5 shadow">
               <span>✍️</span> <span>Criar E-mail com este Cargo Agora</span>
             </button>
-            <button type="button" onclick="openAssignRoleToAdminModal('${escapeText(roleName)}')" class="bg-blue-600 hover:bg-blue-500 text-white font-oswald text-xs uppercase font-bold px-3.5 py-1.5 rounded-lg transition cursor-pointer flex items-center gap-1.5 shadow">
+            <button type="button" onclick="openAssignRoleToAdminModal('${escapeJsString(roleName)}')" class="bg-blue-600 hover:bg-blue-500 text-white font-oswald text-xs uppercase font-bold px-3.5 py-1.5 rounded-lg transition cursor-pointer flex items-center gap-1.5 shadow">
               <span>👤</span> <span>Atribuir a uma Conta Existente</span>
             </button>
           </div>
@@ -10081,9 +10091,6 @@
             a.email = a.email.replace(/@foot-table\.pe\.gov\.br$/i, '@foot-table.pe.org');
           }
         }
-        if (a.cargo && a.cargo.toLowerCase().includes('presidên')) {
-          a.cargo = 'Diretor Adjunto';
-        }
       });
 
       // 2. Sincronização e limpeza com Supabase
@@ -10102,7 +10109,7 @@
                   cargo: dbItem.cargo || 'Diretor Adjunto',
                   email: normEmail,
                   senha: dbItem.senha || '••••••',
-                  isMaster: normEmail.includes('gabrielacessor'),
+                  isMaster: normEmail.includes('gabrielacessor') && (!dbItem.cargo || dbItem.cargo === 'Diretor Adjunto'),
                   permissions: dbItem.permissions || (normEmail.includes('gabrielacessor') ? ['*'] : []),
                   created_at: dbItem.created_at || new Date().toISOString()
                 });
@@ -10130,22 +10137,15 @@
       });
       list = uniqueAdmins;
 
-      // 4. Garante que exista ao menos uma conta com privilégios Master
+      // 4. Garante que exista ao menos uma conta no sistema
       if (list.length === 0) {
         list.push(JSON.parse(JSON.stringify(DEFAULT_INSTITUTIONAL_ADMINS[0])));
       } else {
         const masterIdx = list.findIndex(a => a.email && a.email.toLowerCase() === 'gabrielacessor@foot-table.pe.org');
         if (masterIdx !== -1) {
-          list[masterIdx].isMaster = true;
-          list[masterIdx].permissions = ['*'];
           if (!list[masterIdx].cargo) list[masterIdx].cargo = "Diretor Adjunto";
         } else {
-          const hasMaster = list.some(a => a.isMaster || (a.permissions && a.permissions.includes('*')) || a.cargo === 'Diretor Adjunto');
-          if (!hasMaster) {
-            list[0].isMaster = true;
-            list[0].permissions = ['*'];
-            list[0].cargo = 'Diretor Adjunto';
-          }
+          if (!list[0].cargo) list[0].cargo = 'Diretor Adjunto';
         }
       }
 
@@ -10164,12 +10164,13 @@
       tbody.innerHTML = '';
 
       admins.forEach(admin => {
-        const isMaster = admin.isMaster || admin.email.toLowerCase() === 'gabrielacessor@foot-table.pe.org' || admin.email.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br';
         const roleObj = roles.find(r => r.name.toLowerCase() === (admin.cargo || '').toLowerCase());
-        const perms = (admin.permissions && admin.permissions.includes('*')) || isMaster 
+        const isMaster = admin.isMaster || admin.cargo === 'Diretor Adjunto' || (roleObj && roleObj.isMaster);
+        const perms = (admin.permissions && admin.permissions.includes('*')) || (roleObj && roleObj.permissions && roleObj.permissions.includes('*')) || admin.cargo === 'Diretor Adjunto'
           ? ALL_OPERATION_IDS 
-          : (admin.permissions || (roleObj ? roleObj.permissions : []));
+          : (admin.permissions && Array.isArray(admin.permissions) ? admin.permissions : (roleObj && Array.isArray(roleObj.permissions) ? roleObj.permissions : []));
         const permsCount = Array.isArray(perms) ? perms.length : 0;
+        const cargoDisplayName = admin.cargo || (isMaster ? 'Diretor Adjunto' : 'Gestor Autorizado');
 
         const tr = document.createElement('tr');
         tr.className = "hover:bg-[#070b14] transition";
@@ -10186,7 +10187,7 @@
           </td>
           <td class="py-3 px-3 whitespace-nowrap">
             <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold whitespace-nowrap leading-none ${isMaster ? 'bg-amber-950/80 text-amber-400 border border-amber-500/40 shadow-sm' : 'bg-blue-950/80 text-blue-400 border border-blue-500/30'}">
-              ${escapeText(admin.cargo || 'Diretor Adjunto')}
+              ${escapeText(cargoDisplayName)}
             </span>
           </td>
           <td class="py-3 px-3 whitespace-nowrap">
@@ -10194,17 +10195,17 @@
               <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded whitespace-nowrap ${isMaster ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/30' : 'bg-[#05080e] text-blue-300 border border-blue-500/30'}">
                 ${isMaster ? 'Acesso Total Master' : `${permsCount}/${ALL_OPERATION_IDS.length} ops`}
               </span>
-              <button type="button" onclick="openRoleOperationsModal('${escapeText(admin.email)}')" class="text-blue-400 hover:text-blue-300 text-[10px] font-bold underline cursor-pointer whitespace-nowrap">
+              <button type="button" onclick="openRoleOperationsModal('${escapeJsString(admin.email)}')" class="text-blue-400 hover:text-blue-300 text-[10px] font-bold underline cursor-pointer whitespace-nowrap">
                 Ver Esquema
               </button>
             </div>
           </td>
           <td class="py-3 px-3 text-right whitespace-nowrap">
             <div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
-              <button type="button" onclick="openEditInstitutionalAdminModal('${escapeText(admin.email)}')" class="text-[11px] text-amber-300 hover:text-amber-200 bg-amber-950/50 hover:bg-amber-900/70 border border-amber-500/40 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 font-bold cursor-pointer whitespace-nowrap" title="Editar dados e cargo da conta">
+              <button type="button" onclick="openEditInstitutionalAdminModal('${escapeJsString(admin.email)}')" class="text-[11px] text-amber-300 hover:text-amber-200 bg-amber-950/50 hover:bg-amber-900/70 border border-amber-500/40 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 font-bold cursor-pointer whitespace-nowrap" title="Editar dados e cargo da conta">
                 <i class="fa-solid fa-pen-to-square text-[10px]"></i> <span>Editar</span>
               </button>
-              <button type="button" onclick="handleDeleteInstitutionalAdmin('${escapeText(admin.email)}')" class="text-[11px] text-rose-300 hover:text-rose-200 bg-rose-950/50 hover:bg-rose-900/70 border border-rose-500/40 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 font-bold cursor-pointer whitespace-nowrap" title="Remover esta conta do sistema">
+              <button type="button" onclick="handleDeleteInstitutionalAdmin('${escapeJsString(admin.email)}')" class="text-[11px] text-rose-300 hover:text-rose-200 bg-rose-950/50 hover:bg-rose-900/70 border border-rose-500/40 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 font-bold cursor-pointer whitespace-nowrap" title="Remover esta conta do sistema">
                 <i class="fa-solid fa-trash text-[10px]"></i> <span>Remover</span>
               </button>
             </div>
@@ -10249,7 +10250,8 @@
       // Encontra permissões do cargo
       const roles = loadCustomRoles();
       const roleObj = roles.find(r => r.name.toLowerCase() === role.toLowerCase());
-      const permissions = roleObj ? (roleObj.permissions || []) : (role === 'Diretor Adjunto' ? ['*'] : []);
+      const isMasterRole = role === 'Diretor Adjunto' || (roleObj && (roleObj.isMaster || (roleObj.permissions && roleObj.permissions.includes('*'))));
+      const permissions = isMasterRole ? ['*'] : (roleObj && Array.isArray(roleObj.permissions) ? roleObj.permissions : []);
 
       const newAdmin = {
         nome: name,
@@ -10257,9 +10259,18 @@
         email: fullEmail,
         senha: password,
         permissions: permissions,
-        isMaster: fullEmail.toLowerCase() === 'gabrielacessor@foot-table.pe.org' || fullEmail.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br',
+        isMaster: !!isMasterRole,
         created_at: new Date().toISOString()
       };
+
+      let admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || [];
+      const existingIdx = admins.findIndex(a => (a.email || '').toLowerCase() === fullEmail.toLowerCase());
+      if (existingIdx >= 0) {
+        admins[existingIdx] = { ...admins[existingIdx], ...newAdmin };
+      } else {
+        admins.push(newAdmin);
+      }
+      localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
 
       if (supabaseClient) {
         try {
@@ -10268,15 +10279,6 @@
           console.warn("Aviso Supabase:", err);
         }
       }
-
-      let admins = await loadInstitutionalAdmins();
-      const existingIdx = admins.findIndex(a => a.email.toLowerCase() === fullEmail.toLowerCase());
-      if (existingIdx >= 0) {
-        admins[existingIdx] = { ...admins[existingIdx], ...newAdmin };
-      } else {
-        admins.push(newAdmin);
-      }
-      localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
 
       feedback.className = "text-xs rounded-xl p-3 border bg-emerald-950/40 border-emerald-500/50 text-emerald-300 font-bold";
       feedback.innerHTML = `✓ E-mail institucional <strong>${fullEmail}</strong> credenciado com sucesso no cargo <strong>${escapeText(role)}</strong>! Esta conta já pode acessar o sistema no login com suas permissões operacionais.`;
@@ -10358,7 +10360,7 @@
 
       const masterNotice = document.getElementById('editAdminMasterNotice');
       if (masterNotice) {
-        const isMaster = target.isMaster || (target.email || '').toLowerCase().includes('gabrielacessor') || target.cargo === 'Diretor Adjunto';
+        const isMaster = target.isMaster || target.cargo === 'Diretor Adjunto';
         masterNotice.classList.toggle('hidden', !isMaster);
       }
 
@@ -10429,17 +10431,16 @@
       // Permissões do cargo
       const roles = loadCustomRoles();
       const roleObj = roles.find(r => r.name.toLowerCase() === role.toLowerCase());
-      const permissions = role === 'Diretor Adjunto' || (roleObj && (roleObj.isMaster || (roleObj.permissions && roleObj.permissions.includes('*'))))
+      const isMasterRole = role === 'Diretor Adjunto' || (roleObj && (roleObj.isMaster || (roleObj.permissions && roleObj.permissions.includes('*'))));
+      const permissions = isMasterRole
         ? ['*']
-        : (roleObj ? (roleObj.permissions || []) : []);
-
-      const isMaster = newEmail.toLowerCase().includes('gabrielacessor') || role === 'Diretor Adjunto' || (roleObj && roleObj.isMaster) || admins[targetIdx].isMaster;
+        : (roleObj && Array.isArray(roleObj.permissions) ? roleObj.permissions : []);
 
       admins[targetIdx].nome = name;
       admins[targetIdx].cargo = role;
       admins[targetIdx].email = newEmail;
       admins[targetIdx].permissions = permissions;
-      admins[targetIdx].isMaster = isMaster;
+      admins[targetIdx].isMaster = !!isMasterRole;
       admins[targetIdx].updated_at = new Date().toISOString();
       if (newPass && newPass.trim().length > 0) {
         admins[targetIdx].senha = newPass;
@@ -10462,11 +10463,15 @@
       }
 
       const currentUser = sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user');
-      if (currentUser && currentUser.toLowerCase() === origEmail.toLowerCase()) {
+      if (currentUser && (currentUser.toLowerCase() === origEmail.toLowerCase() || currentUser.toLowerCase() === newEmail.toLowerCase())) {
         sessionStorage.setItem('pe_admin_user', newEmail);
         localStorage.setItem('pe_admin_user', newEmail);
         if (document.getElementById('sidebarAdminUser')) {
           document.getElementById('sidebarAdminUser').textContent = newEmail;
+        }
+        const roleEl = document.getElementById('sidebarAdminRole');
+        if (roleEl) {
+          roleEl.innerHTML = `${isMasterRole ? '⚡' : '🛡️'} ${escapeText(role)}`;
         }
       }
 
@@ -10538,13 +10543,11 @@
           document.getElementById('sidebarAdminUser').textContent = user;
           const roleEl = document.getElementById('sidebarAdminRole');
           if (roleEl) {
-            if (user.toLowerCase().includes('gabrielacessor')) {
-              roleEl.innerHTML = '⚡ Diretor Adjunto';
-            } else {
-              const admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || [];
-              const current = admins.find(a => a.email && a.email.toLowerCase() === user.toLowerCase());
-              roleEl.innerHTML = current ? `🛡️ ${escapeText(current.cargo || 'Gestor Autorizado')}` : '🛡️ Gestor Autorizado';
-            }
+            const admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || [];
+            const current = admins.find(a => a.email && a.email.toLowerCase() === user.toLowerCase());
+            const cargoName = current && current.cargo ? current.cargo : (user.toLowerCase().includes('gabrielacessor') ? 'Diretor Adjunto' : 'Gestor Autorizado');
+            const isMaster = current ? (current.isMaster || cargoName === 'Diretor Adjunto') : user.toLowerCase().includes('gabrielacessor');
+            roleEl.innerHTML = `${isMaster ? '⚡' : '🛡️'} ${escapeText(cargoName)}`;
           }
         }
       }

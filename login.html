@@ -376,9 +376,13 @@
         });
       } else {
         admins[masterIdx].email = 'gabrielacessor@foot-table.pe.org';
-        admins[masterIdx].cargo = "Diretor Adjunto";
-        admins[masterIdx].isMaster = true;
-        admins[masterIdx].permissions = ['*'];
+        if (!admins[masterIdx].cargo) admins[masterIdx].cargo = "Diretor Adjunto";
+        if (typeof admins[masterIdx].isMaster === 'undefined') {
+          admins[masterIdx].isMaster = admins[masterIdx].cargo === 'Diretor Adjunto';
+        }
+        if (!admins[masterIdx].permissions) {
+          admins[masterIdx].permissions = admins[masterIdx].isMaster ? ['*'] : [];
+        }
       }
       localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
 
