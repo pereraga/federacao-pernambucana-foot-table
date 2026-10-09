@@ -9153,45 +9153,7 @@
     }
 
     function getTelemetryBadge(itemId) {
-      const telemetry = getOperationsTelemetry();
-      switch (itemId) {
-        case 'carteira_studio':
-          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-blue-950/60 border border-blue-500/40 text-blue-300 shrink-0 font-bold">Studio CR80</span>`;
-        case 'carteira_pdf':
-          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 shrink-0 font-bold">Vetor HD</span>`;
-        case 'carteira_png':
-          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-teal-950/60 border border-teal-500/40 text-teal-300 shrink-0 font-bold">600 DPI</span>`;
-        case 'carteira_imprimir':
-          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-indigo-950/60 border border-indigo-500/40 text-indigo-300 shrink-0 font-bold">CR80</span>`;
-        case 'atletas_visualizar':
-          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950/60 border border-amber-500/40 text-amber-300 shrink-0 font-bold" title="Total de atletas cadastrados">${telemetry.athletesCount} atletas</span>`;
-        case 'atletas_homologar':
-          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 shrink-0 font-bold" title="Atletas homologados">${telemetry.verifiedCount} homologados</span>`;
-        case 'atletas_editar':
-          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-sky-950/60 border border-sky-500/40 text-sky-300 shrink-0 font-bold">Fichas</span>`;
-        case 'atletas_excluir':
-          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-rose-950/60 border border-rose-500/40 text-rose-300 shrink-0 font-bold">Protegido</span>`;
-        case 'atletas_exportar':
-          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/60 border border-cyan-500/40 text-cyan-300 shrink-0 font-bold">ZIP & CSV</span>`;
-        case 'noticias_publicar':
-          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-blue-950/60 border border-blue-500/40 text-blue-300 shrink-0 font-bold" title="Matérias publicadas">${telemetry.newsCount} notícias</span>`;
-        case 'noticias_upload':
-          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-indigo-950/60 border border-indigo-500/40 text-indigo-300 shrink-0 font-bold">Supabase</span>`;
-        case 'noticias_editar':
-          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950/60 border border-amber-500/40 text-amber-300 shrink-0 font-bold">Destaques</span>`;
-        case 'noticias_excluir':
-          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-red-950/60 border border-red-500/40 text-red-300 shrink-0 font-bold">Moderação</span>`;
-        case 'gestao_emails':
-          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-purple-950/60 border border-purple-500/40 text-purple-300 shrink-0 font-bold" title="Gestores credenciados">${telemetry.adminsCount} gestores</span>`;
-        case 'gestao_cargos':
-          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-pe-gold/20 border border-pe-gold/40 text-pe-gold shrink-0 font-bold" title="Cargos cadastrados">${telemetry.rolesCount} cargos</span>`;
-        case 'gestao_supabase':
-          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 shrink-0 font-bold">Nuvem</span>`;
-        case 'gestao_limpeza':
-          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950/60 border border-amber-500/40 text-amber-300 shrink-0 font-bold">Manutenção</span>`;
-        default:
-          return '';
-      }
+      return '';
     }
 
     let currentlyEditingRoleId = null;
@@ -9240,10 +9202,7 @@
                       ${isChecked ? 'checked' : ''}
                     >
                     <div class="min-w-0 flex-1">
-                      <div class="flex items-center justify-between gap-1">
-                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">${escapeText(item.name)}</span>
-                        ${getTelemetryBadge(item.id)}
-                      </div>
+                      <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">${escapeText(item.name)}</span>
                       <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">${escapeText(item.desc)}</span>
                     </div>
                   </label>
@@ -9266,28 +9225,6 @@
     }
 
     function updateOperationsTelemetry() {
-      const groups = loadSystemOperationGroups();
-      groups.forEach(g => {
-        g.items.forEach(item => {
-          const cb = document.getElementById(`perm_${item.id}`);
-          if (cb) {
-            const parent = cb.closest('label');
-            if (parent) {
-              const badgeContainer = parent.querySelector('.font-mono');
-              const newBadgeHtml = getTelemetryBadge(item.id);
-              if (newBadgeHtml) {
-                if (badgeContainer) {
-                  badgeContainer.outerHTML = newBadgeHtml;
-                } else {
-                  const titleRow = parent.querySelector('.flex.items-center.justify-between');
-                  if (titleRow) titleRow.insertAdjacentHTML('beforeend', newBadgeHtml);
-                }
-              }
-            }
-          }
-        });
-      });
-
       const counterEl = document.getElementById('totalCustomRolesCount');
       if (counterEl) {
         const roles = loadCustomRoles();
