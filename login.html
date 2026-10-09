@@ -384,12 +384,31 @@
           admins[masterIdx].permissions = admins[masterIdx].isMaster ? ['*'] : [];
         }
       }
+
+      // Garante conta institucional de Adriano Mello (Presidente FPEFT)
+      const presIdx = admins.findIndex(a => a.email && a.email.toLowerCase() === 'adrianomelofpeft@foot-table.pe.org');
+      if (presIdx === -1) {
+        admins.unshift({
+          nome: "Adriano Mello",
+          cargo: "Presidente FPEFT",
+          email: "adrianomelofpeft@foot-table.pe.org",
+          senha: "admin",
+          isMaster: true,
+          permissions: ['*'],
+          created_at: "2026-01-01T00:00:00Z"
+        });
+      } else {
+        admins[presIdx].email = 'adrianomelofpeft@foot-table.pe.org';
+        if (!admins[presIdx].cargo) admins[presIdx].cargo = "Presidente FPEFT";
+        admins[presIdx].isMaster = true;
+        if (!admins[presIdx].permissions) admins[presIdx].permissions = ['*'];
+      }
       localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
 
-      const foundAdmin = admins.find(a => (a.email.toLowerCase() === user || (user === 'gabrielacessor' && a.email.toLowerCase() === 'gabrielacessor@foot-table.pe.org')) && a.senha === pass);
+      const foundAdmin = admins.find(a => (a.email.toLowerCase() === user || (user === 'gabrielacessor' && a.email.toLowerCase() === 'gabrielacessor@foot-table.pe.org') || (user === 'adrianomello' && a.email.toLowerCase() === 'adrianomelofpeft@foot-table.pe.org')) && a.senha === pass);
 
-      // Reconhece ADM MASTER (gabrielacessor@foot-table.pe.org) com sua senha cadastrada ou padrão
-      const isMasterUser = (user === 'gabrielacessor@foot-table.pe.org' || user === 'gabrielacessor@foot-table.pe.gov.br' || user === 'gabrielacessor') && (pass === 'admin' || pass.length >= 4);
+      // Reconhece ADM MASTER (gabrielacessor ou adrianomelo) com sua senha cadastrada ou padrão
+      const isMasterUser = (user.includes('gabrielacessor') || user.includes('adrianomelo')) && (pass === 'admin' || pass.length >= 4);
 
       // Também aceita login padrão da diretoria ou qualquer e-mail institucional cadastrado
       let isAuthorized = !!foundAdmin || isMasterUser || (user.includes('@foot-table.pe.org') && pass.length >= 4) || (user.includes('@foot-table.pe.gov.br') && pass.length >= 4) || (user === 'admin' && pass.length >= 4);
