@@ -80,7 +80,7 @@
         if (!perms.includes('atletas_homologar')) hideSelectors.push('#btnHomologarTodos');
 
         // Selos e tags de bloqueio
-        hideSelectors.push('.nav-tab-lock-indicator');
+        hideSelectors.push('.nav-tab-lock-indicator', '#sidebarAdminBadge');
 
         if (hideSelectors.length > 0) {
           const style = document.createElement('style');
@@ -473,7 +473,6 @@
             <span id="sidebarAdminRole" class="text-[9px] uppercase tracking-wider text-pe-gold font-bold">⚡ Diretor Adjunto</span>
           </div>
         </div>
-        <span id="sidebarAdminBadge" class="text-[10px] bg-pe-gold/20 text-pe-gold px-2 py-0.5 rounded font-mono font-bold sidebar-text shrink-0 whitespace-nowrap">DIRETOR ADJUNTO</span>
       </div>
 
       <!-- Menu de Navegação Vertical -->
@@ -1886,12 +1885,12 @@
                     <span class="text-[10px] text-pe-gold font-semibold">Define as operações da conta</span>
                   </div>
                   <select id="panelRegRole" onchange="updateSelectedRolePreview(this.value)" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-4 py-2.5 text-white font-bold outline-none">
-                    <option value="Diretor Adjunto">Diretor Adjunto (Acesso Total)</option>
+                    <option value="Diretor Adjunto">Diretor Adjunto</option>
                   </select>
                   
                   <!-- Resumo dinâmico de operações do cargo -->
                   <div id="roleSummaryPreview" class="mt-2 p-2.5 bg-[#05080e] border border-blue-500/30 rounded-xl text-[11px] text-slate-300 flex items-center justify-between">
-                    <span id="roleSummaryPreviewText">Operações vinculadas: Acesso Total Master</span>
+                    <span id="roleSummaryPreviewText">Operações vinculadas: Padrão do cargo configurado</span>
                     <button type="button" onclick="previewCurrentSelectedRoleModal()" class="text-blue-400 hover:text-blue-300 font-bold underline cursor-pointer text-[10px]">Ver Esquema</button>
                   </div>
 
@@ -2177,8 +2176,8 @@
                     <span class="text-sm">🛡️</span>
                     <span class="font-bold text-white text-[11px] uppercase tracking-wider">Operações Desta Conta</span>
                   </div>
-                  <span id="editAdminPermsCountBadge" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-500/30">
-                    17/17 ops
+                  <span id="editAdminPermsCountBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-500/30">
+                    Configurado
                   </span>
                 </div>
                 <p class="text-[10px] text-slate-400 leading-snug">
@@ -2706,12 +2705,10 @@
       const totalOps = (typeof ALL_OPERATION_IDS !== 'undefined' && ALL_OPERATION_IDS.length) ? ALL_OPERATION_IDS.length : 17;
       const allowedCount = isMaster ? totalOps : perms.length;
 
-      // 1. Atualiza cabeçalho e badges do topo do Guia
+      // 1. Atualiza cabeçalho do Guia (sem badges de contagem de operações ou master)
       const badgeContainer = document.getElementById('guiaUserBadgeContainer');
       if (badgeContainer) {
-        badgeContainer.innerHTML = isMaster
-          ? `<span class="text-xs bg-amber-500/20 text-amber-300 border border-amber-500/30 px-3 py-1 rounded-full font-mono font-bold flex items-center gap-1.5"><i class="fa-solid fa-crown text-pe-gold"></i> ACESSO TOTAL MASTER (${totalOps}/${totalOps})</span>`
-          : `<span class="text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 px-3 py-1 rounded-full font-mono font-bold flex items-center gap-1.5"><i class="fa-solid fa-shield-halved text-blue-400"></i> ${allowedCount}/${totalOps} OPERAÇÕES ATIVAS</span>`;
+        badgeContainer.innerHTML = '';
       }
 
       const userBanner = document.getElementById('guiaUserBanner');
@@ -2725,9 +2722,6 @@
             <div>
               <div class="flex items-center gap-2 flex-wrap">
                 <h3 class="font-bold text-white text-base">${escapeText(currentName)}</h3>
-                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded ${isMaster ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'}">
-                  ${isMaster ? 'ACESSO MASTER ILIMITADO' : `${allowedCount} DE ${totalOps} OPS AUTORIZADAS`}
-                </span>
               </div>
               <p class="text-xs text-slate-400 mt-0.5">
                 Cargo Oficial: <strong class="text-pe-gold font-semibold">${cargoIcon} ${escapeText(currentCargo)}</strong> &bull; E-mail: <span class="font-mono text-slate-300">${escapeText(user)}</span>
@@ -2735,13 +2729,13 @@
             </div>
           </div>
           <div class="text-xs text-slate-400 bg-[#05080e] p-3 rounded-xl border border-[#1c253b] self-start md:self-auto space-y-0.5">
-            <span class="text-emerald-400 font-bold flex items-center gap-1.5 text-xs"><i class="fa-solid fa-circle-check"></i> Guia Filtrado por Permissão</span>
-            <span class="text-[11px] text-slate-400 block">Exibindo somente as funções que sua conta tem permissão para realizar. Ações bloqueadas não aparecem.</span>
+            <span class="text-emerald-400 font-bold flex items-center gap-1.5 text-xs"><i class="fa-solid fa-circle-check"></i> Funções Oficiais do Painel</span>
+            <span class="text-[11px] text-slate-400 block">Manual interativo com todas as funções disponíveis para a sua utilização no sistema.</span>
           </div>
         `;
       }
 
-      // 2. Construção dinâmica dos módulos e funções permitidas
+      // 2. Construção dinâmica dos módulos e funções permitidas (sem contadores de operações)
       let moduleCount = 1;
       let html = '';
 
@@ -2749,14 +2743,9 @@
       html += `
         <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
           <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
-          <div class="flex items-center justify-between flex-wrap gap-2">
-            <div class="flex items-center gap-3">
-              <span class="text-2xl">🏠</span>
-              <h3 class="font-oswald text-xl uppercase font-bold text-white">${moduleCount++}. Aba Início & Navegação Federativa</h3>
-            </div>
-            <span class="text-[11px] font-mono font-bold bg-blue-950 text-blue-300 border border-blue-500/40 px-2.5 py-0.5 rounded-full">
-              2 funções disponíveis
-            </span>
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">🏠</span>
+            <h3 class="font-oswald text-xl uppercase font-bold text-white">${moduleCount++}. Aba Início & Navegação Federativa</h3>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-300">
             <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b] hover:border-blue-500/30 transition flex flex-col justify-between">
@@ -2765,8 +2754,7 @@
                 <span class="text-slate-300 leading-relaxed block">Painel com estatísticas em tempo real: total de atletas federados, carteirinhas homologadas no estado de Pernambuco, matérias no ar e administradores ativos.</span>
               </div>
               <div class="mt-2.5 pt-2 border-t border-[#151c2e] flex items-center justify-between text-[10px] text-slate-400">
-                <span class="text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Liberado para você</span>
-                <span class="font-mono text-slate-400">GERAL</span>
+                <span class="text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Função Oficial do Painel</span>
               </div>
             </div>
             <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b] hover:border-blue-500/30 transition flex flex-col justify-between">
@@ -2775,8 +2763,7 @@
                 <span class="text-slate-300 leading-relaxed block">O sistema bloqueia e oculta automaticamente da sua tela qualquer módulo que não esteja liberado para o seu cargo ou usuário, garantindo foco e segurança.</span>
               </div>
               <div class="mt-2.5 pt-2 border-t border-[#151c2e] flex items-center justify-between text-[10px] text-slate-400">
-                <span class="text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Liberado para você</span>
-                <span class="font-mono text-slate-400">GERAL</span>
+                <span class="text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Função Oficial do Painel</span>
               </div>
             </div>
           </div>
@@ -2789,50 +2776,43 @@
         studioCards.push({
           icon: '🎲',
           name: 'Gerador de Código Oficial',
-          desc: 'Botão para gerar automaticamente um código oficial exclusivo de 6 dígitos numéricos para novos atletas.',
-          perm: 'carteira_studio'
+          desc: 'Botão para gerar automaticamente um código oficial exclusivo de 6 dígitos numéricos para novos atletas.'
         });
         studioCards.push({
           icon: '📸',
           name: 'Upload da Foto Oficial',
-          desc: 'Você seleciona a foto do atleta direto do seu computador, que é inserida e tratada instantaneamente na carteirinha.',
-          perm: 'carteira_studio'
+          desc: 'Você seleciona a foto do atleta direto do seu computador, que é inserida e tratada instantaneamente na carteirinha.'
         });
         studioCards.push({
           icon: '👁️',
           name: 'Preview ao Vivo & Diagramador CR80',
-          desc: 'Enquanto você preenche os dados do atleta (Nome, CPF, Nascimento, Município, Modalidade), a carteirinha oficial é renderizada ao lado em tempo real com drag-and-drop.',
-          perm: 'carteira_studio'
+          desc: 'Enquanto você preenche os dados do atleta (Nome, CPF, Nascimento, Município, Modalidade), a carteirinha oficial é renderizada ao lado em tempo real com drag-and-drop.'
         });
         studioCards.push({
           icon: '☁️',
           name: 'Envio para o Banco de Dados',
-          desc: 'Ao clicar em "Salvar Atleta no Banco de Dados", as informações e a foto são gravadas no Supabase. Assim, quando o atleta digitar os 6 dígitos dele no site público, ele recebe a carteira oficial dele imediatamente!',
-          perm: 'carteira_studio'
+          desc: 'Ao clicar em "Salvar Atleta no Banco de Dados", as informações e a foto são gravadas no Supabase. Assim, quando o atleta digitar os 6 dígitos dele no site público, ele recebe a carteira oficial dele imediatamente!'
         });
       }
       if (hasPermission('carteira_pdf')) {
         studioCards.push({
           icon: '📄',
           name: 'Emissão em PDF Vetorial HD',
-          desc: 'Exporta a carteirinha oficial frente e verso em PDF vetorial em altíssima definição (300 DPI), pronta para gráfica ou impressora PVC.',
-          perm: 'carteira_pdf'
+          desc: 'Exporta a carteirinha oficial frente e verso em PDF vetorial em altíssima definição (300 DPI), pronta para gráfica ou impressora PVC.'
         });
       }
       if (hasPermission('carteira_png')) {
         studioCards.push({
           icon: '💾',
           name: 'Botão Baixar PNG HD (600 DPI)',
-          desc: 'Exporta a carteirinha em altíssima resolução para impressão ou envio instantâneo.',
-          perm: 'carteira_png'
+          desc: 'Exporta a carteirinha em altíssima resolução para impressão ou envio instantâneo.'
         });
       }
       if (hasPermission('carteira_imprimir')) {
         studioCards.push({
           icon: '🖨️',
           name: 'Impressão Oficial Direta',
-          desc: 'Disparo de impressão instantânea no padrão CR80 (85.60 mm x 53.98 mm) calibrada para cartões de PVC.',
-          perm: 'carteira_imprimir'
+          desc: 'Disparo de impressão instantânea no padrão CR80 (85.60 mm x 53.98 mm) calibrada para cartões de PVC.'
         });
       }
 
@@ -2840,14 +2820,9 @@
         html += `
           <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
             <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
-            <div class="flex items-center justify-between flex-wrap gap-2">
-              <div class="flex items-center gap-3">
-                <span class="text-2xl">🪪</span>
-                <h3 class="font-oswald text-xl uppercase font-bold text-white">${moduleCount++}. Aba Carteiras & Studio CR80</h3>
-              </div>
-              <span class="text-[11px] font-mono font-bold bg-blue-950 text-blue-300 border border-blue-500/40 px-2.5 py-0.5 rounded-full">
-                ${studioCards.length} ${studioCards.length === 1 ? 'função permitida' : 'funções permitidas'}
-              </span>
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">🪪</span>
+              <h3 class="font-oswald text-xl uppercase font-bold text-white">${moduleCount++}. Aba Carteiras & Studio CR80</h3>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs text-slate-300">
               ${studioCards.map(c => `
@@ -2857,8 +2832,7 @@
                     <span class="text-slate-300 leading-relaxed block">${escapeText(c.desc)}</span>
                   </div>
                   <div class="mt-2.5 pt-2 border-t border-[#151c2e] flex items-center justify-between text-[10px] text-slate-400">
-                    <span class="text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Liberado para você</span>
-                    <span class="font-mono text-slate-400">${c.perm}</span>
+                    <span class="text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Função Oficial do Painel</span>
                   </div>
                 </div>
               `).join('')}
@@ -2873,40 +2847,35 @@
         atletasCards.push({
           icon: '📋',
           name: 'Tabela de Atletas & Busca',
-          desc: 'Lista com todos os atletas cadastrados, filtro de busca instantânea por nome, CPF, código de 6 dígitos, categoria e município.',
-          perm: 'atletas_visualizar'
+          desc: 'Lista com todos os atletas cadastrados, filtro de busca instantânea por nome, CPF, código de 6 dígitos, categoria e município.'
         });
       }
       if (hasPermission('atletas_homologar')) {
         atletasCards.push({
           icon: '✅',
           name: 'Homologação Oficial de Atletas',
-          desc: 'Validação e aprovação dos registros federativos de novos atletas, liberando o selo de homologado e a verificação pública imediata no portal.',
-          perm: 'atletas_homologar'
+          desc: 'Validação e aprovação dos registros federativos de novos atletas, liberando o selo de homologado e a verificação pública imediata no portal.'
         });
       }
       if (hasPermission('atletas_editar')) {
         atletasCards.push({
           icon: '✏️',
           name: 'Edição de Fichas e Modalidades',
-          desc: 'Atualização cadastral dos atletas federados, substituição de foto 3x4, retificação de dados pessoais e alteração de modalidade (SOLO/DUPLA).',
-          perm: 'atletas_editar'
+          desc: 'Atualização cadastral dos atletas federados, substituição de foto 3x4, retificação de dados pessoais e alteração de modalidade (SOLO/DUPLA).'
         });
       }
       if (hasPermission('atletas_exportar')) {
         atletasCards.push({
           icon: '📦',
           name: 'Exportação em Lote (ZIP & Planilha)',
-          desc: 'Baixar todas as carteiras em arquivo comprimido ZIP e exportar a planilha completa de federados em formato CSV/Excel.',
-          perm: 'atletas_exportar'
+          desc: 'Baixar todas as carteiras em arquivo comprimido ZIP e exportar a planilha completa de federados em formato CSV/Excel.'
         });
       }
       if (hasPermission('atletas_excluir')) {
         atletasCards.push({
           icon: '🗑️',
           name: 'Exclusão & Suspensão de Registros',
-          desc: 'Suspensão e remoção segura de atletas inativos ou cancelados do banco de dados oficial da Federação.',
-          perm: 'atletas_excluir'
+          desc: 'Suspensão e remoção segura de atletas inativos ou cancelados do banco de dados oficial da Federação.'
         });
       }
 
@@ -2914,14 +2883,9 @@
         html += `
           <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
             <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
-            <div class="flex items-center justify-between flex-wrap gap-2">
-              <div class="flex items-center gap-3">
-                <span class="text-2xl">👥</span>
-                <h3 class="font-oswald text-xl uppercase font-bold text-white">${moduleCount++}. Aba Atletas & Homologação</h3>
-              </div>
-              <span class="text-[11px] font-mono font-bold bg-blue-950 text-blue-300 border border-blue-500/40 px-2.5 py-0.5 rounded-full">
-                ${atletasCards.length} ${atletasCards.length === 1 ? 'função permitida' : 'funções permitidas'}
-              </span>
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">👥</span>
+              <h3 class="font-oswald text-xl uppercase font-bold text-white">${moduleCount++}. Aba Atletas & Homologação</h3>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs text-slate-300">
               ${atletasCards.map(c => `
@@ -2931,8 +2895,7 @@
                     <span class="text-slate-300 leading-relaxed block">${escapeText(c.desc)}</span>
                   </div>
                   <div class="mt-2.5 pt-2 border-t border-[#151c2e] flex items-center justify-between text-[10px] text-slate-400">
-                    <span class="text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Liberado para você</span>
-                    <span class="font-mono text-slate-400">${c.perm}</span>
+                    <span class="text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Função Oficial do Painel</span>
                   </div>
                 </div>
               `).join('')}
@@ -2947,38 +2910,33 @@
         noticiasCards.push({
           icon: '🚀',
           name: 'Publicação de Novas Matérias',
-          desc: 'Publicação de novas matérias com Título, Categoria (Mundial Roma, Campeonato, Regulamento, Informativo, Comunicado), Data e Conteúdo oficial.',
-          perm: 'noticias_publicar'
+          desc: 'Publicação de novas matérias com Título, Categoria (Mundial Roma, Campeonato, Regulamento, Informativo, Comunicado), Data e Conteúdo oficial.'
         });
         noticiasCards.push({
           icon: '⚡',
           name: 'Sincronização Automática com o Portal',
-          desc: 'As matérias salvas vão para o Supabase e aparecem instantaneamente na página inicial da Federação para todo o público.',
-          perm: 'noticias_publicar'
+          desc: 'As matérias salvas vão para o Supabase e aparecem instantaneamente na página inicial da Federação para todo o público.'
         });
       }
       if (hasPermission('noticias_upload')) {
         noticiasCards.push({
           icon: '📸',
           name: 'Upload de Banners & Fotos Oficiais',
-          desc: 'Envio de artes promocionais, fotos de pódio e capas de notícias diretamente para o Supabase Storage.',
-          perm: 'noticias_upload'
+          desc: 'Envio de artes promocionais, fotos de pódio e capas de notícias diretamente para o Supabase Storage.'
         });
       }
       if (hasPermission('noticias_editar')) {
         noticiasCards.push({
           icon: '⭐',
           name: 'Edição & Destaque de Matérias',
-          desc: 'Edição de comunicados publicados, atualização de links externos de torneios e definição da notícia principal de capa do portal.',
-          perm: 'noticias_editar'
+          desc: 'Edição de comunicados publicados, atualização de links externos de torneios e definição da notícia principal de capa do portal.'
         });
       }
       if (hasPermission('noticias_excluir')) {
         noticiasCards.push({
           icon: '🗑️',
           name: 'Gerenciamento e Exclusão Rápida',
-          desc: 'Gerenciamento e exclusão de comunicados antigos ou expirados com apenas um clique.',
-          perm: 'noticias_excluir'
+          desc: 'Gerenciamento e exclusão de comunicados antigos ou expirados com apenas um clique.'
         });
       }
 
@@ -2986,14 +2944,9 @@
         html += `
           <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
             <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
-            <div class="flex items-center justify-between flex-wrap gap-2">
-              <div class="flex items-center gap-3">
-                <span class="text-2xl">📰</span>
-                <h3 class="font-oswald text-xl uppercase font-bold text-white">${moduleCount++}. Aba Notícias & Torneios</h3>
-              </div>
-              <span class="text-[11px] font-mono font-bold bg-blue-950 text-blue-300 border border-blue-500/40 px-2.5 py-0.5 rounded-full">
-                ${noticiasCards.length} ${noticiasCards.length === 1 ? 'função permitida' : 'funções permitidas'}
-              </span>
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">📰</span>
+              <h3 class="font-oswald text-xl uppercase font-bold text-white">${moduleCount++}. Aba Notícias & Torneios</h3>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs text-slate-300">
               ${noticiasCards.map(c => `
@@ -3003,8 +2956,7 @@
                     <span class="text-slate-300 leading-relaxed block">${escapeText(c.desc)}</span>
                   </div>
                   <div class="mt-2.5 pt-2 border-t border-[#151c2e] flex items-center justify-between text-[10px] text-slate-400">
-                    <span class="text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Liberado para você</span>
-                    <span class="font-mono text-slate-400">${c.perm}</span>
+                    <span class="text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Função Oficial do Painel</span>
                   </div>
                 </div>
               `).join('')}
@@ -3019,16 +2971,14 @@
         emailsCards.push({
           icon: '📧',
           name: 'Credenciamento de E-mails Oficiais',
-          desc: 'Criação de novos e-mails institucionais com domínio oficial @foot-table.pe.org, definindo senhas e cargos para diretores e gestores.',
-          perm: 'gestao_emails'
+          desc: 'Criação de novos e-mails institucionais com domínio oficial @foot-table.pe.org, definindo senhas e cargos para diretores e gestores.'
         });
       }
       if (hasPermission('gestao_cargos')) {
         emailsCards.push({
           icon: '🛡️',
           name: 'Gestão de Cargos & Esquema de Operações',
-          desc: 'Criação de novos cargos federativos e configuração granular de quais das 17 operações cada função tem autorização para realizar.',
-          perm: 'gestao_cargos'
+          desc: 'Criação de novos cargos federativos e configuração granular de quais das 17 operações cada função tem autorização para realizar.'
         });
       }
 
@@ -3036,14 +2986,9 @@
         html += `
           <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
             <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
-            <div class="flex items-center justify-between flex-wrap gap-2">
-              <div class="flex items-center gap-3">
-                <span class="text-2xl">📧</span>
-                <h3 class="font-oswald text-xl uppercase font-bold text-white">${moduleCount++}. Aba E-mails Institucionais & Gestão</h3>
-              </div>
-              <span class="text-[11px] font-mono font-bold bg-blue-950 text-blue-300 border border-blue-500/40 px-2.5 py-0.5 rounded-full">
-                ${emailsCards.length} ${emailsCards.length === 1 ? 'função permitida' : 'funções permitidas'}
-              </span>
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">📧</span>
+              <h3 class="font-oswald text-xl uppercase font-bold text-white">${moduleCount++}. Aba E-mails Institucionais & Gestão</h3>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-300">
               ${emailsCards.map(c => `
@@ -3053,8 +2998,7 @@
                     <span class="text-slate-300 leading-relaxed block">${escapeText(c.desc)}</span>
                   </div>
                   <div class="mt-2.5 pt-2 border-t border-[#151c2e] flex items-center justify-between text-[10px] text-slate-400">
-                    <span class="text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Liberado para você</span>
-                    <span class="font-mono text-slate-400">${c.perm}</span>
+                    <span class="text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Função Oficial do Painel</span>
                   </div>
                 </div>
               `).join('')}
@@ -3069,16 +3013,14 @@
         configCards.push({
           icon: '☁️',
           name: 'Conexão Supabase & Nuvem',
-          desc: 'Configuração avançada das chaves de conexão de banco de dados, URL da API REST e credenciais de segurança do Supabase.',
-          perm: 'gestao_supabase'
+          desc: 'Configuração avançada das chaves de conexão de banco de dados, URL da API REST e credenciais de segurança do Supabase.'
         });
       }
       if (hasPermission('gestao_limpeza')) {
         configCards.push({
           icon: '🧹',
           name: 'Manutenção & Limpeza do Sistema',
-          desc: 'Rotinas de limpeza de cache, descarte de sessões expiradas e restauração de dados padrão do sistema.',
-          perm: 'gestao_limpeza'
+          desc: 'Rotinas de limpeza de cache, descarte de sessões expiradas e restauração de dados padrão do sistema.'
         });
       }
 
@@ -3086,14 +3028,9 @@
         html += `
           <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
             <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
-            <div class="flex items-center justify-between flex-wrap gap-2">
-              <div class="flex items-center gap-3">
-                <span class="text-2xl">⚙️</span>
-                <h3 class="font-oswald text-xl uppercase font-bold text-white">${moduleCount++}. Aba Banco de Dados & Ajustes</h3>
-              </div>
-              <span class="text-[11px] font-mono font-bold bg-blue-950 text-blue-300 border border-blue-500/40 px-2.5 py-0.5 rounded-full">
-                ${configCards.length} ${configCards.length === 1 ? 'função permitida' : 'funções permitidas'}
-              </span>
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">⚙️</span>
+              <h3 class="font-oswald text-xl uppercase font-bold text-white">${moduleCount++}. Aba Banco de Dados & Ajustes</h3>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-300">
               ${configCards.map(c => `
@@ -3103,8 +3040,7 @@
                     <span class="text-slate-300 leading-relaxed block">${escapeText(c.desc)}</span>
                   </div>
                   <div class="mt-2.5 pt-2 border-t border-[#151c2e] flex items-center justify-between text-[10px] text-slate-400">
-                    <span class="text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Liberado para você</span>
-                    <span class="font-mono text-slate-400">${c.perm}</span>
+                    <span class="text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Função Oficial do Painel</span>
                   </div>
                 </div>
               `).join('')}
@@ -3122,8 +3058,7 @@
             customCards.push({
               icon: '⚡',
               name: item.name,
-              desc: item.desc || 'Operação personalizada autorizada para a sua conta institucional.',
-              perm: item.id
+              desc: item.desc || 'Operação personalizada autorizada para a sua conta institucional.'
             });
           }
         });
@@ -3133,14 +3068,9 @@
         html += `
           <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
             <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
-            <div class="flex items-center justify-between flex-wrap gap-2">
-              <div class="flex items-center gap-3">
-                <span class="text-2xl">⚡</span>
-                <h3 class="font-oswald text-xl uppercase font-bold text-white">${moduleCount++}. Operações Personalizadas</h3>
-              </div>
-              <span class="text-[11px] font-mono font-bold bg-blue-950 text-blue-300 border border-blue-500/40 px-2.5 py-0.5 rounded-full">
-                ${customCards.length} ${customCards.length === 1 ? 'função permitida' : 'funções permitidas'}
-              </span>
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">⚡</span>
+              <h3 class="font-oswald text-xl uppercase font-bold text-white">${moduleCount++}. Operações Personalizadas</h3>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs text-slate-300">
               ${customCards.map(c => `
@@ -3150,8 +3080,7 @@
                     <span class="text-slate-300 leading-relaxed block">${escapeText(c.desc)}</span>
                   </div>
                   <div class="mt-2.5 pt-2 border-t border-[#151c2e] flex items-center justify-between text-[10px] text-slate-400">
-                    <span class="text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Liberado para você</span>
-                    <span class="font-mono text-slate-400">${c.perm}</span>
+                    <span class="text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Função Oficial do Painel</span>
                   </div>
                 </div>
               `).join('')}
@@ -3199,17 +3128,10 @@
         sidebarRole.innerHTML = `${icon} ${escapeText(currentCargo)}`;
       }
       if (sidebarBadge) {
-        if (isMaster) {
-          sidebarBadge.textContent = 'ACESSO MASTER';
-          sidebarBadge.className = 'text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded font-mono font-bold sidebar-text shrink-0 whitespace-nowrap';
-        } else {
-          const totalOps = (typeof ALL_OPERATION_IDS !== 'undefined' && ALL_OPERATION_IDS.length) ? ALL_OPERATION_IDS.length : 17;
-          sidebarBadge.textContent = `${perms.length}/${totalOps} OPS`;
-          sidebarBadge.className = 'text-[10px] bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2 py-0.5 rounded font-mono font-bold sidebar-text shrink-0 whitespace-nowrap';
-        }
+        sidebarBadge.remove();
       }
       if (sidebarBox) {
-        sidebarBox.setAttribute('title', `${user} (${currentCargo}) - ${isMaster ? 'Acesso Total Master' : `${perms.length} operações autorizadas`}`);
+        sidebarBox.setAttribute('title', `${user} (${currentCargo})`);
       }
 
       // 2. Ocultação Rigorosa das Abas Não Permitidas na Barra Lateral (Sidebar)
@@ -3390,6 +3312,7 @@
           if (!hasPermission('atletas_homologar')) hideSelectors.push('#btnHomologarTodos');
           hideSelectors.push('.nav-tab-lock-indicator');
         }
+        hideSelectors.push('#sidebarAdminBadge');
         let instantStyle = document.getElementById('instant-permissions-style');
         if (!instantStyle) {
           instantStyle = document.createElement('style');
@@ -10116,7 +10039,7 @@
       {
         id: 'diretor_adjunto',
         name: 'Diretor Adjunto',
-        desc: 'Acesso total a todas as operações, cadastros, carteiras e configurações da Federação',
+        desc: 'Diretoria executiva e supervisão institucional da Federação',
         isMaster: true,
         permissions: ['*'],
         created_at: '2026-01-01T00:00:00Z'
@@ -10256,7 +10179,7 @@
                 <h4 class="font-bold text-xs uppercase tracking-wider text-white">${escapeText(group.title)}</h4>
               </div>
               <span class="text-[10px] font-mono text-slate-400 font-bold bg-[#0b101d] px-1.5 py-0.5 rounded border border-[#1c253b]">
-                ${group.items.length} ops
+                ${group.items.length} funções
               </span>
             </div>
 
@@ -10468,9 +10391,7 @@
       roles.forEach(r => {
         const opt = document.createElement('option');
         opt.value = r.name;
-        const isMasterRole = r.isMaster || (Array.isArray(r.permissions) && r.permissions.includes('*')) || r.name === 'Diretor Adjunto';
-        const permsCount = Array.isArray(r.permissions) ? r.permissions.length : 0;
-        opt.textContent = `${r.name} ${isMasterRole ? '(Acesso Total Master)' : `(${permsCount} operações)`}`;
+        opt.textContent = r.name;
         select.appendChild(opt);
       });
 
@@ -10488,15 +10409,8 @@
 
     function updateSelectedRolePreview(roleName) {
       const summaryText = document.getElementById('roleSummaryPreviewText');
-      if (!summaryText) return;
-
-      const roles = loadCustomRoles();
-      const role = roles.find(r => r.name.toLowerCase() === (roleName || '').toLowerCase());
-      if (!role || role.isMaster || (role.permissions && role.permissions.includes('*')) || roleName === 'Diretor Adjunto') {
-        summaryText.innerHTML = `Operações vinculadas: <strong class="text-pe-gold">Acesso Total Master (${ALL_OPERATION_IDS.length} operações)</strong>`;
-      } else {
-        const count = Array.isArray(role.permissions) ? role.permissions.length : 0;
-        summaryText.innerHTML = `Operações vinculadas: <strong class="text-blue-400">${count} de ${ALL_OPERATION_IDS.length} operações autorizadas</strong>`;
+      if (summaryText) {
+        summaryText.innerHTML = `Operações vinculadas: <strong class="text-emerald-400">Padrão configurado do cargo</strong>`;
       }
       renderCreateEmailPermsCheckboxes(roleName);
     }
@@ -10535,15 +10449,8 @@
     function updateCreateEmailPermsBadge() {
       const badge = document.getElementById('createEmailPermsBadge');
       if (!badge) return;
-      const checkedCount = document.querySelectorAll('.create-email-perm-check:checked').length;
-      const total = ALL_OPERATION_IDS.length;
-      if (checkedCount === total) {
-        badge.textContent = `Acesso Total (${total}/${total})`;
-        badge.className = "text-[10px] font-mono text-amber-300 bg-amber-500/20 border border-amber-500/40 px-2 py-0.5 rounded font-bold";
-      } else {
-        badge.textContent = `${checkedCount}/${total} ops`;
-        badge.className = "text-[10px] font-mono text-blue-300 bg-blue-500/20 border border-blue-500/40 px-2 py-0.5 rounded font-bold";
-      }
+      badge.textContent = 'Configurado';
+      badge.className = "text-[10px] font-bold text-pe-gold bg-pe-gold/10 border border-pe-gold/30 px-2 py-0.5 rounded";
     }
 
     function toggleCreateEmailCustomPerms() {
@@ -10720,12 +10627,12 @@
                 ${isPres ? '<span class="text-amber-300 text-sm">👑</span>' : (isMaster ? '<span class="text-amber-400">⚡</span>' : '<span class="text-blue-400">🛡️</span>')}
                 <span class="${isPres ? 'text-pe-gold font-black' : 'text-white'}">${escapeText(role.name)}</span>
               </h5>
-              <span class="text-[10px] font-mono px-2 py-0.5 rounded font-bold whitespace-nowrap shrink-0 ${isMaster ? 'bg-amber-950/80 text-amber-400 border border-amber-500/40' : 'bg-blue-950/80 text-blue-300 border border-blue-500/30'}">
-                ${permsCount}/${ALL_OPERATION_IDS.length} ops
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded whitespace-nowrap shrink-0 bg-blue-950/80 text-blue-300 border border-blue-500/30">
+                Ativo
               </span>
             </div>
             <p class="text-[11px] text-slate-400 line-clamp-2 mt-1">
-              ${escapeText(role.desc || (isMaster ? 'Acesso administrativo irrestrito à federação' : 'Cargo operacional com permissões customizadas'))}
+              ${escapeText(role.desc || 'Cargo operacional com permissões customizadas')}
             </p>
           </div>
 
@@ -10892,7 +10799,7 @@
         feedback.innerHTML = `
           <div class="flex items-center gap-2">
             <span class="text-emerald-400 text-base">✓</span>
-            <span>Cargo <strong>${escapeText(roleName)}</strong> gerado com sucesso com <strong>${selectedPerms.length} de ${ALL_OPERATION_IDS.length} operações autorizadas</strong>!</span>
+            <span>Cargo <strong>${escapeText(roleName)}</strong> gerado com sucesso com as operações configuradas!</span>
           </div>
           <div class="pt-2 border-t border-emerald-500/30 flex flex-wrap items-center gap-2">
             <button type="button" onclick="selectRoleForNewEmail('${escapeJsString(roleName)}')" class="bg-pe-gold hover:bg-amber-300 text-black font-oswald text-xs uppercase font-bold px-3.5 py-1.5 rounded-lg transition cursor-pointer flex items-center gap-1.5 shadow">
@@ -10965,7 +10872,7 @@
 
           targetRole = {
             name: admin.cargo || 'Gestor Autorizado',
-            desc: `E-mail credenciado: ${admin.email} • ${isMaster ? 'Acesso Total Master' : `${permsCount} de ${ALL_OPERATION_IDS.length} operações autorizadas`}`,
+            desc: `E-mail credenciado: ${admin.email} • Funções operacionais vinculadas`,
             permissions: isMaster ? ALL_OPERATION_IDS : adminPerms,
             isMaster: isMaster
           };
@@ -10980,7 +10887,7 @@
         const isMaster = rolePerms.includes('*') || (rolePerms.length >= ALL_OPERATION_IDS.length && ALL_OPERATION_IDS.length > 0);
         const permsCount = isMaster ? ALL_OPERATION_IDS.length : rolePerms.length;
         if (titleEl) titleEl.textContent = `Esquema de Operação: ${targetRole.name}`;
-        if (descEl) descEl.textContent = `${targetRole.desc || 'Atribuições e permissões operacionais do cargo no sistema'} (${permsCount}/${ALL_OPERATION_IDS.length} ops)`;
+        if (descEl) descEl.textContent = `${targetRole.desc || 'Atribuições e permissões operacionais do cargo no sistema'}`;
       }
 
       const isAll = targetRole.isMaster || (targetRole.permissions && targetRole.permissions.includes('*'));
@@ -11189,8 +11096,8 @@
           </td>
           <td class="py-3 px-3 whitespace-nowrap">
             <div class="flex items-center gap-2 whitespace-nowrap">
-              <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded whitespace-nowrap ${isMaster ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/30' : 'bg-[#05080e] text-blue-300 border border-blue-500/30'}">
-                ${isMaster ? 'Acesso Total Master' : `${permsCount}/${ALL_OPERATION_IDS.length} ops`}
+              <span class="text-[10px] font-bold px-2.5 py-0.5 rounded whitespace-nowrap bg-emerald-950/70 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                <i class="fa-solid fa-circle-check text-[9px]"></i> Ativo
               </span>
               <button type="button" onclick="openRoleOperationsModal('${escapeJsString(admin.email)}')" class="text-blue-400 hover:text-blue-300 text-[10px] font-bold underline cursor-pointer whitespace-nowrap">
                 Ver Esquema
@@ -11294,7 +11201,7 @@
       }
 
       feedback.className = "text-xs rounded-xl p-3 border bg-emerald-950/40 border-emerald-500/50 text-emerald-300 font-bold";
-      feedback.innerHTML = `✓ E-mail institucional <strong>${fullEmail}</strong> credenciado com sucesso no cargo <strong>${escapeText(role)}</strong>! Esta conta já pode acessar o sistema no login com suas permissões operacionais (${isMasterRole ? 'Acesso Total Master' : `${permissions.length} operações`}).`;
+      feedback.innerHTML = `✓ E-mail institucional <strong>${fullEmail}</strong> credenciado com sucesso no cargo <strong>${escapeText(role)}</strong>! Esta conta já pode acessar o sistema no login com suas permissões operacionais.`;
 
       document.getElementById('adminCreateEmailForm').reset();
       document.getElementById('panelRegFederationKey').value = "FPFTM-2026";
@@ -11318,9 +11225,7 @@
       roles.forEach(r => {
         const opt = document.createElement('option');
         opt.value = r.name;
-        const isTotal = r.isMaster || (Array.isArray(r.permissions) && r.permissions.includes('*')) || r.name === 'Diretor Adjunto';
-        const count = Array.isArray(r.permissions) ? r.permissions.length : 0;
-        opt.textContent = `${r.name} ${isTotal ? '(Acesso Total Master)' : `(${count} operações)`}`;
+        opt.textContent = r.name;
         select.appendChild(opt);
       });
       if (currentRole && roles.some(r => r.name.toLowerCase() === currentRole.toLowerCase())) {
@@ -11334,14 +11239,8 @@
 
     function updateEditAdminRolePreview(roleName) {
       const summaryText = document.getElementById('editAdminRoleSummaryText');
-      if (!summaryText) return;
-      const roles = loadCustomRoles();
-      const role = roles.find(r => r.name.toLowerCase() === (roleName || '').toLowerCase());
-      if (!role || role.isMaster || (role.permissions && role.permissions.includes('*')) || roleName === 'Diretor Adjunto') {
-        summaryText.innerHTML = `Atribuições: <strong class="text-pe-gold">Acesso Total Master (${ALL_OPERATION_IDS.length} operações)</strong>`;
-      } else {
-        const count = Array.isArray(role.permissions) ? role.permissions.length : 0;
-        summaryText.innerHTML = `Atribuições: <strong class="text-blue-400">${count} de ${ALL_OPERATION_IDS.length} operações autorizadas</strong>`;
+      if (summaryText) {
+        summaryText.innerHTML = `Atribuições: <strong class="text-emerald-400">Padrão configurado do cargo</strong>`;
       }
     }
 
@@ -11385,24 +11284,15 @@
     }
 
     function updateEditAdminPermsCountBadge() {
-      const checks = document.querySelectorAll('.edit-admin-perm-check');
-      const checked = document.querySelectorAll('.edit-admin-perm-check:checked');
       const badge = document.getElementById('editAdminPermsCountBadge');
       const masterNotice = document.getElementById('editAdminMasterNotice');
-      const totalOps = (typeof ALL_OPERATION_IDS !== 'undefined' && ALL_OPERATION_IDS.length) ? ALL_OPERATION_IDS.length : (checks.length || 17);
 
-      const isAll = checked.length === totalOps && totalOps > 0;
       if (badge) {
-        if (isAll) {
-          badge.textContent = `⚡ Acesso Total Master (${totalOps}/${totalOps} ops)`;
-          badge.className = "text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/40";
-        } else {
-          badge.textContent = `${checked.length}/${totalOps} ops autorizadas`;
-          badge.className = "text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-500/30";
-        }
+        badge.textContent = "Configurado";
+        badge.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-500/30";
       }
       if (masterNotice) {
-        masterNotice.classList.toggle('hidden', !isAll);
+        masterNotice.classList.add('hidden');
       }
     }
 
