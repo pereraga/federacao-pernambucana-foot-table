@@ -20,13 +20,75 @@
   <title>FPEFT ADM | Painel de Controle Oficial</title>
   <link rel="icon" type="image/png" href="assets/images/logo-federacao.png" />
 
-  <!-- Proteção Imediata: Redireciona para o login se não autenticado -->
+  <!-- Proteção Imediata & Aplicação Instantânea (0ms) de Permissões antes da pintura da tela -->
   <script>
     (function() {
-      const isLogged = sessionStorage.getItem('pe_admin_logged') === 'true' || localStorage.getItem('pe_admin_logged') === 'true';
-      if (!isLogged) {
-        window.location.replace('login.html');
-      }
+      try {
+        const isLogged = sessionStorage.getItem('pe_admin_logged') === 'true' || localStorage.getItem('pe_admin_logged') === 'true';
+        if (!isLogged) {
+          window.location.replace('login.html');
+          return;
+        }
+
+        const rawUser = (sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user') || '').toLowerCase().trim();
+        const user = rawUser.includes('@') ? rawUser : (rawUser + '@foot-table.pe.org');
+        if (rawUser === 'admin' || rawUser.includes('gabrielacessor')) return; // Acesso total
+
+        const admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || [];
+        const current = admins.find(a => {
+          const aEmail = (a.email || '').toLowerCase().trim();
+          return aEmail === rawUser || aEmail === user || aEmail.replace(/@foot-table\.pe\.(org|gov\.br)$/i, '') === rawUser;
+        });
+
+        let perms = [];
+        if (current) {
+          if (Array.isArray(current.permissions) && current.permissions.length > 0) {
+            perms = current.permissions;
+          } else {
+            const roles = JSON.parse(localStorage.getItem('pe_custom_roles')) || [];
+            const role = roles.find(r => r.name.toLowerCase() === (current.cargo || '').toLowerCase());
+            if (role && Array.isArray(role.permissions) && role.permissions.length > 0) perms = role.permissions;
+            else if (current.cargo === 'Diretor Adjunto') perms = ['*'];
+          }
+        }
+        if (perms.includes('*')) return;
+
+        const hideSelectors = [];
+        // Abas da barra lateral
+        const canAtletas = perms.includes('carteira_studio') || perms.includes('carteira_pdf') || perms.includes('carteira_png') || perms.includes('carteira_imprimir');
+        if (!canAtletas) hideSelectors.push('#navBtn-atletas, #tabContent-atletas');
+
+        const canJogadores = perms.includes('atletas_visualizar') || perms.includes('atletas_homologar') || perms.includes('atletas_editar') || perms.includes('atletas_excluir') || perms.includes('atletas_exportar');
+        if (!canJogadores) hideSelectors.push('#navBtn-jogadores, #tabContent-jogadores');
+
+        const canNoticias = perms.includes('noticias_publicar') || perms.includes('noticias_editar') || perms.includes('noticias_upload') || perms.includes('noticias_excluir');
+        if (!canNoticias) hideSelectors.push('#navBtn-noticias, #tabContent-noticias');
+
+        const canEmails = perms.includes('gestao_emails') || perms.includes('gestao_cargos');
+        if (!canEmails) hideSelectors.push('#navBtn-emails, #tabContent-emails');
+
+        const canConfig = perms.includes('gestao_supabase') || perms.includes('gestao_limpeza');
+        if (!canConfig) hideSelectors.push('#navBtn-config, #tabContent-config');
+
+        // Studio actions
+        if (!perms.includes('carteira_pdf')) hideSelectors.push('#btnExportPDF, #btnDownloadPdf, #btnDownloadPdfMobile');
+        if (!perms.includes('carteira_png')) hideSelectors.push('#btnExportPNG, #btnDownloadPng, #btnDownloadPngMobile');
+        if (!perms.includes('carteira_imprimir')) hideSelectors.push('#btnPrintCarteira, #btnPrintCarteiraMobile');
+
+        // Jogadores actions
+        if (!perms.includes('atletas_exportar')) hideSelectors.push('#btnExportZip, #btnExportCsv, #btnExportExcel, #btnExportarZipJogadores, #btnExportarCsvJogadores');
+        if (!perms.includes('atletas_homologar')) hideSelectors.push('#btnHomologarTodos');
+
+        // Selos e tags de bloqueio
+        hideSelectors.push('.nav-tab-lock-indicator');
+
+        if (hideSelectors.length > 0) {
+          const style = document.createElement('style');
+          style.id = 'instant-permissions-style';
+          style.textContent = hideSelectors.join(',\n') + ' { display: none !important; }';
+          document.head.appendChild(style);
+        }
+      } catch (e) {}
     })();
   </script>
 
@@ -2803,6 +2865,31 @@
           resetCard.style.display = '';
         }
       }
+
+      // 8. Atualização CSS instantânea (1ms) para garantir zero delay visual em qualquer recarregamento
+      try {
+        const hideSelectors = [];
+        if (!isMaster) {
+          if (!isTabAllowed('atletas')) hideSelectors.push('#navBtn-atletas, #tabContent-atletas');
+          if (!isTabAllowed('jogadores')) hideSelectors.push('#navBtn-jogadores, #tabContent-jogadores');
+          if (!isTabAllowed('noticias')) hideSelectors.push('#navBtn-noticias, #tabContent-noticias');
+          if (!isTabAllowed('emails')) hideSelectors.push('#navBtn-emails, #tabContent-emails');
+          if (!isTabAllowed('config')) hideSelectors.push('#navBtn-config, #tabContent-config');
+          if (!hasPermission('carteira_pdf')) hideSelectors.push('#btnExportPDF, #btnDownloadPdf, #btnDownloadPdfMobile');
+          if (!hasPermission('carteira_png')) hideSelectors.push('#btnExportPNG, #btnDownloadPng, #btnDownloadPngMobile');
+          if (!hasPermission('carteira_imprimir')) hideSelectors.push('#btnPrintCarteira, #btnPrintCarteiraMobile');
+          if (!hasPermission('atletas_exportar')) hideSelectors.push('#btnExportZip, #btnExportCsv, #btnExportExcel, #btnExportarZipJogadores, #btnExportarCsvJogadores');
+          if (!hasPermission('atletas_homologar')) hideSelectors.push('#btnHomologarTodos');
+          hideSelectors.push('.nav-tab-lock-indicator');
+        }
+        let instantStyle = document.getElementById('instant-permissions-style');
+        if (!instantStyle) {
+          instantStyle = document.createElement('style');
+          instantStyle.id = 'instant-permissions-style';
+          document.head.appendChild(instantStyle);
+        }
+        instantStyle.textContent = hideSelectors.length > 0 ? (hideSelectors.join(',\n') + ' { display: none !important; }') : '';
+      } catch (e) {}
     }
 
     function switchTab(tabName) {
@@ -11127,6 +11214,7 @@
     async function initApp() {
       try {
         checkAuth();
+        applyPermissionsToUI(); // Executa em menos de 1ms antes de qualquer requisição na rede
 
         const urlInput = document.getElementById('adminCfgUrl');
         if (urlInput) urlInput.value = localStorage.getItem('pe_supabase_url') || DEFAULT_SUPABASE_URL;
