@@ -1711,17 +1711,23 @@
                 </p>
               </div>
 
-              <div class="flex items-center gap-2 shrink-0">
+              <div class="flex flex-wrap items-center gap-2 shrink-0">
+                <span id="activePermsCounterText" class="text-xs font-mono font-bold px-3 py-1.5 rounded-lg bg-blue-950/80 border border-blue-500/40 text-blue-300">
+                  13 de 14 operações marcadas (93%)
+                </span>
                 <button type="button" onclick="toggleAllRoleOperations(true)" class="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-blue-950/80 border border-blue-500/40 text-blue-300 hover:bg-blue-900 transition cursor-pointer">
                   ✓ Marcar Todas
                 </button>
                 <button type="button" onclick="toggleAllRoleOperations(false)" class="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:bg-slate-800 transition cursor-pointer">
                   ✕ Desmarcar Todas
                 </button>
+                <button type="button" onclick="resetCheckboxesToDefault()" class="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-pe-gold hover:bg-slate-800 transition cursor-pointer" title="Restaura seleção padrão das 4 colunas">
+                  ↺ Padrão
+                </button>
               </div>
             </div>
 
-            <!-- Formulário de Criação do Cargo -->
+            <!-- Formulário de Criação/Edição do Cargo -->
             <form id="createRoleForm" onsubmit="handleCreateCustomRole(event)" class="space-y-6">
               
               <!-- Linha de Entrada: Nome do Cargo & Descrição -->
@@ -1751,183 +1757,22 @@
                 </div>
               </div>
 
-              <!-- AS 4 COLUNAS EXATAS DA IMAGEM DO USUÁRIO -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                
-                <!-- Coluna 1: OPERAÇÃO DE JOGOS -->
-                <div class="bg-[#070b14] border border-[#1c253b] rounded-2xl p-4 space-y-3 shadow-md flex flex-col justify-between">
-                  <div class="space-y-3">
-                    <div class="flex items-center gap-2 pb-2 border-b border-[#1c253b]">
-                      <span class="text-base">🎮</span>
-                      <h4 class="font-bold text-xs uppercase tracking-wider text-white">OPERAÇÃO DE JOGOS</h4>
-                    </div>
-
-                    <!-- Item 1: Apagar / Cancelar Jogos -->
-                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
-                      <input type="checkbox" id="perm_jogos_cancelar" value="jogos_cancelar" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
-                      <div class="min-w-0">
-                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Apagar / Cancelar Jogos</span>
-                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Permite apagar jogos do sistema e liberar horário imediatamente</span>
-                      </div>
-                    </label>
-
-                    <!-- Item 2: Liberar e Iniciar Partidas -->
-                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
-                      <input type="checkbox" id="perm_jogos_iniciar" value="jogos_iniciar" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
-                      <div class="min-w-0">
-                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Liberar e Iniciar Partidas</span>
-                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Botão de liberar entrada/iniciar jogo e cronômetro ao vivo</span>
-                      </div>
-                    </label>
-
-                    <!-- Item 3: Finalizar Jogos ao Vivo -->
-                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
-                      <input type="checkbox" id="perm_jogos_finalizar" value="jogos_finalizar" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
-                      <div class="min-w-0">
-                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Finalizar Jogos ao Vivo</span>
-                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Permite encerrar partidas e finalizar o tempo de jogo</span>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-
-                <!-- Coluna 2: BALCÃO & CONSUMO -->
-                <div class="bg-[#070b14] border border-[#1c253b] rounded-2xl p-4 space-y-3 shadow-md flex flex-col justify-between">
-                  <div class="space-y-3">
-                    <div class="flex items-center gap-2 pb-2 border-b border-[#1c253b]">
-                      <span class="text-base">🛒</span>
-                      <h4 class="font-bold text-xs uppercase tracking-wider text-white">BALCÃO & CONSUMO</h4>
-                    </div>
-
-                    <!-- Item 4: Reserva Direta no Balcão -->
-                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
-                      <input type="checkbox" id="perm_balcao_reserva" value="balcao_reserva" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
-                      <div class="min-w-0">
-                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Reserva Direta no Balcão</span>
-                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Criar novas reservas avulsas diretamente na recepção</span>
-                      </div>
-                    </label>
-
-                    <!-- Item 5: Comanda do Bar & Lanches -->
-                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
-                      <input type="checkbox" id="perm_balcao_comanda" value="balcao_comanda" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
-                      <div class="min-w-0">
-                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Comanda do Bar & Lanches</span>
-                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Aba de Bar, comanda individual e entrega de pedidos</span>
-                      </div>
-                    </label>
-
-                    <!-- Item 6: Cardápio e Estoque do Bar -->
-                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
-                      <input type="checkbox" id="perm_balcao_estoque" value="balcao_estoque" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
-                      <div class="min-w-0">
-                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Cardápio e Estoque do Bar</span>
-                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Cadastrar novos produtos, fotos e alterar valores de venda</span>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-
-                <!-- Coluna 3: QUADRAS & ESPAÇOS -->
-                <div class="bg-[#070b14] border border-[#1c253b] rounded-2xl p-4 space-y-3 shadow-md flex flex-col justify-between">
-                  <div class="space-y-3">
-                    <div class="flex items-center gap-2 pb-2 border-b border-[#1c253b]">
-                      <span class="text-base">🏟️</span>
-                      <h4 class="font-bold text-xs uppercase tracking-wider text-white">QUADRAS & ESPAÇOS</h4>
-                    </div>
-
-                    <!-- Item 7: Editar Quadras e Preços -->
-                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
-                      <input type="checkbox" id="perm_espacos_quadras" value="espacos_quadras" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
-                      <div class="min-w-0">
-                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Editar Quadras e Preços</span>
-                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Cadastrar quadras, alterar fotos e ajustar tarifas por hora</span>
-                      </div>
-                    </label>
-
-                    <!-- Item 8: Treinos e Manutenções -->
-                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
-                      <input type="checkbox" id="perm_espacos_treinos" value="espacos_treinos" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
-                      <div class="min-w-0">
-                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Treinos e Manutenções</span>
-                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Bloquear horários na grade para escolinhas e reformas</span>
-                      </div>
-                    </label>
-
-                    <!-- Item 9: Categorias e Esportes -->
-                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
-                      <input type="checkbox" id="perm_espacos_esportes" value="espacos_esportes" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
-                      <div class="min-w-0">
-                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Categorias e Esportes</span>
-                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Criar e editar modalidades esportivas {Beach, Society...}</span>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-
-                <!-- Coluna 4: CADASTROS & GESTÃO -->
-                <div class="bg-[#070b14] border border-[#1c253b] rounded-2xl p-4 space-y-3 shadow-md flex flex-col justify-between">
-                  <div class="space-y-3">
-                    <div class="flex items-center gap-2 pb-2 border-b border-[#1c253b]">
-                      <span class="text-base">⚙️</span>
-                      <h4 class="font-bold text-xs uppercase tracking-wider text-white">CADASTROS & GESTÃO</h4>
-                    </div>
-
-                    <!-- Item 10: Base de Clientes / Atletas -->
-                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
-                      <input type="checkbox" id="perm_gestao_atletas" value="gestao_atletas" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
-                      <div class="min-w-0">
-                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Base de Clientes / Atletas</span>
-                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Visualizar lista de clientes, fichas médicas e telefones</span>
-                      </div>
-                    </label>
-
-                    <!-- Item 11: Horários Fixos (Mensalistas) -->
-                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
-                      <input type="checkbox" id="perm_gestao_mensalistas" value="gestao_mensalistas" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
-                      <div class="min-w-0">
-                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Horários Fixos (Mensalistas)</span>
-                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Gerenciar mensalistas e contratos semanais fixos</span>
-                      </div>
-                    </label>
-
-                    <!-- Item 12: Gestores e Ajustes Gerais -->
-                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
-                      <input type="checkbox" id="perm_gestao_ajustes" value="gestao_ajustes" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0">
-                      <div class="min-w-0">
-                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Gestores e Ajustes Gerais</span>
-                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Cadastrar novos gestores, níveis de acesso e banco de dados</span>
-                      </div>
-                    </label>
-
-                    <!-- Item 13: Baixar Carteiras (PDF/PNG) -->
-                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
-                      <input type="checkbox" id="perm_gestao_carteiras_download" value="gestao_carteiras_download" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
-                      <div class="min-w-0">
-                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Baixar Carteiras (PDF/PNG)</span>
-                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Permissão de download da carteira do atleta federado</span>
-                      </div>
-                    </label>
-
-                    <!-- Item 14: Publicar & Editar Notícias -->
-                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
-                      <input type="checkbox" id="perm_gestao_noticias" value="gestao_noticias" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
-                      <div class="min-w-0">
-                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Publicar e Editar Notícias</span>
-                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Criar matérias com fotos sincronizadas no Supabase</span>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-
+              <!-- AS 4 COLUNAS EXATAS DA IMAGEM DO USUÁRIO (DINÂMICAS E REATIVAS) -->
+              <div id="operationsSchemeFormColumns" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Preenchido dinamicamente via renderOperationsSchemeForm() -->
               </div>
 
-              <!-- Botão de Salvar Cargo -->
+              <!-- Botão de Salvar Cargo / Atualizar Cargo -->
               <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
                 <div id="roleCreateFeedback" class="hidden text-xs rounded-xl p-3 border w-full sm:w-auto"></div>
-                <button type="submit" class="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-oswald text-sm uppercase font-bold tracking-wider px-7 py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
-                  <span>💾</span> SALVAR CARGO COM ESTE ESQUEMA DE OPERAÇÕES
-                </button>
+                <div class="flex items-center gap-2 w-full sm:w-auto ml-auto">
+                  <button type="button" id="cancelRoleEditBtn" onclick="cancelEditingRole()" class="hidden px-4 py-3 rounded-xl border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-bold transition cursor-pointer">
+                    ✕ Cancelar Edição
+                  </button>
+                  <button type="submit" id="submitRoleBtn" class="flex-1 sm:flex-initial bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-oswald text-sm uppercase font-bold tracking-wider px-7 py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
+                    <span id="submitRoleBtnIcon">💾</span> <span id="submitRoleBtnText">SALVAR CARGO COM ESTE ESQUEMA DE OPERAÇÕES</span>
+                  </button>
+                </div>
               </div>
             </form>
 
@@ -2103,6 +1948,52 @@
                 Fechar
               </button>
             </div>
+          </div>
+        </div>
+
+        <!-- MODAL: ADICIONAR NOVA OPERAÇÃO AO ESQUEMA -->
+        <div id="addCustomOperationModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+          <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl max-w-md w-full p-6 shadow-2xl relative space-y-4">
+            <div class="pe-stripe-bar h-1.5 w-full absolute top-0 left-0 rounded-t-2xl"></div>
+
+            <div class="flex items-center justify-between border-b border-[#1c253b] pb-3">
+              <div>
+                <span class="text-pe-gold text-[10px] font-bold uppercase tracking-wider block">Customização Dinâmica</span>
+                <h3 class="font-oswald text-lg uppercase font-bold text-white flex items-center gap-1.5">
+                  <span>➕</span> Nova Operação do Sistema
+                </h3>
+              </div>
+              <button onclick="closeAddOperationModal()" class="w-8 h-8 rounded-full bg-[#1c253b] text-slate-300 hover:text-white flex items-center justify-center cursor-pointer font-bold text-xs">
+                ✕
+              </button>
+            </div>
+
+            <form id="newOperationForm" onsubmit="handleSaveNewOperation(event)" class="space-y-4 text-xs">
+              <input type="hidden" id="newOpTargetGroupId" value="" />
+              <div>
+                <label class="block text-slate-400 font-bold mb-1 uppercase tracking-wider text-[10px]">Coluna de Destino</label>
+                <div id="newOpTargetGroupLabel" class="text-pe-gold font-bold bg-[#05080e] border border-[#1c253b] px-3 py-2 rounded-xl text-xs flex items-center gap-2"></div>
+              </div>
+
+              <div>
+                <label class="block text-slate-300 font-bold mb-1 uppercase tracking-wider text-[10px]">Nome da Operação / Permissão *</label>
+                <input type="text" id="newOpName" required placeholder="ex: Homologar Árbitros, Gerar Súmula..." class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-white font-bold outline-none text-xs" />
+              </div>
+
+              <div>
+                <label class="block text-slate-300 font-bold mb-1 uppercase tracking-wider text-[10px]">Descrição da Atribuição *</label>
+                <input type="text" id="newOpDesc" required placeholder="ex: Permite validar e aprovar súmulas de arbitragem pós-jogo" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2.5 text-slate-300 outline-none text-xs" />
+              </div>
+
+              <div class="flex items-center justify-end gap-2 pt-2 border-t border-[#1c253b]">
+                <button type="button" onclick="closeAddOperationModal()" class="px-4 py-2 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 font-bold hover:bg-slate-700 cursor-pointer text-xs">
+                  Cancelar
+                </button>
+                <button type="submit" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold font-oswald uppercase cursor-pointer text-xs flex items-center gap-1.5">
+                  <span>💾</span> Salvar Operação
+                </button>
+              </div>
+            </form>
           </div>
         </div>
 
@@ -2443,6 +2334,12 @@
       return false;
     }
 
+    function hasPermission(permId) {
+      const perms = getCurrentUserPermissions();
+      if (perms.includes('*')) return true;
+      return perms.includes(permId);
+    }
+
     function switchTab(tabName) {
       if (!isTabAllowed(tabName)) {
         showToast("⚠️ Seu cargo não possui permissão para acessar esta área.", true);
@@ -2487,6 +2384,9 @@
         } else if (tabName === 'noticias') {
           renderAdminNews();
         } else if (tabName === 'emails') {
+          renderOperationsSchemeForm();
+          populateRoleSelect();
+          renderCustomRolesList();
           renderInstitutionalAdminsTable();
         }
       } catch (err) {
@@ -5180,6 +5080,10 @@
        Garante download imediato e repetível a cada clique
        ========================================================= */
     async function exportCarteiraPDF(athlete = null, triggerBtn = null) {
+      if (!hasPermission('gestao_carteiras_download')) {
+        showToast('⚠️ Seu cargo não possui permissão para baixar carteiras (gestao_carteiras_download).', true);
+        return;
+      }
       if (_isExportingCarteiraPdf) {
         showToast('⏳ Aguarde, o PDF já está sendo gerado...');
         return;
@@ -5284,6 +5188,10 @@
        Emite RIGOROSAMENTE 1 ÚNICO arquivo PNG por vez via Blob nativo
        ========================================================= */
     async function exportHdPng(athlete = null, triggerBtn = null) {
+      if (!hasPermission('gestao_carteiras_download')) {
+        showToast('⚠️ Seu cargo não possui permissão para baixar carteiras (gestao_carteiras_download).', true);
+        return;
+      }
       if (_isExportingCarteiraPng) {
         showToast('⏳ Aguarde, o PNG já está sendo gerado...');
         return;
@@ -7895,6 +7803,9 @@
       if (metricEl) {
         metricEl.textContent = athletes.length;
       }
+      if (typeof updateOperationsTelemetry === 'function') {
+        updateOperationsTelemetry();
+      }
 
       // Renderiza as últimas carteiras homologadas (tabela rápida da aba Início)
       const quickTable = document.getElementById('quickAthletesList');
@@ -8501,9 +8412,16 @@
     }
 
     function saveNewsData(syncSupabase = false) {
+      if (!hasPermission('gestao_noticias')) {
+        showToast('⚠️ Seu cargo não possui permissão para publicar ou editar notícias (gestao_noticias).', true);
+        return;
+      }
       localStorage.setItem('pe_news_db', JSON.stringify(newsItems));
       localStorage.setItem('foot_table_news_db', JSON.stringify(newsItems));
       updateCounter();
+      if (typeof updateOperationsTelemetry === 'function') {
+        updateOperationsTelemetry();
+      }
     }
 
     function updateCounter() {
@@ -9079,7 +8997,7 @@
     /* =========================================================
        ESQUEMA DE OPERAÇÕES & GESTÃO DE CARGOS (@foot-table.pe.gov.br)
        ========================================================= */
-    const SYSTEM_OPERATION_GROUPS = [
+    const DEFAULT_OPERATION_GROUPS = [
       {
         id: 'operacao_jogos',
         icon: '🎮',
@@ -9124,7 +9042,29 @@
       }
     ];
 
-    const ALL_OPERATION_IDS = SYSTEM_OPERATION_GROUPS.flatMap(g => g.items.map(i => i.id));
+    let SYSTEM_OPERATION_GROUPS = [];
+    let ALL_OPERATION_IDS = [];
+
+    function loadSystemOperationGroups() {
+      let stored = null;
+      try { stored = JSON.parse(localStorage.getItem('pe_custom_operation_groups')); } catch (e) {}
+      if (!stored || !Array.isArray(stored) || stored.length === 0) {
+        stored = JSON.parse(JSON.stringify(DEFAULT_OPERATION_GROUPS));
+        localStorage.setItem('pe_custom_operation_groups', JSON.stringify(stored));
+      }
+      SYSTEM_OPERATION_GROUPS = stored;
+      ALL_OPERATION_IDS = SYSTEM_OPERATION_GROUPS.flatMap(g => g.items.map(i => i.id));
+      return SYSTEM_OPERATION_GROUPS;
+    }
+
+    function saveSystemOperationGroups(groups) {
+      SYSTEM_OPERATION_GROUPS = groups;
+      ALL_OPERATION_IDS = SYSTEM_OPERATION_GROUPS.flatMap(g => g.items.map(i => i.id));
+      localStorage.setItem('pe_custom_operation_groups', JSON.stringify(groups));
+    }
+
+    // Inicialização síncrona imediata das listas
+    loadSystemOperationGroups();
 
     const DEFAULT_ROLES = [
       {
@@ -9138,7 +9078,8 @@
     ];
 
     function loadCustomRoles() {
-      let roles = JSON.parse(localStorage.getItem('pe_custom_roles'));
+      let roles = null;
+      try { roles = JSON.parse(localStorage.getItem('pe_custom_roles')); } catch (e) {}
       if (!roles || !Array.isArray(roles) || roles.length === 0) {
         roles = DEFAULT_ROLES;
         localStorage.setItem('pe_custom_roles', JSON.stringify(roles));
@@ -9162,6 +9103,306 @@
 
     function saveCustomRoles(roles) {
       localStorage.setItem('pe_custom_roles', JSON.stringify(roles));
+    }
+
+    function getOperationsTelemetry() {
+      let athletes = [];
+      try { athletes = JSON.parse(localStorage.getItem('pe_athletes_db')) || []; } catch (e) {}
+      let admins = [];
+      try { admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || []; } catch (e) {}
+      let newsCount = 0;
+      if (Array.isArray(newsItems) && newsItems.length > 0) {
+        newsCount = newsItems.length;
+      } else {
+        try { newsCount = (JSON.parse(localStorage.getItem('pe_news_db')) || []).length || 3; } catch (e) { newsCount = 3; }
+      }
+      const verifiedCount = athletes.filter(a => a.status === 'HOMOLOGADO' || a.status === 'homologado' || a.homologado || a.status === 'ativo').length || athletes.length;
+      const roles = loadCustomRoles();
+
+      return {
+        athletesCount: athletes.length,
+        verifiedCount: verifiedCount,
+        adminsCount: admins.length,
+        newsCount: newsCount,
+        rolesCount: roles.length
+      };
+    }
+
+    function getTelemetryBadge(itemId) {
+      const telemetry = getOperationsTelemetry();
+      switch (itemId) {
+        case 'gestao_atletas':
+          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950/60 border border-amber-500/40 text-amber-300 shrink-0 font-bold" title="Total de atletas cadastrados">${telemetry.athletesCount} atletas</span>`;
+        case 'gestao_carteiras_download':
+          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 shrink-0 font-bold" title="Carteiras homologadas">${telemetry.verifiedCount} homologados</span>`;
+        case 'gestao_noticias':
+          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-blue-950/60 border border-blue-500/40 text-blue-300 shrink-0 font-bold" title="Matérias publicadas no portal">${telemetry.newsCount} matérias</span>`;
+        case 'gestao_ajustes':
+          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-purple-950/60 border border-purple-500/40 text-purple-300 shrink-0 font-bold" title="Gestores credenciados">${telemetry.adminsCount} gestores</span>`;
+        case 'espacos_quadras':
+          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/60 border border-cyan-500/40 text-cyan-300 shrink-0 font-bold">3 arenas</span>`;
+        case 'jogos_iniciar':
+          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-rose-950/60 border border-rose-500/40 text-rose-300 shrink-0 font-bold">Ao Vivo</span>`;
+        case 'gestao_mensalistas':
+          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-indigo-950/60 border border-indigo-500/40 text-indigo-300 shrink-0 font-bold">Fixos</span>`;
+        case 'balcao_estoque':
+          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950/60 border border-amber-500/40 text-amber-300 shrink-0 font-bold">Estoque</span>`;
+        default:
+          return '';
+      }
+    }
+
+    let currentlyEditingRoleId = null;
+
+    function renderOperationsSchemeForm() {
+      const container = document.getElementById('operationsSchemeFormColumns');
+      if (!container) return;
+
+      const groups = loadSystemOperationGroups();
+
+      let activePerms = null;
+      if (currentlyEditingRoleId) {
+        const roles = loadCustomRoles();
+        const editingRole = roles.find(r => r.id === currentlyEditingRoleId);
+        if (editingRole) {
+          activePerms = (editingRole.isMaster || (editingRole.permissions && editingRole.permissions.includes('*')))
+            ? ALL_OPERATION_IDS
+            : (Array.isArray(editingRole.permissions) ? editingRole.permissions : []);
+        }
+      }
+
+      container.innerHTML = groups.map(group => `
+        <div class="bg-[#070b14] border border-[#1c253b] rounded-2xl p-4 space-y-3 shadow-md flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between pb-2 border-b border-[#1c253b]">
+              <div class="flex items-center gap-2">
+                <span class="text-base">${group.icon}</span>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-white">${escapeText(group.title)}</h4>
+              </div>
+              <span class="text-[10px] font-mono text-slate-400 font-bold bg-[#0b101d] px-1.5 py-0.5 rounded border border-[#1c253b]">
+                ${group.items.length} ops
+              </span>
+            </div>
+
+            <div class="space-y-2.5">
+              ${group.items.map(item => {
+                const isChecked = activePerms !== null ? activePerms.includes(item.id) : (item.id !== 'gestao_ajustes');
+                return `
+                  <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group relative">
+                    <input 
+                      type="checkbox" 
+                      id="perm_${item.id}" 
+                      value="${item.id}" 
+                      onchange="updatePermsCounter()" 
+                      class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" 
+                      ${isChecked ? 'checked' : ''}
+                    >
+                    <div class="min-w-0 flex-1">
+                      <div class="flex items-center justify-between gap-1">
+                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">${escapeText(item.name)}</span>
+                        ${getTelemetryBadge(item.id)}
+                      </div>
+                      <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">${escapeText(item.desc)}</span>
+                    </div>
+                  </label>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <button 
+            type="button" 
+            onclick="openAddOperationModal('${group.id}', '${escapeText(group.title)}')" 
+            class="w-full mt-3 py-1.5 px-2 bg-[#05080e] hover:bg-blue-950/40 border border-dashed border-[#1c253b] hover:border-blue-500/50 rounded-xl text-[10px] font-bold text-slate-400 hover:text-blue-300 transition flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <span>➕</span> Nova Operação nesta coluna
+          </button>
+        </div>
+      `).join('');
+
+      updatePermsCounter();
+    }
+
+    function updateOperationsTelemetry() {
+      const groups = loadSystemOperationGroups();
+      groups.forEach(g => {
+        g.items.forEach(item => {
+          const cb = document.getElementById(`perm_${item.id}`);
+          if (cb) {
+            const parent = cb.closest('label');
+            if (parent) {
+              const badgeContainer = parent.querySelector('.font-mono');
+              const newBadgeHtml = getTelemetryBadge(item.id);
+              if (newBadgeHtml) {
+                if (badgeContainer) {
+                  badgeContainer.outerHTML = newBadgeHtml;
+                } else {
+                  const titleRow = parent.querySelector('.flex.items-center.justify-between');
+                  if (titleRow) titleRow.insertAdjacentHTML('beforeend', newBadgeHtml);
+                }
+              }
+            }
+          }
+        });
+      });
+
+      const counterEl = document.getElementById('totalCustomRolesCount');
+      if (counterEl) {
+        const roles = loadCustomRoles();
+        counterEl.textContent = roles.length;
+      }
+    }
+
+    function updatePermsCounter() {
+      const allChecks = document.querySelectorAll('.role-perm-check');
+      const checkedCount = document.querySelectorAll('.role-perm-check:checked').length;
+      const totalCount = allChecks.length || ALL_OPERATION_IDS.length;
+      const pct = totalCount > 0 ? Math.round((checkedCount / totalCount) * 100) : 0;
+
+      const counterEl = document.getElementById('activePermsCounterText');
+      if (counterEl) {
+        counterEl.textContent = `${checkedCount} de ${totalCount} operações marcadas (${pct}%)`;
+        if (checkedCount === totalCount) {
+          counterEl.className = "text-xs font-mono font-bold px-3 py-1.5 rounded-lg bg-emerald-950/80 border border-emerald-500/40 text-emerald-300";
+        } else if (checkedCount === 0) {
+          counterEl.className = "text-xs font-mono font-bold px-3 py-1.5 rounded-lg bg-rose-950/80 border border-rose-500/40 text-rose-300";
+        } else {
+          counterEl.className = "text-xs font-mono font-bold px-3 py-1.5 rounded-lg bg-blue-950/80 border border-blue-500/40 text-blue-300";
+        }
+      }
+    }
+
+    function toggleAllRoleOperations(check) {
+      document.querySelectorAll('.role-perm-check').forEach(cb => {
+        cb.checked = !!check;
+      });
+      updatePermsCounter();
+    }
+
+    function resetCheckboxesToDefault() {
+      document.querySelectorAll('.role-perm-check').forEach(cb => {
+        cb.checked = (cb.value !== 'gestao_ajustes');
+      });
+      updatePermsCounter();
+    }
+
+    function openAddOperationModal(groupId, groupTitle) {
+      const modal = document.getElementById('addCustomOperationModal');
+      const targetIdInput = document.getElementById('newOpTargetGroupId');
+      const targetLabel = document.getElementById('newOpTargetGroupLabel');
+      const nameInput = document.getElementById('newOpName');
+      const descInput = document.getElementById('newOpDesc');
+
+      if (!modal) return;
+      if (targetIdInput) targetIdInput.value = groupId;
+      if (targetLabel) targetLabel.textContent = groupTitle;
+      if (nameInput) nameInput.value = '';
+      if (descInput) descInput.value = '';
+
+      modal.classList.remove('hidden');
+      setTimeout(() => { if (nameInput) nameInput.focus(); }, 100);
+    }
+
+    function closeAddOperationModal() {
+      const modal = document.getElementById('addCustomOperationModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function handleSaveNewOperation(e) {
+      e.preventDefault();
+      const groupId = document.getElementById('newOpTargetGroupId').value;
+      const name = document.getElementById('newOpName').value.trim();
+      const desc = document.getElementById('newOpDesc').value.trim();
+      if (!groupId || !name) return;
+
+      const groups = loadSystemOperationGroups();
+      const group = groups.find(g => g.id === groupId);
+      if (!group) return;
+
+      const newOpId = 'op_' + Date.now();
+      group.items.push({
+        id: newOpId,
+        name: name,
+        desc: desc,
+        isCustom: true
+      });
+
+      saveSystemOperationGroups(groups);
+      renderOperationsSchemeForm();
+      populateRoleSelect();
+      renderCustomRolesList();
+      closeAddOperationModal();
+      showToast(`Nova operação "${name}" adicionada com sucesso à coluna "${group.title}"!`);
+    }
+
+    function editRolePermissions(roleId) {
+      const roles = loadCustomRoles();
+      const role = roles.find(r => r.id === roleId || r.name.toLowerCase() === (roleId || '').toLowerCase());
+      if (!role) return;
+
+      currentlyEditingRoleId = role.id;
+      const nameInput = document.getElementById('newRoleName');
+      const descInput = document.getElementById('newRoleDesc');
+      if (nameInput) {
+        nameInput.value = role.name;
+        nameInput.readOnly = (role.isMaster || role.name.toLowerCase() === 'diretor adjunto');
+      }
+      if (descInput) {
+        descInput.value = role.desc || '';
+      }
+
+      const isMaster = role.isMaster || (role.permissions && role.permissions.includes('*'));
+      document.querySelectorAll('.role-perm-check').forEach(cb => {
+        if (isMaster) {
+          cb.checked = true;
+        } else {
+          cb.checked = Array.isArray(role.permissions) && role.permissions.includes(cb.value);
+        }
+      });
+      updatePermsCounter();
+
+      const submitBtn = document.getElementById('submitRoleBtn');
+      const submitIcon = document.getElementById('submitRoleBtnIcon');
+      const submitText = document.getElementById('submitRoleBtnText');
+      const cancelBtn = document.getElementById('cancelRoleEditBtn');
+
+      if (submitIcon) submitIcon.textContent = '🔄';
+      if (submitText) submitText.textContent = `ATUALIZAR PERMISSÕES DE "${role.name.toUpperCase()}"`;
+      if (submitBtn) {
+        submitBtn.className = "flex-1 sm:flex-initial bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-oswald text-sm uppercase font-bold tracking-wider px-7 py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2 cursor-pointer";
+      }
+      if (cancelBtn) cancelBtn.classList.remove('hidden');
+
+      const formEl = document.getElementById('createRoleForm');
+      if (formEl) formEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      showToast(`Editando cargo "${role.name}". Altere as permissões nas 4 colunas e salve.`);
+    }
+
+    function cancelEditingRole() {
+      currentlyEditingRoleId = null;
+      const nameInput = document.getElementById('newRoleName');
+      const descInput = document.getElementById('newRoleDesc');
+      if (nameInput) {
+        nameInput.value = '';
+        nameInput.readOnly = false;
+      }
+      if (descInput) descInput.value = '';
+
+      resetCheckboxesToDefault();
+
+      const submitBtn = document.getElementById('submitRoleBtn');
+      const submitIcon = document.getElementById('submitRoleBtnIcon');
+      const submitText = document.getElementById('submitRoleBtnText');
+      const cancelBtn = document.getElementById('cancelRoleEditBtn');
+
+      if (submitIcon) submitIcon.textContent = '💾';
+      if (submitText) submitText.textContent = 'SALVAR CARGO COM ESTE ESQUEMA DE OPERAÇÕES';
+      if (submitBtn) {
+        submitBtn.className = "flex-1 sm:flex-initial bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-oswald text-sm uppercase font-bold tracking-wider px-7 py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2 cursor-pointer";
+      }
+      if (cancelBtn) cancelBtn.classList.add('hidden');
+      updatePermsCounter();
     }
 
     function populateRoleSelect() {
@@ -9195,7 +9436,7 @@
       const roles = loadCustomRoles();
       const role = roles.find(r => r.name.toLowerCase() === (roleName || '').toLowerCase());
       if (!role || role.isMaster || (role.permissions && role.permissions.includes('*'))) {
-        summaryText.innerHTML = `Operações vinculadas: <strong class="text-pe-gold">Acesso Total Master (Todas as 14 operações)</strong>`;
+        summaryText.innerHTML = `Operações vinculadas: <strong class="text-pe-gold">Acesso Total Master (Todas as ${ALL_OPERATION_IDS.length} operações)</strong>`;
       } else {
         const count = Array.isArray(role.permissions) ? role.permissions.length : 0;
         summaryText.innerHTML = `Operações vinculadas: <strong class="text-blue-400">${count} de ${ALL_OPERATION_IDS.length} operações autorizadas</strong>`;
@@ -9233,10 +9474,15 @@
             </p>
           </div>
 
-          <div class="flex items-center justify-between pt-2 border-t border-[#1c253b]/80 text-[11px]">
-            <button type="button" onclick="openRoleOperationsModal('${escapeText(role.id || role.name)}')" class="text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1 cursor-pointer">
-              <i class="fa-solid fa-eye text-[10px]"></i> Ver Esquema
-            </button>
+          <div class="flex items-center justify-between pt-2 border-t border-[#1c253b]/80 text-[11px] gap-2">
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="editRolePermissions('${escapeText(role.id || role.name)}')" class="text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 cursor-pointer" title="Editar permissões nas 4 colunas">
+                <i class="fa-solid fa-pen-to-square text-[10px]"></i> Editar
+              </button>
+              <button type="button" onclick="openRoleOperationsModal('${escapeText(role.id || role.name)}')" class="text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1 cursor-pointer">
+                <i class="fa-solid fa-eye text-[10px]"></i> Esquema
+              </button>
+            </div>
             ${isMaster ? `
               <span class="text-[10px] text-amber-400 font-bold font-mono">CARGO PROTEGIDO</span>
             ` : `
@@ -9247,12 +9493,6 @@
           </div>
         `;
         container.appendChild(card);
-      });
-    }
-
-    function toggleAllRoleOperations(check) {
-      document.querySelectorAll('.role-perm-check').forEach(cb => {
-        cb.checked = !!check;
       });
     }
 
@@ -9289,6 +9529,58 @@
       }
 
       let roles = loadCustomRoles();
+
+      // MODO EDIÇÃO DE CARGO EXISTENTE
+      if (currentlyEditingRoleId) {
+        const targetIdx = roles.findIndex(r => r.id === currentlyEditingRoleId);
+        if (targetIdx >= 0) {
+          const oldName = roles[targetIdx].name;
+          const isMaster = roles[targetIdx].isMaster || oldName.toLowerCase() === 'diretor adjunto';
+
+          roles[targetIdx].desc = descInput ? descInput.value.trim() : roles[targetIdx].desc;
+          if (!isMaster) {
+            roles[targetIdx].name = roleName;
+            roles[targetIdx].permissions = selectedPerms;
+          } else {
+            roles[targetIdx].permissions = ['*'];
+          }
+          roles[targetIdx].updated_at = new Date().toISOString();
+
+          // Sincroniza em tempo real as contas vinculadas a este cargo
+          let admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || [];
+          let updatedAdminsCount = 0;
+          admins.forEach(a => {
+            if (a.cargo && a.cargo.toLowerCase() === oldName.toLowerCase()) {
+              a.cargo = roles[targetIdx].name;
+              if (!a.isMaster) {
+                a.permissions = roles[targetIdx].permissions;
+              }
+              updatedAdminsCount++;
+            }
+          });
+          if (updatedAdminsCount > 0) {
+            localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
+            renderInstitutionalAdminsTable();
+          }
+
+          saveCustomRoles(roles);
+          cancelEditingRole();
+          populateRoleSelect();
+          renderCustomRolesList();
+          updateOperationsTelemetry();
+
+          if (feedback) {
+            feedback.classList.remove('hidden');
+            feedback.className = "text-xs rounded-xl p-3 border bg-emerald-950/40 border-emerald-500/40 text-emerald-300 font-bold";
+            feedback.innerHTML = `✓ Permissões do cargo <strong>${escapeText(roleName)}</strong> atualizadas com sucesso (${selectedPerms.length} operações ativas)! ${updatedAdminsCount > 0 ? `${updatedAdminsCount} contas vinculadas foram atualizadas automaticamente.` : ''}`;
+            setTimeout(() => feedback.classList.add('hidden'), 5000);
+          }
+          showToast(`Cargo "${roleName}" atualizado com sucesso!`);
+          return;
+        }
+      }
+
+      // MODO CRIAÇÃO DE NOVO CARGO
       const roleId = 'role_' + Date.now();
       const newRole = {
         id: roleId,
@@ -9313,17 +9605,19 @@
       saveCustomRoles(roles);
       populateRoleSelect();
       renderCustomRolesList();
+      updateOperationsTelemetry();
 
       if (feedback) {
         feedback.classList.remove('hidden');
         feedback.className = "text-xs rounded-xl p-3 border bg-emerald-950/40 border-emerald-500/40 text-emerald-300 font-bold";
-        feedback.innerHTML = `✓ Cargo <strong>${escapeText(roleName)}</strong> salvo com sucesso com <strong>${selectedPerms.length} de ${ALL_OPERATION_IDS.length} operações autorizadas</strong>! Agora você pode vinculá-lo ao criar e-mails abaixo.`;
+        feedback.innerHTML = `✓ Cargo <strong>${escapeText(roleName)}</strong> salvo com sucesso com <strong>${selectedPerms.length} de ${ALL_OPERATION_IDS.length} operações autorizadas</strong>! Já está disponível na seleção de e-mails abaixo.`;
         setTimeout(() => feedback.classList.add('hidden'), 5000);
       }
 
       showToast(`Cargo "${roleName}" criado com ${selectedPerms.length} operações autorizadas!`);
       nameInput.value = '';
       if (descInput) descInput.value = '';
+      resetCheckboxesToDefault();
     }
 
     function handleDeleteCustomRole(roleIdentifier) {
@@ -9343,6 +9637,7 @@
       saveCustomRoles(roles);
       populateRoleSelect();
       renderCustomRolesList();
+      updateOperationsTelemetry();
       showToast(`Cargo "${target.name}" removido.`);
     }
 
@@ -9357,7 +9652,6 @@
       const roles = loadCustomRoles();
       const admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || [];
 
-      // Pode ser ID do cargo, nome do cargo ou e-mail de admin
       if (identifier && identifier.includes('@')) {
         const admin = admins.find(a => a.email.toLowerCase() === identifier.toLowerCase());
         if (admin) {
@@ -9379,12 +9673,13 @@
 
       const isAll = targetRole.isMaster || (targetRole.permissions && targetRole.permissions.includes('*'));
       const activePerms = isAll ? ALL_OPERATION_IDS : (Array.isArray(targetRole.permissions) ? targetRole.permissions : []);
+      const groups = loadSystemOperationGroups();
 
-      container.innerHTML = SYSTEM_OPERATION_GROUPS.map(group => `
+      container.innerHTML = groups.map(group => `
         <div class="bg-[#070b14] border border-[#1c253b] rounded-xl p-3 space-y-2.5">
           <div class="flex items-center gap-1.5 pb-1.5 border-b border-[#1c253b]">
             <span class="text-sm">${group.icon}</span>
-            <span class="font-bold text-[11px] uppercase tracking-wider text-white">${group.title}</span>
+            <span class="font-bold text-[11px] uppercase tracking-wider text-white">${escapeText(group.title)}</span>
           </div>
           <div class="space-y-2">
             ${group.items.map(item => {
@@ -9395,9 +9690,9 @@
                     <span class="${hasIt ? 'text-blue-400 font-bold' : 'text-slate-600'} text-xs">
                       ${hasIt ? '✓' : '✕'}
                     </span>
-                    <span class="font-bold text-[11px] ${hasIt ? 'text-white' : 'text-slate-400 line-through'}">${item.name}</span>
+                    <span class="font-bold text-[11px] ${hasIt ? 'text-white' : 'text-slate-400 line-through'}">${escapeText(item.name)}</span>
                   </div>
-                  <span class="block text-[9px] text-slate-400 leading-tight mt-0.5">${item.desc}</span>
+                  <span class="block text-[9px] text-slate-400 leading-tight mt-0.5">${escapeText(item.desc)}</span>
                 </div>
               `;
             }).join('')}
@@ -9618,6 +9913,7 @@
       document.getElementById('panelRegFederationKey').value = "FPFTM-2026";
       populateRoleSelect();
       renderInstitutionalAdminsTable();
+      updateOperationsTelemetry();
     }
 
     async function handleDeleteInstitutionalAdmin(email) {
@@ -9641,6 +9937,7 @@
       }
 
       renderInstitutionalAdminsTable();
+      updateOperationsTelemetry();
     }
 
     /* =========================================================
@@ -9695,6 +9992,7 @@
         renderAdminNews();
         syncStudioWithCurrentLayout();
         updateDashboardData();
+        renderOperationsSchemeForm();
         populateRoleSelect();
         renderCustomRolesList();
         renderInstitutionalAdminsTable();
