@@ -385,7 +385,7 @@
         }
       }
 
-      // Garante conta institucional de Adriano Mello (Presidente FPEFT)
+      // Garante conta institucional de Adriano Mello (Presidente FPEFT) se não existir
       const presIdx = admins.findIndex(a => a.email && a.email.toLowerCase() === 'adrianomelofpeft@foot-table.pe.org');
       if (presIdx === -1) {
         admins.unshift({
@@ -393,25 +393,28 @@
           cargo: "Presidente FPEFT",
           email: "adrianomelofpeft@foot-table.pe.org",
           senha: "admin",
-          isMaster: true,
-          permissions: ['*'],
+          isMaster: false,
+          permissions: [],
           created_at: "2026-01-01T00:00:00Z"
         });
       } else {
         admins[presIdx].email = 'adrianomelofpeft@foot-table.pe.org';
         if (!admins[presIdx].cargo) admins[presIdx].cargo = "Presidente FPEFT";
-        admins[presIdx].isMaster = true;
-        if (!admins[presIdx].permissions) admins[presIdx].permissions = ['*'];
       }
       localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
 
-      const foundAdmin = admins.find(a => (a.email.toLowerCase() === user || (user === 'gabrielacessor' && a.email.toLowerCase() === 'gabrielacessor@foot-table.pe.org') || (user === 'adrianomello' && a.email.toLowerCase() === 'adrianomelofpeft@foot-table.pe.org')) && a.senha === pass);
+      const normUser = user.includes('@') ? user : `${user}@foot-table.pe.org`;
+      const foundAdmin = admins.find(a => {
+        const aEmail = (a.email || '').toLowerCase().trim();
+        const aPrefix = aEmail.replace(/@foot-table\.pe\.(org|gov\.br)$/i, '');
+        return (aEmail === user || aEmail === normUser || aPrefix === user) && a.senha === pass;
+      });
 
-      // Reconhece ADM MASTER (gabrielacessor ou adrianomelo) com sua senha cadastrada ou padrão
-      const isMasterUser = (user.includes('gabrielacessor') || user.includes('adrianomelo')) && (pass === 'admin' || pass.length >= 4);
+      // Reconhece ADM MASTER (gabrielacessor) com sua senha cadastrada ou padrão
+      const isMasterUser = (user.includes('gabrielacessor')) && (pass === 'admin' || pass.length >= 4);
 
       // Também aceita login padrão da diretoria ou qualquer e-mail institucional cadastrado
-      let isAuthorized = !!foundAdmin || isMasterUser || (user.includes('@foot-table.pe.org') && pass.length >= 4) || (user.includes('@foot-table.pe.gov.br') && pass.length >= 4) || (user === 'admin' && pass.length >= 4);
+      let isAuthorized = !!foundAdmin || isMasterUser || (user === 'admin' && pass.length >= 4);
 
       // Tenta validar no Supabase se existir
       if (!isAuthorized && supabaseClient) {
@@ -419,11 +422,26 @@
           const { data, error } = await supabaseClient
             .from('admin_users')
             .select('*')
-            .eq('email', user)
+            .or(`email.eq.${user},email.eq.${normUser}`)
             .eq('senha', pass)
             .maybeSingle();
 
-          if (!error && data) isAuthorized = true;
+          if (!error && data) {
+            isAuthorized = true;
+            // Se encontrou no Supabase mas não está no localStorage, sincroniza localmente
+            if (!admins.some(a => (a.email || '').toLowerCase() === (data.email || '').toLowerCase())) {
+              admins.push({
+                nome: data.nome || 'Gestor Autorizado',
+                cargo: data.cargo || 'Gestor',
+                email: data.email,
+                senha: data.senha || pass,
+                isMaster: !!(data.isMaster || (data.permissions && data.permissions.includes('*'))),
+                permissions: data.permissions || [],
+                created_at: data.created_at || new Date().toISOString()
+              });
+              localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
+            }
+          }
         } catch (err) {
           console.warn("Validação Supabase:", err);
         }
@@ -444,7 +462,7 @@
           `;
           loginFeedback.classList.remove('hidden');
 
-          const effectiveUser = (user === 'gabrielacessor@foot-table.pe.gov.br' || user === 'gabrielacessor') ? 'gabrielacessor@foot-table.pe.org' : user;
+          const effectiveUser = foundAdmin ? foundAdmin.email : ((user === 'gabrielacessor@foot-table.pe.gov.br' || user === 'gabrielacessor') ? 'gabrielacessor@foot-table.pe.org' : normUser);
           sessionStorage.setItem('pe_admin_logged', 'true');
           sessionStorage.setItem('pe_admin_user', effectiveUser);
 

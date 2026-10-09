@@ -1832,6 +1832,32 @@
                     <span id="roleSummaryPreviewText">Operações vinculadas: Acesso Total Master</span>
                     <button type="button" onclick="previewCurrentSelectedRoleModal()" class="text-blue-400 hover:text-blue-300 font-bold underline cursor-pointer text-[10px]">Ver Esquema</button>
                   </div>
+
+                  <!-- Seletor opcional de operações personalizadas para esta conta -->
+                  <div class="mt-2.5">
+                    <button type="button" onclick="toggleCreateEmailCustomPerms()" class="w-full text-[11px] text-slate-400 hover:text-pe-gold transition font-bold flex items-center justify-between p-2 rounded-xl bg-[#05080e] border border-[#1c253b] hover:border-pe-gold/40 cursor-pointer">
+                      <div class="flex items-center gap-1.5">
+                        <span id="createEmailPermsToggleIcon" class="text-[9px] text-pe-gold">▶</span>
+                        <span>Personalizar operações desta conta</span>
+                      </div>
+                      <span id="createEmailPermsBadge" class="text-[10px] font-mono text-pe-gold bg-pe-gold/10 border border-pe-gold/30 px-2 py-0.5 rounded font-bold">Padrão do cargo</span>
+                    </button>
+                    <div id="createEmailPermsContainer" class="hidden mt-2 p-3 bg-[#05080e] border border-[#1c253b] rounded-xl space-y-2.5 max-h-60 overflow-y-auto">
+                      <div class="flex items-center justify-between pb-1.5 border-b border-[#1c253b] text-[10px]">
+                        <span class="text-slate-400 font-bold">17 Operações Oficiais (4 Módulos):</span>
+                        <div class="flex items-center gap-2">
+                          <button type="button" onclick="syncCreateEmailPermsFromRole()" class="text-blue-400 hover:underline font-bold cursor-pointer">Sincronizar Cargo</button>
+                          <span class="text-slate-600">•</span>
+                          <button type="button" onclick="toggleAllCreateEmailPerms(true)" class="text-emerald-400 hover:underline font-bold cursor-pointer">Todas</button>
+                          <span class="text-slate-600">•</span>
+                          <button type="button" onclick="toggleAllCreateEmailPerms(false)" class="text-rose-400 hover:underline font-bold cursor-pointer">Nenhuma</button>
+                        </div>
+                      </div>
+                      <div id="createEmailPermsGrid" class="space-y-2.5">
+                        <!-- Preenchido dinamicamente via JavaScript -->
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- E-mail Institucional Oficial -->
@@ -2516,23 +2542,27 @@
     };
 
     function getCurrentUserPermissions() {
-      const user = (sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user') || '').toLowerCase().trim();
-      // Superusuário de emergência para recuperação
-      if (user === 'admin') return ['*'];
+      const rawUser = (sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user') || '').toLowerCase().trim();
+      const user = rawUser.includes('@') ? rawUser : `${rawUser}@foot-table.pe.org`;
+      // Superusuário de emergência para recuperação técnica
+      if (rawUser === 'admin') return ['*'];
 
       const admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || [];
-      const current = admins.find(a => a.email && a.email.toLowerCase() === user);
+      const current = admins.find(a => {
+        const aEmail = (a.email || '').toLowerCase().trim();
+        return aEmail === rawUser || aEmail === user || aEmail.replace(/@foot-table\.pe\.(org|gov\.br)$/i, '') === rawUser;
+      });
 
       if (current) {
         // Se a conta específica tem permissões configuradas
-        if (Array.isArray(current.permissions)) {
+        if (Array.isArray(current.permissions) && current.permissions.length > 0) {
           if (current.permissions.includes('*')) return ['*'];
           return current.permissions;
         }
         // Se a conta não tem permissões explícitas, herda do cargo cadastrado
         const roles = JSON.parse(localStorage.getItem('pe_custom_roles')) || [];
         const role = roles.find(r => r.name.toLowerCase() === (current.cargo || '').toLowerCase());
-        if (role && Array.isArray(role.permissions)) {
+        if (role && Array.isArray(role.permissions) && role.permissions.length > 0) {
           if (role.permissions.includes('*')) return ['*'];
           return role.permissions;
         }
@@ -2541,8 +2571,8 @@
       }
 
       // Se não encontrou cadastro institucional mas é gabrielacessor (legado inicial)
-      if (user.includes('gabrielacessor')) return ['*'];
-      return ['*'];
+      if (rawUser.includes('gabrielacessor')) return ['*'];
+      return [];
     }
 
     function isTabAllowed(tabName) {
@@ -2566,11 +2596,24 @@
     function applyPermissionsToUI() {
       const perms = getCurrentUserPermissions();
       const isMaster = perms.includes('*');
-      const user = (sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user') || '').toLowerCase().trim();
+      const rawUser = (sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user') || '').toLowerCase().trim();
+      const user = rawUser.includes('@') ? rawUser : `${rawUser}@foot-table.pe.org`;
       const admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || [];
-      const currentAdmin = admins.find(a => a.email && a.email.toLowerCase() === user);
+      const currentAdmin = admins.find(a => {
+        const aEmail = (a.email || '').toLowerCase().trim();
+        return aEmail === rawUser || aEmail === user || aEmail.replace(/@foot-table\.pe\.(org|gov\.br)$/i, '') === rawUser;
+      });
       const currentCargo = currentAdmin && currentAdmin.cargo ? currentAdmin.cargo : (isMaster ? 'Diretor Adjunto' : 'Gestor Autorizado');
       const isPres = currentCargo.toLowerCase().includes('presidente');
+
+      // Se a aba atualmente ativa estiver bloqueada para o usuário, redireciona imediatamente para 'inicio'
+      const activeTab = ALL_TABS.find(t => {
+        const el = document.getElementById(`tabContent-${t}`);
+        return el && !el.classList.contains('hidden');
+      });
+      if (activeTab && !isTabAllowed(activeTab)) {
+        switchTab('inicio');
+      }
 
       // 1. Atualiza cabeçalho do perfil na Sidebar
       const sidebarUser = document.getElementById('sidebarAdminUser');
@@ -2579,7 +2622,7 @@
       const sidebarBox = document.getElementById('sidebarUserBox');
 
       if (sidebarUser) {
-        sidebarUser.textContent = currentAdmin ? currentAdmin.email : (user || 'gabrielacessor@foot-table.pe.org');
+        sidebarUser.textContent = currentAdmin ? (currentAdmin.nome ? `${currentAdmin.nome}` : currentAdmin.email) : (user || 'gabrielacessor@foot-table.pe.org');
       }
       if (sidebarRole) {
         const icon = isPres ? '👑' : (isMaster ? '⚡' : '🛡️');
@@ -9897,6 +9940,74 @@
         const count = Array.isArray(role.permissions) ? role.permissions.length : 0;
         summaryText.innerHTML = `Operações vinculadas: <strong class="text-blue-400">${count} de ${ALL_OPERATION_IDS.length} operações autorizadas</strong>`;
       }
+      renderCreateEmailPermsCheckboxes(roleName);
+    }
+
+    function renderCreateEmailPermsCheckboxes(roleName) {
+      const grid = document.getElementById('createEmailPermsGrid');
+      if (!grid) return;
+
+      const roles = loadCustomRoles();
+      const role = roles.find(r => r.name.toLowerCase() === (roleName || document.getElementById('panelRegRole')?.value || '').toLowerCase());
+      const rolePerms = role ? (role.isMaster || (role.permissions && role.permissions.includes('*')) ? ALL_OPERATION_IDS : (role.permissions || [])) : ALL_OPERATION_IDS;
+
+      const groups = loadSystemOperationGroups();
+      grid.innerHTML = groups.map(group => `
+        <div class="border border-[#1c253b]/80 bg-[#070b14] rounded-lg p-2.5 space-y-1.5">
+          <div class="flex items-center gap-1.5 text-[11px] font-bold text-pe-gold pb-1 border-b border-[#1c253b]/50">
+            <span>${group.icon}</span> <span>${escapeText(group.title)}</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
+            ${group.items.map(item => {
+              const checked = rolePerms.includes('*') || rolePerms.includes(item.id);
+              return `
+                <label class="flex items-start gap-1.5 p-1 rounded hover:bg-white/5 cursor-pointer text-[10px] text-slate-300">
+                  <input type="checkbox" value="${item.id}" class="create-email-perm-check mt-0.5 accent-[#f5b800] rounded" ${checked ? 'checked' : ''} onchange="updateCreateEmailPermsBadge()" />
+                  <span class="leading-tight">${escapeText(item.name)}</span>
+                </label>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      updateCreateEmailPermsBadge();
+    }
+
+    function updateCreateEmailPermsBadge() {
+      const badge = document.getElementById('createEmailPermsBadge');
+      if (!badge) return;
+      const checkedCount = document.querySelectorAll('.create-email-perm-check:checked').length;
+      const total = ALL_OPERATION_IDS.length;
+      if (checkedCount === total) {
+        badge.textContent = `Acesso Total (${total}/${total})`;
+        badge.className = "text-[10px] font-mono text-amber-300 bg-amber-500/20 border border-amber-500/40 px-2 py-0.5 rounded font-bold";
+      } else {
+        badge.textContent = `${checkedCount}/${total} ops`;
+        badge.className = "text-[10px] font-mono text-blue-300 bg-blue-500/20 border border-blue-500/40 px-2 py-0.5 rounded font-bold";
+      }
+    }
+
+    function toggleCreateEmailCustomPerms() {
+      const container = document.getElementById('createEmailPermsContainer');
+      const icon = document.getElementById('createEmailPermsToggleIcon');
+      if (!container) return;
+      const isHidden = container.classList.contains('hidden');
+      container.classList.toggle('hidden', !isHidden);
+      if (icon) icon.textContent = isHidden ? '▼' : '▶';
+    }
+
+    function syncCreateEmailPermsFromRole() {
+      const roleName = document.getElementById('panelRegRole')?.value;
+      renderCreateEmailPermsCheckboxes(roleName);
+      showToast("Operações sincronizadas com o cargo selecionado!");
+    }
+
+    function toggleAllCreateEmailPerms(check) {
+      document.querySelectorAll('.create-email-perm-check').forEach(cb => {
+        cb.checked = check;
+      });
+      updateCreateEmailPermsBadge();
     }
 
     function selectRoleForNewEmail(roleName) {
@@ -10461,8 +10572,17 @@
         }
       }
 
-      // 5. Sincroniza isMaster baseado estritamente nas permissões
+      // 5. Sincroniza permissões do cargo caso a conta não tenha permissões explícitas definidas
+      const currentRoles = loadCustomRoles();
       list.forEach(a => {
+        if (!a.permissions || !Array.isArray(a.permissions) || a.permissions.length === 0) {
+          const matchedRole = currentRoles.find(r => r.name.toLowerCase() === (a.cargo || '').toLowerCase());
+          if (matchedRole && Array.isArray(matchedRole.permissions) && matchedRole.permissions.length > 0) {
+            a.permissions = (matchedRole.isMaster || matchedRole.permissions.includes('*')) ? ['*'] : [...matchedRole.permissions];
+          } else if (a.cargo === 'Diretor Adjunto' || (a.email && a.email.toLowerCase().includes('gabrielacessor'))) {
+            a.permissions = ['*'];
+          }
+        }
         const isMasterPerm = (a.permissions && a.permissions.includes('*')) || (a.cargo === 'Diretor Adjunto');
         a.isMaster = !!isMasterPerm;
       });
@@ -10483,7 +10603,7 @@
 
       admins.forEach(admin => {
         const roleObj = roles.find(r => r.name.toLowerCase() === (admin.cargo || '').toLowerCase());
-        const adminPerms = (admin.permissions && Array.isArray(admin.permissions))
+        const adminPerms = (admin.permissions && Array.isArray(admin.permissions) && admin.permissions.length > 0)
           ? admin.permissions
           : (roleObj && Array.isArray(roleObj.permissions) ? roleObj.permissions : []);
         const isMaster = adminPerms.includes('*') || (adminPerms.length >= ALL_OPERATION_IDS.length && ALL_OPERATION_IDS.length > 0) || (admin.cargo === 'Diretor Adjunto');
@@ -10496,7 +10616,7 @@
         tr.innerHTML = `
           <td class="py-3 px-3 whitespace-nowrap">
             <div class="font-bold text-white uppercase text-xs flex items-center gap-1.5 whitespace-nowrap">
-              ${isPres ? '<span class="text-amber-300">👑</span>' : (isMaster ? '<span class="text-amber-400">⚡</span>' : '<span>👤</span>')}
+              ${isPres ? '<span class="text-amber-300">👑</span>' : (isMaster ? '<span class="text-amber-400">⚡</span>' : '<span class="text-blue-400">🛡️</span>')}
               <span>${escapeText(admin.nome || 'Gestor Autorizado')}</span>
             </div>
             <span class="text-[10px] text-slate-400 block mt-0.5 whitespace-nowrap">Criado em: ${admin.created_at ? new Date(admin.created_at).toLocaleDateString('pt-BR') : '01/01/2026'}</span>
@@ -10566,11 +10686,27 @@
       feedback.className = "text-xs rounded-xl p-3 border bg-blue-950/40 border-blue-500/40 text-blue-300";
       feedback.textContent = "Gerando credencial e vinculando operações do cargo...";
 
-      // Encontra permissões do cargo
+      // Encontra permissões do cargo ou personalizadas
       const roles = loadCustomRoles();
       const roleObj = roles.find(r => r.name.toLowerCase() === role.toLowerCase());
-      const isMasterRole = role === 'Diretor Adjunto' || (roleObj && (roleObj.isMaster || (roleObj.permissions && roleObj.permissions.includes('*'))));
-      const permissions = isMasterRole ? ['*'] : (roleObj && Array.isArray(roleObj.permissions) ? roleObj.permissions : []);
+
+      const customBox = document.getElementById('createEmailPermsContainer');
+      const isCustomExpanded = customBox && !customBox.classList.contains('hidden');
+      const checkedPerms = document.querySelectorAll('.create-email-perm-check:checked');
+      let customPerms = [];
+      checkedPerms.forEach(cb => customPerms.push(cb.value));
+
+      let permissions = [];
+      let isMasterRole = false;
+
+      if (isCustomExpanded && checkedPerms.length > 0) {
+        const isAll = customPerms.length >= ALL_OPERATION_IDS.length || customPerms.includes('*');
+        permissions = isAll ? ['*'] : customPerms;
+        isMasterRole = isAll || role === 'Diretor Adjunto';
+      } else {
+        isMasterRole = role === 'Diretor Adjunto' || (roleObj && (roleObj.isMaster || (roleObj.permissions && roleObj.permissions.includes('*'))));
+        permissions = isMasterRole ? ['*'] : (roleObj && Array.isArray(roleObj.permissions) ? roleObj.permissions : []);
+      }
 
       const newAdmin = {
         nome: name,
@@ -10600,10 +10736,14 @@
       }
 
       feedback.className = "text-xs rounded-xl p-3 border bg-emerald-950/40 border-emerald-500/50 text-emerald-300 font-bold";
-      feedback.innerHTML = `✓ E-mail institucional <strong>${fullEmail}</strong> credenciado com sucesso no cargo <strong>${escapeText(role)}</strong>! Esta conta já pode acessar o sistema no login com suas permissões operacionais.`;
+      feedback.innerHTML = `✓ E-mail institucional <strong>${fullEmail}</strong> credenciado com sucesso no cargo <strong>${escapeText(role)}</strong>! Esta conta já pode acessar o sistema no login com suas permissões operacionais (${isMasterRole ? 'Acesso Total Master' : `${permissions.length} operações`}).`;
 
       document.getElementById('adminCreateEmailForm').reset();
       document.getElementById('panelRegFederationKey').value = "FPFTM-2026";
+      const customPermsBox = document.getElementById('createEmailPermsContainer');
+      if (customPermsBox) customPermsBox.classList.add('hidden');
+      const toggleIcon = document.getElementById('createEmailPermsToggleIcon');
+      if (toggleIcon) toggleIcon.textContent = '▶';
       populateRoleSelect();
       renderInstitutionalAdminsTable();
       updateOperationsTelemetry();
