@@ -2642,43 +2642,38 @@
         sidebarBox.setAttribute('title', `${user} (${currentCargo}) - ${isMaster ? 'Acesso Total Master' : `${perms.length} operações autorizadas`}`);
       }
 
-      // 2. Bloqueio e Restrição Visual das Abas na Barra Lateral (Sidebar)
+      // 2. Ocultação Rigorosa das Abas Não Permitidas na Barra Lateral (Sidebar)
       ALL_TABS.forEach(t => {
         const btn = document.getElementById(`navBtn-${t}`);
         if (!btn) return;
 
         const allowed = isTabAllowed(t);
-        let lockEl = btn.querySelector('.nav-tab-lock-indicator');
+        const lockEl = btn.querySelector('.nav-tab-lock-indicator');
+        if (lockEl) lockEl.remove();
 
         if (!allowed) {
-          btn.classList.add('opacity-30', 'grayscale', 'cursor-not-allowed');
-          btn.setAttribute('title', `🔒 Acesso Bloqueado: seu cargo (${currentCargo}) não possui permissão para esta aba.`);
-          
-          if (!lockEl) {
-            lockEl = document.createElement('span');
-            lockEl.className = 'nav-tab-lock-indicator text-[10px] font-mono font-bold text-rose-400 bg-rose-950/70 border border-rose-500/40 px-1.5 py-0.5 rounded ml-auto flex items-center gap-1 shadow-sm';
-            lockEl.innerHTML = '🔒 <span class="sidebar-text text-[9px] uppercase">Bloqueado</span>';
-            btn.appendChild(lockEl);
-          } else {
-            lockEl.classList.remove('hidden');
-          }
+          btn.classList.add('hidden');
+          btn.style.display = 'none';
         } else {
-          btn.classList.remove('opacity-30', 'grayscale', 'cursor-not-allowed');
+          btn.classList.remove('hidden', 'opacity-30', 'grayscale', 'cursor-not-allowed');
+          btn.style.display = '';
           btn.removeAttribute('title');
-          if (lockEl) lockEl.classList.add('hidden');
         }
       });
 
-      // 3. Bloqueio de Botões de Ação no Studio (PDF, PNG, Imprimir)
+      // 3. Ocultação de Botões de Ação no Studio (PDF, PNG, Imprimir)
       const canPdf = hasPermission('carteira_pdf');
       ['btnExportPDF', 'btnDownloadPdf', 'btnDownloadPdfMobile'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-          el.disabled = !canPdf;
-          el.classList.toggle('opacity-40', !canPdf);
-          el.classList.toggle('cursor-not-allowed', !canPdf);
-          if (!canPdf) el.setAttribute('title', '🔒 Sem permissão para baixar PDF');
-          else el.removeAttribute('title');
+          if (!canPdf) {
+            el.classList.add('hidden');
+            el.style.display = 'none';
+          } else {
+            el.classList.remove('hidden');
+            el.style.display = '';
+            el.disabled = false;
+          }
         }
       });
 
@@ -2686,11 +2681,14 @@
       ['btnExportPNG', 'btnDownloadPng', 'btnDownloadPngMobile'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-          el.disabled = !canPng;
-          el.classList.toggle('opacity-40', !canPng);
-          el.classList.toggle('cursor-not-allowed', !canPng);
-          if (!canPng) el.setAttribute('title', '🔒 Sem permissão para baixar PNG');
-          else el.removeAttribute('title');
+          if (!canPng) {
+            el.classList.add('hidden');
+            el.style.display = 'none';
+          } else {
+            el.classList.remove('hidden');
+            el.style.display = '';
+            el.disabled = false;
+          }
         }
       });
 
@@ -2698,85 +2696,112 @@
       ['btnPrintCarteira', 'btnPrintCarteiraMobile'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-          el.disabled = !canImprimir;
-          el.classList.toggle('opacity-40', !canImprimir);
-          el.classList.toggle('cursor-not-allowed', !canImprimir);
-          if (!canImprimir) el.setAttribute('title', '🔒 Sem permissão para imprimir carteira');
-          else el.removeAttribute('title');
+          if (!canImprimir) {
+            el.classList.add('hidden');
+            el.style.display = 'none';
+          } else {
+            el.classList.remove('hidden');
+            el.style.display = '';
+            el.disabled = false;
+          }
         }
       });
 
-      // 4. Bloqueio de Exportação e Homologação na Aba Jogadores
+      // 4. Ocultação de Exportação e Homologação na Aba Jogadores
       const canExportJogadores = hasPermission('atletas_exportar');
       ['btnExportZip', 'btnExportCsv', 'btnExportExcel', 'btnExportarZipJogadores', 'btnExportarCsvJogadores'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-          el.disabled = !canExportJogadores;
-          el.classList.toggle('opacity-40', !canExportJogadores);
-          el.classList.toggle('cursor-not-allowed', !canExportJogadores);
-          if (!canExportJogadores) el.setAttribute('title', '🔒 Sem permissão para exportar jogadores');
-          else el.removeAttribute('title');
+          if (!canExportJogadores) {
+            el.classList.add('hidden');
+            el.style.display = 'none';
+          } else {
+            el.classList.remove('hidden');
+            el.style.display = '';
+            el.disabled = false;
+          }
         }
       });
 
       const canHomologar = hasPermission('atletas_homologar');
       const btnHomologarTodos = document.getElementById('btnHomologarTodos');
       if (btnHomologarTodos) {
-        btnHomologarTodos.disabled = !canHomologar;
-        btnHomologarTodos.classList.toggle('opacity-40', !canHomologar);
-        btnHomologarTodos.classList.toggle('cursor-not-allowed', !canHomologar);
-      }
-
-      // 5. Bloqueio no Formulário de Notícias
-      const canPublicarNoticia = hasPermission('noticias_publicar');
-      const newsForm = document.getElementById('adminNewsForm');
-      if (newsForm) {
-        const submitNewsBtn = newsForm.querySelector('button[type="submit"]');
-        if (submitNewsBtn) {
-          submitNewsBtn.disabled = !canPublicarNoticia;
-          submitNewsBtn.classList.toggle('opacity-40', !canPublicarNoticia);
-          submitNewsBtn.classList.toggle('cursor-not-allowed', !canPublicarNoticia);
+        if (!canHomologar) {
+          btnHomologarTodos.classList.add('hidden');
+          btnHomologarTodos.style.display = 'none';
+        } else {
+          btnHomologarTodos.classList.remove('hidden');
+          btnHomologarTodos.style.display = '';
+          btnHomologarTodos.disabled = false;
         }
       }
 
-      // 6. Bloqueio no Formulário de E-mails e Cargos
+      // 5. Ocultação no Formulário de Notícias
+      const canPublicarNoticia = hasPermission('noticias_publicar');
+      const newsForm = document.getElementById('adminNewsForm');
+      if (newsForm) {
+        const newsCard = newsForm.closest('.bg-\\[\\#0b101d\\]') || newsForm;
+        if (!canPublicarNoticia) {
+          newsCard.classList.add('hidden');
+          newsCard.style.display = 'none';
+        } else {
+          newsCard.classList.remove('hidden');
+          newsCard.style.display = '';
+        }
+      }
+
+      // 6. Ocultação no Formulário de E-mails e Cargos
       const canEmails = hasPermission('gestao_emails');
       const emailForm = document.getElementById('adminCreateEmailForm');
       if (emailForm) {
-        const submitEmailBtn = emailForm.querySelector('button[type="submit"]');
-        if (submitEmailBtn) {
-          submitEmailBtn.disabled = !canEmails;
-          submitEmailBtn.classList.toggle('opacity-40', !canEmails);
-          submitEmailBtn.classList.toggle('cursor-not-allowed', !canEmails);
+        const emailCard = emailForm.closest('.bg-\\[\\#0b101d\\]') || emailForm;
+        if (!canEmails) {
+          emailCard.classList.add('hidden');
+          emailCard.style.display = 'none';
+        } else {
+          emailCard.classList.remove('hidden');
+          emailCard.style.display = '';
         }
       }
 
       const canCargos = hasPermission('gestao_cargos');
       const roleForm = document.getElementById('createRoleForm');
       if (roleForm) {
-        const submitRoleBtn = document.getElementById('submitRoleBtn');
-        if (submitRoleBtn) {
-          submitRoleBtn.disabled = !canCargos;
-          submitRoleBtn.classList.toggle('opacity-40', !canCargos);
-          submitRoleBtn.classList.toggle('cursor-not-allowed', !canCargos);
+        const roleCard = roleForm.closest('.bg-\\[\\#0b101d\\]') || roleForm;
+        if (!canCargos) {
+          roleCard.classList.add('hidden');
+          roleCard.style.display = 'none';
+        } else {
+          roleCard.classList.remove('hidden');
+          roleCard.style.display = '';
         }
       }
 
-      // 7. Bloqueio de Configurações Supabase e Limpeza
+      // 7. Ocultação de Configurações Supabase e Limpeza
       const canSupabase = hasPermission('gestao_supabase');
       const btnSaveSupabase = document.getElementById('btnSaveSupabaseCfg');
       if (btnSaveSupabase) {
-        btnSaveSupabase.disabled = !canSupabase;
-        btnSaveSupabase.classList.toggle('opacity-40', !canSupabase);
-        btnSaveSupabase.classList.toggle('cursor-not-allowed', !canSupabase);
+        const supabaseCard = btnSaveSupabase.closest('.bg-\\[\\#0b101d\\]') || btnSaveSupabase;
+        if (!canSupabase) {
+          supabaseCard.classList.add('hidden');
+          supabaseCard.style.display = 'none';
+        } else {
+          supabaseCard.classList.remove('hidden');
+          supabaseCard.style.display = '';
+        }
       }
 
       const canLimpeza = hasPermission('gestao_limpeza');
       const btnResetSystem = document.getElementById('btnResetSystemDatabase');
       if (btnResetSystem) {
-        btnResetSystem.disabled = !canLimpeza;
-        btnResetSystem.classList.toggle('opacity-40', !canLimpeza);
-        btnResetSystem.classList.toggle('cursor-not-allowed', !canLimpeza);
+        const resetCard = btnResetSystem.closest('.bg-\\[\\#0b101d\\]') || btnResetSystem;
+        if (!canLimpeza) {
+          resetCard.classList.add('hidden');
+          resetCard.style.display = 'none';
+        } else {
+          resetCard.classList.remove('hidden');
+          resetCard.style.display = '';
+        }
       }
     }
 
