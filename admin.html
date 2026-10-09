@@ -403,15 +403,15 @@
       </div>
 
       <!-- Perfil do Administrador Logado -->
-      <div id="sidebarUserBox" class="px-5 py-3.5 bg-[#080d16] border-b border-[#151c2e]/80 flex items-center justify-between transition-all" title="gabrielacessor@foot-table.pe.gov.br (MASTER)">
+      <div id="sidebarUserBox" class="px-5 py-3.5 bg-[#080d16] border-b border-[#151c2e]/80 flex items-center justify-between transition-all" title="gabrielacessor@foot-table.pe.gov.br (Diretor Adjunto)">
         <div class="flex items-center gap-2.5 min-w-0">
-          <div class="w-2.5 h-2.5 rounded-full bg-pe-gold animate-pulse shrink-0" title="Online - ADM MASTER"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-pe-gold animate-pulse shrink-0" title="Online - Diretor Adjunto"></div>
           <div class="min-w-0 sidebar-text">
             <span id="sidebarAdminUser" class="block text-xs font-bold text-white truncate">gabrielacessor@foot-table.pe.gov.br</span>
-            <span id="sidebarAdminRole" class="text-[9px] uppercase tracking-wider text-pe-gold font-bold">👑 ADM MASTER • Presidência</span>
+            <span id="sidebarAdminRole" class="text-[9px] uppercase tracking-wider text-pe-gold font-bold">⚡ Diretor Adjunto</span>
           </div>
         </div>
-        <span class="text-[10px] bg-pe-gold/20 text-pe-gold px-2 py-0.5 rounded font-mono font-bold sidebar-text shrink-0">MASTER</span>
+        <span class="text-[10px] bg-pe-gold/20 text-pe-gold px-2 py-0.5 rounded font-mono font-bold sidebar-text shrink-0">DIRETOR ADJUNTO</span>
       </div>
 
       <!-- Menu de Navegação Vertical -->
@@ -873,14 +873,14 @@
                     </div>
                     <div>
                       <div class="flex items-center justify-between mb-1">
-                        <label class="block text-slate-400 font-bold text-[10px]">Assinatura Presidente</label>
+                        <label class="block text-slate-400 font-bold text-[10px]">Assinatura Diretoria Adjunta</label>
                         <label for="inputSignatureFile" class="text-[9px] font-bold text-pe-gold hover:text-amber-300 flex items-center gap-1 cursor-pointer transition select-none" title="Upar imagem transparente da assinatura (PNG/SVG)">
                           <i class="fa-solid fa-file-arrow-up"></i> Upar Imagem
                         </label>
                         <input type="file" id="inputSignatureFile" accept="image/*" class="hidden" onchange="handlePresidentSignatureUpload(event)" />
                       </div>
                       <div class="flex items-center gap-1.5">
-                        <input type="text" id="inputAssinatura" value="ASSINATURA DO PRESIDENTE FPEFT" class="flex-1 bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-2.5 py-1.5 text-[10px] uppercase text-white outline-none font-fpeft" />
+                        <input type="text" id="inputAssinatura" value="ASSINATURA DA DIRETORIA ADJUNTA FPEFT" class="flex-1 bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-2.5 py-1.5 text-[10px] uppercase text-white outline-none font-fpeft" />
                         <button type="button" id="btnRemoveSignatureImg" onclick="removePresidentSignatureImage()" class="hidden px-2 py-1.5 bg-rose-950/60 hover:bg-rose-900/80 border border-rose-700/50 text-rose-300 rounded-xl text-[10px] transition cursor-pointer" title="Remover imagem da assinatura">
                           <i class="fa-solid fa-trash-can"></i>
                         </button>
@@ -1679,43 +1679,286 @@
               <div class="flex items-start gap-4">
                 <span class="text-3xl">📧</span>
                 <div class="space-y-1">
-                  <h3 class="font-oswald text-lg sm:text-xl uppercase font-bold text-white tracking-wide">
-                    Criação de E-mails Institucionais & Gestão
+                  <h3 class="font-oswald text-lg sm:text-xl uppercase font-bold text-white tracking-wide flex items-center gap-2">
+                    <span>E-mails Institucionais & Esquema de Operações</span>
                   </h3>
                   <p class="text-xs text-slate-300">
-                    Gere e gerencie contas de e-mail oficiais com domínio institucional <code class="text-pe-gold bg-black/40 px-1.5 py-0.5 rounded font-mono font-bold">@foot-table.pe.gov.br</code> para login da diretoria.
+                    Crie cargos personalizados, defina o que cada cargo pode fazer no sistema e vincule as operações aos e-mails <code class="text-pe-gold bg-black/40 px-1.5 py-0.5 rounded font-mono font-bold">@foot-table.pe.gov.br</code> credenciados.
                   </p>
                 </div>
               </div>
               <div class="inline-flex items-center gap-2 bg-[#05080e] border border-pe-gold/40 px-3.5 py-2 rounded-xl text-xs shrink-0">
-                <span class="text-pe-gold font-bold">👑 ADM MASTER:</span>
+                <span class="text-pe-gold font-bold">⚡ DIRETOR ADJUNTO:</span>
                 <span class="font-mono text-white font-bold">gabrielacessor@foot-table.pe.gov.br</span>
               </div>
             </div>
           </div>
 
-          <!-- Cabeçalho de Ação -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Diretoria & Credenciamento</span>
-              <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Gerador de E-mail Institucional</h2>
+          <!-- SEÇÃO 1: ESQUEMA DE OPERAÇÕES & CONSTRUTOR DE CARGOS (FIEL À IMAGEM DO USUÁRIO) -->
+          <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 sm:p-7 shadow-2xl relative space-y-6">
+            <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0 rounded-t-2xl"></div>
+
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1c253b] pb-4">
+              <div>
+                <div class="flex items-center gap-2 text-pe-gold text-xs font-bold uppercase tracking-wider">
+                  <span>🛡️</span> <span>ESQUEMA DE OPERAÇÃO DE CARGOS & PERMISSÕES</span>
+                </div>
+                <h3 class="font-oswald text-xl sm:text-2xl uppercase font-bold text-white mt-1">
+                  O que cada Cargo deve fazer no sistema
+                </h3>
+                <p class="text-xs text-slate-400 mt-0.5">
+                  Crie o nome do cargo, selecione as operações autorizadas nas 4 colunas abaixo e vincule aos e-mails credenciados.
+                </p>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0">
+                <button type="button" onclick="toggleAllRoleOperations(true)" class="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-blue-950/80 border border-blue-500/40 text-blue-300 hover:bg-blue-900 transition cursor-pointer">
+                  ✓ Marcar Todas
+                </button>
+                <button type="button" onclick="toggleAllRoleOperations(false)" class="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:bg-slate-800 transition cursor-pointer">
+                  ✕ Desmarcar Todas
+                </button>
+              </div>
             </div>
-            <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span class="text-xs font-mono text-emerald-400 font-bold">CHAVE DE HOMOLOGAÇÃO: FPFTM-2026</span>
+
+            <!-- Formulário de Criação do Cargo -->
+            <form id="createRoleForm" onsubmit="handleCreateCustomRole(event)" class="space-y-6">
+              
+              <!-- Linha de Entrada: Nome do Cargo & Descrição -->
+              <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
+                <div class="sm:col-span-5">
+                  <label class="block text-slate-300 font-bold mb-1.5 uppercase tracking-wider text-[11px]">
+                    Nome do Cargo / Atribuição *
+                  </label>
+                  <input 
+                    type="text" 
+                    id="newRoleName" 
+                    required 
+                    placeholder="ex: Coordenador de Jogos, Secretaria Técnica, Balcão & Recepção..." 
+                    class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-4 py-2.5 text-white font-bold text-xs outline-none" 
+                  />
+                </div>
+                <div class="sm:col-span-7">
+                  <label class="block text-slate-300 font-bold mb-1.5 uppercase tracking-wider text-[11px]">
+                    Descrição / Resumo das Atividades
+                  </label>
+                  <input 
+                    type="text" 
+                    id="newRoleDesc" 
+                    placeholder="ex: Responsável pelo controle de quadras, tabelas de partidas e súmulas" 
+                    class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-4 py-2.5 text-slate-300 text-xs outline-none" 
+                  />
+                </div>
+              </div>
+
+              <!-- AS 4 COLUNAS EXATAS DA IMAGEM DO USUÁRIO -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                <!-- Coluna 1: OPERAÇÃO DE JOGOS -->
+                <div class="bg-[#070b14] border border-[#1c253b] rounded-2xl p-4 space-y-3 shadow-md flex flex-col justify-between">
+                  <div class="space-y-3">
+                    <div class="flex items-center gap-2 pb-2 border-b border-[#1c253b]">
+                      <span class="text-base">🎮</span>
+                      <h4 class="font-bold text-xs uppercase tracking-wider text-white">OPERAÇÃO DE JOGOS</h4>
+                    </div>
+
+                    <!-- Item 1: Apagar / Cancelar Jogos -->
+                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
+                      <input type="checkbox" id="perm_jogos_cancelar" value="jogos_cancelar" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
+                      <div class="min-w-0">
+                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Apagar / Cancelar Jogos</span>
+                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Permite apagar jogos do sistema e liberar horário imediatamente</span>
+                      </div>
+                    </label>
+
+                    <!-- Item 2: Liberar e Iniciar Partidas -->
+                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
+                      <input type="checkbox" id="perm_jogos_iniciar" value="jogos_iniciar" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
+                      <div class="min-w-0">
+                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Liberar e Iniciar Partidas</span>
+                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Botão de liberar entrada/iniciar jogo e cronômetro ao vivo</span>
+                      </div>
+                    </label>
+
+                    <!-- Item 3: Finalizar Jogos ao Vivo -->
+                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
+                      <input type="checkbox" id="perm_jogos_finalizar" value="jogos_finalizar" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
+                      <div class="min-w-0">
+                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Finalizar Jogos ao Vivo</span>
+                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Permite encerrar partidas e finalizar o tempo de jogo</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Coluna 2: BALCÃO & CONSUMO -->
+                <div class="bg-[#070b14] border border-[#1c253b] rounded-2xl p-4 space-y-3 shadow-md flex flex-col justify-between">
+                  <div class="space-y-3">
+                    <div class="flex items-center gap-2 pb-2 border-b border-[#1c253b]">
+                      <span class="text-base">🛒</span>
+                      <h4 class="font-bold text-xs uppercase tracking-wider text-white">BALCÃO & CONSUMO</h4>
+                    </div>
+
+                    <!-- Item 4: Reserva Direta no Balcão -->
+                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
+                      <input type="checkbox" id="perm_balcao_reserva" value="balcao_reserva" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
+                      <div class="min-w-0">
+                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Reserva Direta no Balcão</span>
+                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Criar novas reservas avulsas diretamente na recepção</span>
+                      </div>
+                    </label>
+
+                    <!-- Item 5: Comanda do Bar & Lanches -->
+                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
+                      <input type="checkbox" id="perm_balcao_comanda" value="balcao_comanda" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
+                      <div class="min-w-0">
+                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Comanda do Bar & Lanches</span>
+                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Aba de Bar, comanda individual e entrega de pedidos</span>
+                      </div>
+                    </label>
+
+                    <!-- Item 6: Cardápio e Estoque do Bar -->
+                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
+                      <input type="checkbox" id="perm_balcao_estoque" value="balcao_estoque" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
+                      <div class="min-w-0">
+                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Cardápio e Estoque do Bar</span>
+                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Cadastrar novos produtos, fotos e alterar valores de venda</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Coluna 3: QUADRAS & ESPAÇOS -->
+                <div class="bg-[#070b14] border border-[#1c253b] rounded-2xl p-4 space-y-3 shadow-md flex flex-col justify-between">
+                  <div class="space-y-3">
+                    <div class="flex items-center gap-2 pb-2 border-b border-[#1c253b]">
+                      <span class="text-base">🏟️</span>
+                      <h4 class="font-bold text-xs uppercase tracking-wider text-white">QUADRAS & ESPAÇOS</h4>
+                    </div>
+
+                    <!-- Item 7: Editar Quadras e Preços -->
+                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
+                      <input type="checkbox" id="perm_espacos_quadras" value="espacos_quadras" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
+                      <div class="min-w-0">
+                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Editar Quadras e Preços</span>
+                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Cadastrar quadras, alterar fotos e ajustar tarifas por hora</span>
+                      </div>
+                    </label>
+
+                    <!-- Item 8: Treinos e Manutenções -->
+                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
+                      <input type="checkbox" id="perm_espacos_treinos" value="espacos_treinos" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
+                      <div class="min-w-0">
+                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Treinos e Manutenções</span>
+                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Bloquear horários na grade para escolinhas e reformas</span>
+                      </div>
+                    </label>
+
+                    <!-- Item 9: Categorias e Esportes -->
+                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
+                      <input type="checkbox" id="perm_espacos_esportes" value="espacos_esportes" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
+                      <div class="min-w-0">
+                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Categorias e Esportes</span>
+                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Criar e editar modalidades esportivas {Beach, Society...}</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Coluna 4: CADASTROS & GESTÃO -->
+                <div class="bg-[#070b14] border border-[#1c253b] rounded-2xl p-4 space-y-3 shadow-md flex flex-col justify-between">
+                  <div class="space-y-3">
+                    <div class="flex items-center gap-2 pb-2 border-b border-[#1c253b]">
+                      <span class="text-base">⚙️</span>
+                      <h4 class="font-bold text-xs uppercase tracking-wider text-white">CADASTROS & GESTÃO</h4>
+                    </div>
+
+                    <!-- Item 10: Base de Clientes / Atletas -->
+                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
+                      <input type="checkbox" id="perm_gestao_atletas" value="gestao_atletas" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
+                      <div class="min-w-0">
+                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Base de Clientes / Atletas</span>
+                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Visualizar lista de clientes, fichas médicas e telefones</span>
+                      </div>
+                    </label>
+
+                    <!-- Item 11: Horários Fixos (Mensalistas) -->
+                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
+                      <input type="checkbox" id="perm_gestao_mensalistas" value="gestao_mensalistas" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
+                      <div class="min-w-0">
+                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Horários Fixos (Mensalistas)</span>
+                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Gerenciar mensalistas e contratos semanais fixos</span>
+                      </div>
+                    </label>
+
+                    <!-- Item 12: Gestores e Ajustes Gerais -->
+                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
+                      <input type="checkbox" id="perm_gestao_ajustes" value="gestao_ajustes" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0">
+                      <div class="min-w-0">
+                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Gestores e Ajustes Gerais</span>
+                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Cadastrar novos gestores, níveis de acesso e banco de dados</span>
+                      </div>
+                    </label>
+
+                    <!-- Item 13: Baixar Carteiras (PDF/PNG) -->
+                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
+                      <input type="checkbox" id="perm_gestao_carteiras_download" value="gestao_carteiras_download" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
+                      <div class="min-w-0">
+                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Baixar Carteiras (PDF/PNG)</span>
+                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Permissão de download da carteira do atleta federado</span>
+                      </div>
+                    </label>
+
+                    <!-- Item 14: Publicar & Editar Notícias -->
+                    <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group">
+                      <input type="checkbox" id="perm_gestao_noticias" value="gestao_noticias" class="role-perm-check w-4 h-4 mt-0.5 rounded text-blue-600 focus:ring-0 accent-blue-600 cursor-pointer shrink-0" checked>
+                      <div class="min-w-0">
+                        <span class="block text-xs font-bold text-white group-hover:text-blue-300 transition">Publicar e Editar Notícias</span>
+                        <span class="block text-[10px] text-slate-400 leading-snug mt-0.5">Criar matérias com fotos sincronizadas no Supabase</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Botão de Salvar Cargo -->
+              <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+                <div id="roleCreateFeedback" class="hidden text-xs rounded-xl p-3 border w-full sm:w-auto"></div>
+                <button type="submit" class="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-oswald text-sm uppercase font-bold tracking-wider px-7 py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
+                  <span>💾</span> SALVAR CARGO COM ESTE ESQUEMA DE OPERAÇÕES
+                </button>
+              </div>
+            </form>
+
+            <!-- Lista de Cargos Cadastrados no Sistema -->
+            <div class="border-t border-[#1c253b] pt-5 space-y-3">
+              <div class="flex items-center justify-between">
+                <h4 class="font-oswald text-base uppercase font-bold text-white flex items-center gap-2">
+                  <span>📋</span> Cargos & Operações Cadastrados (<span id="totalCustomRolesCount" class="text-pe-gold">1</span>)
+                </h4>
+                <span class="text-[11px] text-slate-400">Selecione qualquer cargo abaixo para vincular ao criar e-mails</span>
+              </div>
+              <div id="customRolesContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <!-- Preenchido via JavaScript -->
+              </div>
             </div>
+
           </div>
 
-          <!-- Grid: Formulário de Criação + Lista de E-mails -->
+          <!-- SEÇÃO 2: GERADOR DE E-MAIL INSTITUCIONAL & TABELA DE CONTAS AUTORIZADAS -->
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
-            <!-- Formulário de Criação (Exato da Imagem) -->
+            <!-- Formulário de Criação de E-mail Vinculado a Cargo -->
             <div class="lg:col-span-5 bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 shadow-xl relative">
               <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0 rounded-t-2xl"></div>
 
-              <h3 class="font-oswald text-lg uppercase font-bold text-white mb-4 flex items-center gap-2">
-                <span>✍️</span> Criar E-mail Institucional
-              </h3>
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="font-oswald text-lg uppercase font-bold text-white flex items-center gap-2">
+                  <span>✍️</span> Criar E-mail Institucional
+                </h3>
+                <span class="text-[10px] text-pe-gold font-mono font-bold">FPFTM-2026</span>
+              </div>
 
               <form id="adminCreateEmailForm" onsubmit="handleAdminCreateEmail(event)" class="space-y-4 text-xs">
                 
@@ -1727,19 +1970,23 @@
                   <input type="text" id="panelRegName" required placeholder="ex: Gabriel Alves" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-4 py-2.5 text-white font-bold outline-none" />
                 </div>
 
-                <!-- Cargo / Atribuição -->
+                <!-- Cargo / Atribuição (Dinâmico a partir do Esquema) -->
                 <div>
-                  <label class="block text-slate-300 font-bold mb-1.5 uppercase tracking-wider text-[11px]">
-                    Cargo / Atribuição
-                  </label>
-                  <select id="panelRegRole" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-4 py-2.5 text-slate-200 outline-none">
-                    <option value="Presidência">Presidência</option>
-                    <option value="Diretoria Técnica">Diretoria Técnica</option>
-                    <option value="Comissão de Arbitragem">Comissão de Arbitragem</option>
-                    <option value="Secretaria Geral">Secretaria Geral</option>
-                    <option value="Delegado Federativo">Delegado Federativo</option>
-                    <option value="Coordenação de Eventos">Coordenação de Eventos</option>
+                  <div class="flex items-center justify-between mb-1.5">
+                    <label class="block text-slate-300 font-bold uppercase tracking-wider text-[11px]">
+                      Cargo Vinculado *
+                    </label>
+                    <span class="text-[10px] text-pe-gold font-semibold">Define as operações da conta</span>
+                  </div>
+                  <select id="panelRegRole" onchange="updateSelectedRolePreview(this.value)" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-4 py-2.5 text-white font-bold outline-none">
+                    <option value="Diretor Adjunto">Diretor Adjunto (Acesso Total)</option>
                   </select>
+                  
+                  <!-- Resumo dinâmico de operações do cargo -->
+                  <div id="roleSummaryPreview" class="mt-2 p-2.5 bg-[#05080e] border border-blue-500/30 rounded-xl text-[11px] text-slate-300 flex items-center justify-between">
+                    <span id="roleSummaryPreviewText">Operações vinculadas: Acesso Total Master</span>
+                    <button type="button" onclick="previewCurrentSelectedRoleModal()" class="text-blue-400 hover:text-blue-300 font-bold underline cursor-pointer text-[10px]">Ver Esquema</button>
+                  </div>
                 </div>
 
                 <!-- E-mail Institucional Oficial -->
@@ -1807,8 +2054,9 @@
                     <thead class="bg-[#05080e] text-slate-400 uppercase text-[10px] font-mono border-b border-[#1c253b]">
                       <tr>
                         <th class="py-3 px-3">Gestor</th>
-                        <th class="py-3 px-3">E-mail Institucional</th>
+                        <th class="py-3 px-3">E-mail</th>
                         <th class="py-3 px-3">Cargo</th>
+                        <th class="py-3 px-3">Operações</th>
                         <th class="py-3 px-3 text-right">Ação</th>
                       </tr>
                     </thead>
@@ -1820,13 +2068,42 @@
 
                 <div class="bg-[#05080e] border border-[#1c253b] rounded-xl p-3 text-[11px] text-slate-400 flex items-center gap-2">
                   <span class="text-pe-gold text-base">🛡️</span>
-                  <span>Os e-mails institucionais criados aqui podem ser utilizados imediatamente na página de login com sua respectiva senha.</span>
+                  <span>Os e-mails institucionais credenciados aqui operam exatamente conforme o esquema de permissões atribuído ao seu cargo.</span>
                 </div>
               </div>
             </div>
 
           </div>
 
+        </div>
+
+        <!-- MODAL INTERATIVO: VISUALIZAÇÃO DO ESQUEMA DE OPERAÇÕES DO CARGO -->
+        <div id="operationsSchemeModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+          <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl max-w-4xl w-full p-6 shadow-2xl relative space-y-5 max-h-[90vh] overflow-y-auto">
+            <div class="pe-stripe-bar h-1.5 w-full absolute top-0 left-0 rounded-t-2xl"></div>
+
+            <div class="flex items-center justify-between border-b border-[#1c253b] pb-3">
+              <div>
+                <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Inspeção de Permissões</span>
+                <h3 id="modalSchemeRoleTitle" class="font-oswald text-xl uppercase font-bold text-white">Esquema de Operação do Cargo</h3>
+                <span id="modalSchemeRoleDesc" class="text-xs text-slate-400">Atribuições ativas para esta função</span>
+              </div>
+              <button onclick="closeRoleOperationsModal()" class="w-8 h-8 rounded-full bg-[#1c253b] text-slate-300 hover:text-white flex items-center justify-center cursor-pointer font-bold">
+                ✕
+              </button>
+            </div>
+
+            <!-- As 4 Colunas no Modal -->
+            <div id="modalSchemeColumnsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+              <!-- Preenchido dinamicamente via JS -->
+            </div>
+
+            <div class="flex justify-end pt-2 border-t border-[#1c253b]">
+              <button onclick="closeRoleOperationsModal()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-5 py-2 rounded-xl text-xs cursor-pointer">
+                Fechar
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- ===================================================== -->
@@ -2141,7 +2418,36 @@
       guia: '📋 Guia do Painel Administrativo'
     };
 
+    function getCurrentUserPermissions() {
+      const user = (sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user') || '').toLowerCase();
+      if (user.includes('gabrielacessor') || user === 'admin') return ['*'];
+      const admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || [];
+      const current = admins.find(a => a.email && a.email.toLowerCase() === user);
+      if (!current) return ['*'];
+      if (current.isMaster || current.cargo === 'Diretor Adjunto') return ['*'];
+      if (Array.isArray(current.permissions) && current.permissions.length > 0) return current.permissions;
+      const roles = JSON.parse(localStorage.getItem('pe_custom_roles')) || [];
+      const role = roles.find(r => r.name.toLowerCase() === (current.cargo || '').toLowerCase());
+      return role && Array.isArray(role.permissions) ? role.permissions : [];
+    }
+
+    function isTabAllowed(tabName) {
+      const perms = getCurrentUserPermissions();
+      if (perms.includes('*')) return true;
+      if (tabName === 'inicio' || tabName === 'guia') return true;
+      if (tabName === 'atletas') return perms.includes('gestao_carteiras_download') || perms.includes('espacos_quadras');
+      if (tabName === 'jogadores') return perms.includes('gestao_atletas');
+      if (tabName === 'noticias') return perms.includes('gestao_noticias') || perms.includes('jogos_iniciar');
+      if (tabName === 'emails') return perms.includes('gestao_ajustes');
+      if (tabName === 'config') return perms.includes('gestao_ajustes');
+      return false;
+    }
+
     function switchTab(tabName) {
+      if (!isTabAllowed(tabName)) {
+        showToast("⚠️ Seu cargo não possui permissão para acessar esta área.", true);
+        return;
+      }
       ALL_TABS.forEach(t => {
         const content = document.getElementById(`tabContent-${t}`);
         const btn = document.getElementById(`navBtn-${t}`);
@@ -2942,7 +3248,7 @@
           autoSaveStudioDesign();
           renderInteractiveElements();
           updateSignatureUIState(true);
-          showToast('✓ Imagem da Assinatura do Presidente aplicada na carteira!');
+          showToast('✓ Imagem da Assinatura da Diretoria Adjunta aplicada na carteira!');
         }
       };
       reader.readAsDataURL(file);
@@ -8771,24 +9077,359 @@
     }
 
     /* =========================================================
+       ESQUEMA DE OPERAÇÕES & GESTÃO DE CARGOS (@foot-table.pe.gov.br)
+       ========================================================= */
+    const SYSTEM_OPERATION_GROUPS = [
+      {
+        id: 'operacao_jogos',
+        icon: '🎮',
+        title: 'OPERAÇÃO DE JOGOS',
+        items: [
+          { id: 'jogos_cancelar', name: 'Apagar / Cancelar Jogos', desc: 'Permite apagar jogos do sistema e liberar horário imediatamente' },
+          { id: 'jogos_iniciar', name: 'Liberar e Iniciar Partidas', desc: 'Botão de liberar entrada/iniciar jogo e cronômetro ao vivo' },
+          { id: 'jogos_finalizar', name: 'Finalizar Jogos ao Vivo', desc: 'Permite encerrar partidas e finalizar o tempo de jogo' }
+        ]
+      },
+      {
+        id: 'balcao_consumo',
+        icon: '🛒',
+        title: 'BALCÃO & CONSUMO',
+        items: [
+          { id: 'balcao_reserva', name: 'Reserva Direta no Balcão', desc: 'Criar novas reservas avulsas diretamente na recepção' },
+          { id: 'balcao_comanda', name: 'Comanda do Bar & Lanches', desc: 'Aba de Bar, comanda individual e entrega de pedidos' },
+          { id: 'balcao_estoque', name: 'Cardápio e Estoque do Bar', desc: 'Cadastrar novos produtos, fotos e alterar valores de venda' }
+        ]
+      },
+      {
+        id: 'quadras_espacos',
+        icon: '🏟️',
+        title: 'QUADRAS & ESPAÇOS',
+        items: [
+          { id: 'espacos_quadras', name: 'Editar Quadras e Preços', desc: 'Cadastrar quadras, alterar fotos e ajustar tarifas por hora' },
+          { id: 'espacos_treinos', name: 'Treinos e Manutenções', desc: 'Bloquear horários na grade para escolinhas e reformas' },
+          { id: 'espacos_esportes', name: 'Categorias e Esportes', desc: 'Criar e editar modalidades esportivas {Beach, Society...}' }
+        ]
+      },
+      {
+        id: 'cadastros_gestao',
+        icon: '⚙️',
+        title: 'CADASTROS & GESTÃO',
+        items: [
+          { id: 'gestao_atletas', name: 'Base de Clientes / Atletas', desc: 'Visualizar lista de clientes, fichas médicas e telefones' },
+          { id: 'gestao_mensalistas', name: 'Horários Fixos (Mensalistas)', desc: 'Gerenciar mensalistas e contratos semanais fixos' },
+          { id: 'gestao_ajustes', name: 'Gestores e Ajustes Gerais', desc: 'Cadastrar novos gestores, níveis de acesso e banco de dados' },
+          { id: 'gestao_carteiras_download', name: 'Baixar Carteiras (PDF/PNG)', desc: 'Permissão de download da carteira do atleta federado' },
+          { id: 'gestao_noticias', name: 'Publicar e Editar Notícias', desc: 'Criar matérias com fotos sincronizadas no Supabase' }
+        ]
+      }
+    ];
+
+    const ALL_OPERATION_IDS = SYSTEM_OPERATION_GROUPS.flatMap(g => g.items.map(i => i.id));
+
+    const DEFAULT_ROLES = [
+      {
+        id: 'diretor_adjunto',
+        name: 'Diretor Adjunto',
+        desc: 'Acesso total a todas as operações, cadastros, carteiras e configurações da Federação',
+        isMaster: true,
+        permissions: ['*'],
+        created_at: '2026-01-01T00:00:00Z'
+      }
+    ];
+
+    function loadCustomRoles() {
+      let roles = JSON.parse(localStorage.getItem('pe_custom_roles'));
+      if (!roles || !Array.isArray(roles) || roles.length === 0) {
+        roles = DEFAULT_ROLES;
+        localStorage.setItem('pe_custom_roles', JSON.stringify(roles));
+      }
+
+      // Garante que o Diretor Adjunto esteja sempre presente e com permissões totais
+      const dirIdx = roles.findIndex(r => r.name.toLowerCase() === 'diretor adjunto' || r.id === 'diretor_adjunto');
+      if (dirIdx === -1) {
+        roles.unshift(DEFAULT_ROLES[0]);
+      } else {
+        roles[dirIdx].name = 'Diretor Adjunto';
+        roles[dirIdx].isMaster = true;
+        roles[dirIdx].permissions = ['*'];
+      }
+
+      // Remove roles obsoletos com nome Presidência
+      roles = roles.filter(r => !r.name.toLowerCase().includes('presidên') && !r.name.toLowerCase().includes('presiden'));
+      localStorage.setItem('pe_custom_roles', JSON.stringify(roles));
+      return roles;
+    }
+
+    function saveCustomRoles(roles) {
+      localStorage.setItem('pe_custom_roles', JSON.stringify(roles));
+    }
+
+    function populateRoleSelect() {
+      const select = document.getElementById('panelRegRole');
+      if (!select) return;
+
+      const roles = loadCustomRoles();
+      const previousValue = select.value;
+      select.innerHTML = '';
+
+      roles.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r.name;
+        opt.textContent = `${r.name} ${r.isMaster ? '(Acesso Total Master)' : `(${Array.isArray(r.permissions) ? (r.permissions.includes('*') ? 'Acesso Total' : r.permissions.length + ' operações') : ''})`}`;
+        select.appendChild(opt);
+      });
+
+      if (previousValue && roles.some(r => r.name === previousValue)) {
+        select.value = previousValue;
+      } else {
+        select.value = 'Diretor Adjunto';
+      }
+
+      updateSelectedRolePreview(select.value);
+    }
+
+    function updateSelectedRolePreview(roleName) {
+      const summaryText = document.getElementById('roleSummaryPreviewText');
+      if (!summaryText) return;
+
+      const roles = loadCustomRoles();
+      const role = roles.find(r => r.name.toLowerCase() === (roleName || '').toLowerCase());
+      if (!role || role.isMaster || (role.permissions && role.permissions.includes('*'))) {
+        summaryText.innerHTML = `Operações vinculadas: <strong class="text-pe-gold">Acesso Total Master (Todas as 14 operações)</strong>`;
+      } else {
+        const count = Array.isArray(role.permissions) ? role.permissions.length : 0;
+        summaryText.innerHTML = `Operações vinculadas: <strong class="text-blue-400">${count} de ${ALL_OPERATION_IDS.length} operações autorizadas</strong>`;
+      }
+    }
+
+    function renderCustomRolesList() {
+      const container = document.getElementById('customRolesContainer');
+      const counter = document.getElementById('totalCustomRolesCount');
+      if (!container) return;
+
+      const roles = loadCustomRoles();
+      if (counter) counter.textContent = roles.length;
+      container.innerHTML = '';
+
+      roles.forEach(role => {
+        const isMaster = role.isMaster || role.name.toLowerCase() === 'diretor adjunto';
+        const permsCount = role.permissions && role.permissions.includes('*') ? ALL_OPERATION_IDS.length : (Array.isArray(role.permissions) ? role.permissions.length : 0);
+
+        const card = document.createElement('div');
+        card.className = "bg-[#05080e] border " + (isMaster ? "border-amber-500/50" : "border-[#1c253b]") + " rounded-xl p-3.5 space-y-2 flex flex-col justify-between";
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between gap-2">
+              <h5 class="font-bold text-xs uppercase text-white flex items-center gap-1.5">
+                ${isMaster ? '<span class="text-amber-400">⚡</span>' : '<span class="text-blue-400">🛡️</span>'}
+                <span>${escapeText(role.name)}</span>
+              </h5>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded font-bold ${isMaster ? 'bg-amber-950/80 text-amber-400 border border-amber-500/40' : 'bg-blue-950/80 text-blue-300 border border-blue-500/30'}">
+                ${permsCount}/${ALL_OPERATION_IDS.length} ops
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-400 line-clamp-2 mt-1">
+              ${escapeText(role.desc || (isMaster ? 'Acesso administrativo irrestrito à federação' : 'Cargo operacional com permissões customizadas'))}
+            </p>
+          </div>
+
+          <div class="flex items-center justify-between pt-2 border-t border-[#1c253b]/80 text-[11px]">
+            <button type="button" onclick="openRoleOperationsModal('${escapeText(role.id || role.name)}')" class="text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1 cursor-pointer">
+              <i class="fa-solid fa-eye text-[10px]"></i> Ver Esquema
+            </button>
+            ${isMaster ? `
+              <span class="text-[10px] text-amber-400 font-bold font-mono">CARGO PROTEGIDO</span>
+            ` : `
+              <button type="button" onclick="handleDeleteCustomRole('${escapeText(role.id || role.name)}')" class="text-red-400 hover:text-red-300 font-bold cursor-pointer">
+                Excluir
+              </button>
+            `}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function toggleAllRoleOperations(check) {
+      document.querySelectorAll('.role-perm-check').forEach(cb => {
+        cb.checked = !!check;
+      });
+    }
+
+    function handleCreateCustomRole(e) {
+      if (e) e.preventDefault();
+      const nameInput = document.getElementById('newRoleName');
+      const descInput = document.getElementById('newRoleDesc');
+      const feedback = document.getElementById('roleCreateFeedback');
+      if (!nameInput) return;
+
+      const roleName = nameInput.value.trim();
+      if (!roleName) {
+        if (feedback) {
+          feedback.classList.remove('hidden');
+          feedback.className = "text-xs rounded-xl p-3 border bg-red-950/40 border-red-500/40 text-red-300";
+          feedback.textContent = "❌ Informe o nome do cargo.";
+        }
+        return;
+      }
+
+      // Coleta operações marcadas
+      const selectedPerms = [];
+      document.querySelectorAll('.role-perm-check:checked').forEach(cb => {
+        selectedPerms.push(cb.value);
+      });
+
+      if (selectedPerms.length === 0) {
+        if (feedback) {
+          feedback.classList.remove('hidden');
+          feedback.className = "text-xs rounded-xl p-3 border bg-amber-950/40 border-amber-500/40 text-amber-300";
+          feedback.textContent = "⚠️ Selecione pelo menos 1 operação autorizada para este cargo nas colunas acima.";
+        }
+        return;
+      }
+
+      let roles = loadCustomRoles();
+      const roleId = 'role_' + Date.now();
+      const newRole = {
+        id: roleId,
+        name: roleName,
+        desc: descInput ? descInput.value.trim() : '',
+        isMaster: false,
+        permissions: selectedPerms,
+        created_at: new Date().toISOString()
+      };
+
+      const existingIndex = roles.findIndex(r => r.name.toLowerCase() === roleName.toLowerCase());
+      if (existingIndex >= 0) {
+        if (roles[existingIndex].isMaster) {
+          alert("O cargo Diretor Adjunto é o cargo máster da federação e não pode ser sobrescrito.");
+          return;
+        }
+        roles[existingIndex] = { ...roles[existingIndex], ...newRole };
+      } else {
+        roles.push(newRole);
+      }
+
+      saveCustomRoles(roles);
+      populateRoleSelect();
+      renderCustomRolesList();
+
+      if (feedback) {
+        feedback.classList.remove('hidden');
+        feedback.className = "text-xs rounded-xl p-3 border bg-emerald-950/40 border-emerald-500/40 text-emerald-300 font-bold";
+        feedback.innerHTML = `✓ Cargo <strong>${escapeText(roleName)}</strong> salvo com sucesso com <strong>${selectedPerms.length} de ${ALL_OPERATION_IDS.length} operações autorizadas</strong>! Agora você pode vinculá-lo ao criar e-mails abaixo.`;
+        setTimeout(() => feedback.classList.add('hidden'), 5000);
+      }
+
+      showToast(`Cargo "${roleName}" criado com ${selectedPerms.length} operações autorizadas!`);
+      nameInput.value = '';
+      if (descInput) descInput.value = '';
+    }
+
+    function handleDeleteCustomRole(roleIdentifier) {
+      if (!roleIdentifier) return;
+      let roles = loadCustomRoles();
+      const target = roles.find(r => r.id === roleIdentifier || r.name.toLowerCase() === roleIdentifier.toLowerCase());
+      if (!target) return;
+
+      if (target.isMaster || target.name.toLowerCase() === 'diretor adjunto') {
+        alert("O cargo Diretor Adjunto não pode ser excluído.");
+        return;
+      }
+
+      if (!confirm(`Deseja realmente excluir o cargo "${target.name}"? Contas vinculadas a este cargo voltarão ao perfil básico.`)) return;
+
+      roles = roles.filter(r => r.id !== target.id && r.name !== target.name);
+      saveCustomRoles(roles);
+      populateRoleSelect();
+      renderCustomRolesList();
+      showToast(`Cargo "${target.name}" removido.`);
+    }
+
+    function openRoleOperationsModal(identifier) {
+      const modal = document.getElementById('operationsSchemeModal');
+      const titleEl = document.getElementById('modalSchemeRoleTitle');
+      const descEl = document.getElementById('modalSchemeRoleDesc');
+      const container = document.getElementById('modalSchemeColumnsContainer');
+      if (!modal || !container) return;
+
+      let targetRole = null;
+      const roles = loadCustomRoles();
+      const admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || [];
+
+      // Pode ser ID do cargo, nome do cargo ou e-mail de admin
+      if (identifier && identifier.includes('@')) {
+        const admin = admins.find(a => a.email.toLowerCase() === identifier.toLowerCase());
+        if (admin) {
+          targetRole = roles.find(r => r.name.toLowerCase() === (admin.cargo || '').toLowerCase()) || {
+            name: admin.cargo || 'Gestor',
+            desc: `E-mail credenciado: ${admin.email}`,
+            permissions: admin.permissions || (admin.isMaster ? ['*'] : [])
+          };
+          if (titleEl) titleEl.textContent = `Operações de: ${admin.nome} (${admin.email})`;
+          if (descEl) descEl.textContent = `Cargo: ${admin.cargo || 'Gestor Autorizado'}`;
+        }
+      }
+
+      if (!targetRole) {
+        targetRole = roles.find(r => r.id === identifier || r.name.toLowerCase() === (identifier || '').toLowerCase()) || roles[0];
+        if (titleEl) titleEl.textContent = `Esquema de Operação: ${targetRole.name}`;
+        if (descEl) descEl.textContent = targetRole.desc || 'Atribuições e permissões operacionais do cargo no sistema';
+      }
+
+      const isAll = targetRole.isMaster || (targetRole.permissions && targetRole.permissions.includes('*'));
+      const activePerms = isAll ? ALL_OPERATION_IDS : (Array.isArray(targetRole.permissions) ? targetRole.permissions : []);
+
+      container.innerHTML = SYSTEM_OPERATION_GROUPS.map(group => `
+        <div class="bg-[#070b14] border border-[#1c253b] rounded-xl p-3 space-y-2.5">
+          <div class="flex items-center gap-1.5 pb-1.5 border-b border-[#1c253b]">
+            <span class="text-sm">${group.icon}</span>
+            <span class="font-bold text-[11px] uppercase tracking-wider text-white">${group.title}</span>
+          </div>
+          <div class="space-y-2">
+            ${group.items.map(item => {
+              const hasIt = activePerms.includes(item.id);
+              return `
+                <div class="p-2 rounded-lg border ${hasIt ? 'bg-blue-950/30 border-blue-500/40 text-blue-200' : 'bg-[#0b101d] border-[#1c253b]/60 opacity-40 text-slate-400'}">
+                  <div class="flex items-center gap-1.5">
+                    <span class="${hasIt ? 'text-blue-400 font-bold' : 'text-slate-600'} text-xs">
+                      ${hasIt ? '✓' : '✕'}
+                    </span>
+                    <span class="font-bold text-[11px] ${hasIt ? 'text-white' : 'text-slate-400 line-through'}">${item.name}</span>
+                  </div>
+                  <span class="block text-[9px] text-slate-400 leading-tight mt-0.5">${item.desc}</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      modal.classList.remove('hidden');
+    }
+
+    function previewCurrentSelectedRoleModal() {
+      const select = document.getElementById('panelRegRole');
+      if (select) openRoleOperationsModal(select.value);
+    }
+
+    function closeRoleOperationsModal() {
+      const modal = document.getElementById('operationsSchemeModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    /* =========================================================
        GESTÃO DE E-MAILS INSTITUCIONAIS (@foot-table.pe.gov.br)
        ========================================================= */
     const DEFAULT_INSTITUTIONAL_ADMINS = [
       {
         nome: "Gabriel Alves",
-        cargo: "Presidência (ADM MASTER)",
+        cargo: "Diretor Adjunto",
         email: "gabrielacessor@foot-table.pe.gov.br",
         senha: "admin",
         isMaster: true,
+        permissions: ['*'],
         created_at: "2026-01-01T00:00:00Z"
-      },
-      {
-        nome: "Diretoria Geral",
-        cargo: "Diretoria Executiva",
-        email: "diretoria@foot-table.pe.gov.br",
-        senha: "admin",
-        isMaster: false,
-        created_at: "2026-01-15T00:00:00Z"
       }
     ];
 
@@ -8803,12 +9444,23 @@
         localStorage.setItem('pe_institutional_admins', JSON.stringify(list));
       }
 
-      // Garante que o ADM MASTER gabrielacessor@foot-table.pe.gov.br esteja sempre presente e protegido
-      const hasMaster = list.some(a => a.email && a.email.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br');
-      if (!hasMaster) {
+      // Garante que o Diretor Adjunto gabrielacessor@foot-table.pe.gov.br esteja sempre presente e com cargo Diretor Adjunto
+      const masterIdx = list.findIndex(a => a.email && a.email.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br');
+      if (masterIdx === -1) {
         list.unshift(DEFAULT_INSTITUTIONAL_ADMINS[0]);
-        localStorage.setItem('pe_institutional_admins', JSON.stringify(list));
+      } else {
+        list[masterIdx].cargo = "Diretor Adjunto";
+        list[masterIdx].isMaster = true;
+        list[masterIdx].permissions = ['*'];
       }
+
+      // Remove qualquer menção antiga de Presidência nas contas
+      list.forEach(a => {
+        if (a.cargo && a.cargo.toLowerCase().includes('presidên')) {
+          a.cargo = 'Diretor Adjunto';
+        }
+      });
+      localStorage.setItem('pe_institutional_admins', JSON.stringify(list));
 
       if (supabaseClient) {
         try {
@@ -8818,10 +9470,11 @@
               if (!list.some(l => l.email.toLowerCase() === dbItem.email.toLowerCase())) {
                 list.push({
                   nome: dbItem.nome,
-                  cargo: dbItem.cargo,
+                  cargo: dbItem.cargo || 'Diretor Adjunto',
                   email: dbItem.email,
                   senha: dbItem.senha || '••••••',
                   isMaster: dbItem.email.toLowerCase().includes('gabrielacessor'),
+                  permissions: dbItem.permissions || (dbItem.email.toLowerCase().includes('gabrielacessor') ? ['*'] : []),
                   created_at: dbItem.created_at
                 });
               }
@@ -8842,17 +9495,24 @@
       if (!tbody) return;
 
       const admins = await loadInstitutionalAdmins();
+      const roles = loadCustomRoles();
       if (counter) counter.textContent = admins.length;
       tbody.innerHTML = '';
 
       admins.forEach(admin => {
         const isMaster = admin.isMaster || admin.email.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br';
+        const roleObj = roles.find(r => r.name.toLowerCase() === (admin.cargo || '').toLowerCase());
+        const perms = (admin.permissions && admin.permissions.includes('*')) || isMaster 
+          ? ALL_OPERATION_IDS 
+          : (admin.permissions || (roleObj ? roleObj.permissions : []));
+        const permsCount = Array.isArray(perms) ? perms.length : 0;
+
         const tr = document.createElement('tr');
         tr.className = "hover:bg-[#070b14] transition";
         tr.innerHTML = `
           <td class="py-3 px-3">
             <div class="font-bold text-white uppercase text-xs flex items-center gap-1.5">
-              ${isMaster ? '<span>👑</span>' : '<span>👤</span>'}
+              ${isMaster ? '<span class="text-amber-400">⚡</span>' : '<span>👤</span>'}
               <span>${escapeText(admin.nome || 'Gestor Autorizado')}</span>
             </div>
             <span class="text-[10px] text-slate-400">Criado em: ${admin.created_at ? new Date(admin.created_at).toLocaleDateString('pt-BR') : '01/01/2026'}</span>
@@ -8862,16 +9522,26 @@
           </td>
           <td class="py-3 px-3">
             <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isMaster ? 'bg-amber-950/80 text-amber-400 border border-amber-500/40' : 'bg-blue-950/80 text-blue-400 border border-blue-500/30'}">
-              ${escapeText(admin.cargo || 'Diretoria')}
+              ${escapeText(admin.cargo || 'Diretor Adjunto')}
             </span>
+          </td>
+          <td class="py-3 px-3">
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded ${isMaster ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/30' : 'bg-[#05080e] text-blue-300 border border-blue-500/30'}">
+                ${isMaster ? 'Acesso Total Master' : `${permsCount}/${ALL_OPERATION_IDS.length} ops`}
+              </span>
+              <button type="button" onclick="openRoleOperationsModal('${escapeText(admin.email)}')" class="text-blue-400 hover:text-blue-300 text-[10px] font-bold underline cursor-pointer">
+                Ver Esquema
+              </button>
+            </div>
           </td>
           <td class="py-3 px-3 text-right">
             ${isMaster ? `
-              <span class="text-[10px] font-mono font-bold text-pe-gold bg-pe-gold/10 border border-pe-gold/30 px-2 py-1 rounded">
-                ADM MASTER
+              <span class="text-[10px] font-mono font-bold text-amber-400 bg-amber-950/60 border border-amber-500/40 px-2 py-1 rounded">
+                DIRETOR ADJUNTO
               </span>
             ` : `
-              <button onclick="handleDeleteInstitutionalAdmin('${admin.email}')" class="text-xs text-red-400 hover:text-red-300 bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 px-2.5 py-1 rounded-lg transition cursor-pointer">
+              <button onclick="handleDeleteInstitutionalAdmin('${escapeText(admin.email)}')" class="text-xs text-red-400 hover:text-red-300 bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 px-2.5 py-1 rounded-lg transition cursor-pointer">
                 Excluir
               </button>
             `}
@@ -8907,13 +9577,19 @@
       const fullEmail = emailPrefix.includes('@') ? emailPrefix : `${emailPrefix}@foot-table.pe.gov.br`;
 
       feedback.className = "text-xs rounded-xl p-3 border bg-blue-950/40 border-blue-500/40 text-blue-300";
-      feedback.textContent = "Gerando credencial institucional oficial...";
+      feedback.textContent = "Gerando credencial e vinculando operações do cargo...";
+
+      // Encontra permissões do cargo
+      const roles = loadCustomRoles();
+      const roleObj = roles.find(r => r.name.toLowerCase() === role.toLowerCase());
+      const permissions = roleObj ? (roleObj.permissions || []) : (role === 'Diretor Adjunto' ? ['*'] : []);
 
       const newAdmin = {
         nome: name,
         cargo: role,
         email: fullEmail,
         senha: password,
+        permissions: permissions,
         isMaster: fullEmail.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br',
         created_at: new Date().toISOString()
       };
@@ -8936,16 +9612,17 @@
       localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
 
       feedback.className = "text-xs rounded-xl p-3 border bg-emerald-950/40 border-emerald-500/50 text-emerald-300 font-bold";
-      feedback.innerHTML = `✓ E-mail institucional <strong>${fullEmail}</strong> ativado com sucesso! Esta conta já pode acessar o sistema no login.`;
+      feedback.innerHTML = `✓ E-mail institucional <strong>${fullEmail}</strong> credenciado com sucesso no cargo <strong>${escapeText(role)}</strong>! Esta conta já pode acessar o sistema no login com suas permissões operacionais.`;
 
       document.getElementById('adminCreateEmailForm').reset();
       document.getElementById('panelRegFederationKey').value = "FPFTM-2026";
+      populateRoleSelect();
       renderInstitutionalAdminsTable();
     }
 
     async function handleDeleteInstitutionalAdmin(email) {
       if (email.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br') {
-        alert("A conta ADM MASTER (gabrielacessor@foot-table.pe.gov.br) é a conta principal da federação e não pode ser excluída.");
+        alert("A conta do Diretor Adjunto (gabrielacessor@foot-table.pe.gov.br) é a conta principal da federação e não pode ser excluída.");
         return;
       }
 
@@ -8979,10 +9656,12 @@
           document.getElementById('sidebarAdminUser').textContent = user;
           const roleEl = document.getElementById('sidebarAdminRole');
           if (roleEl) {
-            if (user.toLowerCase().includes('gabrielacessor') || user.toLowerCase().includes('admin')) {
-              roleEl.innerHTML = '👑 ADM MASTER • Presidência';
+            if (user.toLowerCase().includes('gabrielacessor')) {
+              roleEl.innerHTML = '⚡ Diretor Adjunto';
             } else {
-              roleEl.innerHTML = 'Gestor Institucional';
+              const admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || [];
+              const current = admins.find(a => a.email && a.email.toLowerCase() === user.toLowerCase());
+              roleEl.innerHTML = current ? `🛡️ ${escapeText(current.cargo || 'Gestor Autorizado')}` : '🛡️ Gestor Autorizado';
             }
           }
         }
@@ -9016,6 +9695,8 @@
         renderAdminNews();
         syncStudioWithCurrentLayout();
         updateDashboardData();
+        populateRoleSelect();
+        renderCustomRolesList();
         renderInstitutionalAdminsTable();
 
         // Inicialização do Studio CR80 Interativo Oficial

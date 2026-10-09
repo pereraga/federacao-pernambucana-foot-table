@@ -355,18 +355,23 @@
 
       // Verifica lista de administradores institucionais criados
       let admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || [];
-      const hasMaster = admins.some(a => a.email && a.email.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br');
-      if (!hasMaster) {
+      const masterIdx = admins.findIndex(a => a.email && a.email.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br');
+      if (masterIdx === -1) {
         admins.unshift({
           nome: "Gabriel Alves",
-          cargo: "Presidência (ADM MASTER)",
+          cargo: "Diretor Adjunto",
           email: "gabrielacessor@foot-table.pe.gov.br",
           senha: "admin",
           isMaster: true,
+          permissions: ['*'],
           created_at: "2026-01-01T00:00:00Z"
         });
-        localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
+      } else {
+        admins[masterIdx].cargo = "Diretor Adjunto";
+        admins[masterIdx].isMaster = true;
+        admins[masterIdx].permissions = ['*'];
       }
+      localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
 
       const foundAdmin = admins.find(a => a.email.toLowerCase() === user && a.senha === pass);
 
@@ -436,7 +441,7 @@
     document.getElementById('btnForgot').addEventListener('click', (e) => {
       e.preventDefault();
       loginFeedback.className = "text-xs rounded-xl p-3 border bg-amber-950/40 border-pe-gold/50 text-amber-200";
-      loginFeedback.innerHTML = `<span>Para redefinir sua senha ou solicitar credenciamento oficial, contate a Presidência ou a Administração Geral da Federação.</span>`;
+      loginFeedback.innerHTML = `<span>Para redefinir sua senha ou solicitar credenciamento oficial, contate a Diretoria Adjunta ou a Administração Geral da Federação.</span>`;
       loginFeedback.classList.remove('hidden');
     });
 
