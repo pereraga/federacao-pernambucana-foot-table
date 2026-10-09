@@ -10585,7 +10585,13 @@
 
       if (supabaseClient) {
         try {
-          await supabaseClient.from('admin_users').upsert([admins[idx]], { onConflict: 'email' });
+          const dbPayload = {
+            nome: admins[idx].nome,
+            cargo: admins[idx].cargo,
+            email: admins[idx].email.toLowerCase(),
+            senha: admins[idx].senha || 'admin'
+          };
+          await supabaseClient.from('admin_users').upsert([dbPayload], { onConflict: 'email' });
         } catch (e) {
           console.warn("Supabase update role:", e);
         }
@@ -10738,6 +10744,20 @@
           });
           if (updatedAdminsCount > 0) {
             localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
+            if (supabaseClient) {
+              for (const a of admins) {
+                if (a.cargo && a.cargo.toLowerCase() === roles[targetIdx].name.toLowerCase()) {
+                  try {
+                    supabaseClient.from('admin_users').upsert([{
+                      nome: a.nome,
+                      cargo: a.cargo,
+                      email: a.email.toLowerCase(),
+                      senha: a.senha || 'admin'
+                    }], { onConflict: 'email' });
+                  } catch (e) {}
+                }
+              }
+            }
             renderInstitutionalAdminsTable();
           }
 
@@ -10979,7 +10999,7 @@
         }
       });
 
-      // 2. Sincronização e limpeza com Supabase
+      // 2. Sincronização e limpeza bidirecional com Supabase
       if (supabaseClient) {
         try {
           const { data, error } = await supabaseClient.from('admin_users').select('*').order('created_at', { ascending: false });
@@ -10989,18 +11009,41 @@
               if (normEmail === 'gabrielacessor@foot-table.pe.gov.br') normEmail = 'gabrielacessor@foot-table.pe.org';
               else if (normEmail.endsWith('@foot-table.pe.gov.br')) normEmail = normEmail.replace(/@foot-table\.pe\.gov\.br$/i, '@foot-table.pe.org');
 
-              if (normEmail && !list.some(l => (l.email || '').toLowerCase() === normEmail)) {
+              if (!normEmail) return;
+
+              const existingIdx = list.findIndex(l => (l.email || '').toLowerCase() === normEmail);
+              if (existingIdx !== -1) {
+                // Atualiza dados locais com os mais recentes da nuvem
+                list[existingIdx].nome = dbItem.nome || list[existingIdx].nome;
+                list[existingIdx].cargo = dbItem.cargo || list[existingIdx].cargo;
+                if (dbItem.senha) list[existingIdx].senha = dbItem.senha;
+              } else {
                 list.push({
                   nome: dbItem.nome || 'Gestor Autorizado',
                   cargo: dbItem.cargo || 'Diretor Adjunto',
                   email: normEmail,
-                  senha: dbItem.senha || '••••••',
+                  senha: dbItem.senha || 'admin',
                   isMaster: normEmail.includes('gabrielacessor') && (!dbItem.cargo || dbItem.cargo === 'Diretor Adjunto'),
-                  permissions: dbItem.permissions || (normEmail.includes('gabrielacessor') ? ['*'] : []),
+                  permissions: (normEmail.includes('gabrielacessor') ? ['*'] : []),
                   created_at: dbItem.created_at || new Date().toISOString()
                 });
               }
             });
+
+            // Sincroniza do local para a nuvem caso haja contas cadastradas localmente ausentes no banco
+            for (const localAdmin of list) {
+              const localEmail = (localAdmin.email || '').trim().toLowerCase();
+              if (localEmail && !data.some(d => (d.email || '').trim().toLowerCase() === localEmail)) {
+                try {
+                  await supabaseClient.from('admin_users').upsert([{
+                    nome: localAdmin.nome || 'Gestor Autorizado',
+                    cargo: localAdmin.cargo || 'Diretor Adjunto',
+                    email: localEmail,
+                    senha: localAdmin.senha || 'admin'
+                  }], { onConflict: 'email' });
+                } catch (upErr) {}
+              }
+            }
 
             // Limpa registro antigo .gov.br da nuvem
             try {
@@ -11194,7 +11237,16 @@
 
       if (supabaseClient) {
         try {
-          await supabaseClient.from('admin_users').upsert([newAdmin], { onConflict: 'email' });
+          const dbPayload = {
+            nome: name,
+            cargo: role,
+            email: fullEmail.toLowerCase(),
+            senha: password
+          };
+          const { error: upsertErr } = await supabaseClient.from('admin_users').upsert([dbPayload], { onConflict: 'email' });
+          if (upsertErr) {
+            console.error("Erro Supabase ao salvar novo admin:", upsertErr);
+          }
         } catch (err) {
           console.warn("Aviso Supabase:", err);
         }
@@ -11432,36 +11484,51 @@
       const isMasterRole = selectedOps.length === ALL_OPERATION_IDS.length && ALL_OPERATION_IDS.length > 0;
       const permissions = isMasterRole ? ['*'] : selectedOps;
 
+      // Determina a senha final da conta
+      let finalSenha = admins[targetIdx].senha || 'admin';
+      if (newPass && newPass.trim().length > 0) {
+        finalSenha = newPass.trim();
+      }
+
       admins[targetIdx].nome = name;
       admins[targetIdx].cargo = role;
       admins[targetIdx].email = newEmail;
+      admins[targetIdx].senha = finalSenha;
       admins[targetIdx].permissions = permissions;
       admins[targetIdx].isMaster = !!isMasterRole;
       admins[targetIdx].updated_at = new Date().toISOString();
-      if (newPass && newPass.trim().length > 0) {
-        admins[targetIdx].senha = newPass;
-      }
 
       localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
 
       if (supabaseClient) {
         try {
           if (newEmail.toLowerCase() !== origEmail.toLowerCase()) {
-            await supabaseClient.from('admin_users').delete().eq('email', origEmail);
+            await supabaseClient.from('admin_users').delete().eq('email', origEmail.toLowerCase());
             if (origEmail.toLowerCase().includes('gabrielacessor')) {
               await supabaseClient.from('admin_users').delete().eq('email', 'gabrielacessor@foot-table.pe.gov.br');
             }
           }
-          await supabaseClient.from('admin_users').upsert([admins[targetIdx]], { onConflict: 'email' });
+          const dbPayload = {
+            nome: name,
+            cargo: role,
+            email: newEmail.toLowerCase(),
+            senha: finalSenha
+          };
+          const { error: upsertErr } = await supabaseClient.from('admin_users').upsert([dbPayload], { onConflict: 'email' });
+          if (upsertErr) {
+            console.error("Erro Supabase ao salvar edição:", upsertErr);
+          }
         } catch (err) {
           console.warn("Aviso Supabase ao salvar edição:", err);
         }
       }
 
       const currentUser = sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user');
-      if (currentUser && (currentUser.toLowerCase() === origEmail.toLowerCase() || currentUser.toLowerCase() === newEmail.toLowerCase())) {
+      if (currentUser && (currentUser.toLowerCase() === origEmail.toLowerCase() || currentUser.toLowerCase() === newEmail.toLowerCase() || currentUser.replace(/@foot-table\.pe\.(org|gov\.br)$/i, '') === origEmail.replace(/@foot-table\.pe\.(org|gov\.br)$/i, ''))) {
         sessionStorage.setItem('pe_admin_user', newEmail);
         localStorage.setItem('pe_admin_user', newEmail);
+        const sidebarAdminUser = document.getElementById('sidebarAdminUser');
+        if (sidebarAdminUser) sidebarAdminUser.textContent = newEmail;
         applyPermissionsToUI();
       }
 

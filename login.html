@@ -385,66 +385,70 @@
         }
       }
 
-      // Garante conta institucional de Adriano Mello (Presidente FPEFT) se não existir
-      const presIdx = admins.findIndex(a => a.email && a.email.toLowerCase() === 'adrianomelofpeft@foot-table.pe.org');
-      if (presIdx === -1) {
-        admins.unshift({
-          nome: "Adriano Mello",
-          cargo: "Presidente FPEFT",
-          email: "adrianomelofpeft@foot-table.pe.org",
-          senha: "admin",
-          isMaster: false,
-          permissions: [],
-          created_at: "2026-01-01T00:00:00Z"
-        });
-      } else {
-        admins[presIdx].email = 'adrianomelofpeft@foot-table.pe.org';
-        if (!admins[presIdx].cargo) admins[presIdx].cargo = "Presidente FPEFT";
-      }
-      localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
-
+      // 1. Tenta validar no Supabase em TEMPO REAL primeiro (banco de dados oficial na nuvem)
       const normUser = user.includes('@') ? user : `${user}@foot-table.pe.org`;
-      const foundAdmin = admins.find(a => {
-        const aEmail = (a.email || '').toLowerCase().trim();
-        const aPrefix = aEmail.replace(/@foot-table\.pe\.(org|gov\.br)$/i, '');
-        return (aEmail === user || aEmail === normUser || aPrefix === user) && a.senha === pass;
-      });
+      let foundAdmin = null;
+      let isAuthorized = false;
 
-      // Reconhece ADM MASTER (gabrielacessor) com sua senha cadastrada ou padrão
-      const isMasterUser = (user.includes('gabrielacessor')) && (pass === 'admin' || pass.length >= 4);
-
-      // Também aceita login padrão da diretoria ou qualquer e-mail institucional cadastrado
-      let isAuthorized = !!foundAdmin || isMasterUser || (user === 'admin' && pass.length >= 4);
-
-      // Tenta validar no Supabase se existir
-      if (!isAuthorized && supabaseClient) {
+      if (supabaseClient) {
         try {
           const { data, error } = await supabaseClient
             .from('admin_users')
             .select('*')
             .or(`email.eq.${user},email.eq.${normUser}`)
-            .eq('senha', pass)
             .maybeSingle();
 
           if (!error && data) {
-            isAuthorized = true;
-            // Se encontrou no Supabase mas não está no localStorage, sincroniza localmente
-            if (!admins.some(a => (a.email || '').toLowerCase() === (data.email || '').toLowerCase())) {
+            // Sincroniza / atualiza imediatamente no localStorage com os dados do banco
+            const existingIdx = admins.findIndex(a => (a.email || '').toLowerCase() === (data.email || '').toLowerCase());
+            if (existingIdx !== -1) {
+              admins[existingIdx].nome = data.nome || admins[existingIdx].nome;
+              admins[existingIdx].cargo = data.cargo || admins[existingIdx].cargo;
+              admins[existingIdx].senha = data.senha;
+            } else {
               admins.push({
                 nome: data.nome || 'Gestor Autorizado',
                 cargo: data.cargo || 'Gestor',
                 email: data.email,
                 senha: data.senha || pass,
-                isMaster: !!(data.isMaster || (data.permissions && data.permissions.includes('*'))),
-                permissions: data.permissions || [],
+                isMaster: (data.email.toLowerCase().includes('gabrielacessor') || data.cargo === 'Diretor Adjunto'),
+                permissions: (data.email.toLowerCase().includes('gabrielacessor') || data.cargo === 'Diretor Adjunto') ? ['*'] : [],
                 created_at: data.created_at || new Date().toISOString()
               });
-              localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
+            }
+            localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
+
+            if (data.senha === pass) {
+              isAuthorized = true;
+              foundAdmin = data;
             }
           }
-        } catch (err) {
-          console.warn("Validação Supabase:", err);
+        } catch (dbErr) {
+          console.warn("Validação Supabase em tempo real:", dbErr);
         }
+      }
+
+      // 2. Se não autenticado pelo Supabase, valida localmente
+      if (!isAuthorized) {
+        const localMatch = admins.find(a => {
+          const aEmail = (a.email || '').toLowerCase().trim();
+          const aPrefix = aEmail.replace(/@foot-table\.pe\.(org|gov\.br)$/i, '');
+          return (aEmail === user || aEmail === normUser || aPrefix === user) && a.senha === pass;
+        });
+        if (localMatch) {
+          isAuthorized = true;
+          foundAdmin = localMatch;
+        }
+      }
+
+      // Reconhece ADM MASTER (gabrielacessor) com senha cadastrada ou padrão de emergência
+      if (!isAuthorized && user.includes('gabrielacessor') && (pass === 'admin' || pass.length >= 4)) {
+        isAuthorized = true;
+      }
+
+      // Também aceita login padrão da diretoria emergencial
+      if (!isAuthorized && user === 'admin' && pass.length >= 4) {
+        isAuthorized = true;
       }
 
       setTimeout(() => {
