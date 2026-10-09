@@ -1997,6 +1997,136 @@
           </div>
         </div>
 
+        <!-- MODAL FLUTUANTE: EDITAR CONTA INSTITUCIONAL (SEM SOBREPOR OU CORTAR) -->
+        <div id="editInstitutionalAdminModal" onclick="if(event.target === this) closeEditInstitutionalAdminModal()" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+          <div class="relative w-full max-w-lg bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 sm:p-7 shadow-2xl space-y-5 my-auto max-h-[90vh] overflow-y-auto flex flex-col justify-between">
+            <div class="pe-stripe-bar h-1.5 w-full absolute top-0 left-0 rounded-t-2xl"></div>
+
+            <!-- Topo com Título e Fechar -->
+            <div class="flex items-center justify-between pb-3 border-b border-[#1c253b]">
+              <div class="flex items-center gap-2.5">
+                <span class="text-xl">✍️</span>
+                <div>
+                  <span class="text-pe-gold text-[10px] font-bold uppercase tracking-wider block font-mono">Gestão de Acesso</span>
+                  <h3 class="font-oswald text-lg sm:text-xl uppercase font-bold text-white tracking-wide">
+                    Editar Conta Institucional
+                  </h3>
+                </div>
+              </div>
+              <button type="button" onclick="closeEditInstitutionalAdminModal()" class="w-8 h-8 rounded-full bg-[#1c253b] text-slate-300 hover:text-white flex items-center justify-center text-xs font-bold transition cursor-pointer" title="Fechar">
+                ✕
+              </button>
+            </div>
+
+            <!-- Formulário de Edição -->
+            <form id="editInstitutionalAdminForm" onsubmit="handleSaveEditInstitutionalAdmin(event)" class="space-y-4 text-xs">
+              <input type="hidden" id="editAdminOriginalEmail" value="" />
+
+              <!-- Informações de Criação -->
+              <div class="flex items-center justify-between bg-[#05080e] border border-[#1c253b] rounded-xl px-3.5 py-2 text-[11px]">
+                <span class="text-slate-400">Credenciamento Oficial:</span>
+                <span id="editAdminCreatedDate" class="text-pe-gold font-mono font-bold">01/01/2026</span>
+              </div>
+
+              <!-- Nome Completo do Gestor -->
+              <div>
+                <label class="block text-slate-300 font-bold mb-1.5 uppercase tracking-wider text-[10px]">
+                  Nome Completo do Gestor *
+                </label>
+                <input 
+                  type="text" 
+                  id="editAdminName" 
+                  required 
+                  placeholder="ex: Gabriel Alves" 
+                  class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3.5 py-2.5 text-white font-bold outline-none text-xs" 
+                />
+              </div>
+
+              <!-- E-mail Institucional -->
+              <div>
+                <label class="block text-slate-300 font-bold mb-1.5 uppercase tracking-wider text-[10px]">
+                  E-mail Institucional (@foot-table.pe.org) *
+                </label>
+                <div class="relative flex items-center">
+                  <input 
+                    type="text" 
+                    id="editAdminEmailPrefix" 
+                    required 
+                    oninput="formatEditAdminEmailInput(this)" 
+                    class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl pl-3.5 pr-36 py-2.5 text-white font-mono text-xs outline-none" 
+                  />
+                  <span class="absolute right-3 text-pe-gold font-mono text-xs font-bold pointer-events-none select-none">
+                    @foot-table.pe.org
+                  </span>
+                </div>
+              </div>
+
+              <!-- Cargo & Atribuições -->
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label class="block text-slate-300 font-bold uppercase tracking-wider text-[10px]">
+                    Cargo Vinculado *
+                  </label>
+                  <span class="text-[10px] text-pe-gold font-semibold">Define as operações da conta</span>
+                </div>
+                <select 
+                  id="editAdminRole" 
+                  onchange="updateEditAdminRolePreview(this.value)" 
+                  class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3.5 py-2.5 text-white font-bold outline-none text-xs"
+                >
+                  <!-- Preenchido dinamicamente via JS -->
+                </select>
+                <div id="editAdminRoleSummary" class="mt-2 p-2.5 bg-[#05080e] border border-blue-500/30 rounded-xl text-[11px] text-slate-300 flex items-center justify-between">
+                  <span id="editAdminRoleSummaryText">Atribuições do cargo</span>
+                  <span class="text-pe-gold font-mono font-bold text-[9px] bg-pe-gold/10 px-1.5 py-0.5 rounded border border-pe-gold/30">REATIVO</span>
+                </div>
+              </div>
+
+              <!-- Nova Senha -->
+              <div>
+                <label class="block text-slate-300 font-bold mb-1.5 uppercase tracking-wider text-[10px]">
+                  Nova Senha de Acesso (Opcional)
+                </label>
+                <input 
+                  type="password" 
+                  id="editAdminPassword" 
+                  placeholder="Deixe em branco para manter a senha atual" 
+                  minlength="4" 
+                  class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3.5 py-2.5 text-white font-mono text-xs outline-none" 
+                />
+                <span class="text-[10px] text-slate-500 mt-1 block">
+                  Altere a senha somente se o gestor precisar redefinir seu acesso.
+                </span>
+              </div>
+
+              <!-- Aviso Master -->
+              <div id="editAdminMasterNotice" class="hidden p-3 rounded-xl bg-amber-950/30 border border-amber-500/40 text-amber-200 text-xs flex items-center gap-2">
+                <span class="text-base">⚡</span>
+                <span class="text-[11px] leading-snug">Esta conta possui acesso Master com todas as permissões da Federação.</span>
+              </div>
+
+              <div id="editAdminFeedback" class="hidden text-xs rounded-xl p-3 border"></div>
+
+              <!-- Botões de Ação -->
+              <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-[#1c253b]">
+                <button 
+                  type="button" 
+                  onclick="closeEditInstitutionalAdminModal()" 
+                  class="px-4 py-2 rounded-xl border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold text-xs transition cursor-pointer"
+                >
+                  ✕ Cancelar
+                </button>
+                <button 
+                  type="submit" 
+                  class="px-5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-oswald text-xs uppercase font-bold tracking-wider shadow-lg transition flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span>💾</span> <span>Salvar Alterações</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
         <!-- ===================================================== -->
         <!-- 6. ⚙️ ABA BANCO DE DADOS & AJUSTES                     -->
         <!-- ===================================================== -->
@@ -7492,6 +7622,9 @@
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         fecharModalVerCarteira();
+        if (typeof closeEditInstitutionalAdminModal === 'function') closeEditInstitutionalAdminModal();
+        if (typeof closeRoleOperationsModal === 'function') closeRoleOperationsModal();
+        if (typeof closeAddCustomOperationModal === 'function') closeAddCustomOperationModal();
       }
     });
 
@@ -9726,62 +9859,89 @@
     async function loadInstitutionalAdmins() {
       let list = JSON.parse(localStorage.getItem('pe_institutional_admins'));
       if (!list || !Array.isArray(list) || list.length === 0) {
-        list = DEFAULT_INSTITUTIONAL_ADMINS;
+        list = JSON.parse(JSON.stringify(DEFAULT_INSTITUTIONAL_ADMINS));
         localStorage.setItem('pe_institutional_admins', JSON.stringify(list));
       }
 
-      // Migração automática de @foot-table.pe.gov.br para @foot-table.pe.org
+      // 1. Normalização de domínios antigos
       list.forEach(a => {
-        if (a.email && a.email.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br') {
-          a.email = 'gabrielacessor@foot-table.pe.org';
-        } else if (a.email && a.email.toLowerCase().endsWith('@foot-table.pe.gov.br')) {
-          a.email = a.email.replace(/@foot-table\.pe\.gov\.br$/i, '@foot-table.pe.org');
+        if (a.email) {
+          a.email = a.email.trim().toLowerCase();
+          if (a.email === 'gabrielacessor@foot-table.pe.gov.br') {
+            a.email = 'gabrielacessor@foot-table.pe.org';
+          } else if (a.email.endsWith('@foot-table.pe.gov.br')) {
+            a.email = a.email.replace(/@foot-table\.pe\.gov\.br$/i, '@foot-table.pe.org');
+          }
         }
-      });
-
-      // Garante que o Diretor Adjunto gabrielacessor@foot-table.pe.org esteja sempre presente e com cargo Diretor Adjunto
-      const masterIdx = list.findIndex(a => a.email && (a.email.toLowerCase() === 'gabrielacessor@foot-table.pe.org' || a.email.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br'));
-      if (masterIdx === -1) {
-        list.unshift(DEFAULT_INSTITUTIONAL_ADMINS[0]);
-      } else {
-        list[masterIdx].email = "gabrielacessor@foot-table.pe.org";
-        list[masterIdx].cargo = "Diretor Adjunto";
-        list[masterIdx].isMaster = true;
-        list[masterIdx].permissions = ['*'];
-      }
-
-      // Remove qualquer menção antiga de Presidência nas contas
-      list.forEach(a => {
         if (a.cargo && a.cargo.toLowerCase().includes('presidên')) {
           a.cargo = 'Diretor Adjunto';
         }
       });
-      localStorage.setItem('pe_institutional_admins', JSON.stringify(list));
 
+      // 2. Sincronização e limpeza com Supabase
       if (supabaseClient) {
         try {
           const { data, error } = await supabaseClient.from('admin_users').select('*').order('created_at', { ascending: false });
           if (!error && data && data.length > 0) {
             data.forEach(dbItem => {
-              if (!list.some(l => l.email.toLowerCase() === dbItem.email.toLowerCase())) {
+              let normEmail = (dbItem.email || '').trim().toLowerCase();
+              if (normEmail === 'gabrielacessor@foot-table.pe.gov.br') normEmail = 'gabrielacessor@foot-table.pe.org';
+              else if (normEmail.endsWith('@foot-table.pe.gov.br')) normEmail = normEmail.replace(/@foot-table\.pe\.gov\.br$/i, '@foot-table.pe.org');
+
+              if (normEmail && !list.some(l => (l.email || '').toLowerCase() === normEmail)) {
                 list.push({
-                  nome: dbItem.nome,
+                  nome: dbItem.nome || 'Gestor Autorizado',
                   cargo: dbItem.cargo || 'Diretor Adjunto',
-                  email: dbItem.email,
+                  email: normEmail,
                   senha: dbItem.senha || '••••••',
-                  isMaster: dbItem.email.toLowerCase().includes('gabrielacessor'),
-                  permissions: dbItem.permissions || (dbItem.email.toLowerCase().includes('gabrielacessor') ? ['*'] : []),
-                  created_at: dbItem.created_at
+                  isMaster: normEmail.includes('gabrielacessor'),
+                  permissions: dbItem.permissions || (normEmail.includes('gabrielacessor') ? ['*'] : []),
+                  created_at: dbItem.created_at || new Date().toISOString()
                 });
               }
             });
-            localStorage.setItem('pe_institutional_admins', JSON.stringify(list));
+
+            // Limpa registro antigo .gov.br da nuvem
+            try {
+              await supabaseClient.from('admin_users').delete().eq('email', 'gabrielacessor@foot-table.pe.gov.br');
+            } catch (delErr) {}
           }
         } catch (e) {
           console.warn("Supabase admin_users sync:", e);
         }
       }
 
+      // 3. Deduplicação estrita por e-mail para eliminar contas repetidas na tabela
+      const uniqueAdmins = [];
+      const seenEmails = new Set();
+      list.forEach(a => {
+        const em = (a.email || '').trim().toLowerCase();
+        if (!em || seenEmails.has(em)) return;
+        seenEmails.add(em);
+        uniqueAdmins.push(a);
+      });
+      list = uniqueAdmins;
+
+      // 4. Garante que exista ao menos uma conta com privilégios Master
+      if (list.length === 0) {
+        list.push(JSON.parse(JSON.stringify(DEFAULT_INSTITUTIONAL_ADMINS[0])));
+      } else {
+        const masterIdx = list.findIndex(a => a.email && a.email.toLowerCase() === 'gabrielacessor@foot-table.pe.org');
+        if (masterIdx !== -1) {
+          list[masterIdx].isMaster = true;
+          list[masterIdx].permissions = ['*'];
+          if (!list[masterIdx].cargo) list[masterIdx].cargo = "Diretor Adjunto";
+        } else {
+          const hasMaster = list.some(a => a.isMaster || (a.permissions && a.permissions.includes('*')) || a.cargo === 'Diretor Adjunto');
+          if (!hasMaster) {
+            list[0].isMaster = true;
+            list[0].permissions = ['*'];
+            list[0].cargo = 'Diretor Adjunto';
+          }
+        }
+      }
+
+      localStorage.setItem('pe_institutional_admins', JSON.stringify(list));
       return list;
     }
 
@@ -9832,15 +9992,14 @@
             </div>
           </td>
           <td class="py-3 px-3 text-right">
-            ${isMaster ? `
-              <span class="text-[10px] font-mono font-bold text-amber-400 bg-amber-950/60 border border-amber-500/40 px-2 py-1 rounded">
-                DIRETOR ADJUNTO
-              </span>
-            ` : `
-              <button onclick="handleDeleteInstitutionalAdmin('${escapeText(admin.email)}')" class="text-xs text-red-400 hover:text-red-300 bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 px-2.5 py-1 rounded-lg transition cursor-pointer">
-                Excluir
+            <div class="flex items-center justify-end gap-1.5">
+              <button type="button" onclick="openEditInstitutionalAdminModal('${escapeText(admin.email)}')" class="text-[11px] text-amber-300 hover:text-amber-200 bg-amber-950/50 hover:bg-amber-900/70 border border-amber-500/40 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 font-bold cursor-pointer" title="Editar dados e cargo da conta">
+                <i class="fa-solid fa-pen-to-square text-[10px]"></i> <span>Editar</span>
               </button>
-            `}
+              <button type="button" onclick="handleDeleteInstitutionalAdmin('${escapeText(admin.email)}')" class="text-[11px] text-rose-300 hover:text-rose-200 bg-rose-950/50 hover:bg-rose-900/70 border border-rose-500/40 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 font-bold cursor-pointer" title="Remover esta conta do sistema">
+                <i class="fa-solid fa-trash text-[10px]"></i> <span>Remover</span>
+              </button>
+            </div>
           </td>
         `;
         tbody.appendChild(tr);
@@ -9921,30 +10080,234 @@
       updateOperationsTelemetry();
     }
 
+    /* =========================================================
+       MODAL FLUTUANTE DE EDIÇÃO DE CONTA INSTITUCIONAL
+       ========================================================= */
+    function populateEditAdminRoleSelect(currentRole) {
+      const select = document.getElementById('editAdminRole');
+      if (!select) return;
+      const roles = loadCustomRoles();
+      select.innerHTML = '';
+      roles.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r.name;
+        const isTotal = r.isMaster || (Array.isArray(r.permissions) && r.permissions.includes('*')) || r.name === 'Diretor Adjunto';
+        const count = Array.isArray(r.permissions) ? r.permissions.length : 0;
+        opt.textContent = `${r.name} ${isTotal ? '(Acesso Total Master)' : `(${count} operações)`}`;
+        select.appendChild(opt);
+      });
+      if (currentRole && roles.some(r => r.name.toLowerCase() === currentRole.toLowerCase())) {
+        const matched = roles.find(r => r.name.toLowerCase() === currentRole.toLowerCase());
+        select.value = matched.name;
+      } else {
+        select.value = 'Diretor Adjunto';
+      }
+      updateEditAdminRolePreview(select.value);
+    }
+
+    function updateEditAdminRolePreview(roleName) {
+      const summaryText = document.getElementById('editAdminRoleSummaryText');
+      if (!summaryText) return;
+      const roles = loadCustomRoles();
+      const role = roles.find(r => r.name.toLowerCase() === (roleName || '').toLowerCase());
+      if (!role || role.isMaster || (role.permissions && role.permissions.includes('*')) || roleName === 'Diretor Adjunto') {
+        summaryText.innerHTML = `Atribuições: <strong class="text-pe-gold">Acesso Total Master (${ALL_OPERATION_IDS.length} operações)</strong>`;
+      } else {
+        const count = Array.isArray(role.permissions) ? role.permissions.length : 0;
+        summaryText.innerHTML = `Atribuições: <strong class="text-blue-400">${count} de ${ALL_OPERATION_IDS.length} operações autorizadas</strong>`;
+      }
+    }
+
+    function formatEditAdminEmailInput(input) {
+      input.value = input.value.toLowerCase().replace(/@.*$/, '').replace(/[^a-z0-9._-]/g, '');
+    }
+
+    async function openEditInstitutionalAdminModal(email) {
+      if (!hasPermission('gestao_emails')) {
+        showToast("⚠️ Seu cargo não tem permissão para editar acessos institucionais.", true);
+        return;
+      }
+      const admins = await loadInstitutionalAdmins();
+      const target = admins.find(a => (a.email || '').toLowerCase() === (email || '').toLowerCase());
+      if (!target) {
+        showToast("Conta não encontrada no sistema.", true);
+        return;
+      }
+
+      document.getElementById('editAdminOriginalEmail').value = target.email;
+      document.getElementById('editAdminName').value = target.nome || '';
+
+      let prefix = (target.email || '').split('@')[0];
+      document.getElementById('editAdminEmailPrefix').value = prefix;
+
+      const dateEl = document.getElementById('editAdminCreatedDate');
+      if (dateEl) {
+        dateEl.textContent = target.created_at ? new Date(target.created_at).toLocaleDateString('pt-BR') : '01/01/2026';
+      }
+
+      populateEditAdminRoleSelect(target.cargo || 'Diretor Adjunto');
+      document.getElementById('editAdminPassword').value = '';
+
+      const masterNotice = document.getElementById('editAdminMasterNotice');
+      if (masterNotice) {
+        const isMaster = target.isMaster || (target.email || '').toLowerCase().includes('gabrielacessor') || target.cargo === 'Diretor Adjunto';
+        masterNotice.classList.toggle('hidden', !isMaster);
+      }
+
+      const feedback = document.getElementById('editAdminFeedback');
+      if (feedback) feedback.classList.add('hidden');
+
+      const modal = document.getElementById('editInstitutionalAdminModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function closeEditInstitutionalAdminModal() {
+      const modal = document.getElementById('editInstitutionalAdminModal');
+      if (modal) modal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    async function handleSaveEditInstitutionalAdmin(e) {
+      e.preventDefault();
+      if (!hasPermission('gestao_emails')) {
+        showToast("⚠️ Seu cargo não tem permissão para editar contas institucionais.", true);
+        return;
+      }
+
+      const origEmail = document.getElementById('editAdminOriginalEmail').value.trim();
+      const name = document.getElementById('editAdminName').value.trim();
+      let prefix = document.getElementById('editAdminEmailPrefix').value.trim().toLowerCase();
+      const role = document.getElementById('editAdminRole').value;
+      const newPass = document.getElementById('editAdminPassword').value;
+      const feedback = document.getElementById('editAdminFeedback');
+
+      if (feedback) feedback.classList.remove('hidden');
+
+      if (!prefix) {
+        if (feedback) {
+          feedback.className = "text-xs rounded-xl p-3 border bg-red-950/40 border-red-500/40 text-red-300";
+          feedback.textContent = "❌ Informe o prefixo para o e-mail institucional.";
+        }
+        return;
+      }
+
+      const newEmail = prefix.includes('@') ? prefix : `${prefix}@foot-table.pe.org`;
+
+      let admins = await loadInstitutionalAdmins();
+      const targetIdx = admins.findIndex(a => (a.email || '').toLowerCase() === origEmail.toLowerCase());
+      if (targetIdx === -1) {
+        if (feedback) {
+          feedback.className = "text-xs rounded-xl p-3 border bg-red-950/40 border-red-500/40 text-red-300";
+          feedback.textContent = "❌ Registro da conta não foi encontrado para atualização.";
+        }
+        return;
+      }
+
+      // Se alterou o e-mail, checa colisão com outras contas
+      if (newEmail.toLowerCase() !== origEmail.toLowerCase()) {
+        const exists = admins.some((a, idx) => idx !== targetIdx && (a.email || '').toLowerCase() === newEmail.toLowerCase());
+        if (exists) {
+          if (feedback) {
+            feedback.className = "text-xs rounded-xl p-3 border bg-red-950/40 border-red-500/40 text-red-300";
+            feedback.textContent = `❌ O e-mail "${newEmail}" já pertence a outra conta cadastrada.`;
+          }
+          return;
+        }
+      }
+
+      // Permissões do cargo
+      const roles = loadCustomRoles();
+      const roleObj = roles.find(r => r.name.toLowerCase() === role.toLowerCase());
+      const permissions = role === 'Diretor Adjunto' || (roleObj && (roleObj.isMaster || (roleObj.permissions && roleObj.permissions.includes('*'))))
+        ? ['*']
+        : (roleObj ? (roleObj.permissions || []) : []);
+
+      const isMaster = newEmail.toLowerCase().includes('gabrielacessor') || role === 'Diretor Adjunto' || (roleObj && roleObj.isMaster) || admins[targetIdx].isMaster;
+
+      admins[targetIdx].nome = name;
+      admins[targetIdx].cargo = role;
+      admins[targetIdx].email = newEmail;
+      admins[targetIdx].permissions = permissions;
+      admins[targetIdx].isMaster = isMaster;
+      admins[targetIdx].updated_at = new Date().toISOString();
+      if (newPass && newPass.trim().length > 0) {
+        admins[targetIdx].senha = newPass;
+      }
+
+      localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
+
+      if (supabaseClient) {
+        try {
+          if (newEmail.toLowerCase() !== origEmail.toLowerCase()) {
+            await supabaseClient.from('admin_users').delete().eq('email', origEmail);
+            if (origEmail.toLowerCase().includes('gabrielacessor')) {
+              await supabaseClient.from('admin_users').delete().eq('email', 'gabrielacessor@foot-table.pe.gov.br');
+            }
+          }
+          await supabaseClient.from('admin_users').upsert([admins[targetIdx]], { onConflict: 'email' });
+        } catch (err) {
+          console.warn("Aviso Supabase ao salvar edição:", err);
+        }
+      }
+
+      const currentUser = sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user');
+      if (currentUser && currentUser.toLowerCase() === origEmail.toLowerCase()) {
+        sessionStorage.setItem('pe_admin_user', newEmail);
+        localStorage.setItem('pe_admin_user', newEmail);
+        if (document.getElementById('sidebarAdminUser')) {
+          document.getElementById('sidebarAdminUser').textContent = newEmail;
+        }
+      }
+
+      if (feedback) {
+        feedback.className = "text-xs rounded-xl p-3 border bg-emerald-950/40 border-emerald-500/50 text-emerald-300 font-bold";
+        feedback.textContent = `✓ Dados da conta institucional "${newEmail}" atualizados com sucesso!`;
+      }
+
+      setTimeout(() => {
+        closeEditInstitutionalAdminModal();
+        renderInstitutionalAdminsTable();
+        updateOperationsTelemetry();
+        showToast(`Conta "${newEmail}" atualizada com sucesso!`);
+      }, 500);
+    }
+
     async function handleDeleteInstitutionalAdmin(email) {
       if (!hasPermission('gestao_emails')) {
         showToast("⚠️ Seu cargo não tem permissão para revogar acessos institucionais.", true);
         return;
       }
-      if (email.toLowerCase() === 'gabrielacessor@foot-table.pe.org' || email.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br') {
-        alert("A conta do Diretor Adjunto (gabrielacessor@foot-table.pe.org) é a conta principal da federação e não pode ser excluída.");
+      let admins = await loadInstitutionalAdmins();
+      if (admins.length <= 1) {
+        alert("Não é possível remover a única conta institucional restante no sistema.");
         return;
       }
 
-      if (!confirm(`Deseja revogar o acesso institucional do e-mail ${email}?`)) return;
+      const target = admins.find(a => (a.email || '').toLowerCase() === email.toLowerCase());
+      const displayName = target ? target.nome : email;
 
-      let admins = await loadInstitutionalAdmins();
-      admins = admins.filter(a => a.email.toLowerCase() !== email.toLowerCase());
+      if (!confirm(`Deseja realmente remover o acesso da conta institucional:\n\n👤 ${displayName}\n📧 ${email}?`)) {
+        return;
+      }
+
+      admins = admins.filter(a => (a.email || '').toLowerCase() !== email.toLowerCase());
       localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
 
       if (supabaseClient) {
         try {
           await supabaseClient.from('admin_users').delete().eq('email', email);
+          if (email.toLowerCase().includes('gabrielacessor')) {
+            await supabaseClient.from('admin_users').delete().eq('email', 'gabrielacessor@foot-table.pe.gov.br');
+          }
         } catch (e) {
           console.warn("Exclusão Supabase:", e);
         }
       }
 
+      showToast(`Conta institucional "${email}" removida com sucesso!`);
       renderInstitutionalAdminsTable();
       updateOperationsTelemetry();
     }
