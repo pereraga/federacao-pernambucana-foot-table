@@ -10959,7 +10959,7 @@
       {
         nome: "Adriano Mello",
         cargo: "Presidente FPEFT",
-        email: "adrianomelofpeft@foot-table.pe.org",
+        email: "adrianomelo@foot-table.pe.org",
         senha: "admin",
         isMaster: false,
         permissions: ['*'],
@@ -10993,6 +10993,8 @@
           a.email = a.email.trim().toLowerCase();
           if (a.email === 'gabrielacessor@foot-table.pe.gov.br') {
             a.email = 'gabrielacessor@foot-table.pe.org';
+          } else if (a.email === 'adrianomelofpeft@foot-table.pe.org' || a.email === 'adrianomelofpeft@foot-table.pe.gov.br') {
+            a.email = 'adrianomelo@foot-table.pe.org';
           } else if (a.email.endsWith('@foot-table.pe.gov.br')) {
             a.email = a.email.replace(/@foot-table\.pe\.gov\.br$/i, '@foot-table.pe.org');
           }
@@ -11074,8 +11076,9 @@
         if (masterIdx !== -1) {
           if (!list[masterIdx].cargo) list[masterIdx].cargo = "Diretor Adjunto";
         }
-        const presAdminIdx = list.findIndex(a => a.email && a.email.toLowerCase() === 'adrianomelofpeft@foot-table.pe.org');
+        const presAdminIdx = list.findIndex(a => a.email && (a.email.toLowerCase() === 'adrianomelo@foot-table.pe.org' || a.email.toLowerCase() === 'adrianomelofpeft@foot-table.pe.org'));
         if (presAdminIdx !== -1) {
+          list[presAdminIdx].email = 'adrianomelo@foot-table.pe.org';
           if (!list[presAdminIdx].cargo) list[presAdminIdx].cargo = "Presidente FPEFT";
         }
       }

@@ -280,6 +280,11 @@
       localStorage.setItem('pe_supabase_anon_key', SUPABASE_ANON_KEY);
     }
     let supabaseClient = null;
+    if (window.supabase) {
+      try {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL || SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY);
+      } catch (e) {}
+    }
 
     async function initLoginSupabase() {
       if ((!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.startsWith('http') || SUPABASE_ANON_KEY.length < 20) && typeof fetch === 'function') {
@@ -385,6 +390,31 @@
         }
       }
 
+      // Garante conta institucional de Adriano Mello (Presidente FPEFT) se não existir
+      const presIdx = admins.findIndex(a => a.email && (a.email.toLowerCase() === 'adrianomelo@foot-table.pe.org' || a.email.toLowerCase() === 'adrianomelofpeft@foot-table.pe.org'));
+      if (presIdx === -1) {
+        admins.push({
+          nome: "Adriano Mello",
+          cargo: "Presidente FPEFT",
+          email: "adrianomelo@foot-table.pe.org",
+          senha: "admin",
+          isMaster: false,
+          permissions: [],
+          created_at: "2026-01-01T00:00:00Z"
+        });
+      } else {
+        admins[presIdx].email = 'adrianomelo@foot-table.pe.org';
+        if (!admins[presIdx].cargo) admins[presIdx].cargo = "Presidente FPEFT";
+      }
+      localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
+
+      // Garante que supabaseClient esteja pronto para consulta imediata
+      if (!supabaseClient && window.supabase) {
+        try {
+          supabaseClient = window.supabase.createClient(SUPABASE_URL || SUPABASE_PROJECT_URL, (SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.startsWith('http')) ? SUPABASE_ANON_KEY : DEFAULT_SUPABASE_ANON_KEY);
+        } catch (e) {}
+      }
+
       // 1. Tenta validar no Supabase em TEMPO REAL primeiro (banco de dados oficial na nuvem)
       const normUser = user.includes('@') ? user : `${user}@foot-table.pe.org`;
       let foundAdmin = null;
@@ -395,7 +425,7 @@
           const { data, error } = await supabaseClient
             .from('admin_users')
             .select('*')
-            .or(`email.eq.${user},email.eq.${normUser}`)
+            .or(`email.ilike.${user},email.ilike.${normUser}`)
             .maybeSingle();
 
           if (!error && data) {
@@ -418,7 +448,9 @@
             }
             localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
 
-            if (data.senha === pass) {
+            const dbPass = (data.senha || '').trim();
+            const inputPass = pass.trim();
+            if (data.senha === pass || dbPass === inputPass) {
               isAuthorized = true;
               foundAdmin = data;
             }
@@ -430,10 +462,12 @@
 
       // 2. Se não autenticado pelo Supabase, valida localmente
       if (!isAuthorized) {
+        const inputPass = pass.trim();
         const localMatch = admins.find(a => {
           const aEmail = (a.email || '').toLowerCase().trim();
           const aPrefix = aEmail.replace(/@foot-table\.pe\.(org|gov\.br)$/i, '');
-          return (aEmail === user || aEmail === normUser || aPrefix === user) && a.senha === pass;
+          const aPass = (a.senha || '').trim();
+          return (aEmail === user || aEmail === normUser || aPrefix === user) && (a.senha === pass || aPass === inputPass);
         });
         if (localMatch) {
           isAuthorized = true;
