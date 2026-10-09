@@ -2341,73 +2341,27 @@
         <!-- 5. 📋 ABA GUIA DO PAINEL ADMINISTRATIVO                -->
         <!-- ===================================================== -->
         <div id="tabContent-guia" class="space-y-6 hidden">
-          <div class="flex items-center justify-between">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#1c253b]">
             <div>
-              <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Documentação Oficial</span>
-              <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">O que você encontra no Painel Administrativo</h2>
+              <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Documentação Oficial Personalizada</span>
+              <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Guia de Funções do Painel</h2>
+              <p id="guiaUserSubtitle" class="text-xs text-slate-400 mt-0.5">
+                Exibindo exclusivamente as funções individuais e módulos autorizados para a sua conta.
+              </p>
+            </div>
+            <div id="guiaUserBadgeContainer" class="flex items-center gap-2">
+              <!-- Injetado dinamicamente via JS -->
             </div>
           </div>
 
-          <div class="space-y-6">
-            
-            <!-- Item 1 -->
-            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
-              <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
-              <div class="flex items-center gap-3">
-                <span class="text-2xl">🪪</span>
-                <h3 class="font-oswald text-xl uppercase font-bold text-white">1. Aba Carteiras & Atletas</h3>
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-300">
-                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
-                  <strong class="text-white block mb-1 text-sm text-pe-gold">🎲 Gerador de Código:</strong>
-                  Botão para gerar automaticamente um código oficial de 6 dígitos numéricos.
-                </div>
-                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
-                  <strong class="text-white block mb-1 text-sm text-pe-gold">📸 Upload da Foto Oficial:</strong>
-                  Você seleciona a foto do atleta direto do seu computador, que é inserida instantaneamente na carteirinha.
-                </div>
-                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
-                  <strong class="text-white block mb-1 text-sm text-pe-gold">👁️ Preview ao Vivo:</strong>
-                  Enquanto você preenche os dados do atleta (Nome, CPF, Nascimento, Município, Modalidade), a carteirinha oficial é renderizada ao lado em tempo real.
-                </div>
-                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
-                  <strong class="text-white block mb-1 text-sm text-pe-gold">☁️ Envio para o Banco de Dados:</strong>
-                  Ao clicar em "Salvar Atleta no Banco de Dados", as informações e a foto são gravadas no Supabase. Assim, quando o atleta digitar os 6 dígitos dele no site público, ele recebe a carteira oficial dele imediatamente!
-                </div>
-                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
-                  <strong class="text-white block mb-1 text-sm text-pe-gold">💾 Botão Baixar PNG HD:</strong>
-                  Exporta a carteirinha em altíssima resolução para impressão ou envio.
-                </div>
-                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
-                  <strong class="text-white block mb-1 text-sm text-pe-gold">📋 Tabela de Atletas:</strong>
-                  Lista com todos os atletas cadastrados, filtro de busca, edição e exclusão rápida.
-                </div>
-              </div>
-            </div>
+          <!-- Banner Informativo do Usuário Ativo -->
+          <div id="guiaUserBanner" class="p-4 bg-[#0b101d] border border-[#1c253b] rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl relative overflow-hidden">
+            <!-- Injetado dinamicamente via renderGuiaDoPainel() -->
+          </div>
 
-            <!-- Item 2 -->
-            <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
-              <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
-              <div class="flex items-center gap-3">
-                <span class="text-2xl">📰</span>
-                <h3 class="font-oswald text-xl uppercase font-bold text-white">2. Aba Notícias & Torneios</h3>
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-300">
-                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
-                  <strong class="text-white block mb-1 text-sm text-pe-gold">🚀 Publicação de Matérias:</strong>
-                  Publicação de novas matérias com Título, Categoria (Mundial Roma, Campeonato, Regulamento, Informativo, Comunicado), Data e Conteúdo.
-                </div>
-                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
-                  <strong class="text-white block mb-1 text-sm text-pe-gold">⚡ Sincronização Automática:</strong>
-                  As matérias salvas vão para o Supabase e aparecem instantaneamente na página inicial.
-                </div>
-                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b]">
-                  <strong class="text-white block mb-1 text-sm text-pe-gold">🗑️ Gerenciamento Rápido:</strong>
-                  Gerenciamento e exclusão de comunicados antigos com apenas um clique.
-                </div>
-              </div>
-            </div>
-
+          <!-- Grade Dinâmica dos Módulos Permitidos -->
+          <div id="dynamicGuiaContainer" class="space-y-6">
+            <!-- Módulos e funções individuais injetados dinamicamente via renderGuiaDoPainel() -->
           </div>
         </div>
 
@@ -2603,6 +2557,83 @@
       guia: '📋 Guia do Painel Administrativo'
     };
 
+    /* =========================================================
+       ESQUEMA DE OPERAÇÕES & GESTÃO DE CARGOS (@foot-table.pe.org)
+       Definido no topo para acesso instantâneo (0ms) a permissões e guia
+       ========================================================= */
+    const DEFAULT_OPERATION_GROUPS = [
+      {
+        id: 'modulo_carteira',
+        icon: '🪪',
+        title: 'CARTEIRA & STUDIO CR80',
+        items: [
+          { id: 'carteira_studio', name: 'Studio de Emissão CR80', desc: 'Diagramar, ajustar posições, foto 3x4 e visualizar carteira oficial' },
+          { id: 'carteira_pdf', name: 'Baixar Carteira (PDF HD)', desc: 'Gerar e baixar PDF vetorial em alta definição para impressão gráfica' },
+          { id: 'carteira_png', name: 'Baixar Carteira (PNG 600 DPI)', desc: 'Gerar e baixar imagem nítida em altíssima resolução (600 DPI)' },
+          { id: 'carteira_imprimir', name: 'Impressão Oficial Direta', desc: 'Disparar impressão instantânea no padrão CR80 da Federação' }
+        ]
+      },
+      {
+        id: 'modulo_atletas',
+        icon: '👥',
+        title: 'ATLETAS & HOMOLOGAÇÃO',
+        items: [
+          { id: 'atletas_visualizar', name: 'Base de Atletas Federados', desc: 'Visualizar lista geral, CPF, contatos e dados de filiação' },
+          { id: 'atletas_homologar', name: 'Homologar & Aprovar Atleta', desc: 'Validar registro federativo e liberar consulta pública oficial' },
+          { id: 'atletas_editar', name: 'Editar Dados de Atletas', desc: 'Atualizar fotos, categorias, modalidades SOLO/DUPLA e fichas' },
+          { id: 'atletas_excluir', name: 'Suspender / Excluir Atleta', desc: 'Remover atleta do banco de dados oficial da Federação' },
+          { id: 'atletas_exportar', name: 'Exportar Lotes (ZIP & CSV)', desc: 'Baixar todas as carteiras em ZIP ou planilha de federados' }
+        ]
+      },
+      {
+        id: 'modulo_noticias',
+        icon: '📰',
+        title: 'NOTÍCIAS & TORNEIOS',
+        items: [
+          { id: 'noticias_publicar', name: 'Publicar Matérias & Notícias', desc: 'Criar novas notícias, comunicados e matérias do portal' },
+          { id: 'noticias_upload', name: 'Upload de Banners (Supabase)', desc: 'Fazer upload de fotos e artes direto para o Supabase' },
+          { id: 'noticias_editar', name: 'Editar & Destacar Notícias', desc: 'Editar textos, links, categorias e fixar notícias em destaque' },
+          { id: 'noticias_excluir', name: 'Excluir Notícias do Portal', desc: 'Remover publicações arquivadas ou comunicados antigos' }
+        ]
+      },
+      {
+        id: 'modulo_gestao',
+        icon: '⚙️',
+        title: 'GESTÃO, CONTAS & SISTEMA',
+        items: [
+          { id: 'gestao_emails', name: 'Criar E-mails Institucionais', desc: 'Credenciar contas @foot-table.pe.org para gestores' },
+          { id: 'gestao_cargos', name: 'Gerenciar Cargos & Permissões', desc: 'Criar novos cargos e configurar o esquema de operações' },
+          { id: 'gestao_supabase', name: 'Configurações Supabase & Nuvem', desc: 'Ajustar URL, chave Anon e conexão de banco de dados' },
+          { id: 'gestao_limpeza', name: 'Limpeza de Dados & Manutenção', desc: 'Limpar cache, logs e restaurar padrões do sistema' }
+        ]
+      }
+    ];
+
+    let SYSTEM_OPERATION_GROUPS = [];
+    let ALL_OPERATION_IDS = [];
+
+    function loadSystemOperationGroups() {
+      let stored = null;
+      try { stored = JSON.parse(localStorage.getItem('pe_custom_operation_groups')); } catch (e) {}
+      const hasOldArenaData = stored && Array.isArray(stored) && stored.some(g => g.id === 'operacao_jogos' || g.id === 'balcao_consumo' || g.id === 'quadras_espacos' || g.id === 'cadastros_gestao');
+      if (!stored || !Array.isArray(stored) || stored.length === 0 || hasOldArenaData) {
+        stored = JSON.parse(JSON.stringify(DEFAULT_OPERATION_GROUPS));
+        localStorage.setItem('pe_custom_operation_groups', JSON.stringify(stored));
+      }
+      SYSTEM_OPERATION_GROUPS = stored;
+      ALL_OPERATION_IDS = SYSTEM_OPERATION_GROUPS.flatMap(g => g.items.map(i => i.id));
+      return SYSTEM_OPERATION_GROUPS;
+    }
+
+    function saveSystemOperationGroups(groups) {
+      SYSTEM_OPERATION_GROUPS = groups;
+      ALL_OPERATION_IDS = SYSTEM_OPERATION_GROUPS.flatMap(g => g.items.map(i => i.id));
+      localStorage.setItem('pe_custom_operation_groups', JSON.stringify(groups));
+    }
+
+    // Inicialização síncrona imediata das listas
+    loadSystemOperationGroups();
+
     function getCurrentUserPermissions() {
       const rawUser = (sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user') || '').toLowerCase().trim();
       const user = rawUser.includes('@') ? rawUser : `${rawUser}@foot-table.pe.org`;
@@ -2653,6 +2684,483 @@
       const perms = getCurrentUserPermissions();
       if (perms.includes('*')) return true;
       return perms.includes(permId);
+    }
+
+    function renderGuiaDoPainel() {
+      const container = document.getElementById('dynamicGuiaContainer');
+      if (!container) return;
+
+      const perms = getCurrentUserPermissions();
+      const isMaster = perms.includes('*');
+      const rawUser = (sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user') || '').toLowerCase().trim();
+      const user = rawUser.includes('@') ? rawUser : `${rawUser}@foot-table.pe.org`;
+      const admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || [];
+      const currentAdmin = admins.find(a => {
+        const aEmail = (a.email || '').toLowerCase().trim();
+        return aEmail === rawUser || aEmail === user || aEmail.replace(/@foot-table\.pe\.(org|gov\.br)$/i, '') === rawUser;
+      });
+      const currentCargo = currentAdmin && currentAdmin.cargo ? currentAdmin.cargo : (isMaster ? 'Diretor Adjunto' : 'Gestor Autorizado');
+      const currentName = currentAdmin && currentAdmin.nome ? currentAdmin.nome : user;
+      const isPres = currentCargo.toLowerCase().includes('presidente');
+      const cargoIcon = isPres ? '👑' : (isMaster ? '⚡' : '🛡️');
+      const totalOps = (typeof ALL_OPERATION_IDS !== 'undefined' && ALL_OPERATION_IDS.length) ? ALL_OPERATION_IDS.length : 17;
+      const allowedCount = isMaster ? totalOps : perms.length;
+
+      // 1. Atualiza cabeçalho e badges do topo do Guia
+      const badgeContainer = document.getElementById('guiaUserBadgeContainer');
+      if (badgeContainer) {
+        badgeContainer.innerHTML = isMaster
+          ? `<span class="text-xs bg-amber-500/20 text-amber-300 border border-amber-500/30 px-3 py-1 rounded-full font-mono font-bold flex items-center gap-1.5"><i class="fa-solid fa-crown text-pe-gold"></i> ACESSO TOTAL MASTER (${totalOps}/${totalOps})</span>`
+          : `<span class="text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 px-3 py-1 rounded-full font-mono font-bold flex items-center gap-1.5"><i class="fa-solid fa-shield-halved text-blue-400"></i> ${allowedCount}/${totalOps} OPERAÇÕES ATIVAS</span>`;
+      }
+
+      const userBanner = document.getElementById('guiaUserBanner');
+      if (userBanner) {
+        userBanner.innerHTML = `
+          <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
+          <div class="flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-xl bg-[#05080e] border border-[#1c253b] flex items-center justify-center text-2xl shrink-0 shadow-inner">
+              ${cargoIcon}
+            </div>
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="font-bold text-white text-base">${escapeText(currentName)}</h3>
+                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded ${isMaster ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'}">
+                  ${isMaster ? 'ACESSO MASTER ILIMITADO' : `${allowedCount} DE ${totalOps} OPS AUTORIZADAS`}
+                </span>
+              </div>
+              <p class="text-xs text-slate-400 mt-0.5">
+                Cargo Oficial: <strong class="text-pe-gold font-semibold">${cargoIcon} ${escapeText(currentCargo)}</strong> &bull; E-mail: <span class="font-mono text-slate-300">${escapeText(user)}</span>
+              </p>
+            </div>
+          </div>
+          <div class="text-xs text-slate-400 bg-[#05080e] p-3 rounded-xl border border-[#1c253b] self-start md:self-auto space-y-0.5">
+            <span class="text-emerald-400 font-bold flex items-center gap-1.5 text-xs"><i class="fa-solid fa-circle-check"></i> Guia Filtrado por Permissão</span>
+            <span class="text-[11px] text-slate-400 block">Exibindo somente as funções que sua conta tem permissão para realizar. Ações bloqueadas não aparecem.</span>
+          </div>
+        `;
+      }
+
+      // 2. Construção dinâmica dos módulos e funções permitidas
+      let moduleCount = 1;
+      let html = '';
+
+      // MÓDULO 1: Painel Geral & Navegação (Sempre liberado para usuários autenticados)
+      html += `
+        <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
+          <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">🏠</span>
+              <h3 class="font-oswald text-xl uppercase font-bold text-white">${moduleCount++}. Aba Início & Navegação Federativa</h3>
+            </div>
+            <span class="text-[11px] font-mono font-bold bg-blue-950 text-blue-300 border border-blue-500/40 px-2.5 py-0.5 rounded-full">
+              2 funções disponíveis
+            </span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-300">
+            <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b] hover:border-blue-500/30 transition flex flex-col justify-between">
+              <div>
+                <strong class="text-white block mb-1 text-sm text-pe-gold">📊 Indicadores Oficiais & Métricas ao Vivo:</strong>
+                <span class="text-slate-300 leading-relaxed block">Painel com estatísticas em tempo real: total de atletas federados, carteirinhas homologadas no estado de Pernambuco, matérias no ar e administradores ativos.</span>
+              </div>
+              <div class="mt-2.5 pt-2 border-t border-[#151c2e] flex items-center justify-between text-[10px] text-slate-400">
+                <span class="text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Liberado para você</span>
+                <span class="font-mono text-slate-400">GERAL</span>
+              </div>
+            </div>
+            <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b] hover:border-blue-500/30 transition flex flex-col justify-between">
+              <div>
+                <strong class="text-white block mb-1 text-sm text-pe-gold">🧭 Menu Lateral Restrito & Adaptativo:</strong>
+                <span class="text-slate-300 leading-relaxed block">O sistema bloqueia e oculta automaticamente da sua tela qualquer módulo que não esteja liberado para o seu cargo ou usuário, garantindo foco e segurança.</span>
+              </div>
+              <div class="mt-2.5 pt-2 border-t border-[#151c2e] flex items-center justify-between text-[10px] text-slate-400">
+                <span class="text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Liberado para você</span>
+                <span class="font-mono text-slate-400">GERAL</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // MÓDULO: Carteiras & Studio CR80
+      const studioCards = [];
+      if (hasPermission('carteira_studio')) {
+        studioCards.push({
+          icon: '🎲',
+          name: 'Gerador de Código Oficial',
+          desc: 'Botão para gerar automaticamente um código oficial exclusivo de 6 dígitos numéricos para novos atletas.',
+          perm: 'carteira_studio'
+        });
+        studioCards.push({
+          icon: '📸',
+          name: 'Upload da Foto Oficial',
+          desc: 'Você seleciona a foto do atleta direto do seu computador, que é inserida e tratada instantaneamente na carteirinha.',
+          perm: 'carteira_studio'
+        });
+        studioCards.push({
+          icon: '👁️',
+          name: 'Preview ao Vivo & Diagramador CR80',
+          desc: 'Enquanto você preenche os dados do atleta (Nome, CPF, Nascimento, Município, Modalidade), a carteirinha oficial é renderizada ao lado em tempo real com drag-and-drop.',
+          perm: 'carteira_studio'
+        });
+        studioCards.push({
+          icon: '☁️',
+          name: 'Envio para o Banco de Dados',
+          desc: 'Ao clicar em "Salvar Atleta no Banco de Dados", as informações e a foto são gravadas no Supabase. Assim, quando o atleta digitar os 6 dígitos dele no site público, ele recebe a carteira oficial dele imediatamente!',
+          perm: 'carteira_studio'
+        });
+      }
+      if (hasPermission('carteira_pdf')) {
+        studioCards.push({
+          icon: '📄',
+          name: 'Emissão em PDF Vetorial HD',
+          desc: 'Exporta a carteirinha oficial frente e verso em PDF vetorial em altíssima definição (300 DPI), pronta para gráfica ou impressora PVC.',
+          perm: 'carteira_pdf'
+        });
+      }
+      if (hasPermission('carteira_png')) {
+        studioCards.push({
+          icon: '💾',
+          name: 'Botão Baixar PNG HD (600 DPI)',
+          desc: 'Exporta a carteirinha em altíssima resolução para impressão ou envio instantâneo.',
+          perm: 'carteira_png'
+        });
+      }
+      if (hasPermission('carteira_imprimir')) {
+        studioCards.push({
+          icon: '🖨️',
+          name: 'Impressão Oficial Direta',
+          desc: 'Disparo de impressão instantânea no padrão CR80 (85.60 mm x 53.98 mm) calibrada para cartões de PVC.',
+          perm: 'carteira_imprimir'
+        });
+      }
+
+      if (studioCards.length > 0) {
+        html += `
+          <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
+            <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-3">
+                <span class="text-2xl">🪪</span>
+                <h3 class="font-oswald text-xl uppercase font-bold text-white">${moduleCount++}. Aba Carteiras & Studio CR80</h3>
+              </div>
+              <span class="text-[11px] font-mono font-bold bg-blue-950 text-blue-300 border border-blue-500/40 px-2.5 py-0.5 rounded-full">
+                ${studioCards.length} ${studioCards.length === 1 ? 'função permitida' : 'funções permitidas'}
+              </span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs text-slate-300">
+              ${studioCards.map(c => `
+                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b] hover:border-blue-500/30 transition flex flex-col justify-between">
+                  <div>
+                    <strong class="text-white block mb-1 text-sm text-pe-gold">${c.icon} ${escapeText(c.name)}:</strong>
+                    <span class="text-slate-300 leading-relaxed block">${escapeText(c.desc)}</span>
+                  </div>
+                  <div class="mt-2.5 pt-2 border-t border-[#151c2e] flex items-center justify-between text-[10px] text-slate-400">
+                    <span class="text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Liberado para você</span>
+                    <span class="font-mono text-slate-400">${c.perm}</span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      // MÓDULO: Atletas Cadastrados & Homologação
+      const atletasCards = [];
+      if (hasPermission('atletas_visualizar')) {
+        atletasCards.push({
+          icon: '📋',
+          name: 'Tabela de Atletas & Busca',
+          desc: 'Lista com todos os atletas cadastrados, filtro de busca instantânea por nome, CPF, código de 6 dígitos, categoria e município.',
+          perm: 'atletas_visualizar'
+        });
+      }
+      if (hasPermission('atletas_homologar')) {
+        atletasCards.push({
+          icon: '✅',
+          name: 'Homologação Oficial de Atletas',
+          desc: 'Validação e aprovação dos registros federativos de novos atletas, liberando o selo de homologado e a verificação pública imediata no portal.',
+          perm: 'atletas_homologar'
+        });
+      }
+      if (hasPermission('atletas_editar')) {
+        atletasCards.push({
+          icon: '✏️',
+          name: 'Edição de Fichas e Modalidades',
+          desc: 'Atualização cadastral dos atletas federados, substituição de foto 3x4, retificação de dados pessoais e alteração de modalidade (SOLO/DUPLA).',
+          perm: 'atletas_editar'
+        });
+      }
+      if (hasPermission('atletas_exportar')) {
+        atletasCards.push({
+          icon: '📦',
+          name: 'Exportação em Lote (ZIP & Planilha)',
+          desc: 'Baixar todas as carteiras em arquivo comprimido ZIP e exportar a planilha completa de federados em formato CSV/Excel.',
+          perm: 'atletas_exportar'
+        });
+      }
+      if (hasPermission('atletas_excluir')) {
+        atletasCards.push({
+          icon: '🗑️',
+          name: 'Exclusão & Suspensão de Registros',
+          desc: 'Suspensão e remoção segura de atletas inativos ou cancelados do banco de dados oficial da Federação.',
+          perm: 'atletas_excluir'
+        });
+      }
+
+      if (atletasCards.length > 0) {
+        html += `
+          <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
+            <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-3">
+                <span class="text-2xl">👥</span>
+                <h3 class="font-oswald text-xl uppercase font-bold text-white">${moduleCount++}. Aba Atletas & Homologação</h3>
+              </div>
+              <span class="text-[11px] font-mono font-bold bg-blue-950 text-blue-300 border border-blue-500/40 px-2.5 py-0.5 rounded-full">
+                ${atletasCards.length} ${atletasCards.length === 1 ? 'função permitida' : 'funções permitidas'}
+              </span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs text-slate-300">
+              ${atletasCards.map(c => `
+                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b] hover:border-blue-500/30 transition flex flex-col justify-between">
+                  <div>
+                    <strong class="text-white block mb-1 text-sm text-pe-gold">${c.icon} ${escapeText(c.name)}:</strong>
+                    <span class="text-slate-300 leading-relaxed block">${escapeText(c.desc)}</span>
+                  </div>
+                  <div class="mt-2.5 pt-2 border-t border-[#151c2e] flex items-center justify-between text-[10px] text-slate-400">
+                    <span class="text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Liberado para você</span>
+                    <span class="font-mono text-slate-400">${c.perm}</span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      // MÓDULO: Notícias & Torneios
+      const noticiasCards = [];
+      if (hasPermission('noticias_publicar')) {
+        noticiasCards.push({
+          icon: '🚀',
+          name: 'Publicação de Novas Matérias',
+          desc: 'Publicação de novas matérias com Título, Categoria (Mundial Roma, Campeonato, Regulamento, Informativo, Comunicado), Data e Conteúdo oficial.',
+          perm: 'noticias_publicar'
+        });
+        noticiasCards.push({
+          icon: '⚡',
+          name: 'Sincronização Automática com o Portal',
+          desc: 'As matérias salvas vão para o Supabase e aparecem instantaneamente na página inicial da Federação para todo o público.',
+          perm: 'noticias_publicar'
+        });
+      }
+      if (hasPermission('noticias_upload')) {
+        noticiasCards.push({
+          icon: '📸',
+          name: 'Upload de Banners & Fotos Oficiais',
+          desc: 'Envio de artes promocionais, fotos de pódio e capas de notícias diretamente para o Supabase Storage.',
+          perm: 'noticias_upload'
+        });
+      }
+      if (hasPermission('noticias_editar')) {
+        noticiasCards.push({
+          icon: '⭐',
+          name: 'Edição & Destaque de Matérias',
+          desc: 'Edição de comunicados publicados, atualização de links externos de torneios e definição da notícia principal de capa do portal.',
+          perm: 'noticias_editar'
+        });
+      }
+      if (hasPermission('noticias_excluir')) {
+        noticiasCards.push({
+          icon: '🗑️',
+          name: 'Gerenciamento e Exclusão Rápida',
+          desc: 'Gerenciamento e exclusão de comunicados antigos ou expirados com apenas um clique.',
+          perm: 'noticias_excluir'
+        });
+      }
+
+      if (noticiasCards.length > 0) {
+        html += `
+          <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
+            <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-3">
+                <span class="text-2xl">📰</span>
+                <h3 class="font-oswald text-xl uppercase font-bold text-white">${moduleCount++}. Aba Notícias & Torneios</h3>
+              </div>
+              <span class="text-[11px] font-mono font-bold bg-blue-950 text-blue-300 border border-blue-500/40 px-2.5 py-0.5 rounded-full">
+                ${noticiasCards.length} ${noticiasCards.length === 1 ? 'função permitida' : 'funções permitidas'}
+              </span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs text-slate-300">
+              ${noticiasCards.map(c => `
+                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b] hover:border-blue-500/30 transition flex flex-col justify-between">
+                  <div>
+                    <strong class="text-white block mb-1 text-sm text-pe-gold">${c.icon} ${escapeText(c.name)}:</strong>
+                    <span class="text-slate-300 leading-relaxed block">${escapeText(c.desc)}</span>
+                  </div>
+                  <div class="mt-2.5 pt-2 border-t border-[#151c2e] flex items-center justify-between text-[10px] text-slate-400">
+                    <span class="text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Liberado para você</span>
+                    <span class="font-mono text-slate-400">${c.perm}</span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      // MÓDULO: E-mails Institucionais & Gestão de Cargos
+      const emailsCards = [];
+      if (hasPermission('gestao_emails')) {
+        emailsCards.push({
+          icon: '📧',
+          name: 'Credenciamento de E-mails Oficiais',
+          desc: 'Criação de novos e-mails institucionais com domínio oficial @foot-table.pe.org, definindo senhas e cargos para diretores e gestores.',
+          perm: 'gestao_emails'
+        });
+      }
+      if (hasPermission('gestao_cargos')) {
+        emailsCards.push({
+          icon: '🛡️',
+          name: 'Gestão de Cargos & Esquema de Operações',
+          desc: 'Criação de novos cargos federativos e configuração granular de quais das 17 operações cada função tem autorização para realizar.',
+          perm: 'gestao_cargos'
+        });
+      }
+
+      if (emailsCards.length > 0) {
+        html += `
+          <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
+            <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-3">
+                <span class="text-2xl">📧</span>
+                <h3 class="font-oswald text-xl uppercase font-bold text-white">${moduleCount++}. Aba E-mails Institucionais & Gestão</h3>
+              </div>
+              <span class="text-[11px] font-mono font-bold bg-blue-950 text-blue-300 border border-blue-500/40 px-2.5 py-0.5 rounded-full">
+                ${emailsCards.length} ${emailsCards.length === 1 ? 'função permitida' : 'funções permitidas'}
+              </span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-300">
+              ${emailsCards.map(c => `
+                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b] hover:border-blue-500/30 transition flex flex-col justify-between">
+                  <div>
+                    <strong class="text-white block mb-1 text-sm text-pe-gold">${c.icon} ${escapeText(c.name)}:</strong>
+                    <span class="text-slate-300 leading-relaxed block">${escapeText(c.desc)}</span>
+                  </div>
+                  <div class="mt-2.5 pt-2 border-t border-[#151c2e] flex items-center justify-between text-[10px] text-slate-400">
+                    <span class="text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Liberado para você</span>
+                    <span class="font-mono text-slate-400">${c.perm}</span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      // MÓDULO: Banco de Dados & Ajustes
+      const configCards = [];
+      if (hasPermission('gestao_supabase')) {
+        configCards.push({
+          icon: '☁️',
+          name: 'Conexão Supabase & Nuvem',
+          desc: 'Configuração avançada das chaves de conexão de banco de dados, URL da API REST e credenciais de segurança do Supabase.',
+          perm: 'gestao_supabase'
+        });
+      }
+      if (hasPermission('gestao_limpeza')) {
+        configCards.push({
+          icon: '🧹',
+          name: 'Manutenção & Limpeza do Sistema',
+          desc: 'Rotinas de limpeza de cache, descarte de sessões expiradas e restauração de dados padrão do sistema.',
+          perm: 'gestao_limpeza'
+        });
+      }
+
+      if (configCards.length > 0) {
+        html += `
+          <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
+            <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-3">
+                <span class="text-2xl">⚙️</span>
+                <h3 class="font-oswald text-xl uppercase font-bold text-white">${moduleCount++}. Aba Banco de Dados & Ajustes</h3>
+              </div>
+              <span class="text-[11px] font-mono font-bold bg-blue-950 text-blue-300 border border-blue-500/40 px-2.5 py-0.5 rounded-full">
+                ${configCards.length} ${configCards.length === 1 ? 'função permitida' : 'funções permitidas'}
+              </span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-300">
+              ${configCards.map(c => `
+                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b] hover:border-blue-500/30 transition flex flex-col justify-between">
+                  <div>
+                    <strong class="text-white block mb-1 text-sm text-pe-gold">${c.icon} ${escapeText(c.name)}:</strong>
+                    <span class="text-slate-300 leading-relaxed block">${escapeText(c.desc)}</span>
+                  </div>
+                  <div class="mt-2.5 pt-2 border-t border-[#151c2e] flex items-center justify-between text-[10px] text-slate-400">
+                    <span class="text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Liberado para você</span>
+                    <span class="font-mono text-slate-400">${c.perm}</span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      // MÓDULO: Operações Customizadas (se criadas no sistema)
+      const customCards = [];
+      const allSysGroups = (typeof loadSystemOperationGroups === 'function') ? loadSystemOperationGroups() : [];
+      allSysGroups.forEach(grp => {
+        (grp.items || []).forEach(item => {
+          if (item.isCustom && hasPermission(item.id)) {
+            customCards.push({
+              icon: '⚡',
+              name: item.name,
+              desc: item.desc || 'Operação personalizada autorizada para a sua conta institucional.',
+              perm: item.id
+            });
+          }
+        });
+      });
+
+      if (customCards.length > 0) {
+        html += `
+          <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 space-y-4 shadow-xl relative overflow-hidden">
+            <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-3">
+                <span class="text-2xl">⚡</span>
+                <h3 class="font-oswald text-xl uppercase font-bold text-white">${moduleCount++}. Operações Personalizadas</h3>
+              </div>
+              <span class="text-[11px] font-mono font-bold bg-blue-950 text-blue-300 border border-blue-500/40 px-2.5 py-0.5 rounded-full">
+                ${customCards.length} ${customCards.length === 1 ? 'função permitida' : 'funções permitidas'}
+              </span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs text-slate-300">
+              ${customCards.map(c => `
+                <div class="p-3 bg-[#05080e] rounded-xl border border-[#1c253b] hover:border-blue-500/30 transition flex flex-col justify-between">
+                  <div>
+                    <strong class="text-white block mb-1 text-sm text-pe-gold">${c.icon} ${escapeText(c.name)}:</strong>
+                    <span class="text-slate-300 leading-relaxed block">${escapeText(c.desc)}</span>
+                  </div>
+                  <div class="mt-2.5 pt-2 border-t border-[#151c2e] flex items-center justify-between text-[10px] text-slate-400">
+                    <span class="text-emerald-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Liberado para você</span>
+                    <span class="font-mono text-slate-400">${c.perm}</span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
     }
 
     function applyPermissionsToUI() {
@@ -2890,6 +3398,11 @@
         }
         instantStyle.textContent = hideSelectors.length > 0 ? (hideSelectors.join(',\n') + ' { display: none !important; }') : '';
       } catch (e) {}
+
+      // 9. Atualiza o Guia do Painel personalizado para a conta atual instantaneamente (0ms)
+      try {
+        renderGuiaDoPainel();
+      } catch (e) {}
     }
 
     function switchTab(tabName) {
@@ -2943,6 +3456,8 @@
           populateRoleSelect();
           renderCustomRolesList();
           renderInstitutionalAdminsTable();
+        } else if (tabName === 'guia') {
+          renderGuiaDoPainel();
         }
       } catch (err) {
         console.warn("Aviso ao atualizar dados da aba:", err);
@@ -9585,78 +10100,9 @@
     /* =========================================================
        ESQUEMA DE OPERAÇÕES & GESTÃO DE CARGOS (@foot-table.pe.org)
        ========================================================= */
-    const DEFAULT_OPERATION_GROUPS = [
-      {
-        id: 'modulo_carteira',
-        icon: '🪪',
-        title: 'CARTEIRA & STUDIO CR80',
-        items: [
-          { id: 'carteira_studio', name: 'Studio de Emissão CR80', desc: 'Diagramar, ajustar posições, foto 3x4 e visualizar carteira oficial' },
-          { id: 'carteira_pdf', name: 'Baixar Carteira (PDF HD)', desc: 'Gerar e baixar PDF vetorial em alta definição para impressão gráfica' },
-          { id: 'carteira_png', name: 'Baixar Carteira (PNG 600 DPI)', desc: 'Gerar e baixar imagem nítida em altíssima resolução (600 DPI)' },
-          { id: 'carteira_imprimir', name: 'Impressão Oficial Direta', desc: 'Disparar impressão instantânea no padrão CR80 da Federação' }
-        ]
-      },
-      {
-        id: 'modulo_atletas',
-        icon: '👥',
-        title: 'ATLETAS & HOMOLOGAÇÃO',
-        items: [
-          { id: 'atletas_visualizar', name: 'Base de Atletas Federados', desc: 'Visualizar lista geral, CPF, contatos e dados de filiação' },
-          { id: 'atletas_homologar', name: 'Homologar & Aprovar Atleta', desc: 'Validar registro federativo e liberar consulta pública oficial' },
-          { id: 'atletas_editar', name: 'Editar Dados de Atletas', desc: 'Atualizar fotos, categorias, modalidades SOLO/DUPLA e fichas' },
-          { id: 'atletas_excluir', name: 'Suspender / Excluir Atleta', desc: 'Remover atleta do banco de dados oficial da Federação' },
-          { id: 'atletas_exportar', name: 'Exportar Lotes (ZIP & CSV)', desc: 'Baixar todas as carteiras em ZIP ou planilha de federados' }
-        ]
-      },
-      {
-        id: 'modulo_noticias',
-        icon: '📰',
-        title: 'NOTÍCIAS & TORNEIOS',
-        items: [
-          { id: 'noticias_publicar', name: 'Publicar Matérias & Notícias', desc: 'Criar novas notícias, comunicados e matérias do portal' },
-          { id: 'noticias_upload', name: 'Upload de Banners (Supabase)', desc: 'Fazer upload de fotos e artes direto para o Supabase' },
-          { id: 'noticias_editar', name: 'Editar & Destacar Notícias', desc: 'Editar textos, links, categorias e fixar notícias em destaque' },
-          { id: 'noticias_excluir', name: 'Excluir Notícias do Portal', desc: 'Remover publicações arquivadas ou comunicados antigos' }
-        ]
-      },
-      {
-        id: 'modulo_gestao',
-        icon: '⚙️',
-        title: 'GESTÃO, CONTAS & SISTEMA',
-        items: [
-          { id: 'gestao_emails', name: 'Criar E-mails Institucionais', desc: 'Credenciar contas @foot-table.pe.org para gestores' },
-          { id: 'gestao_cargos', name: 'Gerenciar Cargos & Permissões', desc: 'Criar novos cargos e configurar o esquema de operações' },
-          { id: 'gestao_supabase', name: 'Configurações Supabase & Nuvem', desc: 'Ajustar URL, chave Anon e conexão de banco de dados' },
-          { id: 'gestao_limpeza', name: 'Limpeza de Dados & Manutenção', desc: 'Limpar cache, logs e restaurar padrões do sistema' }
-        ]
-      }
-    ];
-
-    let SYSTEM_OPERATION_GROUPS = [];
-    let ALL_OPERATION_IDS = [];
-
-    function loadSystemOperationGroups() {
-      let stored = null;
-      try { stored = JSON.parse(localStorage.getItem('pe_custom_operation_groups')); } catch (e) {}
-      const hasOldArenaData = stored && Array.isArray(stored) && stored.some(g => g.id === 'operacao_jogos' || g.id === 'balcao_consumo' || g.id === 'quadras_espacos' || g.id === 'cadastros_gestao');
-      if (!stored || !Array.isArray(stored) || stored.length === 0 || hasOldArenaData) {
-        stored = JSON.parse(JSON.stringify(DEFAULT_OPERATION_GROUPS));
-        localStorage.setItem('pe_custom_operation_groups', JSON.stringify(stored));
-      }
-      SYSTEM_OPERATION_GROUPS = stored;
-      ALL_OPERATION_IDS = SYSTEM_OPERATION_GROUPS.flatMap(g => g.items.map(i => i.id));
-      return SYSTEM_OPERATION_GROUPS;
-    }
-
-    function saveSystemOperationGroups(groups) {
-      SYSTEM_OPERATION_GROUPS = groups;
-      ALL_OPERATION_IDS = SYSTEM_OPERATION_GROUPS.flatMap(g => g.items.map(i => i.id));
-      localStorage.setItem('pe_custom_operation_groups', JSON.stringify(groups));
-    }
-
-    // Inicialização síncrona imediata das listas
-    loadSystemOperationGroups();
+    // Nota: DEFAULT_OPERATION_GROUPS, SYSTEM_OPERATION_GROUPS, ALL_OPERATION_IDS,
+    // loadSystemOperationGroups e saveSystemOperationGroups estão definidos no topo do script
+    // para suporte instantâneo às permissões e renderização imediata do Guia do Painel.
 
     const DEFAULT_ROLES = [
       {
