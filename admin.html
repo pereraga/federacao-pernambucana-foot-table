@@ -1713,7 +1713,7 @@
 
               <div class="flex flex-wrap items-center gap-2 shrink-0">
                 <span id="activePermsCounterText" class="text-xs font-mono font-bold px-3 py-1.5 rounded-lg bg-blue-950/80 border border-blue-500/40 text-blue-300">
-                  13 de 14 operações marcadas (93%)
+                  15 de 17 operações marcadas (88%)
                 </span>
                 <button type="button" onclick="toggleAllRoleOperations(true)" class="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-blue-950/80 border border-blue-500/40 text-blue-300 hover:bg-blue-900 transition cursor-pointer">
                   ✓ Marcar Todas
@@ -1740,7 +1740,7 @@
                     type="text" 
                     id="newRoleName" 
                     required 
-                    placeholder="ex: Coordenador de Jogos, Secretaria Técnica, Balcão & Recepção..." 
+                    placeholder="ex: Coordenador de Homologação, Assessor de Imprensa, Secretário Geral..." 
                     class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-4 py-2.5 text-white font-bold text-xs outline-none" 
                   />
                 </div>
@@ -1751,13 +1751,13 @@
                   <input 
                     type="text" 
                     id="newRoleDesc" 
-                    placeholder="ex: Responsável pelo controle de quadras, tabelas de partidas e súmulas" 
+                    placeholder="ex: Responsável pela homologação de atletas federados e emissão de carteiras CR80" 
                     class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-4 py-2.5 text-slate-300 text-xs outline-none" 
                   />
                 </div>
               </div>
 
-              <!-- AS 4 COLUNAS EXATAS DA IMAGEM DO USUÁRIO (DINÂMICAS E REATIVAS) -->
+              <!-- AS 4 COLUNAS OFICIAIS DA PLATAFORMA FPEFT (DINÂMICAS E REATIVAS) -->
               <div id="operationsSchemeFormColumns" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <!-- Preenchido dinamicamente via renderOperationsSchemeForm() -->
               </div>
@@ -2326,11 +2326,11 @@
       const perms = getCurrentUserPermissions();
       if (perms.includes('*')) return true;
       if (tabName === 'inicio' || tabName === 'guia') return true;
-      if (tabName === 'atletas') return perms.includes('gestao_carteiras_download') || perms.includes('espacos_quadras');
-      if (tabName === 'jogadores') return perms.includes('gestao_atletas');
-      if (tabName === 'noticias') return perms.includes('gestao_noticias') || perms.includes('jogos_iniciar');
-      if (tabName === 'emails') return perms.includes('gestao_ajustes');
-      if (tabName === 'config') return perms.includes('gestao_ajustes');
+      if (tabName === 'atletas') return perms.includes('carteira_studio') || perms.includes('carteira_pdf') || perms.includes('carteira_png') || perms.includes('carteira_imprimir');
+      if (tabName === 'jogadores') return perms.includes('atletas_visualizar') || perms.includes('atletas_homologar') || perms.includes('atletas_editar') || perms.includes('atletas_excluir') || perms.includes('atletas_exportar');
+      if (tabName === 'noticias') return perms.includes('noticias_publicar') || perms.includes('noticias_editar') || perms.includes('noticias_upload') || perms.includes('noticias_excluir');
+      if (tabName === 'emails') return perms.includes('gestao_emails') || perms.includes('gestao_cargos');
+      if (tabName === 'config') return perms.includes('gestao_supabase') || perms.includes('gestao_limpeza');
       return false;
     }
 
@@ -5080,8 +5080,8 @@
        Garante download imediato e repetível a cada clique
        ========================================================= */
     async function exportCarteiraPDF(athlete = null, triggerBtn = null) {
-      if (!hasPermission('gestao_carteiras_download')) {
-        showToast('⚠️ Seu cargo não possui permissão para baixar carteiras (gestao_carteiras_download).', true);
+      if (!hasPermission('carteira_pdf') && !hasPermission('carteira_studio')) {
+        showToast('⚠️ Seu cargo não possui permissão para baixar carteiras em PDF.', true);
         return;
       }
       if (_isExportingCarteiraPdf) {
@@ -5188,8 +5188,8 @@
        Emite RIGOROSAMENTE 1 ÚNICO arquivo PNG por vez via Blob nativo
        ========================================================= */
     async function exportHdPng(athlete = null, triggerBtn = null) {
-      if (!hasPermission('gestao_carteiras_download')) {
-        showToast('⚠️ Seu cargo não possui permissão para baixar carteiras (gestao_carteiras_download).', true);
+      if (!hasPermission('carteira_png') && !hasPermission('carteira_studio')) {
+        showToast('⚠️ Seu cargo não possui permissão para baixar carteiras em PNG.', true);
         return;
       }
       if (_isExportingCarteiraPng) {
@@ -6896,6 +6896,10 @@
        HOMOLOGAÇÃO DE ATLETAS (INDIVIDUAL E EM MASSA)
        ========================================================= */
     async function homologarAthlete(codigo) {
+      if (!hasPermission('atletas_homologar')) {
+        showToast('⚠️ Seu cargo não possui permissão para homologar atletas.', true);
+        return;
+      }
       let athletes = JSON.parse(localStorage.getItem('pe_athletes_db')) || [];
       const a = athletes.find(item => String(item.codigo) === String(codigo) || String(item.federado) === String(codigo));
       if (a) {
@@ -6958,6 +6962,10 @@
     }
 
     async function homologarTodosPendentes() {
+      if (!hasPermission('atletas_homologar')) {
+        showToast('⚠️ Seu cargo não possui permissão para homologar atletas.', true);
+        return;
+      }
       let localAthletes = JSON.parse(localStorage.getItem('pe_athletes_db')) || [];
       let updatedCount = 0;
       localAthletes.forEach(a => {
@@ -7022,6 +7030,10 @@
     }
 
     async function deleteAthlete(codigo) {
+      if (!hasPermission('atletas_excluir')) {
+        showToast('⚠️ Seu cargo não possui permissão para excluir atletas.', true);
+        return;
+      }
       if (!confirm(`Deseja realmente remover o atleta código #${codigo}?`)) return;
 
       if (supabaseClient) {
@@ -7043,6 +7055,10 @@
     }
 
     async function clearAllAthletes() {
+      if (!hasPermission('atletas_excluir')) {
+        showToast('⚠️ Seu cargo não possui permissão para excluir atletas.', true);
+        return;
+      }
       if (!confirm('Deseja realmente remover TODOS os jogadores do sistema e banco de dados? Esta ação não pode ser desfeita.')) return;
 
       if (supabaseClient) {
@@ -7559,6 +7575,10 @@
     }
 
     async function exportAllAthletesBatchZip() {
+      if (!hasPermission('atletas_exportar')) {
+        showToast('⚠️ Seu cargo não possui permissão para exportar lotes de atletas.', true);
+        return;
+      }
       if (typeof JSZip === 'undefined') {
         showToast('Biblioteca JSZip carregando, tente novamente em instantes.');
         return;
@@ -8412,8 +8432,8 @@
     }
 
     function saveNewsData(syncSupabase = false) {
-      if (!hasPermission('gestao_noticias')) {
-        showToast('⚠️ Seu cargo não possui permissão para publicar ou editar notícias (gestao_noticias).', true);
+      if (!hasPermission('noticias_publicar') && !hasPermission('noticias_editar')) {
+        showToast('⚠️ Seu cargo não possui permissão para publicar ou editar notícias.', true);
         return;
       }
       localStorage.setItem('pe_news_db', JSON.stringify(newsItems));
@@ -8999,45 +9019,48 @@
        ========================================================= */
     const DEFAULT_OPERATION_GROUPS = [
       {
-        id: 'operacao_jogos',
-        icon: '🎮',
-        title: 'OPERAÇÃO DE JOGOS',
+        id: 'modulo_carteira',
+        icon: '🪪',
+        title: 'CARTEIRA & STUDIO CR80',
         items: [
-          { id: 'jogos_cancelar', name: 'Apagar / Cancelar Jogos', desc: 'Permite apagar jogos do sistema e liberar horário imediatamente' },
-          { id: 'jogos_iniciar', name: 'Liberar e Iniciar Partidas', desc: 'Botão de liberar entrada/iniciar jogo e cronômetro ao vivo' },
-          { id: 'jogos_finalizar', name: 'Finalizar Jogos ao Vivo', desc: 'Permite encerrar partidas e finalizar o tempo de jogo' }
+          { id: 'carteira_studio', name: 'Studio de Emissão CR80', desc: 'Diagramar, ajustar posições, foto 3x4 e visualizar carteira oficial' },
+          { id: 'carteira_pdf', name: 'Baixar Carteira (PDF HD)', desc: 'Gerar e baixar PDF vetorial em alta definição para impressão gráfica' },
+          { id: 'carteira_png', name: 'Baixar Carteira (PNG 600 DPI)', desc: 'Gerar e baixar imagem nítida em altíssima resolução (600 DPI)' },
+          { id: 'carteira_imprimir', name: 'Impressão Oficial Direta', desc: 'Disparar impressão instantânea no padrão CR80 da Federação' }
         ]
       },
       {
-        id: 'balcao_consumo',
-        icon: '🛒',
-        title: 'BALCÃO & CONSUMO',
+        id: 'modulo_atletas',
+        icon: '👥',
+        title: 'ATLETAS & HOMOLOGAÇÃO',
         items: [
-          { id: 'balcao_reserva', name: 'Reserva Direta no Balcão', desc: 'Criar novas reservas avulsas diretamente na recepção' },
-          { id: 'balcao_comanda', name: 'Comanda do Bar & Lanches', desc: 'Aba de Bar, comanda individual e entrega de pedidos' },
-          { id: 'balcao_estoque', name: 'Cardápio e Estoque do Bar', desc: 'Cadastrar novos produtos, fotos e alterar valores de venda' }
+          { id: 'atletas_visualizar', name: 'Base de Atletas Federados', desc: 'Visualizar lista geral, CPF, contatos e dados de filiação' },
+          { id: 'atletas_homologar', name: 'Homologar & Aprovar Atleta', desc: 'Validar registro federativo e liberar consulta pública oficial' },
+          { id: 'atletas_editar', name: 'Editar Dados de Atletas', desc: 'Atualizar fotos, categorias, modalidades SOLO/DUPLA e fichas' },
+          { id: 'atletas_excluir', name: 'Suspender / Excluir Atleta', desc: 'Remover atleta do banco de dados oficial da Federação' },
+          { id: 'atletas_exportar', name: 'Exportar Lotes (ZIP & CSV)', desc: 'Baixar todas as carteiras em ZIP ou planilha de federados' }
         ]
       },
       {
-        id: 'quadras_espacos',
-        icon: '🏟️',
-        title: 'QUADRAS & ESPAÇOS',
+        id: 'modulo_noticias',
+        icon: '📰',
+        title: 'NOTÍCIAS & TORNEIOS',
         items: [
-          { id: 'espacos_quadras', name: 'Editar Quadras e Preços', desc: 'Cadastrar quadras, alterar fotos e ajustar tarifas por hora' },
-          { id: 'espacos_treinos', name: 'Treinos e Manutenções', desc: 'Bloquear horários na grade para escolinhas e reformas' },
-          { id: 'espacos_esportes', name: 'Categorias e Esportes', desc: 'Criar e editar modalidades esportivas {Beach, Society...}' }
+          { id: 'noticias_publicar', name: 'Publicar Matérias & Notícias', desc: 'Criar novas notícias, comunicados e matérias do portal' },
+          { id: 'noticias_upload', name: 'Upload de Banners (Supabase)', desc: 'Fazer upload de fotos e artes direto para o Supabase' },
+          { id: 'noticias_editar', name: 'Editar & Destacar Notícias', desc: 'Editar textos, links, categorias e fixar notícias em destaque' },
+          { id: 'noticias_excluir', name: 'Excluir Notícias do Portal', desc: 'Remover publicações arquivadas ou comunicados antigos' }
         ]
       },
       {
-        id: 'cadastros_gestao',
+        id: 'modulo_gestao',
         icon: '⚙️',
-        title: 'CADASTROS & GESTÃO',
+        title: 'GESTÃO, CONTAS & SISTEMA',
         items: [
-          { id: 'gestao_atletas', name: 'Base de Clientes / Atletas', desc: 'Visualizar lista de clientes, fichas médicas e telefones' },
-          { id: 'gestao_mensalistas', name: 'Horários Fixos (Mensalistas)', desc: 'Gerenciar mensalistas e contratos semanais fixos' },
-          { id: 'gestao_ajustes', name: 'Gestores e Ajustes Gerais', desc: 'Cadastrar novos gestores, níveis de acesso e banco de dados' },
-          { id: 'gestao_carteiras_download', name: 'Baixar Carteiras (PDF/PNG)', desc: 'Permissão de download da carteira do atleta federado' },
-          { id: 'gestao_noticias', name: 'Publicar e Editar Notícias', desc: 'Criar matérias com fotos sincronizadas no Supabase' }
+          { id: 'gestao_emails', name: 'Criar E-mails Institucionais', desc: 'Credenciar contas @foot-table.pe.gov.br para gestores' },
+          { id: 'gestao_cargos', name: 'Gerenciar Cargos & Permissões', desc: 'Criar novos cargos e configurar o esquema de operações' },
+          { id: 'gestao_supabase', name: 'Configurações Supabase & Nuvem', desc: 'Ajustar URL, chave Anon e conexão de banco de dados' },
+          { id: 'gestao_limpeza', name: 'Limpeza de Dados & Manutenção', desc: 'Limpar cache, logs e restaurar padrões do sistema' }
         ]
       }
     ];
@@ -9048,7 +9071,8 @@
     function loadSystemOperationGroups() {
       let stored = null;
       try { stored = JSON.parse(localStorage.getItem('pe_custom_operation_groups')); } catch (e) {}
-      if (!stored || !Array.isArray(stored) || stored.length === 0) {
+      const hasOldArenaData = stored && Array.isArray(stored) && stored.some(g => g.id === 'operacao_jogos' || g.id === 'balcao_consumo' || g.id === 'quadras_espacos' || g.id === 'cadastros_gestao');
+      if (!stored || !Array.isArray(stored) || stored.length === 0 || hasOldArenaData) {
         stored = JSON.parse(JSON.stringify(DEFAULT_OPERATION_GROUPS));
         localStorage.setItem('pe_custom_operation_groups', JSON.stringify(stored));
       }
@@ -9131,22 +9155,40 @@
     function getTelemetryBadge(itemId) {
       const telemetry = getOperationsTelemetry();
       switch (itemId) {
-        case 'gestao_atletas':
+        case 'carteira_studio':
+          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-blue-950/60 border border-blue-500/40 text-blue-300 shrink-0 font-bold">Studio CR80</span>`;
+        case 'carteira_pdf':
+          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 shrink-0 font-bold">Vetor HD</span>`;
+        case 'carteira_png':
+          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-teal-950/60 border border-teal-500/40 text-teal-300 shrink-0 font-bold">600 DPI</span>`;
+        case 'carteira_imprimir':
+          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-indigo-950/60 border border-indigo-500/40 text-indigo-300 shrink-0 font-bold">CR80</span>`;
+        case 'atletas_visualizar':
           return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950/60 border border-amber-500/40 text-amber-300 shrink-0 font-bold" title="Total de atletas cadastrados">${telemetry.athletesCount} atletas</span>`;
-        case 'gestao_carteiras_download':
-          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 shrink-0 font-bold" title="Carteiras homologadas">${telemetry.verifiedCount} homologados</span>`;
-        case 'gestao_noticias':
-          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-blue-950/60 border border-blue-500/40 text-blue-300 shrink-0 font-bold" title="Matérias publicadas no portal">${telemetry.newsCount} matérias</span>`;
-        case 'gestao_ajustes':
+        case 'atletas_homologar':
+          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 shrink-0 font-bold" title="Atletas homologados">${telemetry.verifiedCount} homologados</span>`;
+        case 'atletas_editar':
+          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-sky-950/60 border border-sky-500/40 text-sky-300 shrink-0 font-bold">Fichas</span>`;
+        case 'atletas_excluir':
+          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-rose-950/60 border border-rose-500/40 text-rose-300 shrink-0 font-bold">Protegido</span>`;
+        case 'atletas_exportar':
+          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/60 border border-cyan-500/40 text-cyan-300 shrink-0 font-bold">ZIP & CSV</span>`;
+        case 'noticias_publicar':
+          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-blue-950/60 border border-blue-500/40 text-blue-300 shrink-0 font-bold" title="Matérias publicadas">${telemetry.newsCount} notícias</span>`;
+        case 'noticias_upload':
+          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-indigo-950/60 border border-indigo-500/40 text-indigo-300 shrink-0 font-bold">Supabase</span>`;
+        case 'noticias_editar':
+          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950/60 border border-amber-500/40 text-amber-300 shrink-0 font-bold">Destaques</span>`;
+        case 'noticias_excluir':
+          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-red-950/60 border border-red-500/40 text-red-300 shrink-0 font-bold">Moderação</span>`;
+        case 'gestao_emails':
           return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-purple-950/60 border border-purple-500/40 text-purple-300 shrink-0 font-bold" title="Gestores credenciados">${telemetry.adminsCount} gestores</span>`;
-        case 'espacos_quadras':
-          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/60 border border-cyan-500/40 text-cyan-300 shrink-0 font-bold">3 arenas</span>`;
-        case 'jogos_iniciar':
-          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-rose-950/60 border border-rose-500/40 text-rose-300 shrink-0 font-bold">Ao Vivo</span>`;
-        case 'gestao_mensalistas':
-          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-indigo-950/60 border border-indigo-500/40 text-indigo-300 shrink-0 font-bold">Fixos</span>`;
-        case 'balcao_estoque':
-          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950/60 border border-amber-500/40 text-amber-300 shrink-0 font-bold">Estoque</span>`;
+        case 'gestao_cargos':
+          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-pe-gold/20 border border-pe-gold/40 text-pe-gold shrink-0 font-bold" title="Cargos cadastrados">${telemetry.rolesCount} cargos</span>`;
+        case 'gestao_supabase':
+          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 shrink-0 font-bold">Nuvem</span>`;
+        case 'gestao_limpeza':
+          return `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950/60 border border-amber-500/40 text-amber-300 shrink-0 font-bold">Manutenção</span>`;
         default:
           return '';
       }
@@ -9186,7 +9228,7 @@
 
             <div class="space-y-2.5">
               ${group.items.map(item => {
-                const isChecked = activePerms !== null ? activePerms.includes(item.id) : (item.id !== 'gestao_ajustes');
+                const isChecked = activePerms !== null ? activePerms.includes(item.id) : (item.id !== 'gestao_supabase' && item.id !== 'gestao_limpeza');
                 return `
                   <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#0b101d] border border-[#1c253b] hover:border-blue-500/50 cursor-pointer transition select-none group relative">
                     <input 
@@ -9281,7 +9323,7 @@
 
     function resetCheckboxesToDefault() {
       document.querySelectorAll('.role-perm-check').forEach(cb => {
-        cb.checked = (cb.value !== 'gestao_ajustes');
+        cb.checked = (cb.value !== 'gestao_supabase' && cb.value !== 'gestao_limpeza');
       });
       updatePermsCounter();
     }
@@ -9310,6 +9352,10 @@
 
     function handleSaveNewOperation(e) {
       e.preventDefault();
+      if (!hasPermission('gestao_cargos')) {
+        showToast("⚠️ Seu cargo não tem permissão para adicionar novas operações.", true);
+        return;
+      }
       const groupId = document.getElementById('newOpTargetGroupId').value;
       const name = document.getElementById('newOpName').value.trim();
       const desc = document.getElementById('newOpDesc').value.trim();
@@ -9498,6 +9544,10 @@
 
     function handleCreateCustomRole(e) {
       if (e) e.preventDefault();
+      if (!hasPermission('gestao_cargos')) {
+        showToast("⚠️ Seu cargo não tem permissão para gerenciar ou criar cargos.", true);
+        return;
+      }
       const nameInput = document.getElementById('newRoleName');
       const descInput = document.getElementById('newRoleDesc');
       const feedback = document.getElementById('roleCreateFeedback');
@@ -9622,6 +9672,10 @@
 
     function handleDeleteCustomRole(roleIdentifier) {
       if (!roleIdentifier) return;
+      if (!hasPermission('gestao_cargos')) {
+        showToast("⚠️ Seu cargo não tem permissão para excluir cargos.", true);
+        return;
+      }
       let roles = loadCustomRoles();
       const target = roles.find(r => r.id === roleIdentifier || r.name.toLowerCase() === roleIdentifier.toLowerCase());
       if (!target) return;
@@ -9848,6 +9902,10 @@
 
     async function handleAdminCreateEmail(e) {
       e.preventDefault();
+      if (!hasPermission('gestao_emails')) {
+        showToast("⚠️ Seu cargo não tem permissão para credenciar novos e-mails institucionais.", true);
+        return;
+      }
       const name = document.getElementById('panelRegName').value.trim();
       const role = document.getElementById('panelRegRole').value;
       let emailPrefix = document.getElementById('panelRegEmail').value.trim().toLowerCase();
@@ -9917,6 +9975,10 @@
     }
 
     async function handleDeleteInstitutionalAdmin(email) {
+      if (!hasPermission('gestao_emails')) {
+        showToast("⚠️ Seu cargo não tem permissão para revogar acessos institucionais.", true);
+        return;
+      }
       if (email.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br') {
         alert("A conta do Diretor Adjunto (gabrielacessor@foot-table.pe.gov.br) é a conta principal da federação e não pode ser excluída.");
         return;
