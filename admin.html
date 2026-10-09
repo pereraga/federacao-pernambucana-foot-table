@@ -2127,6 +2127,48 @@
           </div>
         </div>
 
+        <!-- MODAL FLUTUANTE: ATRIBUIR CARGO A UMA CONTA EXISTENTE -->
+        <div id="assignRoleModal" onclick="if(event.target === this) closeAssignRoleModal()" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+          <div class="relative w-full max-w-lg bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 sm:p-7 shadow-2xl space-y-4 my-auto max-h-[90vh] overflow-y-auto flex flex-col justify-between">
+            <div class="pe-stripe-bar h-1.5 w-full absolute top-0 left-0 rounded-t-2xl"></div>
+
+            <div class="flex items-center justify-between pb-3 border-b border-[#1c253b]">
+              <div class="flex items-center gap-2.5">
+                <span class="text-xl">👤</span>
+                <div>
+                  <span class="text-pe-gold text-[10px] font-bold uppercase tracking-wider block font-mono">Aplicação Imediata de Cargo</span>
+                  <h3 class="font-oswald text-lg sm:text-xl uppercase font-bold text-white tracking-wide">
+                    Atribuir Cargo a Gestor
+                  </h3>
+                </div>
+              </div>
+              <button type="button" onclick="closeAssignRoleModal()" class="w-8 h-8 rounded-full bg-[#1c253b] text-slate-300 hover:text-white flex items-center justify-center text-xs font-bold transition cursor-pointer" title="Fechar">
+                ✕
+              </button>
+            </div>
+
+            <div class="p-3 rounded-xl bg-[#05080e] border border-pe-gold/30 flex items-center justify-between text-xs">
+              <span class="text-slate-400 font-bold uppercase text-[10px]">Cargo Selecionado:</span>
+              <span id="assignTargetRoleBadge" class="text-pe-gold font-bold px-2.5 py-1 rounded-md bg-pe-gold/10 border border-pe-gold/30 font-mono text-xs">Nome do Cargo</span>
+            </div>
+
+            <div>
+              <label class="block text-slate-300 font-bold mb-2 uppercase tracking-wider text-[10px]">
+                Selecione a conta institucional que receberá este cargo:
+              </label>
+              <div id="assignRoleAdminsList" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                <!-- Preenchido dinamicamente via JavaScript -->
+              </div>
+            </div>
+
+            <div class="pt-3 border-t border-[#1c253b] flex justify-end">
+              <button type="button" onclick="closeAssignRoleModal()" class="px-4 py-2 rounded-xl border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold text-xs transition cursor-pointer">
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- ===================================================== -->
         <!-- 6. ⚙️ ABA BANCO DE DADOS & AJUSTES                     -->
         <!-- ===================================================== -->
@@ -7625,6 +7667,7 @@
         if (typeof closeEditInstitutionalAdminModal === 'function') closeEditInstitutionalAdminModal();
         if (typeof closeRoleOperationsModal === 'function') closeRoleOperationsModal();
         if (typeof closeAddCustomOperationModal === 'function') closeAddCustomOperationModal();
+        if (typeof closeAssignRoleModal === 'function') closeAssignRoleModal();
       }
     });
 
@@ -9521,7 +9564,7 @@
       updatePermsCounter();
     }
 
-    function populateRoleSelect() {
+    function populateRoleSelect(preferredRole) {
       const select = document.getElementById('panelRegRole');
       if (!select) return;
 
@@ -9532,11 +9575,16 @@
       roles.forEach(r => {
         const opt = document.createElement('option');
         opt.value = r.name;
-        opt.textContent = `${r.name} ${r.isMaster ? '(Acesso Total Master)' : `(${Array.isArray(r.permissions) ? (r.permissions.includes('*') ? 'Acesso Total' : r.permissions.length + ' operações') : ''})`}`;
+        const isMasterRole = r.isMaster || (Array.isArray(r.permissions) && r.permissions.includes('*')) || r.name === 'Diretor Adjunto';
+        const permsCount = Array.isArray(r.permissions) ? r.permissions.length : 0;
+        opt.textContent = `${r.name} ${isMasterRole ? '(Acesso Total Master)' : `(${permsCount} operações)`}`;
         select.appendChild(opt);
       });
 
-      if (previousValue && roles.some(r => r.name === previousValue)) {
+      if (preferredRole && roles.some(r => r.name.toLowerCase() === preferredRole.toLowerCase())) {
+        const matched = roles.find(r => r.name.toLowerCase() === preferredRole.toLowerCase());
+        select.value = matched.name;
+      } else if (previousValue && roles.some(r => r.name === previousValue)) {
         select.value = previousValue;
       } else {
         select.value = 'Diretor Adjunto';
@@ -9551,12 +9599,134 @@
 
       const roles = loadCustomRoles();
       const role = roles.find(r => r.name.toLowerCase() === (roleName || '').toLowerCase());
-      if (!role || role.isMaster || (role.permissions && role.permissions.includes('*'))) {
-        summaryText.innerHTML = `Operações vinculadas: <strong class="text-pe-gold">Acesso Total Master (Todas as ${ALL_OPERATION_IDS.length} operações)</strong>`;
+      if (!role || role.isMaster || (role.permissions && role.permissions.includes('*')) || roleName === 'Diretor Adjunto') {
+        summaryText.innerHTML = `Operações vinculadas: <strong class="text-pe-gold">Acesso Total Master (${ALL_OPERATION_IDS.length} operações)</strong>`;
       } else {
         const count = Array.isArray(role.permissions) ? role.permissions.length : 0;
         summaryText.innerHTML = `Operações vinculadas: <strong class="text-blue-400">${count} de ${ALL_OPERATION_IDS.length} operações autorizadas</strong>`;
       }
+    }
+
+    function selectRoleForNewEmail(roleName) {
+      if (!roleName) return;
+      populateRoleSelect(roleName);
+
+      const emailForm = document.getElementById('adminCreateEmailForm');
+      const roleSelect = document.getElementById('panelRegRole');
+      const nameInput = document.getElementById('panelRegName');
+
+      if (roleSelect) {
+        roleSelect.value = roleName;
+        updateSelectedRolePreview(roleName);
+        roleSelect.classList.add('ring-2', 'ring-pe-gold', 'bg-[#0f172a]');
+        setTimeout(() => {
+          roleSelect.classList.remove('ring-2', 'ring-pe-gold', 'bg-[#0f172a]');
+        }, 3000);
+      }
+
+      if (emailForm) {
+        emailForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      if (nameInput) {
+        nameInput.focus();
+      }
+
+      showToast(`Cargo "${roleName}" selecionado para criação do e-mail!`);
+    }
+
+    let currentAssignTargetRole = null;
+
+    async function openAssignRoleToAdminModal(roleName) {
+      if (!hasPermission('gestao_emails')) {
+        showToast("⚠️ Seu cargo não tem permissão para gerenciar contas institucionais.", true);
+        return;
+      }
+      currentAssignTargetRole = roleName;
+      const modal = document.getElementById('assignRoleModal');
+      const badge = document.getElementById('assignTargetRoleBadge');
+      const listContainer = document.getElementById('assignRoleAdminsList');
+      if (!modal || !listContainer) return;
+
+      if (badge) badge.textContent = roleName;
+
+      const admins = await loadInstitutionalAdmins();
+      if (!admins || admins.length === 0) {
+        listContainer.innerHTML = '<div class="text-slate-400 text-xs py-4 text-center">Nenhuma conta cadastrada no momento.</div>';
+      } else {
+        listContainer.innerHTML = admins.map(a => {
+          const isCurrentRole = (a.cargo || '').toLowerCase() === (roleName || '').toLowerCase();
+          return `
+            <div class="p-3 rounded-xl bg-[#05080e] border border-[#1c253b] flex items-center justify-between gap-3 text-xs">
+              <div class="min-w-0 flex-1">
+                <div class="font-bold text-white uppercase text-xs flex items-center gap-1.5 truncate">
+                  <span>${a.isMaster ? '⚡' : '👤'}</span>
+                  <span>${escapeText(a.nome || 'Gestor Autorizado')}</span>
+                </div>
+                <div class="text-[10px] font-mono text-pe-gold truncate mt-0.5">${escapeText(a.email)}</div>
+                <div class="text-[10px] text-slate-400 mt-0.5">Cargo atual: <span class="text-slate-300 font-semibold">${escapeText(a.cargo || 'Diretor Adjunto')}</span></div>
+              </div>
+              <div class="shrink-0">
+                ${isCurrentRole ? `
+                  <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-950/60 text-emerald-400 border border-emerald-500/40 whitespace-nowrap">
+                    ✓ Já Atribuído
+                  </span>
+                ` : `
+                  <button type="button" onclick="executeAssignRoleToAdmin('${escapeText(a.email)}', '${escapeText(roleName)}')" class="bg-blue-600 hover:bg-blue-500 text-white font-oswald text-xs uppercase font-bold px-3 py-1.5 rounded-lg transition cursor-pointer flex items-center gap-1 whitespace-nowrap shadow">
+                    <span>Atribuir</span> <span>➔</span>
+                  </button>
+                `}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeAssignRoleModal() {
+      const modal = document.getElementById('assignRoleModal');
+      if (modal) modal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    async function executeAssignRoleToAdmin(email, newRoleName) {
+      let admins = await loadInstitutionalAdmins();
+      const idx = admins.findIndex(a => (a.email || '').toLowerCase() === (email || '').toLowerCase());
+      if (idx === -1) {
+        showToast("Conta não encontrada.", true);
+        return;
+      }
+
+      const roles = loadCustomRoles();
+      const roleObj = roles.find(r => r.name.toLowerCase() === (newRoleName || '').toLowerCase());
+      const permissions = newRoleName === 'Diretor Adjunto' || (roleObj && (roleObj.isMaster || (roleObj.permissions && roleObj.permissions.includes('*'))))
+        ? ['*']
+        : (roleObj ? (roleObj.permissions || []) : []);
+
+      admins[idx].cargo = newRoleName;
+      admins[idx].permissions = permissions;
+      if (newRoleName === 'Diretor Adjunto') {
+        admins[idx].isMaster = true;
+      }
+      admins[idx].updated_at = new Date().toISOString();
+
+      localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
+
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from('admin_users').upsert([admins[idx]], { onConflict: 'email' });
+        } catch (e) {
+          console.warn("Supabase update role:", e);
+        }
+      }
+
+      showToast(`Cargo "${newRoleName}" atribuído a ${admins[idx].nome} com sucesso!`);
+      closeAssignRoleModal();
+      renderInstitutionalAdminsTable();
+      updateOperationsTelemetry();
     }
 
     function renderCustomRolesList() {
@@ -9573,15 +9743,15 @@
         const permsCount = role.permissions && role.permissions.includes('*') ? ALL_OPERATION_IDS.length : (Array.isArray(role.permissions) ? role.permissions.length : 0);
 
         const card = document.createElement('div');
-        card.className = "bg-[#05080e] border " + (isMaster ? "border-amber-500/50" : "border-[#1c253b]") + " rounded-xl p-3.5 space-y-2 flex flex-col justify-between";
+        card.className = "bg-[#05080e] border " + (isMaster ? "border-amber-500/50" : "border-[#1c253b]") + " rounded-xl p-3.5 space-y-2.5 flex flex-col justify-between";
         card.innerHTML = `
           <div>
             <div class="flex items-center justify-between gap-2">
-              <h5 class="font-bold text-xs uppercase text-white flex items-center gap-1.5">
+              <h5 class="font-bold text-xs uppercase text-white flex items-center gap-1.5 truncate">
                 ${isMaster ? '<span class="text-amber-400">⚡</span>' : '<span class="text-blue-400">🛡️</span>'}
                 <span>${escapeText(role.name)}</span>
               </h5>
-              <span class="text-[10px] font-mono px-2 py-0.5 rounded font-bold ${isMaster ? 'bg-amber-950/80 text-amber-400 border border-amber-500/40' : 'bg-blue-950/80 text-blue-300 border border-blue-500/30'}">
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded font-bold whitespace-nowrap shrink-0 ${isMaster ? 'bg-amber-950/80 text-amber-400 border border-amber-500/40' : 'bg-blue-950/80 text-blue-300 border border-blue-500/30'}">
                 ${permsCount}/${ALL_OPERATION_IDS.length} ops
               </span>
             </div>
@@ -9590,22 +9760,35 @@
             </p>
           </div>
 
-          <div class="flex items-center justify-between pt-2 border-t border-[#1c253b]/80 text-[11px] gap-2">
-            <div class="flex items-center gap-2">
-              <button type="button" onclick="editRolePermissions('${escapeText(role.id || role.name)}')" class="text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 cursor-pointer" title="Editar permissões nas 4 colunas">
-                <i class="fa-solid fa-pen-to-square text-[10px]"></i> Editar
+          <div class="space-y-2 pt-2 border-t border-[#1c253b]/80 text-[11px]">
+            <!-- Botões Principais de Ação -->
+            <div class="grid grid-cols-2 gap-1.5">
+              <button type="button" onclick="selectRoleForNewEmail('${escapeText(role.name)}')" class="bg-pe-gold/15 hover:bg-pe-gold text-pe-gold hover:text-black border border-pe-gold/40 py-1.5 px-2 rounded-lg text-[10px] font-bold transition flex items-center justify-center gap-1 cursor-pointer whitespace-nowrap shadow-sm" title="Selecionar este cargo e ir para o formulário de criar e-mail">
+                <span>✍️</span> <span>Criar E-mail</span>
               </button>
-              <button type="button" onclick="openRoleOperationsModal('${escapeText(role.id || role.name)}')" class="text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1 cursor-pointer">
-                <i class="fa-solid fa-eye text-[10px]"></i> Esquema
+              <button type="button" onclick="openAssignRoleToAdminModal('${escapeText(role.name)}')" class="bg-blue-950/40 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/40 py-1.5 px-2 rounded-lg text-[10px] font-bold transition flex items-center justify-center gap-1 cursor-pointer whitespace-nowrap shadow-sm" title="Atribuir este cargo a uma conta de gestor existente">
+                <span>👤</span> <span>Atribuir a Conta</span>
               </button>
             </div>
-            ${isMaster ? `
-              <span class="text-[10px] text-amber-400 font-bold font-mono">CARGO PROTEGIDO</span>
-            ` : `
-              <button type="button" onclick="handleDeleteCustomRole('${escapeText(role.id || role.name)}')" class="text-red-400 hover:text-red-300 font-bold cursor-pointer">
-                Excluir
-              </button>
-            `}
+
+            <!-- Controles Secundários: Editar, Esquema e Excluir -->
+            <div class="flex items-center justify-between pt-1 border-t border-[#1c253b]/50">
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="editRolePermissions('${escapeText(role.id || role.name)}')" class="text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 cursor-pointer" title="Editar permissões nas 4 colunas">
+                  <i class="fa-solid fa-pen-to-square text-[10px]"></i> Editar
+                </button>
+                <button type="button" onclick="openRoleOperationsModal('${escapeText(role.id || role.name)}')" class="text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1 cursor-pointer">
+                  <i class="fa-solid fa-eye text-[10px]"></i> Esquema
+                </button>
+              </div>
+              ${isMaster ? `
+                <span class="text-[10px] text-amber-400 font-bold font-mono">PROTEGIDO</span>
+              ` : `
+                <button type="button" onclick="handleDeleteCustomRole('${escapeText(role.id || role.name)}')" class="text-red-400 hover:text-red-300 font-bold cursor-pointer">
+                  Excluir
+                </button>
+              `}
+            </div>
           </div>
         `;
         container.appendChild(card);
@@ -9685,15 +9868,22 @@
 
           saveCustomRoles(roles);
           cancelEditingRole();
-          populateRoleSelect();
+          populateRoleSelect(roleName);
           renderCustomRolesList();
           updateOperationsTelemetry();
 
           if (feedback) {
             feedback.classList.remove('hidden');
-            feedback.className = "text-xs rounded-xl p-3 border bg-emerald-950/40 border-emerald-500/40 text-emerald-300 font-bold";
-            feedback.innerHTML = `✓ Permissões do cargo <strong>${escapeText(roleName)}</strong> atualizadas com sucesso (${selectedPerms.length} operações ativas)! ${updatedAdminsCount > 0 ? `${updatedAdminsCount} contas vinculadas foram atualizadas automaticamente.` : ''}`;
-            setTimeout(() => feedback.classList.add('hidden'), 5000);
+            feedback.className = "text-xs rounded-xl p-3.5 border bg-emerald-950/50 border-emerald-500/50 text-emerald-200 font-bold space-y-2 shadow-lg";
+            feedback.innerHTML = `
+              <div>✓ Permissões do cargo <strong>${escapeText(roleName)}</strong> atualizadas com sucesso (${selectedPerms.length} operações ativas)! ${updatedAdminsCount > 0 ? `${updatedAdminsCount} contas vinculadas foram atualizadas automaticamente.` : ''}</div>
+              <div class="pt-2 border-t border-emerald-500/30 flex items-center gap-2">
+                <button type="button" onclick="selectRoleForNewEmail('${escapeText(roleName)}')" class="bg-pe-gold hover:bg-amber-300 text-black font-bold px-3 py-1.5 rounded-lg text-xs transition cursor-pointer flex items-center gap-1 shadow">
+                  <span>✍️</span> <span>Criar E-mail com este Cargo</span>
+                </button>
+              </div>
+            `;
+            setTimeout(() => feedback.classList.add('hidden'), 7000);
           }
           showToast(`Cargo "${roleName}" atualizado com sucesso!`);
           return;
@@ -9723,21 +9913,39 @@
       }
 
       saveCustomRoles(roles);
-      populateRoleSelect();
+      populateRoleSelect(newRole.name);
       renderCustomRolesList();
       updateOperationsTelemetry();
 
       if (feedback) {
         feedback.classList.remove('hidden');
-        feedback.className = "text-xs rounded-xl p-3 border bg-emerald-950/40 border-emerald-500/40 text-emerald-300 font-bold";
-        feedback.innerHTML = `✓ Cargo <strong>${escapeText(roleName)}</strong> salvo com sucesso com <strong>${selectedPerms.length} de ${ALL_OPERATION_IDS.length} operações autorizadas</strong>! Já está disponível na seleção de e-mails abaixo.`;
-        setTimeout(() => feedback.classList.add('hidden'), 5000);
+        feedback.className = "text-xs rounded-xl p-3.5 border bg-emerald-950/60 border-emerald-500/50 text-emerald-200 font-bold space-y-2.5 shadow-lg";
+        feedback.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="text-emerald-400 text-base">✓</span>
+            <span>Cargo <strong>${escapeText(roleName)}</strong> gerado com sucesso com <strong>${selectedPerms.length} de ${ALL_OPERATION_IDS.length} operações autorizadas</strong>!</span>
+          </div>
+          <div class="pt-2 border-t border-emerald-500/30 flex flex-wrap items-center gap-2">
+            <button type="button" onclick="selectRoleForNewEmail('${escapeText(roleName)}')" class="bg-pe-gold hover:bg-amber-300 text-black font-oswald text-xs uppercase font-bold px-3.5 py-1.5 rounded-lg transition cursor-pointer flex items-center gap-1.5 shadow">
+              <span>✍️</span> <span>Criar E-mail com este Cargo Agora</span>
+            </button>
+            <button type="button" onclick="openAssignRoleToAdminModal('${escapeText(roleName)}')" class="bg-blue-600 hover:bg-blue-500 text-white font-oswald text-xs uppercase font-bold px-3.5 py-1.5 rounded-lg transition cursor-pointer flex items-center gap-1.5 shadow">
+              <span>👤</span> <span>Atribuir a uma Conta Existente</span>
+            </button>
+          </div>
+        `;
+        setTimeout(() => feedback.classList.add('hidden'), 8000);
       }
 
-      showToast(`Cargo "${roleName}" criado com ${selectedPerms.length} operações autorizadas!`);
+      showToast(`Cargo "${roleName}" criado e selecionado para o e-mail!`);
       nameInput.value = '';
       if (descInput) descInput.value = '';
       resetCheckboxesToDefault();
+
+      // Rola automaticamente para o formulário de criação de e-mail e foca no nome
+      setTimeout(() => {
+        selectRoleForNewEmail(roleName);
+      }, 350);
     }
 
     function handleDeleteCustomRole(roleIdentifier) {
