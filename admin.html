@@ -403,11 +403,11 @@
       </div>
 
       <!-- Perfil do Administrador Logado -->
-      <div id="sidebarUserBox" class="px-5 py-3.5 bg-[#080d16] border-b border-[#151c2e]/80 flex items-center justify-between transition-all" title="gabrielacessor@foot-table.pe.gov.br (Diretor Adjunto)">
+      <div id="sidebarUserBox" class="px-5 py-3.5 bg-[#080d16] border-b border-[#151c2e]/80 flex items-center justify-between transition-all" title="gabrielacessor@foot-table.pe.org (Diretor Adjunto)">
         <div class="flex items-center gap-2.5 min-w-0">
           <div class="w-2.5 h-2.5 rounded-full bg-pe-gold animate-pulse shrink-0" title="Online - Diretor Adjunto"></div>
           <div class="min-w-0 sidebar-text">
-            <span id="sidebarAdminUser" class="block text-xs font-bold text-white truncate">gabrielacessor@foot-table.pe.gov.br</span>
+            <span id="sidebarAdminUser" class="block text-xs font-bold text-white truncate">gabrielacessor@foot-table.pe.org</span>
             <span id="sidebarAdminRole" class="text-[9px] uppercase tracking-wider text-pe-gold font-bold">⚡ Diretor Adjunto</span>
           </div>
         </div>
@@ -1683,13 +1683,13 @@
                     <span>E-mails Institucionais & Esquema de Operações</span>
                   </h3>
                   <p class="text-xs text-slate-300">
-                    Crie cargos personalizados, defina o que cada cargo pode fazer no sistema e vincule as operações aos e-mails <code class="text-pe-gold bg-black/40 px-1.5 py-0.5 rounded font-mono font-bold">@foot-table.pe.gov.br</code> credenciados.
+                    Crie cargos personalizados, defina o que cada cargo pode fazer no sistema e vincule as operações aos e-mails <code class="text-pe-gold bg-black/40 px-1.5 py-0.5 rounded font-mono font-bold">@foot-table.pe.org</code> credenciados.
                   </p>
                 </div>
               </div>
               <div class="inline-flex items-center gap-2 bg-[#05080e] border border-pe-gold/40 px-3.5 py-2 rounded-xl text-xs shrink-0">
                 <span class="text-pe-gold font-bold">⚡ DIRETOR ADJUNTO:</span>
-                <span class="font-mono text-white font-bold">gabrielacessor@foot-table.pe.gov.br</span>
+                <span class="font-mono text-white font-bold">gabrielacessor@foot-table.pe.org</span>
               </div>
             </div>
           </div>
@@ -1842,7 +1842,7 @@
                   <div class="relative flex items-center">
                     <input type="text" id="panelRegEmail" required placeholder="gabriel.alves" oninput="formatPanelEmailInput(this)" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl pl-4 pr-36 py-2.5 text-white font-mono text-xs outline-none" />
                     <span class="absolute right-3 text-pe-gold font-mono text-xs font-bold pointer-events-none select-none">
-                      @foot-table.pe.gov.br
+                      @foot-table.pe.org
                     </span>
                   </div>
                   <span class="text-[10px] text-slate-500 mt-1 block">
@@ -1890,7 +1890,7 @@
                     <span>👥</span> E-mails Institucionais Autorizados (<span id="totalInstitutionalCount" class="text-pe-gold">0</span>)
                   </h3>
                   <span class="text-[10px] text-pe-gold font-mono font-bold bg-pe-gold/10 border border-pe-gold/30 px-2 py-0.5 rounded">
-                    DOMÍNIO: @foot-table.pe.gov.br
+                    DOMÍNIO: @foot-table.pe.org
                   </span>
                 </div>
 
@@ -9015,7 +9015,7 @@
     }
 
     /* =========================================================
-       ESQUEMA DE OPERAÇÕES & GESTÃO DE CARGOS (@foot-table.pe.gov.br)
+       ESQUEMA DE OPERAÇÕES & GESTÃO DE CARGOS (@foot-table.pe.org)
        ========================================================= */
     const DEFAULT_OPERATION_GROUPS = [
       {
@@ -9057,7 +9057,7 @@
         icon: '⚙️',
         title: 'GESTÃO, CONTAS & SISTEMA',
         items: [
-          { id: 'gestao_emails', name: 'Criar E-mails Institucionais', desc: 'Credenciar contas @foot-table.pe.gov.br para gestores' },
+          { id: 'gestao_emails', name: 'Criar E-mails Institucionais', desc: 'Credenciar contas @foot-table.pe.org para gestores' },
           { id: 'gestao_cargos', name: 'Gerenciar Cargos & Permissões', desc: 'Criar novos cargos e configurar o esquema de operações' },
           { id: 'gestao_supabase', name: 'Configurações Supabase & Nuvem', desc: 'Ajustar URL, chave Anon e conexão de banco de dados' },
           { id: 'gestao_limpeza', name: 'Limpeza de Dados & Manutenção', desc: 'Limpar cache, logs e restaurar padrões do sistema' }
@@ -9705,13 +9705,13 @@
     }
 
     /* =========================================================
-       GESTÃO DE E-MAILS INSTITUCIONAIS (@foot-table.pe.gov.br)
+       GESTÃO DE E-MAILS INSTITUCIONAIS (@foot-table.pe.org)
        ========================================================= */
     const DEFAULT_INSTITUTIONAL_ADMINS = [
       {
         nome: "Gabriel Alves",
         cargo: "Diretor Adjunto",
-        email: "gabrielacessor@foot-table.pe.gov.br",
+        email: "gabrielacessor@foot-table.pe.org",
         senha: "admin",
         isMaster: true,
         permissions: ['*'],
@@ -9720,7 +9720,7 @@
     ];
 
     function formatPanelEmailInput(input) {
-      input.value = input.value.replace(/@foot-table\.pe\.gov\.br/gi, '').replace(/\s+/g, '').toLowerCase();
+      input.value = input.value.replace(/@foot-table\.pe\.(gov\.br|org)/gi, '').replace(/\s+/g, '').toLowerCase();
     }
 
     async function loadInstitutionalAdmins() {
@@ -9730,11 +9730,21 @@
         localStorage.setItem('pe_institutional_admins', JSON.stringify(list));
       }
 
-      // Garante que o Diretor Adjunto gabrielacessor@foot-table.pe.gov.br esteja sempre presente e com cargo Diretor Adjunto
-      const masterIdx = list.findIndex(a => a.email && a.email.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br');
+      // Migração automática de @foot-table.pe.gov.br para @foot-table.pe.org
+      list.forEach(a => {
+        if (a.email && a.email.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br') {
+          a.email = 'gabrielacessor@foot-table.pe.org';
+        } else if (a.email && a.email.toLowerCase().endsWith('@foot-table.pe.gov.br')) {
+          a.email = a.email.replace(/@foot-table\.pe\.gov\.br$/i, '@foot-table.pe.org');
+        }
+      });
+
+      // Garante que o Diretor Adjunto gabrielacessor@foot-table.pe.org esteja sempre presente e com cargo Diretor Adjunto
+      const masterIdx = list.findIndex(a => a.email && (a.email.toLowerCase() === 'gabrielacessor@foot-table.pe.org' || a.email.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br'));
       if (masterIdx === -1) {
         list.unshift(DEFAULT_INSTITUTIONAL_ADMINS[0]);
       } else {
+        list[masterIdx].email = "gabrielacessor@foot-table.pe.org";
         list[masterIdx].cargo = "Diretor Adjunto";
         list[masterIdx].isMaster = true;
         list[masterIdx].permissions = ['*'];
@@ -9786,7 +9796,7 @@
       tbody.innerHTML = '';
 
       admins.forEach(admin => {
-        const isMaster = admin.isMaster || admin.email.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br';
+        const isMaster = admin.isMaster || admin.email.toLowerCase() === 'gabrielacessor@foot-table.pe.org' || admin.email.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br';
         const roleObj = roles.find(r => r.name.toLowerCase() === (admin.cargo || '').toLowerCase());
         const perms = (admin.permissions && admin.permissions.includes('*')) || isMaster 
           ? ALL_OPERATION_IDS 
@@ -9864,7 +9874,7 @@
         return;
       }
 
-      const fullEmail = emailPrefix.includes('@') ? emailPrefix : `${emailPrefix}@foot-table.pe.gov.br`;
+      const fullEmail = emailPrefix.includes('@') ? emailPrefix : `${emailPrefix}@foot-table.pe.org`;
 
       feedback.className = "text-xs rounded-xl p-3 border bg-blue-950/40 border-blue-500/40 text-blue-300";
       feedback.textContent = "Gerando credencial e vinculando operações do cargo...";
@@ -9880,7 +9890,7 @@
         email: fullEmail,
         senha: password,
         permissions: permissions,
-        isMaster: fullEmail.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br',
+        isMaster: fullEmail.toLowerCase() === 'gabrielacessor@foot-table.pe.org' || fullEmail.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br',
         created_at: new Date().toISOString()
       };
 
@@ -9916,8 +9926,8 @@
         showToast("⚠️ Seu cargo não tem permissão para revogar acessos institucionais.", true);
         return;
       }
-      if (email.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br') {
-        alert("A conta do Diretor Adjunto (gabrielacessor@foot-table.pe.gov.br) é a conta principal da federação e não pode ser excluída.");
+      if (email.toLowerCase() === 'gabrielacessor@foot-table.pe.org' || email.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br') {
+        alert("A conta do Diretor Adjunto (gabrielacessor@foot-table.pe.org) é a conta principal da federação e não pode ser excluída.");
         return;
       }
 
@@ -9947,7 +9957,12 @@
       if (!isLogged) {
         window.location.href = 'login.html';
       } else {
-        const user = sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user') || 'gabrielacessor@foot-table.pe.gov.br';
+        let user = sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user') || 'gabrielacessor@foot-table.pe.org';
+        if (user === 'gabrielacessor@foot-table.pe.gov.br') {
+          user = 'gabrielacessor@foot-table.pe.org';
+          sessionStorage.setItem('pe_admin_user', user);
+          localStorage.setItem('pe_admin_user', user);
+        }
         if (user && document.getElementById('sidebarAdminUser')) {
           document.getElementById('sidebarAdminUser').textContent = user;
           const roleEl = document.getElementById('sidebarAdminRole');

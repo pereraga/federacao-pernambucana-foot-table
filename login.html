@@ -163,7 +163,7 @@
                   id="adminUser" 
                   name="username" 
                   required 
-                  placeholder="usuario@foot-table.pe.gov.br" 
+                  placeholder="usuario@foot-table.pe.org" 
                   class="w-full bg-pe-inputBg border border-pe-cardBorder focus:border-pe-gold rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-600 outline-none transition duration-150"
                 />
               </div>
@@ -244,7 +244,7 @@
           <div class="text-[11px] text-slate-500">
             Dúvidas ou credenciamento oficial?
           </div>
-          <a href="mailto:contato@foot-table.pe.gov.br" class="text-[11px] text-slate-400 hover:text-pe-gold transition font-semibold">
+          <a href="mailto:contato@foot-table.pe.org" class="text-[11px] text-slate-400 hover:text-pe-gold transition font-semibold">
             Suporte Técnico FPFTM
           </a>
         </div>
@@ -355,31 +355,40 @@
 
       // Verifica lista de administradores institucionais criados
       let admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || [];
-      const masterIdx = admins.findIndex(a => a.email && a.email.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br');
+      // Migração automática de @foot-table.pe.gov.br para @foot-table.pe.org
+      admins.forEach(a => {
+        if (a.email && a.email.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br') {
+          a.email = 'gabrielacessor@foot-table.pe.org';
+        } else if (a.email && a.email.toLowerCase().endsWith('@foot-table.pe.gov.br')) {
+          a.email = a.email.replace(/@foot-table\.pe\.gov\.br$/i, '@foot-table.pe.org');
+        }
+      });
+      const masterIdx = admins.findIndex(a => a.email && (a.email.toLowerCase() === 'gabrielacessor@foot-table.pe.org' || a.email.toLowerCase() === 'gabrielacessor@foot-table.pe.gov.br'));
       if (masterIdx === -1) {
         admins.unshift({
           nome: "Gabriel Alves",
           cargo: "Diretor Adjunto",
-          email: "gabrielacessor@foot-table.pe.gov.br",
+          email: "gabrielacessor@foot-table.pe.org",
           senha: "admin",
           isMaster: true,
           permissions: ['*'],
           created_at: "2026-01-01T00:00:00Z"
         });
       } else {
+        admins[masterIdx].email = 'gabrielacessor@foot-table.pe.org';
         admins[masterIdx].cargo = "Diretor Adjunto";
         admins[masterIdx].isMaster = true;
         admins[masterIdx].permissions = ['*'];
       }
       localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
 
-      const foundAdmin = admins.find(a => a.email.toLowerCase() === user && a.senha === pass);
+      const foundAdmin = admins.find(a => (a.email.toLowerCase() === user || (user === 'gabrielacessor' && a.email.toLowerCase() === 'gabrielacessor@foot-table.pe.org')) && a.senha === pass);
 
-      // Reconhece ADM MASTER (gabrielacessor@foot-table.pe.gov.br) com sua senha cadastrada ou padrão
-      const isMasterUser = (user === 'gabrielacessor@foot-table.pe.gov.br' || user === 'gabrielacessor') && (pass === 'admin' || pass.length >= 4);
+      // Reconhece ADM MASTER (gabrielacessor@foot-table.pe.org) com sua senha cadastrada ou padrão
+      const isMasterUser = (user === 'gabrielacessor@foot-table.pe.org' || user === 'gabrielacessor@foot-table.pe.gov.br' || user === 'gabrielacessor') && (pass === 'admin' || pass.length >= 4);
 
       // Também aceita login padrão da diretoria ou qualquer e-mail institucional cadastrado
-      let isAuthorized = !!foundAdmin || isMasterUser || (user.includes('@foot-table.pe.gov.br') && pass.length >= 4) || (user === 'admin' && pass.length >= 4);
+      let isAuthorized = !!foundAdmin || isMasterUser || (user.includes('@foot-table.pe.org') && pass.length >= 4) || (user.includes('@foot-table.pe.gov.br') && pass.length >= 4) || (user === 'admin' && pass.length >= 4);
 
       // Tenta validar no Supabase se existir
       if (!isAuthorized && supabaseClient) {
@@ -412,12 +421,13 @@
           `;
           loginFeedback.classList.remove('hidden');
 
+          const effectiveUser = (user === 'gabrielacessor@foot-table.pe.gov.br' || user === 'gabrielacessor') ? 'gabrielacessor@foot-table.pe.org' : user;
           sessionStorage.setItem('pe_admin_logged', 'true');
-          sessionStorage.setItem('pe_admin_user', user);
+          sessionStorage.setItem('pe_admin_user', effectiveUser);
 
           if (document.getElementById('rememberMe').checked) {
             localStorage.setItem('pe_admin_logged', 'true');
-            localStorage.setItem('pe_admin_user', user);
+            localStorage.setItem('pe_admin_user', effectiveUser);
           }
 
           setTimeout(() => {
@@ -448,7 +458,7 @@
     // Carrega último usuário se salvo com "Lembrar este dispositivo"
     window.addEventListener('load', () => {
       if (localStorage.getItem('pe_admin_user') === 'gabrielacessor@foot-table.pe.gov.br') {
-        localStorage.removeItem('pe_admin_user');
+        localStorage.setItem('pe_admin_user', 'gabrielacessor@foot-table.pe.org');
       }
       const savedUser = localStorage.getItem('pe_admin_user');
       if (savedUser && document.getElementById('adminUser')) {
