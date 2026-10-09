@@ -429,6 +429,26 @@
     #sidebar.sidebar-collapsed #sidebarFooter span:not(.sidebar-text) {
       font-size: 1.1rem !important;
     }
+    /* Refinamento do Badge de Homologação Pendente na Sidebar */
+    #navPendingBadge:not(.hidden) {
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.25);
+    }
+    #navPendingBadge.hidden {
+      display: none !important;
+    }
+    .active-nav-pill #navPendingBadge {
+      background-color: #080b12 !important;
+      color: #f5b800 !important;
+      border-color: rgba(8, 11, 18, 0.6) !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+    }
+    #sidebar.sidebar-collapsed #navPendingBadge {
+      display: none !important;
+    }
   </style>
 </head>
 <body class="bg-[#080b12] text-slate-100 min-h-screen font-sans antialiased selection:bg-pe-gold selection:text-pe-dark">
@@ -438,7 +458,7 @@
     <!-- ========================================================= -->
     <!-- PAINEL LATERAL (SIDEBAR COM ABAS OFICIAIS DO SISTEMA)     -->
     <!-- ========================================================= -->
-    <aside id="sidebar" class="w-full md:w-64 lg:w-72 bg-[#05080e] border-r border-[#151c2e] flex flex-col shrink-0 z-40 transition-all md:min-h-screen">
+    <aside id="sidebar" class="w-full md:w-72 bg-[#05080e] border-r border-[#151c2e] flex flex-col shrink-0 z-40 transition-all md:min-h-screen">
       
       <!-- Topo da Sidebar: Logo & Identidade com Botão Toggle -->
       <div class="p-4 border-b border-[#151c2e] relative sidebar-header-container">
@@ -510,14 +530,14 @@
 
         <!-- 3. Aba Jogadores Cadastrados (Nova Aba Oficial de Gestão e Homologação) -->
         <button onclick="switchTab('jogadores')" id="navBtn-jogadores" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group" title="Jogadores Cadastrados">
-          <div class="flex items-center gap-3.5">
+          <div class="flex items-center gap-3 min-w-0 flex-1 mr-2">
             <!-- Ícone Jogadores / Grupo -->
             <i class="fa-solid fa-users w-5 text-center text-slate-400 group-hover:text-white shrink-0"></i>
-            <span class="sidebar-text text-sm font-semibold tracking-wide">Jogadores Cadastrados</span>
+            <span class="sidebar-text text-sm font-semibold tracking-wide truncate">Jogadores Cadastrados</span>
           </div>
-          <div class="flex items-center gap-1.5 sidebar-text">
-            <span id="navPendingBadge" class="hidden text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40 px-2 py-0.5 rounded-full"></span>
-            <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0"></span>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <span id="navPendingBadge" class="hidden min-w-[20px] h-5 px-1.5 inline-flex items-center justify-center text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40 rounded-full shrink-0 shadow-sm leading-none sidebar-text" title="Pendentes de homologação"></span>
+            <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0 sidebar-text"></span>
           </div>
         </button>
 
@@ -7704,7 +7724,8 @@
       const navBadge = document.getElementById('navPendingBadge');
       if (navBadge) {
         if (pendingCount > 0) {
-          navBadge.textContent = `${pendingCount} pendente${pendingCount > 1 ? 's' : ''}`;
+          navBadge.textContent = pendingCount;
+          navBadge.title = `${pendingCount} jogador${pendingCount > 1 ? 'es' : ''} pendente${pendingCount > 1 ? 's' : ''} de homologação`;
           navBadge.classList.remove('hidden');
         } else {
           navBadge.classList.add('hidden');
