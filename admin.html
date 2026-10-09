@@ -411,7 +411,7 @@
             <span id="sidebarAdminRole" class="text-[9px] uppercase tracking-wider text-pe-gold font-bold">⚡ Diretor Adjunto</span>
           </div>
         </div>
-        <span class="text-[10px] bg-pe-gold/20 text-pe-gold px-2 py-0.5 rounded font-mono font-bold sidebar-text shrink-0">DIRETOR ADJUNTO</span>
+        <span class="text-[10px] bg-pe-gold/20 text-pe-gold px-2 py-0.5 rounded font-mono font-bold sidebar-text shrink-0 whitespace-nowrap">DIRETOR ADJUNTO</span>
       </div>
 
       <!-- Menu de Navegação Vertical -->
@@ -1895,14 +1895,14 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                  <table class="w-full text-left text-xs">
+                  <table class="w-full text-left text-xs min-w-[620px]">
                     <thead class="bg-[#05080e] text-slate-400 uppercase text-[10px] font-mono border-b border-[#1c253b]">
                       <tr>
-                        <th class="py-3 px-3">Gestor</th>
-                        <th class="py-3 px-3">E-mail</th>
-                        <th class="py-3 px-3">Cargo</th>
-                        <th class="py-3 px-3">Operações</th>
-                        <th class="py-3 px-3 text-right">Ação</th>
+                        <th class="py-3 px-3 whitespace-nowrap">Gestor</th>
+                        <th class="py-3 px-3 whitespace-nowrap">E-mail</th>
+                        <th class="py-3 px-3 whitespace-nowrap">Cargo</th>
+                        <th class="py-3 px-3 whitespace-nowrap">Operações</th>
+                        <th class="py-3 px-3 text-right whitespace-nowrap">Ação</th>
                       </tr>
                     </thead>
                     <tbody id="institutionalTableBody" class="divide-y divide-[#1c253b]/60">
@@ -9966,37 +9966,37 @@
         const tr = document.createElement('tr');
         tr.className = "hover:bg-[#070b14] transition";
         tr.innerHTML = `
-          <td class="py-3 px-3">
-            <div class="font-bold text-white uppercase text-xs flex items-center gap-1.5">
+          <td class="py-3 px-3 whitespace-nowrap">
+            <div class="font-bold text-white uppercase text-xs flex items-center gap-1.5 whitespace-nowrap">
               ${isMaster ? '<span class="text-amber-400">⚡</span>' : '<span>👤</span>'}
               <span>${escapeText(admin.nome || 'Gestor Autorizado')}</span>
             </div>
-            <span class="text-[10px] text-slate-400">Criado em: ${admin.created_at ? new Date(admin.created_at).toLocaleDateString('pt-BR') : '01/01/2026'}</span>
+            <span class="text-[10px] text-slate-400 block mt-0.5 whitespace-nowrap">Criado em: ${admin.created_at ? new Date(admin.created_at).toLocaleDateString('pt-BR') : '01/01/2026'}</span>
           </td>
-          <td class="py-3 px-3 font-mono font-bold text-pe-gold text-xs">
+          <td class="py-3 px-3 font-mono font-bold text-pe-gold text-xs whitespace-nowrap">
             ${escapeText(admin.email)}
           </td>
-          <td class="py-3 px-3">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isMaster ? 'bg-amber-950/80 text-amber-400 border border-amber-500/40' : 'bg-blue-950/80 text-blue-400 border border-blue-500/30'}">
+          <td class="py-3 px-3 whitespace-nowrap">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold whitespace-nowrap leading-none ${isMaster ? 'bg-amber-950/80 text-amber-400 border border-amber-500/40 shadow-sm' : 'bg-blue-950/80 text-blue-400 border border-blue-500/30'}">
               ${escapeText(admin.cargo || 'Diretor Adjunto')}
             </span>
           </td>
-          <td class="py-3 px-3">
-            <div class="flex items-center gap-2">
-              <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded ${isMaster ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/30' : 'bg-[#05080e] text-blue-300 border border-blue-500/30'}">
+          <td class="py-3 px-3 whitespace-nowrap">
+            <div class="flex items-center gap-2 whitespace-nowrap">
+              <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded whitespace-nowrap ${isMaster ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/30' : 'bg-[#05080e] text-blue-300 border border-blue-500/30'}">
                 ${isMaster ? 'Acesso Total Master' : `${permsCount}/${ALL_OPERATION_IDS.length} ops`}
               </span>
-              <button type="button" onclick="openRoleOperationsModal('${escapeText(admin.email)}')" class="text-blue-400 hover:text-blue-300 text-[10px] font-bold underline cursor-pointer">
+              <button type="button" onclick="openRoleOperationsModal('${escapeText(admin.email)}')" class="text-blue-400 hover:text-blue-300 text-[10px] font-bold underline cursor-pointer whitespace-nowrap">
                 Ver Esquema
               </button>
             </div>
           </td>
-          <td class="py-3 px-3 text-right">
-            <div class="flex items-center justify-end gap-1.5">
-              <button type="button" onclick="openEditInstitutionalAdminModal('${escapeText(admin.email)}')" class="text-[11px] text-amber-300 hover:text-amber-200 bg-amber-950/50 hover:bg-amber-900/70 border border-amber-500/40 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 font-bold cursor-pointer" title="Editar dados e cargo da conta">
+          <td class="py-3 px-3 text-right whitespace-nowrap">
+            <div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
+              <button type="button" onclick="openEditInstitutionalAdminModal('${escapeText(admin.email)}')" class="text-[11px] text-amber-300 hover:text-amber-200 bg-amber-950/50 hover:bg-amber-900/70 border border-amber-500/40 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 font-bold cursor-pointer whitespace-nowrap" title="Editar dados e cargo da conta">
                 <i class="fa-solid fa-pen-to-square text-[10px]"></i> <span>Editar</span>
               </button>
-              <button type="button" onclick="handleDeleteInstitutionalAdmin('${escapeText(admin.email)}')" class="text-[11px] text-rose-300 hover:text-rose-200 bg-rose-950/50 hover:bg-rose-900/70 border border-rose-500/40 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 font-bold cursor-pointer" title="Remover esta conta do sistema">
+              <button type="button" onclick="handleDeleteInstitutionalAdmin('${escapeText(admin.email)}')" class="text-[11px] text-rose-300 hover:text-rose-200 bg-rose-950/50 hover:bg-rose-900/70 border border-rose-500/40 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 font-bold cursor-pointer whitespace-nowrap" title="Remover esta conta do sistema">
                 <i class="fa-solid fa-trash text-[10px]"></i> <span>Remover</span>
               </button>
             </div>
