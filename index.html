@@ -722,24 +722,221 @@
       </div>
     </div>
 
-    <!-- Linha Inferior com Copyright e Selos -->
-    <div class="max-w-6xl mx-auto pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
-      <div class="flex items-center gap-2 text-slate-500">
-        <span class="w-2.5 h-2.5 rounded-full bg-pe-gold animate-pulse"></span>
-        <span>© 2026 Federação Pernambucana de FutMesa & Foot Table. Todos os direitos reservados.</span>
+    <!-- Linha Inferior com Copyright, Termos Clicáveis e Botão de Análise -->
+    <div class="max-w-6xl mx-auto pt-6 flex flex-col gap-4">
+      <!-- Barra Central de Botões e Termos Clicáveis para Análise Imediata -->
+      <div class="bg-[#080d1a] border border-pe-cardBorder/90 rounded-xl p-3 sm:p-4 flex flex-col md:flex-row items-center justify-between gap-3 shadow-lg">
+        <div class="flex items-center gap-2 text-center md:text-left">
+          <span class="w-3 h-3 rounded-full bg-pe-gold animate-pulse"></span>
+          <span class="font-bold text-white text-xs sm:text-sm">Termos Oficiais & Governança da Federação:</span>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          <button onclick="openSecurityModal('lgpd')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0e1628] hover:bg-[#152038] border border-emerald-500/50 text-emerald-400 hover:text-emerald-300 font-bold text-xs transition cursor-pointer shadow-sm">
+            <i class="fa-solid fa-scale-balanced text-xs"></i>
+            <span>LGPD (Lei 13.709/18)</span>
+          </button>
+          
+          <button onclick="openSecurityModal('seguranca')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0e1628] hover:bg-[#152038] border border-sky-500/50 text-sky-400 hover:text-sky-300 font-bold text-xs transition cursor-pointer shadow-sm">
+            <i class="fa-solid fa-shield-halved text-xs"></i>
+            <span>Termos de Segurança</span>
+          </button>
+
+          <button onclick="openSecurityModal('dpo')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0e1628] hover:bg-[#152038] border border-purple-500/50 text-purple-400 hover:text-purple-300 font-bold text-xs transition cursor-pointer shadow-sm">
+            <i class="fa-solid fa-user-shield text-xs"></i>
+            <span>Canal do Encarregado (DPO)</span>
+          </button>
+
+          <button onclick="openSecurityModal('lgpd')" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-pe-gold hover:bg-pe-goldHover text-black font-extrabold text-xs uppercase tracking-wide transition shadow-md cursor-pointer transform hover:scale-[1.03]">
+            <i class="fa-solid fa-magnifying-glass text-xs"></i>
+            <span>Clique para Analisar</span>
+          </button>
+        </div>
       </div>
-      <div class="flex items-center gap-3 text-[11px] text-slate-500">
-        <span>Conforme LGPD (Lei 13.709/18)</span>
-        <span>•</span>
-        <span>SSL TLS 1.3</span>
-        <span>•</span>
-        <span>RLS PostgreSQL</span>
+
+      <!-- Barra de Assinatura e Copyright Oficial -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left text-slate-500 text-xs pt-2">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-pe-gold"></span>
+          <span class="font-medium text-slate-300">Federação Pernambucana de FutMesa & Foot Table</span>
+        </div>
+        <div class="flex items-center gap-3 text-[11px] text-slate-400">
+          <a href="seguranca.html" target="_blank" class="hover:text-pe-gold underline font-semibold transition">Abrir Termos em Nova Aba</a>
+          <span>•</span>
+          <span>© 2026 Todos os direitos reservados. Entidade estadual oficial de Foot Table em Pernambuco.</span>
+        </div>
       </div>
     </div>
   </footer>
 
+  <!-- Modal Interativo de Análise de Segurança & Termos LGPD -->
+  <div id="modalSegurancaLGPD" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-[#0b101d] border border-pe-cardBorder rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl relative overflow-hidden">
+      <div class="pe-stripe-bar h-1.5 w-full absolute top-0 left-0"></div>
+
+      <!-- Header do Modal -->
+      <div class="p-5 border-b border-pe-cardBorder flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-pe-gold/10 border border-pe-gold/30 flex items-center justify-center text-pe-gold text-lg">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div>
+            <h3 class="font-oswald text-lg sm:text-xl font-bold uppercase text-white tracking-wide">
+              Análise de Segurança & Termos LGPD
+            </h3>
+            <span class="text-xs text-slate-400 font-mono">
+              Federação Pernambucana de FutMesa & Foot Table • Portal Oficial
+            </span>
+          </div>
+        </div>
+        <button onclick="closeSecurityModal()" class="text-slate-400 hover:text-white p-2 text-xl leading-none">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Conteúdo com Abas Rápidas -->
+      <div class="p-5 overflow-y-auto space-y-4 text-xs text-slate-300">
+        <!-- Navegação de Abas -->
+        <div class="flex items-center gap-2 border-b border-pe-cardBorder pb-3 overflow-x-auto">
+          <button id="tabBtnLgpd" onclick="switchSecurityTab('lgpd')" class="px-3 py-1.5 rounded-lg bg-pe-gold text-black font-extrabold text-xs transition shadow-sm">
+            <i class="fa-solid fa-scale-balanced mr-1"></i> LGPD & CPF
+          </button>
+          <button id="tabBtnSeguranca" onclick="switchSecurityTab('seguranca')" class="px-3 py-1.5 rounded-lg bg-[#080c16] border border-pe-cardBorder text-slate-300 hover:text-white font-bold text-xs transition">
+            <i class="fa-solid fa-lock mr-1"></i> Criptografia & RLS
+          </button>
+          <button id="tabBtnDireitos" onclick="switchSecurityTab('direitos')" class="px-3 py-1.5 rounded-lg bg-[#080c16] border border-pe-cardBorder text-slate-300 hover:text-white font-bold text-xs transition">
+            <i class="fa-solid fa-user-check mr-1"></i> Direitos do Titular
+          </button>
+          <button id="tabBtnDpo" onclick="switchSecurityTab('dpo')" class="px-3 py-1.5 rounded-lg bg-[#080c16] border border-pe-cardBorder text-slate-300 hover:text-white font-bold text-xs transition">
+            <i class="fa-solid fa-envelope mr-1"></i> Contato DPO
+          </button>
+        </div>
+
+        <!-- Conteúdo Aba 1: LGPD & CPF -->
+        <div id="tabContentLgpd" class="space-y-3">
+          <div class="bg-[#05080e] p-4 rounded-xl border border-pe-cardBorder space-y-2">
+            <h4 class="text-sm font-bold text-pe-gold uppercase flex items-center gap-2">
+              <i class="fa-solid fa-id-card-clip text-amber-400"></i> Proteção e Minimização de Dados (Lei nº 13.709/2018)
+            </h4>
+            <p class="leading-relaxed">
+              O portal público da Federação foi arquitetado para não expor números de CPF de atletas em consultas ou carteirinhas. O CPF é exibido sempre mascarado: <code class="text-pe-gold font-mono font-bold bg-black/60 px-1.5 py-0.5 rounded">***.XXX.XXX-**</code>.
+            </p>
+            <p class="leading-relaxed">
+              Apenas os dados desportivos necessários para a validação da credencial oficial (nome, categoria, clube, código federado e foto) são exibidos publicamente com a autorização estatutária do atleta.
+            </p>
+          </div>
+        </div>
+
+        <!-- Conteúdo Aba 2: Criptografia & RLS -->
+        <div id="tabContentSeguranca" class="space-y-3 hidden">
+          <div class="bg-[#05080e] p-4 rounded-xl border border-pe-cardBorder space-y-2">
+            <h4 class="text-sm font-bold text-sky-400 uppercase flex items-center gap-2">
+              <i class="fa-solid fa-database text-sky-400"></i> Row Level Security (RLS) & Criptografia TLS 1.3
+            </h4>
+            <p class="leading-relaxed">
+              Nosso banco de dados Supabase/PostgreSQL opera sob políticas estritas de <strong>Row Level Security</strong>. Usuários comuns não conseguem fazer listagens em massa da base nem extrair relatórios confidenciais.
+            </p>
+            <p class="leading-relaxed">
+              As senhas institucionais são criptografadas com o algoritmo <strong>Blowfish (bcrypt / pgcrypto)</strong> com salteamento dinâmico. O sistema conta com proteção automática de bloqueio temporário (lockout) após 5 tentativas falhas.
+            </p>
+          </div>
+        </div>
+
+        <!-- Conteúdo Aba 3: Direitos do Titular -->
+        <div id="tabContentDireitos" class="space-y-3 hidden">
+          <div class="bg-[#05080e] p-4 rounded-xl border border-pe-cardBorder space-y-2">
+            <h4 class="text-sm font-bold text-emerald-400 uppercase flex items-center gap-2">
+              <i class="fa-solid fa-scale-balanced text-emerald-400"></i> Direitos Previstos no Art. 18 da LGPD
+            </h4>
+            <ul class="space-y-1.5 list-disc list-inside text-slate-300">
+              <li><strong>Confirmação e Acesso:</strong> Obter confirmação sobre quais dados constam no sistema oficial.</li>
+              <li><strong>Correção:</strong> Solicitar a atualização de dados errados, incompletos ou defasados.</li>
+              <li><strong>Revogação e Eliminação:</strong> Solicitar desligamento federativo, resguardando súmulas históricas.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Conteúdo Aba 4: Contato DPO -->
+        <div id="tabContentDpo" class="space-y-3 hidden">
+          <div class="bg-[#05080e] p-4 rounded-xl border border-pe-cardBorder space-y-2">
+            <h4 class="text-sm font-bold text-purple-400 uppercase flex items-center gap-2">
+              <i class="fa-solid fa-envelope-open-text text-purple-400"></i> Encarregado pelo Tratamento de Dados (DPO)
+            </h4>
+            <p class="leading-relaxed">
+              Para solicitações, dúvidas ou comunicações relativas à privacidade e segurança de dados, utilize o canal oficial:
+            </p>
+            <div class="p-3 bg-black/40 rounded-lg border border-pe-cardBorder flex items-center justify-between gap-3">
+              <span class="font-mono text-pe-gold font-bold">privacidade@foot-table.pe.org</span>
+              <a href="mailto:privacidade@foot-table.pe.org?subject=LGPD%20-%20Consulta%20Oficial" class="bg-pe-gold hover:bg-pe-goldHover text-black text-[11px] font-bold px-3 py-1.5 rounded transition">
+                Enviar E-mail
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rodapé do Modal -->
+      <div class="p-4 bg-[#070b14] border-t border-pe-cardBorder flex flex-col sm:flex-row items-center justify-between gap-3">
+        <a href="seguranca.html" target="_blank" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-xs text-pe-gold hover:text-white font-bold transition">
+          <span>Abrir Documentação Completa (seguranca.html)</span>
+          <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+        </a>
+        <button onclick="closeSecurityModal()" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-5 py-2 rounded-xl transition">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Script de Comportamento e Sincronização em Tempo Real -->
   <script>
+    /* =======================================================
+       CONTROLE DO MODAL DE SEGURANÇA & TERMOS LGPD
+       ======================================================= */
+    function openSecurityModal(tab) {
+      const modal = document.getElementById('modalSegurancaLGPD');
+      if (modal) {
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        if (tab) switchSecurityTab(tab);
+      }
+    }
+
+    function closeSecurityModal() {
+      const modal = document.getElementById('modalSegurancaLGPD');
+      if (modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+    }
+
+    function switchSecurityTab(tab) {
+      const tabs = ['lgpd', 'seguranca', 'direitos', 'dpo'];
+      tabs.forEach(t => {
+        const btn = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
+        const content = document.getElementById('tabContent' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (t === tab) {
+          if (btn) {
+            btn.className = 'px-3 py-1.5 rounded-lg bg-pe-gold text-black font-extrabold text-xs transition shadow-sm';
+          }
+          if (content) content.classList.remove('hidden');
+        } else {
+          if (btn) {
+            btn.className = 'px-3 py-1.5 rounded-lg bg-[#080c16] border border-pe-cardBorder text-slate-300 hover:text-white font-bold text-xs transition';
+          }
+          if (content) content.classList.add('hidden');
+        }
+      });
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeSecurityModal();
+    });
+
+    document.getElementById('modalSegurancaLGPD')?.addEventListener('click', (e) => {
+      if (e.target.id === 'modalSegurancaLGPD') closeSecurityModal();
+    });
+
     /* =======================================================
        CONFIGURAÇÃO SUPABASE
        ======================================================= */
