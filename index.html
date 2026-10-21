@@ -141,6 +141,9 @@
         <a href="#noticias" class="text-xs uppercase font-bold text-slate-300 hover:text-pe-gold transition tracking-wider">Notícias & Torneios</a>
         <a href="#galeria" class="text-xs uppercase font-bold text-slate-300 hover:text-pe-gold transition tracking-wider">Fotos & Arenas</a>
         <a href="#regulamento" class="text-xs uppercase font-bold text-slate-300 hover:text-pe-gold transition tracking-wider">Regulamento</a>
+        <a href="#seguranca" class="text-xs uppercase font-bold text-pe-gold hover:text-yellow-300 transition tracking-wider flex items-center gap-1.5 border border-pe-gold/40 bg-pe-gold/10 px-3 py-1 rounded-full shadow-sm">
+          <i class="fa-solid fa-shield-halved text-[11px]"></i> Segurança & LGPD
+        </a>
       </nav>
     </div>
   </header>
@@ -536,24 +539,202 @@
     </div>
   </section>
 
-  <!-- Rodapé Público com Indicador de Conexão Supabase -->
-  <footer class="bg-[#05070c] border-t border-pe-cardBorder py-8 px-4 text-center text-xs text-slate-500 mt-12">
-    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-2">
-        <span class="w-3 h-3 rounded-full bg-pe-gold"></span>
-        <span class="font-bold text-slate-400">Federação Pernambucana de FutMesa & Foot Table</span>
+  <!-- Seção Oficial de Segurança da Informação, LGPD e Termos Institucionais -->
+  <section id="seguranca" class="py-12 px-4 max-w-5xl mx-auto w-full scroll-mt-20">
+    <div class="bg-gradient-to-b from-[#0b101d] to-[#070a12] border border-pe-cardBorder rounded-2xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
+      <!-- Barra Tricolor Superior -->
+      <div class="pe-stripe-bar h-1.5 w-full absolute top-0 left-0"></div>
+
+      <!-- Cabeçalho da Seção -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+        <div>
+          <div class="inline-flex items-center gap-2 text-pe-gold text-xs font-bold uppercase tracking-wider mb-2 bg-pe-gold/10 px-3 py-1 rounded-full border border-pe-gold/30">
+            <i class="fa-solid fa-shield-halved"></i> Governança, Segurança & Transparência
+          </div>
+          <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white tracking-wide">
+            Termos de Segurança e Proteção de Dados (LGPD)
+          </h2>
+          <p class="text-slate-400 text-xs sm:text-sm mt-2 max-w-2xl leading-relaxed">
+            A Federação Pernambucana de FutMesa & Foot Table (FPEFT) adota padrões rigorosos de cibersegurança e respeito à privacidade individual, em estrita conformidade com a <strong class="text-slate-200">Lei Geral de Proteção de Dados (Lei nº 13.709/2018)</strong> e as diretrizes internacionais <strong class="text-slate-200">OWASP ASVS</strong>.
+          </p>
+        </div>
+        <div class="flex-shrink-0">
+          <a href="seguranca.html" class="inline-flex items-center gap-2 bg-pe-gold hover:bg-pe-goldHover text-black text-xs font-extrabold uppercase px-5 py-2.5 rounded-xl shadow-lg transition transform hover:-translate-y-0.5">
+            <span>Ver Política Completa</span>
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </a>
+        </div>
       </div>
 
-      <div class="flex items-center gap-4 text-[11px] text-slate-400">
-        <a href="seguranca.html" class="hover:text-pe-gold transition underline flex items-center gap-1">
-          <svg class="w-3.5 h-3.5 text-pe-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-          Segurança & Privacidade (LGPD)
-        </a>
+      <!-- Grid de 4 Pilares de Segurança -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs mb-8">
+        <!-- Pilar 1: LGPD e Mascaramento -->
+        <div class="bg-[#05080e] p-5 rounded-xl border border-pe-cardBorder/80 hover:border-pe-gold/50 transition space-y-2">
+          <div class="flex items-center gap-2 text-pe-gold font-bold uppercase text-xs">
+            <i class="fa-solid fa-id-card-clip text-amber-400 text-base"></i>
+            <span>1. Privacidade e Mascaramento de CPF</span>
+          </div>
+          <p class="text-slate-300 leading-relaxed">
+            Em conformidade com o princípio da minimização da LGPD, os números de CPF dos atletas federados jamais são expostos integralmente em consultas públicas. O sistema aplica mascaramento criptográfico ativo (<code class="text-pe-gold font-mono font-bold bg-black/50 px-1.5 py-0.5 rounded">***.XXX.XXX-**</code>), inviabilizando raspagens e captura automatizada de dados pessoais.
+          </p>
+        </div>
+
+        <!-- Pilar 2: Criptografia e TLS 1.3 -->
+        <div class="bg-[#05080e] p-5 rounded-xl border border-pe-cardBorder/80 hover:border-pe-gold/50 transition space-y-2">
+          <div class="flex items-center gap-2 text-pe-gold font-bold uppercase text-xs">
+            <i class="fa-solid fa-lock text-sky-400 text-base"></i>
+            <span>2. Criptografia em Trânsito (TLS 1.3 / SSL)</span>
+          </div>
+          <p class="text-slate-300 leading-relaxed">
+            Todas as conexões são protegidas com certificados SSL/TLS de 256 bits, garantindo integridade e confidencialidade total. O portal aplica cabeçalhos de segurança avançados (<code class="text-sky-300 font-mono">HSTS</code>, <code class="text-sky-300 font-mono">Content-Security-Policy</code> e proteção anti-clickjacking <code class="text-sky-300 font-mono">X-Frame-Options: DENY</code>).
+          </p>
+        </div>
+
+        <!-- Pilar 3: Supabase Row Level Security (RLS) -->
+        <div class="bg-[#05080e] p-5 rounded-xl border border-pe-cardBorder/80 hover:border-pe-gold/50 transition space-y-2">
+          <div class="flex items-center gap-2 text-pe-gold font-bold uppercase text-xs">
+            <i class="fa-solid fa-database text-emerald-400 text-base"></i>
+            <span>3. Segregação de Banco de Dados (RLS Ativo)</span>
+          </div>
+          <p class="text-slate-300 leading-relaxed">
+            O banco de dados PostgreSQL opera sob política de <em>Zero-Trust</em> e menor privilégio. Tabelas administrativas, credenciais e logs de auditoria possuem isolamento total via <strong>Row Level Security (RLS)</strong>, impedindo qualquer acesso anônimo direto ou injeção indevida.
+          </p>
+        </div>
+
+        <!-- Pilar 4: Canal do Encarregado (DPO) -->
+        <div class="bg-[#05080e] p-5 rounded-xl border border-pe-cardBorder/80 hover:border-pe-gold/50 transition space-y-2">
+          <div class="flex items-center gap-2 text-pe-gold font-bold uppercase text-xs">
+            <i class="fa-solid fa-scale-balanced text-purple-400 text-base"></i>
+            <span>4. Direitos do Titular & Canal DPO</span>
+          </div>
+          <p class="text-slate-300 leading-relaxed">
+            Qualquer atleta federado tem garantido o direito de confirmar a existência de tratamento, solicitar correção ou atualização de seus dados (Art. 18 da LGPD). Nosso Encarregado de Proteção de Dados (DPO) pode ser acionado diretamente pelo e-mail institucional: <a href="mailto:privacidade@foot-table.pe.org" class="text-pe-gold underline font-mono font-semibold">privacidade@foot-table.pe.org</a>.
+          </p>
+        </div>
+      </div>
+
+      <!-- Selos de Segurança e Conformidade -->
+      <div class="border-t border-pe-cardBorder/80 pt-6 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#080c16] border border-pe-cardBorder text-slate-300 text-[11px] font-semibold">
+            <i class="fa-solid fa-shield-halved text-emerald-400"></i> LGPD Conforme (Lei 13.709/18)
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#080c16] border border-pe-cardBorder text-slate-300 text-[11px] font-semibold">
+            <i class="fa-solid fa-lock text-sky-400"></i> Criptografia SSL 256-Bit
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#080c16] border border-pe-cardBorder text-slate-300 text-[11px] font-semibold">
+            <i class="fa-solid fa-database text-pe-gold"></i> Supabase RLS Ativado
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#080c16] border border-pe-cardBorder text-slate-300 text-[11px] font-semibold">
+            <i class="fa-solid fa-check-double text-blue-400"></i> OWASP ASVS 5.0
+          </span>
+        </div>
+        <div class="text-[11px] text-slate-400">
+          <a href="seguranca.html" class="text-pe-gold hover:underline font-bold">Consulte o Manual de Segurança Completo &rarr;</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rodapé Institucional com Links de Segurança, LGPD e Acesso -->
+  <footer class="bg-[#05070c] border-t border-pe-cardBorder pt-12 pb-8 px-4 text-xs text-slate-400 mt-12">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 pb-8 border-b border-pe-cardBorder/70 text-left">
+      <!-- Coluna 1: Federação -->
+      <div class="space-y-3">
+        <div class="flex items-center gap-2">
+          <img src="assets/images/logo-federacao.png" alt="FPEFT" class="w-8 h-8 object-contain" />
+          <span class="font-oswald text-sm font-bold uppercase text-white tracking-wider">
+            Federação Pernambucana de Foot Table
+          </span>
+        </div>
+        <p class="text-slate-400 text-xs leading-relaxed">
+          Entidade oficial de administração e homologação de competições de FutMesa e Foot Table no Estado de Pernambuco. Compromisso rigoroso com ética, transparência e proteção integral dos atletas federados.
+        </p>
+        <div class="text-[11px] text-slate-500 font-mono">
+          Recife / PE • Brasil • Temporada Oficial 2026
+        </div>
+      </div>
+
+      <!-- Coluna 2: Segurança e Privacidade (LGPD) -->
+      <div class="space-y-3">
+        <h4 class="font-oswald text-xs uppercase font-bold text-pe-gold tracking-widest flex items-center gap-2">
+          <i class="fa-solid fa-shield-halved"></i> Segurança & Proteção de Dados
+        </h4>
+        <ul class="space-y-2 text-xs">
+          <li>
+            <a href="seguranca.html" class="hover:text-pe-gold transition flex items-center gap-1.5">
+              <i class="fa-solid fa-file-shield text-slate-500 text-[10px]"></i>
+              Política de Segurança da Informação
+            </a>
+          </li>
+          <li>
+            <a href="seguranca.html#lgpd" class="hover:text-pe-gold transition flex items-center gap-1.5">
+              <i class="fa-solid fa-user-shield text-slate-500 text-[10px]"></i>
+              Termos de Privacidade e LGPD
+            </a>
+          </li>
+          <li>
+            <a href="seguranca.html#direitos" class="hover:text-pe-gold transition flex items-center gap-1.5">
+              <i class="fa-solid fa-scale-balanced text-slate-500 text-[10px]"></i>
+              Direitos do Titular (Art. 18 LGPD)
+            </a>
+          </li>
+          <li>
+            <a href="mailto:privacidade@foot-table.pe.org?subject=LGPD%20-%20Solicita%C3%A7%C3%A3o%20Oficial" class="hover:text-pe-gold transition flex items-center gap-1.5">
+              <i class="fa-solid fa-envelope text-slate-500 text-[10px]"></i>
+              Canal do Encarregado de Dados (DPO)
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Coluna 3: Serviços & Acesso -->
+      <div class="space-y-3">
+        <h4 class="font-oswald text-xs uppercase font-bold text-pe-gold tracking-widest flex items-center gap-2">
+          <i class="fa-solid fa-compass"></i> Navegação & Sistemas
+        </h4>
+        <ul class="space-y-2 text-xs">
+          <li>
+            <a href="#consulta" class="hover:text-pe-gold transition flex items-center gap-1.5">
+              <i class="fa-solid fa-magnifying-glass text-slate-500 text-[10px]"></i>
+              Validação Pública de Carteira Digital
+            </a>
+          </li>
+          <li>
+            <a href="#noticias" class="hover:text-pe-gold transition flex items-center gap-1.5">
+              <i class="fa-solid fa-newspaper text-slate-500 text-[10px]"></i>
+              Notícias, Calendário e Torneios
+            </a>
+          </li>
+          <li>
+            <a href="#regulamento" class="hover:text-pe-gold transition flex items-center gap-1.5">
+              <i class="fa-solid fa-book text-slate-500 text-[10px]"></i>
+              Normas e Diretrizes Técnicas
+            </a>
+          </li>
+          <li>
+            <a href="login.html" class="text-pe-gold hover:text-white font-bold transition flex items-center gap-1.5">
+              <i class="fa-solid fa-key text-[10px]"></i>
+              Painel do Gestor (Acesso Restrito)
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Linha Inferior com Copyright e Selos -->
+    <div class="max-w-6xl mx-auto pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+      <div class="flex items-center gap-2 text-slate-500">
+        <span class="w-2.5 h-2.5 rounded-full bg-pe-gold animate-pulse"></span>
+        <span>© 2026 Federação Pernambucana de FutMesa & Foot Table. Todos os direitos reservados.</span>
+      </div>
+      <div class="flex items-center gap-3 text-[11px] text-slate-500">
+        <span>Conforme LGPD (Lei 13.709/18)</span>
         <span>•</span>
-        <a href="login.html" class="hover:text-pe-gold transition">Acesso Restrito</a>
+        <span>SSL TLS 1.3</span>
+        <span>•</span>
+        <span>RLS PostgreSQL</span>
       </div>
-
-      <p>© 2026 Todos os direitos reservados. Entidade estadual oficial de Foot Table em Pernambuco.</p>
     </div>
   </footer>
 
