@@ -141,9 +141,6 @@
         <a href="#noticias" class="text-xs uppercase font-bold text-slate-300 hover:text-pe-gold transition tracking-wider">Notícias & Torneios</a>
         <a href="#galeria" class="text-xs uppercase font-bold text-slate-300 hover:text-pe-gold transition tracking-wider">Fotos & Arenas</a>
         <a href="#regulamento" class="text-xs uppercase font-bold text-slate-300 hover:text-pe-gold transition tracking-wider">Regulamento</a>
-        <a href="#seguranca" class="text-xs uppercase font-bold text-pe-gold hover:text-yellow-300 transition tracking-wider flex items-center gap-1.5 border border-pe-gold/40 bg-pe-gold/10 px-3 py-1 rounded-full shadow-sm">
-          <i class="fa-solid fa-shield-halved text-[11px]"></i> Segurança & LGPD
-        </a>
       </nav>
     </div>
   </header>
@@ -601,14 +598,14 @@
           </p>
         </div>
 
-        <!-- Pilar 4: Canal do Encarregado (DPO) -->
+        <!-- Pilar 4: Direitos do Titular (LGPD) -->
         <div class="bg-[#05080e] p-5 rounded-xl border border-pe-cardBorder/80 hover:border-pe-gold/50 transition space-y-2">
           <div class="flex items-center gap-2 text-pe-gold font-bold uppercase text-xs">
             <i class="fa-solid fa-scale-balanced text-purple-400 text-base"></i>
-            <span>4. Direitos do Titular & Canal DPO</span>
+            <span>4. Direitos do Atleta & Titular (LGPD)</span>
           </div>
           <p class="text-slate-300 leading-relaxed">
-            Qualquer atleta federado tem garantido o direito de confirmar a existência de tratamento, solicitar correção ou atualização de seus dados (Art. 18 da LGPD). Nosso Encarregado de Proteção de Dados (DPO) pode ser acionado diretamente pelo e-mail institucional: <a href="mailto:privacidade@foot-table.pe.org" class="text-pe-gold underline font-mono font-semibold">privacidade@foot-table.pe.org</a>.
+            Qualquer atleta federado tem garantido o direito de confirmar a existência de tratamento, solicitar correção ou atualização de seus dados cadastrais (Art. 18 da Lei nº 13.709/2018), ressalvadas as obrigações desportivas regulamentares de conservação de súmulas.
           </p>
         </div>
       </div>
@@ -679,12 +676,6 @@
               Direitos do Titular (Art. 18 LGPD)
             </a>
           </li>
-          <li>
-            <a href="mailto:privacidade@foot-table.pe.org?subject=LGPD%20-%20Solicita%C3%A7%C3%A3o%20Oficial" class="hover:text-pe-gold transition flex items-center gap-1.5">
-              <i class="fa-solid fa-envelope text-slate-500 text-[10px]"></i>
-              Canal do Encarregado de Dados (DPO)
-            </a>
-          </li>
         </ul>
       </div>
 
@@ -722,7 +713,7 @@
       </div>
     </div>
 
-    <!-- Linha Inferior com Copyright, Termos Clicáveis e Botão de Análise -->
+    <!-- Linha Inferior com Copyright e Termos Clicáveis -->
     <div class="max-w-6xl mx-auto pt-6 flex flex-col gap-4">
       <!-- Barra Central de Botões e Termos Clicáveis para Análise Imediata -->
       <div class="bg-[#080d1a] border border-pe-cardBorder/90 rounded-xl p-3 sm:p-4 flex flex-col md:flex-row items-center justify-between gap-3 shadow-lg">
@@ -742,15 +733,10 @@
             <span>Termos de Segurança</span>
           </button>
 
-          <button onclick="openSecurityModal('dpo')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0e1628] hover:bg-[#152038] border border-purple-500/50 text-purple-400 hover:text-purple-300 font-bold text-xs transition cursor-pointer shadow-sm">
-            <i class="fa-solid fa-user-shield text-xs"></i>
-            <span>Canal do Encarregado (DPO)</span>
-          </button>
-
-          <button onclick="openSecurityModal('lgpd')" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-pe-gold hover:bg-pe-goldHover text-black font-extrabold text-xs uppercase tracking-wide transition shadow-md cursor-pointer transform hover:scale-[1.03]">
-            <i class="fa-solid fa-magnifying-glass text-xs"></i>
-            <span>Clique para Analisar</span>
-          </button>
+          <a href="seguranca.html" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0e1628] hover:bg-[#152038] border border-pe-cardBorder text-slate-300 hover:text-white font-bold text-xs transition shadow-sm">
+            <i class="fa-solid fa-file-shield text-pe-gold text-xs"></i>
+            <span>Política de Privacidade</span>
+          </a>
         </div>
       </div>
 
@@ -807,9 +793,6 @@
           <button id="tabBtnDireitos" onclick="switchSecurityTab('direitos')" class="px-3 py-1.5 rounded-lg bg-[#080c16] border border-pe-cardBorder text-slate-300 hover:text-white font-bold text-xs transition">
             <i class="fa-solid fa-user-check mr-1"></i> Direitos do Titular
           </button>
-          <button id="tabBtnDpo" onclick="switchSecurityTab('dpo')" class="px-3 py-1.5 rounded-lg bg-[#080c16] border border-pe-cardBorder text-slate-300 hover:text-white font-bold text-xs transition">
-            <i class="fa-solid fa-envelope mr-1"></i> Contato DPO
-          </button>
         </div>
 
         <!-- Conteúdo Aba 1: LGPD & CPF -->
@@ -855,24 +838,6 @@
             </ul>
           </div>
         </div>
-
-        <!-- Conteúdo Aba 4: Contato DPO -->
-        <div id="tabContentDpo" class="space-y-3 hidden">
-          <div class="bg-[#05080e] p-4 rounded-xl border border-pe-cardBorder space-y-2">
-            <h4 class="text-sm font-bold text-purple-400 uppercase flex items-center gap-2">
-              <i class="fa-solid fa-envelope-open-text text-purple-400"></i> Encarregado pelo Tratamento de Dados (DPO)
-            </h4>
-            <p class="leading-relaxed">
-              Para solicitações, dúvidas ou comunicações relativas à privacidade e segurança de dados, utilize o canal oficial:
-            </p>
-            <div class="p-3 bg-black/40 rounded-lg border border-pe-cardBorder flex items-center justify-between gap-3">
-              <span class="font-mono text-pe-gold font-bold">privacidade@foot-table.pe.org</span>
-              <a href="mailto:privacidade@foot-table.pe.org?subject=LGPD%20-%20Consulta%20Oficial" class="bg-pe-gold hover:bg-pe-goldHover text-black text-[11px] font-bold px-3 py-1.5 rounded transition">
-                Enviar E-mail
-              </a>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- Rodapé do Modal -->
@@ -911,7 +876,7 @@
     }
 
     function switchSecurityTab(tab) {
-      const tabs = ['lgpd', 'seguranca', 'direitos', 'dpo'];
+      const tabs = ['lgpd', 'seguranca', 'direitos'];
       tabs.forEach(t => {
         const btn = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
         const content = document.getElementById('tabContent' + t.charAt(0).toUpperCase() + t.slice(1));
