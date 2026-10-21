@@ -4144,25 +4144,53 @@
       }
     }
 
-    /* Gestão do Upload e Remoção da Imagem da Assinatura do Presidente */
+    /* Gestão do Upload e Remoção da Imagem da Assinatura do Presidente com Otimização de Resolução */
     function handlePresidentSignatureUpload(e) {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
       if (!file.type.startsWith('image/')) {
-        showToast('Por favor, selecione um arquivo de imagem válido (PNG, JPG, SVG).');
+        showToast('Por favor, selecione um arquivo de imagem válido (PNG, JPG, SVG).', true);
         return;
       }
+      showToast('Otimizando imagem da assinatura...');
       const reader = new FileReader();
       reader.onload = function(evt) {
-        const dataUrl = evt.target.result;
-        const target = studioState.elements.find(item => item.id === 'field-assinatura' || item.type === 'text-line' || item.type === 'signature-line');
-        if (target) {
-          target.signatureUrl = dataUrl;
-          autoSaveStudioDesign();
-          renderInteractiveElements();
-          updateSignatureUIState(true);
-          showToast('✓ Imagem da Assinatura da Diretoria Adjunta aplicada na carteira!');
-        }
+        const img = new Image();
+        img.onload = function() {
+          // Dimensão ideal de exibição e nitidez na carteira (resolução 2x para o box de assinatura)
+          const maxW = 500;
+          const maxH = 200;
+          let width = img.width;
+          let height = img.height;
+          if (width > maxW || height > maxH) {
+            const ratio = Math.min(maxW / width, maxH / height);
+            width = Math.round(width * ratio);
+            height = Math.round(height * ratio);
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Preserva canal alfa de transparência se for PNG, ou comprime JPEG
+          const isPng = (file.type === 'image/png');
+          const compressedDataUrl = isPng ? canvas.toDataURL('image/png') : canvas.toDataURL('image/jpeg', 0.85);
+
+          const target = studioState.elements.find(item => item.id === 'field-assinatura' || item.type === 'text-line' || item.type === 'signature-line');
+          if (target) {
+            target.signatureUrl = compressedDataUrl;
+            autoSaveStudioDesign();
+            renderInteractiveElements();
+            updateSignatureUIState(true);
+            const sizeKb = Math.round((compressedDataUrl.length * 3 / 4) / 1024);
+            showToast(`✓ Assinatura otimizada com nitidez (${sizeKb} KB) aplicada na carteira!`);
+          }
+        };
+        img.onerror = function() {
+          showToast('Erro ao processar arquivo da assinatura.', true);
+        };
+        img.src = evt.target.result;
       };
       reader.readAsDataURL(file);
     }
@@ -6764,8 +6792,9 @@
             reader.onload = (event) => {
               const img = new Image();
               img.onload = () => {
-                const maxW = 480;
-                const maxH = 640;
+                // Resolução nítida oficial 3x4 (proporção 3:4 com densidade retina 420x560)
+                const maxW = 420;
+                const maxH = 560;
                 let width = img.width;
                 let height = img.height;
                 if (width > maxW || height > maxH) {
@@ -6777,9 +6806,11 @@
                 canvas.width = width;
                 canvas.height = height;
                 const ctx = canvas.getContext('2d');
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
                 ctx.drawImage(img, 0, 0, width, height);
 
-                // Comprime com qualidade 82% JPEG (tamanho típico de 30-45 KB)
+                // Comprime com qualidade 82% JPEG (tamanho típico de 25-35 KB com nitidez 100%)
                 const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
 
                 const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
@@ -6888,13 +6919,41 @@
             };
             reader.readAsText(file);
           } else {
+            showToast('Otimizando arte de fundo para resolução oficial CR80 (1050x662)...');
             const reader = new FileReader();
             reader.onload = (event) => {
-              studioState.customImageUrl = event.target.result;
-              studioState.customSvgContent = null;
-              triggerAutoFitFullArea();
-              applyCurrentSvgBackground();
-              showToast('Imagem de fundo aplicada!');
+              const img = new Image();
+              img.onload = () => {
+                // Dimensões oficiais da carteirinha CR80 em 300 DPI
+                const targetW = 1050;
+                const targetH = 662;
+                const canvas = document.createElement('canvas');
+                canvas.width = targetW;
+                canvas.height = targetH;
+                const ctx = canvas.getContext('2d');
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+
+                // Desenha cobrindo proporcionalmente a área exata da carteira
+                const hRatio = targetW / img.width;
+                const vRatio = targetH / img.height;
+                const ratio = Math.max(hRatio, vRatio);
+                const centerShiftX = (targetW - img.width * ratio) / 2;
+                const centerShiftY = (targetH - img.height * ratio) / 2;
+                ctx.drawImage(img, 0, 0, img.width, img.height, centerShiftX, centerShiftY, img.width * ratio, img.height * ratio);
+
+                const compressedBg = canvas.toDataURL('image/jpeg', 0.84);
+                studioState.customImageUrl = compressedBg;
+                studioState.customSvgContent = null;
+                triggerAutoFitFullArea();
+                applyCurrentSvgBackground();
+                const sizeKb = Math.round((compressedBg.length * 3 / 4) / 1024);
+                showToast(`✓ Fundo otimizado em alta definição 1050x662 (${sizeKb} KB) aplicado!`);
+              };
+              img.onerror = () => {
+                showToast('Erro ao processar imagem de fundo.', true);
+              };
+              img.src = event.target.result;
             };
             reader.readAsDataURL(file);
           }
@@ -9911,8 +9970,9 @@
         reader.onload = function(e) {
           const img = new Image();
           img.onload = function() {
-            const maxW = 1200;
-            const maxH = 800;
+            // Resolução ideal de exibição no portal (proporção nítida 16:10 retina 900x560)
+            const maxW = 900;
+            const maxH = 560;
             let width = img.width;
             let height = img.height;
 
@@ -9926,9 +9986,11 @@
             canvas.width = width;
             canvas.height = height;
             const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
             ctx.drawImage(img, 0, 0, width, height);
 
-            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
 
             const imageInput = document.getElementById('news-image');
             if (imageInput) {
