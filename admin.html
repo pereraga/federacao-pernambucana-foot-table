@@ -25,20 +25,36 @@
     (function() {
       try {
         const isLogged = sessionStorage.getItem('pe_admin_logged') === 'true' || localStorage.getItem('pe_admin_logged') === 'true';
-        if (!isLogged) {
+        const sessionExpires = Number(sessionStorage.getItem('pe_admin_session_expires') || localStorage.getItem('pe_admin_session_expires') || 0);
+        const isExpired = sessionExpires > 0 && Date.now() > sessionExpires;
+
+        if (!isLogged || isExpired) {
+          sessionStorage.clear();
+          localStorage.removeItem('pe_admin_logged');
+          localStorage.removeItem('pe_admin_user');
+          localStorage.removeItem('pe_admin_session_token');
+          localStorage.removeItem('pe_admin_session_expires');
           window.location.replace('login.html');
           return;
         }
 
         const rawUser = (sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user') || '').toLowerCase().trim();
+        if (!rawUser) {
+          window.location.replace('login.html');
+          return;
+        }
         const user = rawUser.includes('@') ? rawUser : (rawUser + '@foot-table.pe.org');
-        if (rawUser === 'admin' || rawUser.includes('gabrielacessor')) return; // Acesso total
 
         const admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || [];
         const current = admins.find(a => {
           const aEmail = (a.email || '').toLowerCase().trim();
           return aEmail === rawUser || aEmail === user || aEmail.replace(/@foot-table\.pe\.(org|gov\.br)$/i, '') === rawUser;
         });
+
+        if (!current && rawUser !== 'admin') {
+          window.location.replace('login.html');
+          return;
+        }
 
         let perms = [];
         if (current) {
@@ -51,7 +67,7 @@
             else if (current.cargo === 'Diretor Adjunto') perms = ['*'];
           }
         }
-        if (perms.includes('*')) return;
+        if (perms.includes('*') || (current && current.isMaster)) return;
 
         const hideSelectors = [];
         // Abas da barra lateral
@@ -597,6 +613,10 @@
         <a href="index.html" class="w-full bg-[#0c1424] hover:bg-[#121e36] border border-pe-cardBorder text-white font-bold text-xs uppercase px-3 py-2.5 rounded-xl transition flex items-center justify-center gap-2" title="Ver Site Público">
           <span class="text-base shrink-0">🌐</span>
           <span class="sidebar-text">Ver Site Público</span>
+        </a>
+        <a href="seguranca.html" target="_blank" class="w-full border border-[#1c253b] hover:bg-[#121c32] text-slate-400 hover:text-pe-gold font-bold text-[11px] uppercase px-3 py-1.5 rounded-xl transition flex items-center justify-center gap-2" title="Manual de Segurança & Privacidade LGPD">
+          <i class="fa-solid fa-shield-halved text-pe-gold text-xs"></i>
+          <span class="sidebar-text">Segurança & LGPD</span>
         </a>
         <button onclick="handleLogout()" class="w-full border border-red-500/30 hover:bg-red-950/40 text-red-400 font-bold text-xs uppercase px-3 py-2 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer" title="Sair do Sistema">
           <span class="text-base shrink-0">🚪</span>
@@ -8130,6 +8150,7 @@
         }
       }
 
+      logAuditEvent('HOMOLOGATE_ATHLETE', 'atletas', { codigo });
       showToast(`✓ Atleta #${codigo} (${(a && a.nome) || ''}) homologado com sucesso!`);
       await renderJogadoresCadastradosTable();
       updateDashboardData();
@@ -8217,6 +8238,8 @@
           console.warn("Erro ao remover no Supabase:", e);
         }
       }
+
+      logAuditEvent('DELETE_ATHLETE', 'atletas', { codigo });
 
       let localAthletes = JSON.parse(localStorage.getItem('pe_athletes_db')) || [];
       localAthletes = localAthletes.filter(a => String(a.codigo) !== String(codigo));
@@ -8909,17 +8932,27 @@
       let existingAthletes = await loadAthletes();
       const existingCodes = new Set(existingAthletes.map(a => String(a.codigo)));
 
+      // Sanitização de entradas contra CSV Formula Injection
+      function sanitizeCsvCell(str) {
+        if (!str) return '';
+        let s = String(str).trim();
+        if (/^[=\+\-@\t\r]/.test(s)) {
+          s = "'" + s;
+        }
+        return s;
+      }
+
       for (let line of lines) {
         const parts = line.split(/[;,|\t]/).map(p => p.trim());
         if (!parts.length || !parts[0] || parts[0].toLowerCase() === 'nome') continue;
 
-        const nome = parts[0];
-        const cpf = parts[1] || 'XXX.XXX.XXX-XX';
-        const municipio = parts[2] || '- PE';
-        const clube = parts[3] || 'Sport Club do Recife';
-        const modalidade = parts[4] || 'SOLO (INDIVIDUAL)';
-        const telefone = parts[5] || '(XX) XXXXX-XXXX';
-        const nascimento = parts[6] || 'XX/XX/XXXX';
+        const nome = sanitizeCsvCell(parts[0]);
+        const cpf = sanitizeCsvCell(parts[1] || 'XXX.XXX.XXX-XX');
+        const municipio = sanitizeCsvCell(parts[2] || '- PE');
+        const clube = sanitizeCsvCell(parts[3] || 'Sport Club do Recife');
+        const modalidade = sanitizeCsvCell(parts[4] || 'SOLO (INDIVIDUAL)');
+        const telefone = sanitizeCsvCell(parts[5] || '(XX) XXXXX-XXXX');
+        const nascimento = sanitizeCsvCell(parts[6] || 'XX/XX/XXXX');
 
         let code = '';
         do {
@@ -8990,6 +9023,7 @@
       localStorage.setItem('pe_athletes_db', JSON.stringify(existingAthletes));
       currentCachedAthletes = existingAthletes;
 
+      logAuditEvent('BATCH_IMPORT_ATHLETES', 'atletas', { count: athletesToInsert.length });
       closeBatchImportModal();
       showToast(`✓ ${athletesToInsert.length} novos atletas cadastrados e homologados com sucesso!`);
       renderJogadoresCadastradosTable();
@@ -11796,27 +11830,55 @@
        ========================================================= */
     function checkAuth() {
       const isLogged = sessionStorage.getItem('pe_admin_logged') === 'true' || localStorage.getItem('pe_admin_logged') === 'true';
-      if (!isLogged) {
-        window.location.href = 'login.html';
-      } else {
-        let user = sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user') || 'gabrielacessor@foot-table.pe.org';
-        if (user === 'gabrielacessor@foot-table.pe.gov.br') {
-          user = 'gabrielacessor@foot-table.pe.org';
-          sessionStorage.setItem('pe_admin_user', user);
-          localStorage.setItem('pe_admin_user', user);
-        }
-        if (user) {
-          applyPermissionsToUI();
-        }
+      const sessionExpires = Number(sessionStorage.getItem('pe_admin_session_expires') || localStorage.getItem('pe_admin_session_expires') || 0);
+      const isExpired = sessionExpires > 0 && Date.now() > sessionExpires;
+
+      if (!isLogged || isExpired) {
+        handleLogout();
+        return;
       }
+
+      let user = sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user');
+      if (!user) {
+        handleLogout();
+        return;
+      }
+
+      if (user === 'gabrielacessor@foot-table.pe.gov.br') {
+        user = 'gabrielacessor@foot-table.pe.org';
+        sessionStorage.setItem('pe_admin_user', user);
+        localStorage.setItem('pe_admin_user', user);
+      }
+      applyPermissionsToUI();
     }
 
     function handleLogout() {
       sessionStorage.removeItem('pe_admin_logged');
       sessionStorage.removeItem('pe_admin_user');
+      sessionStorage.removeItem('pe_admin_session_token');
+      sessionStorage.removeItem('pe_admin_session_expires');
       localStorage.removeItem('pe_admin_logged');
       localStorage.removeItem('pe_admin_user');
+      localStorage.removeItem('pe_admin_session_token');
+      localStorage.removeItem('pe_admin_session_expires');
       window.location.href = 'login.html';
+    }
+
+    /* Helper Global de Auditoria de Operações Sensíveis */
+    async function logAuditEvent(action, resource, details = {}) {
+      const actor = sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user') || 'anonymous';
+      try {
+        if (supabaseClient) {
+          await supabaseClient.from('audit_logs').insert([{
+            actor_email: actor,
+            action: action,
+            target_resource: resource,
+            details: details
+          }]);
+        }
+      } catch (e) {
+        console.warn('Falha silenciosa ao registrar auditoria:', e);
+      }
     }
 
     /* =========================================================

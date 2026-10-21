@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Segurança da Informação e Privacidade | FPEFT Oficial</title>
+  <link rel="icon" type="image/png" href="assets/images/logo-federacao.png" />
+
+  <!-- Google Fonts & Tailwind CSS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            pe: {
+              blue: '#0044cc',
+              royal: '#003da5',
+              darkblue: '#06173a',
+              gold: '#f5b800',
+              goldHover: '#e0a700',
+              red: '#cc0000',
+              green: '#008833',
+              dark: '#05080e',
+              card: '#0b101d',
+              cardBorder: '#1c253b'
+            }
+          },
+          fontFamily: {
+            sans: ['Montserrat', 'sans-serif'],
+            oswald: ['Oswald', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #03060c;
+      color: #e2e8f0;
+      font-family: 'Montserrat', sans-serif;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-pe-gold selection:text-pe-dark">
+
+  <!-- Header Superior -->
+  <header class="border-b border-[#1c253b] bg-[#070b14]/90 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3 group">
+        <img src="assets/images/logo-federacao.png" alt="FPEFT" class="w-9 h-9 object-contain drop-shadow" />
+        <div>
+          <span class="font-oswald text-sm sm:text-base font-bold text-white tracking-wider block group-hover:text-pe-gold transition leading-tight">
+            FEDERAÇÃO PERNAMBUCANA
+          </span>
+          <span class="text-[10px] text-slate-400 font-mono tracking-widest block uppercase">
+            Portal da Transparência & Segurança
+          </span>
+        </div>
+      </a>
+
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="text-xs text-slate-300 hover:text-white px-3 py-1.5 rounded-lg border border-[#1c253b] hover:border-slate-500 transition">
+          <i class="fa-solid fa-arrow-left mr-1"></i> Início
+        </a>
+        <a href="login.html" class="text-xs bg-pe-gold hover:bg-pe-goldHover text-black font-extrabold px-3 py-1.5 rounded-lg transition shadow">
+          Acesso Gestores
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Conteúdo Principal -->
+  <main class="max-w-4xl mx-auto px-4 py-10 space-y-10 flex-1">
+    
+    <!-- Hero / Cabeçalho da Página -->
+    <div class="text-center space-y-3">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pe-gold/10 border border-pe-gold/30 text-pe-gold text-xs font-bold uppercase tracking-wider">
+        <i class="fa-solid fa-shield-halved"></i> Compromisso com a Proteção de Dados
+      </div>
+      <h1 class="font-oswald text-3xl sm:text-4xl uppercase font-bold text-white tracking-wide">
+        Segurança da Informação e Privacidade (LGPD)
+      </h1>
+      <p class="text-sm text-slate-400 max-w-2xl mx-auto leading-relaxed">
+        Diretrizes, controles técnicos e transparência no tratamento de dados pessoais de atletas, árbitros e gestores pela Federação Pernambucana de FutMesa e Foot Table.
+      </p>
+    </div>
+
+    <!-- Bloco 1: Como os Dados são Protegidos -->
+    <section class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 sm:p-8 space-y-4 shadow-xl">
+      <div class="flex items-center gap-3 text-pe-gold border-b border-[#1c253b] pb-4">
+        <i class="fa-solid fa-lock text-xl"></i>
+        <h2 class="font-oswald text-xl uppercase font-bold text-white tracking-wide">
+          1. Como os Dados Pessoais são Protegidos
+        </h2>
+      </div>
+      <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+        A Federação Pernambucana de Foot Table adota medidas técnicas e administrativas proporcionais para proteger os dados pessoais contra acessos não autorizados, perdas ou adulterações:
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+        <div class="bg-[#05080e] p-4 rounded-xl border border-[#1c253b]/60 space-y-1">
+          <h3 class="text-xs font-bold text-pe-gold uppercase flex items-center gap-1.5">
+            <i class="fa-solid fa-network-wired text-sky-400"></i> Criptografia em Trânsito (TLS 1.3)
+          </h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Todas as comunicações entre seu navegador, a infraestrutura da Vercel e o banco de dados são criptografadas via protocolo HTTPS com certificados de alta segurança.
+          </p>
+        </div>
+        <div class="bg-[#05080e] p-4 rounded-xl border border-[#1c253b]/60 space-y-1">
+          <h3 class="text-xs font-bold text-pe-gold uppercase flex items-center gap-1.5">
+            <i class="fa-solid fa-database text-emerald-400"></i> Segregação em Banco de Dados (RLS)
+          </h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            O banco de dados PostgreSQL utiliza Row Level Security (RLS) estrito. O público possui acesso somente à validação de credenciais ativas, sem exposição irrestrita da tabela.
+          </p>
+        </div>
+        <div class="bg-[#05080e] p-4 rounded-xl border border-[#1c253b]/60 space-y-1">
+          <h3 class="text-xs font-bold text-pe-gold uppercase flex items-center gap-1.5">
+            <i class="fa-solid fa-id-card-clip text-amber-400"></i> Minimização e Mascaramento de CPF
+          </h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Em conformidade com a LGPD, o número de CPF é exibido nas consultas públicas apenas em formato mascarado (<code class="text-pe-gold font-mono">***.XXX.XXX-**</code>), impedindo raspagem automatizada.
+          </p>
+        </div>
+        <div class="bg-[#05080e] p-4 rounded-xl border border-[#1c253b]/60 space-y-1">
+          <h3 class="text-xs font-bold text-pe-gold uppercase flex items-center gap-1.5">
+            <i class="fa-solid fa-user-lock text-purple-400"></i> Controle de Acesso Baseado em Funções
+          </h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            O painel de controle exige autenticação nominal com níveis operacionais específicos, registros de auditoria e limitação contra tentativas excessivas de login.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bloco 2: Direitos do Titular (LGPD) -->
+    <section class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 sm:p-8 space-y-4 shadow-xl">
+      <div class="flex items-center gap-3 text-pe-gold border-b border-[#1c253b] pb-4">
+        <i class="fa-solid fa-scale-balanced text-xl"></i>
+        <h2 class="font-oswald text-xl uppercase font-bold text-white tracking-wide">
+          2. Direitos dos Atletas e Titulares (Art. 18 da LGPD)
+        </h2>
+      </div>
+      <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+        Na condição de titular de dados pessoais cadastrados junto à Federação, você pode solicitar a qualquer momento:
+      </p>
+      <ul class="space-y-2 text-xs sm:text-sm text-slate-300">
+        <li class="flex items-start gap-2">
+          <i class="fa-solid fa-check text-emerald-400 mt-1"></i>
+          <span><strong>Confirmação e Acesso:</strong> Verificar a existência de tratamento e consultar os dados cadastrados em sua ficha oficial de federado.</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <i class="fa-solid fa-check text-emerald-400 mt-1"></i>
+          <span><strong>Correção de Dados:</strong> Solicitar a atualização de dados incompletos, inexatos ou desatualizados (como clube, município ou categoria).</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <i class="fa-solid fa-check text-emerald-400 mt-1"></i>
+          <span><strong>Anonimização ou Eliminação:</strong> Solicitar o descredenciamento ou remoção de dados, ressalvadas as obrigações legais e regulatórias desportivas de conservação de súmulas e histórico de competições.</span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Bloco 3: Recomendações aos Usuários -->
+    <section class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 sm:p-8 space-y-4 shadow-xl">
+      <div class="flex items-center gap-3 text-pe-gold border-b border-[#1c253b] pb-4">
+        <i class="fa-solid fa-user-shield text-xl"></i>
+        <h2 class="font-oswald text-xl uppercase font-bold text-white tracking-wide">
+          3. Como Proteger sua Conta e Credencial
+        </h2>
+      </div>
+      <div class="space-y-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
+        <p>• <strong>Senhas Fortes:</strong> Gestores com acesso ao painel devem utilizar senhas longas, combinando letras maiúsculas, minúsculas, números e símbolos.</p>
+        <p>• <strong>Uso Exclusivo:</strong> Nunca compartilhe seus dados de acesso ao painel com terceiros. Cada operação realizada é registrada nominalmente no histórico de auditoria.</p>
+        <p>• <strong>Encerramento de Sessão:</strong> Ao utilizar computadores institucionais ou compartilhados, lembre-se de clicar no botão "Sair" para encerrar a sessão imediatamente.</p>
+      </div>
+    </section>
+
+    <!-- Bloco 4: Contato do Encarregado (DPO) e Incidentes -->
+    <section class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 sm:p-8 space-y-4 shadow-xl">
+      <div class="flex items-center gap-3 text-pe-gold border-b border-[#1c253b] pb-4">
+        <i class="fa-solid fa-envelope-open-text text-xl"></i>
+        <h2 class="font-oswald text-xl uppercase font-bold text-white tracking-wide">
+          4. Canal de Comunicação do Encarregado de Dados
+        </h2>
+      </div>
+      <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+        Para exercer seus direitos de titular, solicitar esclarecimentos sobre o tratamento de dados pessoais ou comunicar qualquer incidente de segurança ou suspeita de vulnerabilidade, entre em contato através do canal oficial:
+      </p>
+      <div class="p-4 bg-[#05080e] rounded-xl border border-[#1c253b] flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div>
+          <span class="text-[11px] text-slate-400 block font-bold uppercase">Encarregado pelo Tratamento de Dados Pessoais (DPO)</span>
+          <span class="font-mono text-sm text-pe-gold font-bold">privacidade@foot-table.pe.org</span>
+        </div>
+        <a href="mailto:privacidade@foot-table.pe.org?subject=LGPD%20-%20Solicitação%20de%20Titular" class="bg-pe-gold hover:bg-pe-goldHover text-black text-xs font-bold px-4 py-2 rounded-lg transition shadow">
+          <i class="fa-solid fa-paper-plane mr-1"></i> Enviar Mensagem
+        </a>
+      </div>
+      <p class="text-[11px] text-slate-500 pt-2">
+        Em caso de incidentes relevantes que possam acarretar risco ou dano aos titulares, a Federação adotará prontamente o plano de contenção, comunicando a Autoridade Nacional de Proteção de Dados (ANPD) e os atletas envolvidos nos prazos regulamentares.
+      </p>
+    </section>
+
+    <!-- Informação de Revisão -->
+    <div class="text-center text-xs text-slate-500 font-mono">
+      <span>Última revisão técnica e jurídica: <strong>21 de Outubro de 2026</strong> • Versão 2.4.0</span>
+    </div>
+
+  </main>
+
+  <!-- Rodapé -->
+  <footer class="bg-[#05070c] border-t border-[#1c253b] py-6 px-4 text-center text-xs text-slate-500">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-pe-gold"></span>
+        <span class="font-bold text-slate-400">Federação Pernambucana de FutMesa & Foot Table (FPEFT)</span>
+      </div>
+      <p>© 2026 Todos os direitos reservados. Entidade Oficial de Foot Table em Pernambuco.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

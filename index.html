@@ -544,6 +544,15 @@
         <span class="font-bold text-slate-400">Federação Pernambucana de FutMesa & Foot Table</span>
       </div>
 
+      <div class="flex items-center gap-4 text-[11px] text-slate-400">
+        <a href="seguranca.html" class="hover:text-pe-gold transition underline flex items-center gap-1">
+          <svg class="w-3.5 h-3.5 text-pe-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+          Segurança & Privacidade (LGPD)
+        </a>
+        <span>•</span>
+        <a href="login.html" class="hover:text-pe-gold transition">Acesso Restrito</a>
+      </div>
+
       <p>© 2026 Todos os direitos reservados. Entidade estadual oficial de Foot Table em Pernambuco.</p>
     </div>
   </footer>
@@ -833,9 +842,19 @@
       feedback.classList.add('hidden');
       badgeArea.classList.remove('hidden');
 
+      // Mascaramento de Segurança LGPD (Art. 46 Lei nº 13.709/2018)
+      function maskCpf(cpf) {
+        if (!cpf) return '***.***.***-**';
+        const digits = String(cpf).replace(/\D/g, '');
+        if (digits.length === 11) {
+          return `***.${digits.slice(3, 6)}.${digits.slice(6, 9)}-**`;
+        }
+        return '***.***.***-**';
+      }
+
       // Preenche os dados da carteira
       document.getElementById('cardBadgeName').textContent = athlete.nome;
-      document.getElementById('cardBadgeCPF').textContent = athlete.cpf;
+      document.getElementById('cardBadgeCPF').textContent = maskCpf(athlete.cpf);
       document.getElementById('cardBadgeBirth').textContent = athlete.nascimento;
       document.getElementById('cardBadgeCity').textContent = athlete.municipio;
       document.getElementById('cardBadgeModality').textContent = athlete.modalidade;
@@ -872,7 +891,7 @@
 
       if (qrFullName) qrFullName.textContent = athlete.nome;
       if (qrFedNum) qrFedNum.textContent = `#${athlete.codigo}`;
-      if (qrCpf) qrCpf.textContent = athlete.cpf;
+      if (qrCpf) qrCpf.textContent = maskCpf(athlete.cpf);
       if (qrModality) qrModality.textContent = athlete.modalidade;
       if (qrCategory) qrCategory.textContent = athlete.categoria || 'ASPIRANTE';
       if (qrCity) qrCity.textContent = athlete.municipio;

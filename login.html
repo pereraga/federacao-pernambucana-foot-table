@@ -265,6 +265,13 @@
         <span class="w-2.5 h-2.5 rounded-full bg-pe-gold"></span>
         <span class="font-bold text-slate-400">Federação Pernambucana de FutMesa & Foot Table</span>
       </div>
+      <div class="flex items-center gap-3 text-[11px] text-slate-400">
+        <a href="seguranca.html" class="hover:text-pe-gold transition underline flex items-center gap-1">
+          <i class="fa-solid fa-shield-halved text-pe-gold"></i> Segurança & Privacidade (LGPD)
+        </a>
+        <span>•</span>
+        <a href="index.html" class="hover:text-pe-gold transition">Portal Público</a>
+      </div>
       <p>© 2026 Todos os direitos reservados. Portal Homologado.</p>
     </div>
   </footer>
@@ -353,6 +360,21 @@
       const user = document.getElementById('adminUser').value.trim().toLowerCase();
       const pass = document.getElementById('adminPass').value;
 
+      // Proteção Ativa contra Ataques de Força Bruta (Brute-Force Lockout)
+      const lockUntil = Number(localStorage.getItem('pe_login_lockout_until') || 0);
+      if (Date.now() < lockUntil) {
+        const remainingSec = Math.ceil((lockUntil - Date.now()) / 1000);
+        loginFeedback.className = "text-xs rounded-xl p-3 border bg-red-950/40 border-pe-red/50 text-red-300 flex items-center gap-2";
+        loginFeedback.innerHTML = `
+          <svg class="w-4 h-4 text-pe-red flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+          </svg>
+          <span><strong>Múltiplas tentativas incorretas:</strong> Acesso temporariamente suspenso por segurança. Aguarde ${remainingSec} segundos.</span>
+        `;
+        loginFeedback.classList.remove('hidden');
+        return;
+      }
+
       btnSubmit.disabled = true;
       btnText.textContent = "AUTENTICANDO...";
       btnSpinner.classList.remove('hidden');
@@ -415,52 +437,66 @@
         } catch (e) {}
       }
 
-      // 1. Tenta validar no Supabase em TEMPO REAL primeiro (banco de dados oficial na nuvem)
+      // 1. Tenta validar no Supabase em TEMPO REAL primeiro (via RPC seguro ou query direta)
       const normUser = user.includes('@') ? user : `${user}@foot-table.pe.org`;
       let foundAdmin = null;
       let isAuthorized = false;
 
       if (supabaseClient) {
+        // Tentativa via RPC Security Definer (PostgreSQL)
         try {
-          const { data, error } = await supabaseClient
-            .from('admin_users')
-            .select('*')
-            .or(`email.ilike.${user},email.ilike.${normUser}`)
-            .maybeSingle();
-
-          if (!error && data) {
-            // Sincroniza / atualiza imediatamente no localStorage com os dados do banco
-            const existingIdx = admins.findIndex(a => (a.email || '').toLowerCase() === (data.email || '').toLowerCase());
-            if (existingIdx !== -1) {
-              admins[existingIdx].nome = data.nome || admins[existingIdx].nome;
-              admins[existingIdx].cargo = data.cargo || admins[existingIdx].cargo;
-              admins[existingIdx].senha = data.senha;
-            } else {
-              admins.push({
-                nome: data.nome || 'Gestor Autorizado',
-                cargo: data.cargo || 'Gestor',
-                email: data.email,
-                senha: data.senha || pass,
-                isMaster: (data.email.toLowerCase().includes('gabrielacessor') || data.cargo === 'Diretor Adjunto'),
-                permissions: (data.email.toLowerCase().includes('gabrielacessor') || data.cargo === 'Diretor Adjunto') ? ['*'] : [],
-                created_at: data.created_at || new Date().toISOString()
-              });
-            }
-            localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
-
-            const dbPass = (data.senha || '').trim();
-            const inputPass = pass.trim();
-            if (data.senha === pass || dbPass === inputPass) {
-              isAuthorized = true;
-              foundAdmin = data;
-            }
+          const rpcRes = await supabaseClient.rpc('autenticar_gestor_institucional', {
+            p_email: normUser,
+            p_senha_plana: pass
+          });
+          if (!rpcRes.error && rpcRes.data && rpcRes.data.success) {
+            isAuthorized = true;
+            foundAdmin = rpcRes.data.user;
           }
-        } catch (dbErr) {
-          console.warn("Validação Supabase em tempo real:", dbErr);
+        } catch (rpcErr) {}
+
+        // Fallback para query direta se a função RPC ainda não estiver criada
+        if (!isAuthorized) {
+          try {
+            const { data, error } = await supabaseClient
+              .from('admin_users')
+              .select('*')
+              .or(`email.ilike.${user},email.ilike.${normUser}`)
+              .maybeSingle();
+
+            if (!error && data) {
+              const existingIdx = admins.findIndex(a => (a.email || '').toLowerCase() === (data.email || '').toLowerCase());
+              if (existingIdx !== -1) {
+                admins[existingIdx].nome = data.nome || admins[existingIdx].nome;
+                admins[existingIdx].cargo = data.cargo || admins[existingIdx].cargo;
+                admins[existingIdx].senha = data.senha;
+              } else {
+                admins.push({
+                  nome: data.nome || 'Gestor Autorizado',
+                  cargo: data.cargo || 'Gestor',
+                  email: data.email,
+                  senha: data.senha || pass,
+                  isMaster: (data.email.toLowerCase().includes('gabrielacessor') || data.cargo === 'Diretor Adjunto'),
+                  permissions: (data.email.toLowerCase().includes('gabrielacessor') || data.cargo === 'Diretor Adjunto') ? ['*'] : [],
+                  created_at: data.created_at || new Date().toISOString()
+                });
+              }
+              localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
+
+              const dbPass = (data.senha || '').trim();
+              const inputPass = pass.trim();
+              if (data.senha === pass || dbPass === inputPass) {
+                isAuthorized = true;
+                foundAdmin = data;
+              }
+            }
+          } catch (dbErr) {
+            console.warn("Validação Supabase em tempo real:", dbErr);
+          }
         }
       }
 
-      // 2. Se não autenticado pelo Supabase, valida localmente
+      // 2. Se não autenticado pelo Supabase, valida localmente com a senha registrada
       if (!isAuthorized) {
         const inputPass = pass.trim();
         const localMatch = admins.find(a => {
@@ -475,45 +511,61 @@
         }
       }
 
-      // Reconhece ADM MASTER (gabrielacessor) com senha cadastrada ou padrão de emergência
-      if (!isAuthorized && user.includes('gabrielacessor') && (pass === 'admin' || pass.length >= 4)) {
-        isAuthorized = true;
-      }
-
-      // Também aceita login padrão da diretoria emergencial
-      if (!isAuthorized && user === 'admin' && pass.length >= 4) {
-        isAuthorized = true;
-      }
-
       setTimeout(() => {
         btnSubmit.disabled = false;
         btnSpinner.classList.add('hidden');
         btnText.textContent = "ENTRAR NO PAINEL";
 
         if (isAuthorized) {
+          // Limpa contador de tentativas falhas
+          localStorage.removeItem('pe_login_fail_count');
+          localStorage.removeItem('pe_login_lockout_until');
+
           loginFeedback.className = "text-xs rounded-xl p-3 border bg-emerald-950/40 border-emerald-500/50 text-emerald-300 flex items-center gap-2";
           loginFeedback.innerHTML = `
             <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
             </svg>
-            <span><strong>Acesso Autorizado!</strong> Entrando no Painel de Controle...</span>
+            <span><strong>Acesso Autorizado!</strong> Estabelecendo sessão autenticada segura...</span>
           `;
           loginFeedback.classList.remove('hidden');
 
           const effectiveUser = foundAdmin ? foundAdmin.email : ((user === 'gabrielacessor@foot-table.pe.gov.br' || user === 'gabrielacessor') ? 'gabrielacessor@foot-table.pe.org' : normUser);
+
+          // Geração de Token Criptográfico de Sessão e TTL de 8 horas
+          let sessionToken = '';
+          try {
+            sessionToken = Array.from(crypto.getRandomValues(new Uint8Array(24))).map(b => b.toString(16).padStart(2, '0')).join('');
+          } catch (tokErr) {
+            sessionToken = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2);
+          }
+          const sessionExpires = String(Date.now() + 8 * 60 * 60 * 1000); // 8 Horas de validade
+
           sessionStorage.setItem('pe_admin_logged', 'true');
           sessionStorage.setItem('pe_admin_user', effectiveUser);
+          sessionStorage.setItem('pe_admin_session_token', sessionToken);
+          sessionStorage.setItem('pe_admin_session_expires', sessionExpires);
 
           if (document.getElementById('rememberMe').checked) {
             localStorage.setItem('pe_admin_logged', 'true');
             localStorage.setItem('pe_admin_user', effectiveUser);
+            localStorage.setItem('pe_admin_session_token', sessionToken);
+            localStorage.setItem('pe_admin_session_expires', sessionExpires);
           }
 
           setTimeout(() => {
             window.location.href = "admin.html";
-          }, 900);
+          }, 800);
 
         } else {
+          // Incrementa contador de falhas e aplica lockout se >= 5 tentativas
+          let failCount = Number(localStorage.getItem('pe_login_fail_count') || 0) + 1;
+          localStorage.setItem('pe_login_fail_count', failCount);
+          if (failCount >= 5) {
+            localStorage.setItem('pe_login_lockout_until', Date.now() + 180000); // 3 minutos de suspensão
+            localStorage.removeItem('pe_login_fail_count');
+          }
+
           loginFeedback.className = "text-xs rounded-xl p-3 border bg-red-950/40 border-pe-red/50 text-red-300 flex items-center gap-2";
           loginFeedback.innerHTML = `
             <svg class="w-4 h-4 text-pe-red flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
