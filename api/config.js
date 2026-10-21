@@ -1,5 +1,6 @@
 export default async function handler(req, res) {
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+  // Edge Caching da Vercel: responde diretamente dos nós globais da CDN sem acionar execuções serverless
+  res.setHeader('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=604800');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');

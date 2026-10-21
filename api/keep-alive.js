@@ -2,10 +2,11 @@
 // VERCEL SERVERLESS FUNCTION: SUPABASE KEEP-ALIVE (ANTI-AFK)
 // Executado diariamente via Vercel Cron para manter o
 // banco de dados do Supabase 100% ativo (sem pausar por inatividade)
+// e realizar limpeza automática de logs antigos.
 // ========================================================
 
 export default async function handler(req, res) {
-  // Evitar qualquer cache
+  // Evitar qualquer cache no ping diário
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
 
   const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL || "https://qvnsahvdjhimlmtqrnif.supabase.co";
@@ -52,12 +53,27 @@ export default async function handler(req, res) {
       })
     });
 
+    // 3. Autolimpeza periódica: remove logs com mais de 15 dias para manter o banco leve (< 1 MB)
+    try {
+      const fifteenDaysAgo = new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString();
+      await fetch(`${cleanUrl}/rest/v1/keep_alive_logs?pinged_at=lt.${fifteenDaysAgo}`, {
+        method: 'DELETE',
+        headers: {
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+    } catch (cleanErr) {
+      // Ignora erro de limpeza se tabela não suportar delete anônimo
+    }
+
     const isSuccess = selectResponse.ok || insertResponse.ok;
 
     return res.status(200).json({
       success: isSuccess,
       status: 'active',
-      database: 'Supabase mantido ativo com sucesso!',
+      database: 'Supabase mantido ativo e otimizado com sucesso!',
       readStatus: selectResponse.status,
       writeStatus: insertResponse.status,
       timestamp: new Date().toISOString()

@@ -6749,20 +6749,51 @@
         });
       }
 
-      // Upload de Foto 3x4
+      // Upload de Foto 3x4 com Compressão Automática para Alta Performance e Economia de Egress
       const fotoInp = document.getElementById('uploadFotoInput');
       if (fotoInp) {
         fotoInp.addEventListener('change', (e) => {
-          const file = e.target.files[0];
+          const file = e.target.files && e.target.files[0];
           if (file) {
+            if (!file.type.startsWith('image/')) {
+              showToast('Por favor, selecione um arquivo de imagem válido (JPG, PNG, WEBP).', true);
+              return;
+            }
+            showToast('Otimizando foto do atleta...');
             const reader = new FileReader();
             reader.onload = (event) => {
-              const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
-              if (photoTarget) {
-                photoTarget.photoUrl = event.target.result;
-                renderInteractiveElements();
-                showToast('Foto 3x4 do atleta carregada no Studio!');
-              }
+              const img = new Image();
+              img.onload = () => {
+                const maxW = 480;
+                const maxH = 640;
+                let width = img.width;
+                let height = img.height;
+                if (width > maxW || height > maxH) {
+                  const ratio = Math.min(maxW / width, maxH / height);
+                  width = Math.round(width * ratio);
+                  height = Math.round(height * ratio);
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Comprime com qualidade 82% JPEG (tamanho típico de 30-45 KB)
+                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+
+                const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
+                if (photoTarget) {
+                  photoTarget.photoUrl = compressedDataUrl;
+                  renderInteractiveElements();
+                  const sizeKb = Math.round((compressedDataUrl.length * 3 / 4) / 1024);
+                  showToast(`Foto 3x4 otimizada com sucesso (${sizeKb} KB)!`);
+                }
+              };
+              img.onerror = () => {
+                showToast('Erro ao ler dados da imagem.', true);
+              };
+              img.src = event.target.result;
             };
             reader.readAsDataURL(file);
           }
