@@ -1388,7 +1388,7 @@
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
               <div class="relative flex-1 max-w-md">
                 <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                <input type="text" id="searchJogadoresInput" oninput="filterJogadoresTable()" placeholder="Buscar por nome, código, CPF, município ou clube..." class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl pl-9 pr-4 py-2.5 text-xs text-white outline-none transition" />
+                <input type="text" id="searchJogadoresInput" oninput="debouncedFilterJogadoresTable()" placeholder="Buscar por nome, código, CPF, município ou clube..." class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl pl-9 pr-4 py-2.5 text-xs text-white outline-none transition" />
               </div>
 
               <div class="flex flex-wrap items-center gap-2">
@@ -1716,7 +1716,7 @@
                   <input 
                     type="text" 
                     id="search-input" 
-                    oninput="renderNewsList()" 
+                    oninput="debouncedRenderNewsList()" 
                     placeholder="Buscar por título ou tema..." 
                     class="w-full bg-[#0f172a] border border-[#1e293b] rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-accent transition"
                   >
@@ -2399,6 +2399,16 @@
   <!-- SCRIPT DE COMPORTAMENTO E CONTROLE GERAL                  -->
   <!-- ========================================================= -->
   <script>
+    // Utilitário de Debounce para alto desempenho em buscas, digitação e sincronização
+    function debounce(func, wait = 150) {
+      let timeout;
+      return function(...args) {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), wait);
+      };
+    }
+
     // Configurações Padrão
     const DEFAULT_SUPABASE_URL = "https://qvnsahvdjhimlmtqrnif.supabase.co";
     const DEFAULT_SUPABASE_ANON_KEY = "sb_publishable_vvqh9vB0Dr0EqR9JGhy4kA_XnJ-9h0z";
@@ -4132,7 +4142,13 @@
     }
 
     /* Salva automaticamente o design (posições, dimensões, estilo e transformações) no localStorage e Supabase */
-    function autoSaveStudioDesign() {
+    let _autoSaveStudioTimeout = null;
+    function autoSaveStudioDesign(immediate = false) {
+      if (!immediate) {
+        if (_autoSaveStudioTimeout) clearTimeout(_autoSaveStudioTimeout);
+        _autoSaveStudioTimeout = setTimeout(() => autoSaveStudioDesign(true), 250);
+        return;
+      }
       try {
         localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(studioState.elements));
         if (studioState.bgTransform) {
@@ -7790,12 +7806,57 @@
     }
 
     /* =========================================================
+       DELEGAÇÃO DE EVENTOS & OTIMIZAÇÃO DA TABELA DE JOGADORES
+       Reduz reflows para 1 única pintura e gerencia hover/click via tbody
+       ========================================================= */
+    let _jogadoresTableDelegationInit = false;
+    function initJogadoresTableDelegation() {
+      const tbody = document.getElementById('jogadoresTableBody');
+      if (!tbody || _jogadoresTableDelegationInit) return;
+      _jogadoresTableDelegationInit = true;
+
+      tbody.addEventListener('mouseover', (e) => {
+        const tr = e.target.closest('tr[data-code]');
+        if (!tr) return;
+        const code = tr.getAttribute('data-code');
+        showAthleteHoverCard(e, code);
+      });
+
+      tbody.addEventListener('mousemove', (e) => {
+        moveAthleteHoverCard(e);
+      });
+
+      tbody.addEventListener('mouseout', (e) => {
+        const fromTr = e.target.closest('tr[data-code]');
+        const toTr = e.relatedTarget ? e.relatedTarget.closest('tr[data-code]') : null;
+        if (fromTr && fromTr !== toTr) {
+          hideAthleteHoverCard();
+        }
+      });
+
+      tbody.addEventListener('click', (e) => {
+        if (e.target.closest('button') || e.target.closest('a') || e.target.closest('[onclick*="event.stopPropagation"]')) {
+          return;
+        }
+        const tr = e.target.closest('tr[data-code]');
+        if (tr) {
+          const code = tr.getAttribute('data-code');
+          if (code) abrirModalVerCarteira(code);
+        }
+      });
+
+      window.addEventListener('scroll', hideAthleteHoverCard, { passive: true });
+    }
+
+    /* =========================================================
        RENDERIZAÇÃO DA TABELA DE JOGADORES CADASTRADOS (ABA 2)
        Ordem Alfabética (A-Z) | Sem foto nas colunas | Ficha Completa no Hover
        ========================================================= */
     async function renderJogadoresCadastradosTable() {
       const tbody = document.getElementById('jogadoresTableBody');
-      const athletes = await loadAthletes();
+      const athletes = (currentCachedAthletes && currentCachedAthletes.length > 0)
+        ? currentCachedAthletes
+        : await loadAthletes();
       
       const totalCount = athletes.length;
       const pendentesList = athletes.filter(a => a.status === 'PENDENTE' || a.status === 'PENDENTE DE HOMOLOGAÇÃO');
@@ -7844,6 +7905,7 @@
       }
 
       if (!tbody) return;
+      initJogadoresTableDelegation();
 
       // Filtra por status
       let list = [...athletes];
@@ -7878,7 +7940,7 @@
       // ORDENAÇÃO PADRÃO: Ordem Alfabética (A-Z) pelo nome
       list.sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR', { sensitivity: 'base' }));
 
-      // Renderiza as linhas na tabela
+      // Renderiza as linhas na tabela em lote (DocumentFragment evita layout thrashing)
       tbody.innerHTML = '';
       if (list.length === 0) {
         tbody.innerHTML = `
@@ -7890,17 +7952,12 @@
           </tr>
         `;
       } else {
+        const fragment = document.createDocumentFragment();
         list.forEach(a => {
           const isPending = a.status === 'PENDENTE' || a.status === 'PENDENTE DE HOMOLOGAÇÃO';
           const tr = document.createElement('tr');
           tr.className = "hover:bg-[#070e1d] transition cursor-pointer border-b border-[#1c253b]/50 group";
           tr.setAttribute('data-code', a.codigo);
-
-          // Eventos de Hover para exibir a Ficha Completa Flutuante
-          tr.addEventListener('mouseenter', (e) => showAthleteHoverCard(e, a.codigo));
-          tr.addEventListener('mousemove', (e) => moveAthleteHoverCard(e));
-          tr.addEventListener('mouseleave', () => hideAthleteHoverCard());
-          tr.addEventListener('click', () => abrirModalVerCarteira(a.codigo));
 
           const fedDisplay = a.federado || (String(a.codigo).startsWith('PE-') ? a.codigo : `PE-2026/${String(a.codigo).slice(-3)}`);
           tr.innerHTML = `
@@ -7952,8 +8009,9 @@
               </div>
             </td>
           `;
-          tbody.appendChild(tr);
+          fragment.appendChild(tr);
         });
+        tbody.appendChild(fragment);
       }
 
       // Atualiza texto do rodapé
@@ -7963,8 +8021,16 @@
       }
     }
 
-    function filterJogadoresTable() {
+    const debouncedFilterJogadoresTable = debounce(() => {
       renderJogadoresCadastradosTable();
+    }, 120);
+
+    function filterJogadoresTable(immediate = false) {
+      if (immediate) {
+        renderJogadoresCadastradosTable();
+      } else {
+        debouncedFilterJogadoresTable();
+      }
     }
 
     function setJogadoresFilterStatus(status) {
@@ -8296,7 +8362,13 @@
       const container = document.getElementById('athleteHoverCardContent');
       if (!card || !container) return;
 
-      const a = (currentCachedAthletes || []).find(item => String(item.codigo) === String(codigo));
+      let a = (currentCachedAthletes || []).find(item => String(item.codigo) === String(codigo));
+      if (!a) {
+        try {
+          const list = JSON.parse(localStorage.getItem('pe_athletes_db')) || [];
+          a = list.find(item => String(item.codigo) === String(codigo));
+        } catch (err) {}
+      }
       if (!a) return;
 
       const isHomologado = a.status === 'HOMOLOGADO' || a.status === 'REGULAR';
@@ -8987,6 +9059,7 @@
        BUSCA RÁPIDA DE ATLETA (INDIVIDUAL OU EM DUPLA)
        ========================================================= */
     let quickSearchModality = 'ALL';
+    let _quickAthleteSearchDebounce = null;
 
     function setQuickSearchModality(mod) {
       quickSearchModality = mod;
@@ -9002,10 +9075,11 @@
       if (btnSolo) btnSolo.className = (mod === 'SOLO') ? activeClass : inactiveClass;
       if (btnDupla) btnDupla.className = (mod === 'DUPLA') ? activeClass : inactiveClass;
 
-      handleQuickAthleteSearch();
+      handleQuickAthleteSearch(true);
     }
 
     function clearQuickAthleteSearch() {
+      if (_quickAthleteSearchDebounce) clearTimeout(_quickAthleteSearchDebounce);
       const input = document.getElementById('quickSearchAthleteInput');
       const clearBtn = document.getElementById('quickSearchClearBtn');
       if (input) input.value = '';
@@ -9024,7 +9098,7 @@
       }
     }
 
-    async function handleQuickAthleteSearch() {
+    async function handleQuickAthleteSearch(immediate = false) {
       const input = document.getElementById('quickSearchAthleteInput');
       const clearBtn = document.getElementById('quickSearchClearBtn');
       const resultsContainer = document.getElementById('quickSearchResults');
@@ -9037,6 +9111,7 @@
       }
 
       if (!rawQuery) {
+        if (_quickAthleteSearchDebounce) clearTimeout(_quickAthleteSearchDebounce);
         resultsContainer.innerHTML = `
           <div class="text-[11px] text-slate-400 flex items-center gap-1.5">
             <svg class="w-4 h-4 text-pe-gold flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -9048,7 +9123,15 @@
         return;
       }
 
-      const athletes = await loadAthletes();
+      if (!immediate) {
+        if (_quickAthleteSearchDebounce) clearTimeout(_quickAthleteSearchDebounce);
+        _quickAthleteSearchDebounce = setTimeout(() => handleQuickAthleteSearch(true), 130);
+        return;
+      }
+
+      const athletes = (currentCachedAthletes && currentCachedAthletes.length > 0)
+        ? currentCachedAthletes
+        : await loadAthletes();
       
       const normalize = str => (str || '')
         .toLowerCase()
@@ -9588,6 +9671,12 @@
           '"': '&quot;'
         }[tag] || tag)
       );
+    }
+
+    let _newsSearchTimeout = null;
+    function debouncedRenderNewsList() {
+      if (_newsSearchTimeout) clearTimeout(_newsSearchTimeout);
+      _newsSearchTimeout = setTimeout(() => renderNewsList(), 120);
     }
 
     function renderNewsList() {
@@ -11226,6 +11315,7 @@
       if (counter) counter.textContent = admins.length;
       tbody.innerHTML = '';
 
+      const fragment = document.createDocumentFragment();
       admins.forEach(admin => {
         const roleObj = roles.find(r => r.name.toLowerCase() === (admin.cargo || '').toLowerCase());
         const adminPerms = (admin.permissions && Array.isArray(admin.permissions) && admin.permissions.length > 0)
@@ -11275,8 +11365,9 @@
             </div>
           </td>
         `;
-        tbody.appendChild(tr);
+        fragment.appendChild(tr);
       });
+      tbody.appendChild(fragment);
     }
 
     async function handleAdminCreateEmail(e) {
