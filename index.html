@@ -563,8 +563,8 @@
         </div>
       </div>
 
-      <!-- Grid de 4 Pilares de Segurança -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs mb-8">
+      <!-- Grid de 6 Pilares de Segurança -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs mb-8">
         <!-- Pilar 1: LGPD e Mascaramento -->
         <div class="bg-[#05080e] p-5 rounded-xl border border-pe-cardBorder/80 hover:border-pe-gold/50 transition space-y-2">
           <div class="flex items-center gap-2 text-pe-gold font-bold uppercase text-xs">
@@ -598,11 +598,33 @@
           </p>
         </div>
 
-        <!-- Pilar 4: Direitos do Titular (LGPD) -->
+        <!-- Pilar 4: Trilhas de Auditoria -->
+        <div class="bg-[#05080e] p-5 rounded-xl border border-pe-cardBorder/80 hover:border-pe-gold/50 transition space-y-2">
+          <div class="flex items-center gap-2 text-pe-gold font-bold uppercase text-xs">
+            <i class="fa-solid fa-clock-rotate-left text-blue-400 text-base"></i>
+            <span>4. Trilhas de Auditoria e Rastreabilidade</span>
+          </div>
+          <p class="text-slate-300 leading-relaxed">
+            Todas as operações administrativas no sistema (homologações de atletas, alterações de dados e tentativas de acesso) são registradas em logs imutáveis com data/hora UTC e identificador de operador, garantindo transparência e prestação de contas (Art. 6º da LGPD).
+          </p>
+        </div>
+
+        <!-- Pilar 5: Anti-Força Bruta & Hashing -->
+        <div class="bg-[#05080e] p-5 rounded-xl border border-pe-cardBorder/80 hover:border-pe-gold/50 transition space-y-2">
+          <div class="flex items-center gap-2 text-pe-gold font-bold uppercase text-xs">
+            <i class="fa-solid fa-shield-virus text-rose-400 text-base"></i>
+            <span>5. Proteção Anti-Força Bruta & Hashing</span>
+          </div>
+          <p class="text-slate-300 leading-relaxed">
+            Senhas institucionais são criptografadas com o algoritmo <strong>Blowfish (bcrypt / pgcrypto)</strong> com salteamento dinâmico. O sistema conta com bloqueio temporal automático após 5 tentativas incorretas consecutivas para mitigar ataques automatizados e roubo de senhas.
+          </p>
+        </div>
+
+        <!-- Pilar 6: Direitos do Titular (LGPD) -->
         <div class="bg-[#05080e] p-5 rounded-xl border border-pe-cardBorder/80 hover:border-pe-gold/50 transition space-y-2">
           <div class="flex items-center gap-2 text-pe-gold font-bold uppercase text-xs">
             <i class="fa-solid fa-scale-balanced text-purple-400 text-base"></i>
-            <span>4. Direitos do Atleta & Titular (LGPD)</span>
+            <span>6. Direitos do Atleta & Titular (LGPD)</span>
           </div>
           <p class="text-slate-300 leading-relaxed">
             Qualquer atleta federado tem garantido o direito de confirmar a existência de tratamento, solicitar correção ou atualização de seus dados cadastrais (Art. 18 da Lei nº 13.709/2018), ressalvadas as obrigações desportivas regulamentares de conservação de súmulas.
@@ -793,6 +815,9 @@
           <button id="tabBtnDireitos" onclick="switchSecurityTab('direitos')" class="px-3 py-1.5 rounded-lg bg-[#080c16] border border-pe-cardBorder text-slate-300 hover:text-white font-bold text-xs transition">
             <i class="fa-solid fa-user-check mr-1"></i> Direitos do Titular
           </button>
+          <button id="tabBtnAuditoria" onclick="switchSecurityTab('auditoria')" class="px-3 py-1.5 rounded-lg bg-[#080c16] border border-pe-cardBorder text-slate-300 hover:text-white font-bold text-xs transition">
+            <i class="fa-solid fa-clock-rotate-left mr-1"></i> Trilhas de Auditoria
+          </button>
         </div>
 
         <!-- Conteúdo Aba 1: LGPD & CPF -->
@@ -838,6 +863,21 @@
             </ul>
           </div>
         </div>
+
+        <!-- Conteúdo Aba 4: Trilhas de Auditoria -->
+        <div id="tabContentAuditoria" class="space-y-3 hidden">
+          <div class="bg-[#05080e] p-4 rounded-xl border border-pe-cardBorder space-y-2">
+            <h4 class="text-sm font-bold text-blue-400 uppercase flex items-center gap-2">
+              <i class="fa-solid fa-clock-rotate-left text-blue-400"></i> Rastreabilidade Total & Logs Imutáveis
+            </h4>
+            <p class="leading-relaxed">
+              Todas as movimentações cadastrais de atletas, alterações de cargos, homologações e acessos administrativos geram registros imutáveis na tabela de auditoria com carimbo UTC e identificador de usuário.
+            </p>
+            <p class="leading-relaxed">
+              Esse mecanismo impede alterações clandestinas e garante total prestação de contas, auditoria contínua e conformidade com o princípio de responsabilização da Lei nº 13.709/2018.
+            </p>
+          </div>
+        </div>
       </div>
 
       <!-- Rodapé do Modal -->
@@ -876,7 +916,7 @@
     }
 
     function switchSecurityTab(tab) {
-      const tabs = ['lgpd', 'seguranca', 'direitos'];
+      const tabs = ['lgpd', 'seguranca', 'direitos', 'auditoria'];
       tabs.forEach(t => {
         const btn = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
         const content = document.getElementById('tabContent' + t.charAt(0).toUpperCase() + t.slice(1));
