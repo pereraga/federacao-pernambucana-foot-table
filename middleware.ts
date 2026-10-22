@@ -4,12 +4,7 @@ import { getSessionFromCookieHeader } from './api/lib/session.js';
 const RESTRICTED_ROUTES = ['/admin', '/admin.html', '/painel', '/api/gestao'];
 
 export const config = {
-  matcher: [
-    /*
-     * Intercepta todas as rotas exceto arquivos estáticos essenciais
-     */
-    '/((?!_next/static|_next/image|assets/|favicon.ico).*)',
-  ],
+  matcher: ['/admin', '/admin.html', '/painel', '/api/gestao', '/api/gestao/:path*'],
 };
 
 export default function middleware(request: Request) {
@@ -57,7 +52,8 @@ export default function middleware(request: Request) {
     }
   }
 
-  // 2. Continua com a requisição aplicando os cabeçalhos de segurança
+  // 2. Libera a requisição com o cabeçalho de continuação Edge
+  securityHeaders.set('x-middleware-next', '1');
   return new Response(null, {
     status: 200,
     headers: securityHeaders,
