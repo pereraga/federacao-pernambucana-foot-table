@@ -1238,5 +1238,38 @@
       initIndexApp();
     }
   </script>
+
+  <!-- Aviso Institucional de Cookies (LGPD) -->
+  <div id="cookieNoticeBanner" class="fixed bottom-4 left-4 right-4 max-w-2xl mx-auto z-50 bg-[#080c16]/95 border border-[#1c253b] rounded-2xl p-4 shadow-2xl backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-4 transition-all duration-300 hidden">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-pe-gold/10 border border-pe-gold/30 flex items-center justify-center text-pe-gold text-sm flex-shrink-0">
+        <i class="fa-solid fa-cookie-bite"></i>
+      </div>
+      <p class="text-xs text-slate-300 leading-relaxed">
+        Utilizamos cookies essenciais para garantir o funcionamento seguro deste portal institucional e a integridade de sua navegação, em estrita conformidade com a LGPD.
+      </p>
+    </div>
+    <div class="flex items-center gap-3 w-full sm:w-auto flex-shrink-0">
+      <a href="seguranca.html" class="text-xs text-slate-400 hover:text-pe-gold underline transition">Privacidade</a>
+      <button onclick="acceptCookieConsent()" class="w-full sm:w-auto bg-pe-gold hover:bg-pe-goldHover text-black font-bold text-xs uppercase px-4 py-2 rounded-xl transition cursor-pointer shadow-md">
+        Entendido
+      </button>
+    </div>
+  </div>
+
+  <script>
+    function checkCookieConsent() {
+      if (!localStorage.getItem('fpeft_cookie_consent')) {
+        const el = document.getElementById('cookieNoticeBanner');
+        if (el) el.classList.remove('hidden');
+      }
+    }
+    function acceptCookieConsent() {
+      localStorage.setItem('fpeft_cookie_consent', 'true');
+      const el = document.getElementById('cookieNoticeBanner');
+      if (el) el.classList.add('hidden');
+    }
+    document.addEventListener('DOMContentLoaded', checkCookieConsent);
+  </script>
 </body>
 </html>

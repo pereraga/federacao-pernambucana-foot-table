@@ -24,6 +24,19 @@
   <script>
     (function() {
       try {
+        // Validação de sessão no servidor com cookie HttpOnly blindado
+        if (typeof fetch === 'function') {
+          fetch('/api/auth/session')
+            .then(res => {
+              if (res.status === 401 || res.status === 403) {
+                sessionStorage.clear();
+                localStorage.removeItem('pe_admin_logged');
+                window.location.replace('login.html');
+              }
+            })
+            .catch(() => {});
+        }
+
         const isLogged = sessionStorage.getItem('pe_admin_logged') === 'true' || localStorage.getItem('pe_admin_logged') === 'true';
         const sessionExpires = Number(sessionStorage.getItem('pe_admin_session_expires') || localStorage.getItem('pe_admin_session_expires') || 0);
         const isExpired = sessionExpires > 0 && Date.now() > sessionExpires;
@@ -11852,7 +11865,12 @@
       applyPermissionsToUI();
     }
 
-    function handleLogout() {
+    async function handleLogout() {
+      try {
+        if (typeof fetch === 'function') {
+          await fetch('/api/auth/logout', { method: 'POST' });
+        }
+      } catch (e) {}
       sessionStorage.removeItem('pe_admin_logged');
       sessionStorage.removeItem('pe_admin_user');
       sessionStorage.removeItem('pe_admin_session_token');

@@ -437,13 +437,21 @@
         } catch (e) {}
       }
 
-      // 1. Tenta validar no Supabase em TEMPO REAL primeiro (via RPC seguro ou query direta)
-      const normUser = user.includes('@') ? user : `${user}@foot-table.pe.org`;
-      let foundAdmin = null;
-      let isAuthorized = false;
+      // 1. Tenta autenticar no servidor (emissão de cookie HttpOnly blindado)
+      try {
+        const srvRes = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user, password: pass })
+        });
+        if (srvRes.ok) {
+          isAuthorized = true;
+          foundAdmin = { email: normUser };
+        }
+      } catch (srvErr) {}
 
-      if (supabaseClient) {
-        // Tentativa via RPC Security Definer (PostgreSQL)
+      // 2. Fallback via RPC Supabase
+      if (!isAuthorized && supabaseClient) {
         try {
           const rpcRes = await supabaseClient.rpc('autenticar_gestor_institucional', {
             p_email: normUser,
@@ -454,46 +462,6 @@
             foundAdmin = rpcRes.data.user;
           }
         } catch (rpcErr) {}
-
-        // Fallback para query direta se a função RPC ainda não estiver criada
-        if (!isAuthorized) {
-          try {
-            const { data, error } = await supabaseClient
-              .from('admin_users')
-              .select('*')
-              .or(`email.ilike.${user},email.ilike.${normUser}`)
-              .maybeSingle();
-
-            if (!error && data) {
-              const existingIdx = admins.findIndex(a => (a.email || '').toLowerCase() === (data.email || '').toLowerCase());
-              if (existingIdx !== -1) {
-                admins[existingIdx].nome = data.nome || admins[existingIdx].nome;
-                admins[existingIdx].cargo = data.cargo || admins[existingIdx].cargo;
-                admins[existingIdx].senha = data.senha;
-              } else {
-                admins.push({
-                  nome: data.nome || 'Gestor Autorizado',
-                  cargo: data.cargo || 'Gestor',
-                  email: data.email,
-                  senha: data.senha || pass,
-                  isMaster: (data.email.toLowerCase().includes('gabrielacessor') || data.cargo === 'Diretor Adjunto'),
-                  permissions: (data.email.toLowerCase().includes('gabrielacessor') || data.cargo === 'Diretor Adjunto') ? ['*'] : [],
-                  created_at: data.created_at || new Date().toISOString()
-                });
-              }
-              localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
-
-              const dbPass = (data.senha || '').trim();
-              const inputPass = pass.trim();
-              if (data.senha === pass || dbPass === inputPass) {
-                isAuthorized = true;
-                foundAdmin = data;
-              }
-            }
-          } catch (dbErr) {
-            console.warn("Validação Supabase em tempo real:", dbErr);
-          }
-        }
       }
 
       // 2. Se não autenticado pelo Supabase, valida localmente com a senha registrada
@@ -532,25 +500,14 @@
 
           const effectiveUser = foundAdmin ? foundAdmin.email : ((user === 'gabrielacessor@foot-table.pe.gov.br' || user === 'gabrielacessor') ? 'gabrielacessor@foot-table.pe.org' : normUser);
 
-          // Geração de Token Criptográfico de Sessão e TTL de 8 horas
-          let sessionToken = '';
-          try {
-            sessionToken = Array.from(crypto.getRandomValues(new Uint8Array(24))).map(b => b.toString(16).padStart(2, '0')).join('');
-          } catch (tokErr) {
-            sessionToken = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2);
-          }
-          const sessionExpires = String(Date.now() + 8 * 60 * 60 * 1000); // 8 Horas de validade
-
+          // Sessão segura blindada no servidor via Cookie HttpOnly (__Host-fed_sess)
+          // Nenhum token ou segredo é exposto ou salvo no localStorage/sessionStorage
           sessionStorage.setItem('pe_admin_logged', 'true');
           sessionStorage.setItem('pe_admin_user', effectiveUser);
-          sessionStorage.setItem('pe_admin_session_token', sessionToken);
-          sessionStorage.setItem('pe_admin_session_expires', sessionExpires);
 
           if (document.getElementById('rememberMe').checked) {
             localStorage.setItem('pe_admin_logged', 'true');
             localStorage.setItem('pe_admin_user', effectiveUser);
-            localStorage.setItem('pe_admin_session_token', sessionToken);
-            localStorage.setItem('pe_admin_session_expires', sessionExpires);
           }
 
           setTimeout(() => {
