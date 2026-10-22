@@ -83,71 +83,39 @@
         <i class="fa-solid fa-shield-halved"></i> Compromisso com a Proteção de Dados
       </div>
       <h1 class="font-oswald text-3xl sm:text-4xl uppercase font-bold text-white tracking-wide">
-        Segurança da Informação e Privacidade (LGPD)
+        Política de Privacidade e Proteção de Dados (LGPD)
       </h1>
       <p class="text-sm text-slate-400 max-w-2xl mx-auto leading-relaxed">
-        Diretrizes, controles técnicos e transparência no tratamento de dados pessoais de atletas, árbitros e gestores pela Federação Pernambucana de FutMesa e Foot Table.
+        Diretrizes institucionais e transparência no tratamento de dados pessoais de atletas, árbitros e membros da Federação Pernambucana de FutMesa e Foot Table.
       </p>
     </div>
 
-    <!-- Bloco 1: Como os Dados são Protegidos -->
-    <section id="seguranca-tecnica" class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 sm:p-8 space-y-4 shadow-xl scroll-mt-24">
+    <!-- Bloco 1: Tratamento e Privacidade de Dados -->
+    <section id="privacidade" class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 sm:p-8 space-y-4 shadow-xl scroll-mt-24">
       <div class="flex items-center gap-3 text-pe-gold border-b border-[#1c253b] pb-4">
-        <i class="fa-solid fa-lock text-xl"></i>
+        <i class="fa-solid fa-shield-halved text-xl"></i>
         <h2 class="font-oswald text-xl uppercase font-bold text-white tracking-wide">
-          1. Como os Dados Pessoais são Protegidos
+          1. Tratamento e Proteção de Dados Pessoais
         </h2>
       </div>
       <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-        A Federação Pernambucana de Foot Table adota medidas técnicas e administrativas proporcionais para proteger os dados pessoais contra acessos não autorizados, perdas ou adulterações:
+        A Federação Pernambucana de FutMesa & Foot Table preza rigorosamente pela privacidade, confidencialidade e proteção dos dados cadastrais de seus atletas, árbitros e dirigentes, em estrita conformidade com as diretrizes da Lei Geral de Proteção de Dados (Lei nº 13.709/2018 - LGPD).
       </p>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
         <div class="bg-[#05080e] p-4 rounded-xl border border-[#1c253b]/60 space-y-1">
           <h3 class="text-xs font-bold text-pe-gold uppercase flex items-center gap-1.5">
-            <i class="fa-solid fa-network-wired text-sky-400"></i> Criptografia em Trânsito
+            <i class="fa-solid fa-lock text-emerald-400"></i> Finalidade e Confidencialidade
           </h3>
           <p class="text-xs text-slate-400 leading-relaxed">
-            Todas as comunicações entre seu navegador, a infraestrutura da Vercel e o banco de dados são criptografadas via protocolo HTTPS com certificados de alta segurança.
+            As informações coletadas são utilizadas exclusivamente para fins de filiação esportiva, organização de competições, homologação de resultados e emissão de credenciais oficiais, sendo vedado qualquer compartilhamento indevido ou comercial.
           </p>
         </div>
         <div class="bg-[#05080e] p-4 rounded-xl border border-[#1c253b]/60 space-y-1">
           <h3 class="text-xs font-bold text-pe-gold uppercase flex items-center gap-1.5">
-            <i class="fa-solid fa-database text-emerald-400"></i> Segregação em Banco de Dados (RLS)
+            <i class="fa-solid fa-id-card-clip text-amber-400"></i> Minimização e Privacidade de Documentos
           </h3>
           <p class="text-xs text-slate-400 leading-relaxed">
-            O banco de dados PostgreSQL utiliza Row Level Security (RLS) estrito. O público possui acesso somente à validação de credenciais ativas, sem exposição irrestrita da tabela.
-          </p>
-        </div>
-        <div class="bg-[#05080e] p-4 rounded-xl border border-[#1c253b]/60 space-y-1">
-          <h3 class="text-xs font-bold text-pe-gold uppercase flex items-center gap-1.5">
-            <i class="fa-solid fa-id-card-clip text-amber-400"></i> Minimização e Mascaramento de CPF
-          </h3>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            Em conformidade com a LGPD, o número de CPF é exibido nas consultas públicas apenas em formato mascarado (<code class="text-pe-gold font-mono">***.XXX.XXX-**</code>), impedindo raspagem automatizada.
-          </p>
-        </div>
-        <div class="bg-[#05080e] p-4 rounded-xl border border-[#1c253b]/60 space-y-1">
-          <h3 class="text-xs font-bold text-pe-gold uppercase flex items-center gap-1.5">
-            <i class="fa-solid fa-user-lock text-purple-400"></i> Controle de Acesso Baseado em Funções
-          </h3>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            O painel de controle exige autenticação nominal com níveis operacionais específicos, registros de auditoria e limitação contra tentativas excessivas de login.
-          </p>
-        </div>
-        <div class="bg-[#05080e] p-4 rounded-xl border border-[#1c253b]/60 space-y-1">
-          <h3 class="text-xs font-bold text-pe-gold uppercase flex items-center gap-1.5">
-            <i class="fa-solid fa-clock-rotate-left text-blue-400"></i> Trilhas de Auditoria e Rastreabilidade
-          </h3>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            Todas as operações administrativas no sistema (homologações de atletas, alterações de dados e tentativas de acesso) são registradas em logs imutáveis com data/hora UTC e identificador de operador, garantindo transparência e prestação de contas (Art. 6º da LGPD).
-          </p>
-        </div>
-        <div class="bg-[#05080e] p-4 rounded-xl border border-[#1c253b]/60 space-y-1">
-          <h3 class="text-xs font-bold text-pe-gold uppercase flex items-center gap-1.5">
-            <i class="fa-solid fa-shield-virus text-rose-400"></i> Proteção Ativa Anti-Força Bruta & Hashing
-          </h3>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            As credenciais institucionais utilizam algoritmo criptográfico com salteamento dinâmico. O sistema conta com mecanismo de bloqueio automático após 5 tentativas incorretas consecutivas para mitigar ataques automatizados e roubo de senhas.
+            Em conformidade com as boas práticas de privacidade, documentos e dados cadastrais pessoais não são expostos de forma integral em consultas públicas da carteirinha oficial.
           </p>
         </div>
       </div>
@@ -190,7 +158,7 @@
       </div>
       <div class="space-y-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
         <p>• <strong>Senhas Fortes:</strong> Gestores com acesso ao painel devem utilizar senhas longas, combinando letras maiúsculas, minúsculas, números e símbolos.</p>
-        <p>• <strong>Uso Exclusivo:</strong> Nunca compartilhe seus dados de acesso ao painel com terceiros. Cada operação realizada é registrada nominalmente no histórico de auditoria.</p>
+        <p>• <strong>Uso Exclusivo:</strong> Nunca compartilhe seus dados de acesso ao painel com terceiros. As credenciais administrativas são individuais e intransferíveis.</p>
         <p>• <strong>Encerramento de Sessão:</strong> Ao utilizar computadores institucionais ou compartilhados, lembre-se de clicar no botão "Sair" para encerrar a sessão imediatamente.</p>
       </div>
     </section>
