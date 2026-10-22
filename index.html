@@ -579,11 +579,11 @@
         <!-- Pilar 2: Criptografia em Trânsito -->
         <div class="bg-[#05080e] p-5 rounded-xl border border-pe-cardBorder/80 hover:border-pe-gold/50 transition space-y-2">
           <div class="flex items-center gap-2 text-pe-gold font-bold uppercase text-xs">
-            <i class="fa-solid fa-lock text-sky-400 text-base"></i>
+            <i class="fa-solid fa-network-wired text-sky-400 text-base"></i>
             <span>2. Criptografia em Trânsito</span>
           </div>
           <p class="text-slate-300 leading-relaxed">
-            Todas as conexões são protegidas com certificados de segurança SSL de 256 bits, garantindo integridade e confidencialidade total. O portal aplica cabeçalhos de segurança avançados (<code class="text-sky-300 font-mono">HSTS</code>, <code class="text-sky-300 font-mono">Content-Security-Policy</code> e proteção anti-clickjacking <code class="text-sky-300 font-mono">X-Frame-Options: DENY</code>).
+            Todas as comunicações entre seu navegador, a infraestrutura da Vercel e o banco de dados são criptografadas via protocolo HTTPS com certificados de alta segurança.
           </p>
         </div>
 
@@ -591,10 +591,10 @@
         <div class="bg-[#05080e] p-5 rounded-xl border border-pe-cardBorder/80 hover:border-pe-gold/50 transition space-y-2">
           <div class="flex items-center gap-2 text-pe-gold font-bold uppercase text-xs">
             <i class="fa-solid fa-database text-emerald-400 text-base"></i>
-            <span>3. Segregação de Banco de Dados (RLS Ativo)</span>
+            <span>3. Segregação em Banco de Dados (RLS)</span>
           </div>
           <p class="text-slate-300 leading-relaxed">
-            O banco de dados PostgreSQL opera sob política de <em>Zero-Trust</em> e menor privilégio. Tabelas administrativas, credenciais e logs de auditoria possuem isolamento total via <strong>Row Level Security (RLS)</strong>, impedindo qualquer acesso anônimo direto ou injeção indevida.
+            O banco de dados PostgreSQL utiliza Row Level Security (RLS) estrito. O público possui acesso somente à validação de credenciais ativas, sem exposição irrestrita da tabela.
           </p>
         </div>
 
@@ -839,13 +839,16 @@
         <div id="tabContentSeguranca" class="space-y-3 hidden">
           <div class="bg-[#05080e] p-4 rounded-xl border border-pe-cardBorder space-y-2">
             <h4 class="text-sm font-bold text-sky-400 uppercase flex items-center gap-2">
-              <i class="fa-solid fa-database text-sky-400"></i> Row Level Security (RLS) & Conexão Segura
+              <i class="fa-solid fa-database text-sky-400"></i> Criptografia & Segregação em Banco de Dados (RLS)
             </h4>
             <p class="leading-relaxed">
-              Nosso banco de dados Supabase/PostgreSQL opera sob políticas estritas de <strong>Row Level Security</strong>. Usuários comuns não conseguem fazer listagens em massa da base nem extrair relatórios confidenciais.
+              Todas as comunicações entre seu navegador, a infraestrutura da Vercel e o banco de dados são criptografadas via protocolo HTTPS com certificados de alta segurança.
             </p>
             <p class="leading-relaxed">
-              As senhas institucionais são criptografadas com o algoritmo <strong>Blowfish (bcrypt / pgcrypto)</strong> com salteamento dinâmico. O sistema conta com proteção automática de bloqueio temporário (lockout) após 5 tentativas falhas.
+              O banco de dados PostgreSQL opera sob <strong>Row Level Security (RLS)</strong> estrito. O público possui acesso somente à validação de credenciais ativas, sem exposição irrestrita da tabela.
+            </p>
+            <p class="leading-relaxed">
+              As senhas institucionais são criptografadas com o algoritmo <strong>Blowfish (bcrypt / pgcrypto)</strong> com salteamento dinâmico e bloqueio temporário após 5 tentativas incorretas consecutivas.
             </p>
           </div>
         </div>
