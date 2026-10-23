@@ -5,6 +5,8 @@
  * ==============================================================================
  */
 
+process.env.TEST_SUITE = 'true';
+
 import { createClient } from '@supabase/supabase-js';
 import middleware from '../middleware.js';
 import {
