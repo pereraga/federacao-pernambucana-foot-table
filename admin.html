@@ -2498,36 +2498,8 @@
     // Lista de Atletas Padrão (Vazio por padrão - o sistema gerencia estritamente o que for inserido/removido pelo usuário)
     const DEFAULT_ATHLETES = [];
 
-    const DEFAULT_NEWS = [
-      {
-        id: 1,
-        title: "II Campeonato Mundial de Foot Table — Roma 2026 aguarda delegação pernambucana",
-        category: "MUNDIAL ROMA",
-        content: "O Campeonato Mundial começa de 1 a 4 de outubro em Roma, Itália, com mais de 50 países competindo em todas as categorias de Foot Table.",
-        date: "28/09/2026"
-      },
-      {
-        id: 2,
-        title: "Vitória Fernandes chega a Roma como a mulher a ser batida no circuito mundial",
-        category: "CAMPEONATO",
-        content: "A estrela brasileira lidera os rankings mundiais de simples e duplas femininas com 2.000 pontos acumulados na temporada.",
-        date: "25/09/2026"
-      },
-      {
-        id: 3,
-        title: "Homologado o regulamento oficial de quadras e mesas curvas para a temporada pernambucana",
-        category: "REGULAMENTO",
-        content: "A Federação Pernambucana publicou as diretrizes técnicas atualizadas de saque e altura das redes centrais para torneios oficiais.",
-        date: "20/09/2026"
-      },
-      {
-        id: 4,
-        title: "Abertas as inscrições para a 3ª Etapa do Circuito Estadual de Foot Table em Recife",
-        category: "INFORMATIVO",
-        content: "Atletas federados regulares podem garantir sua vaga nas categorias Individual, Duplas e Master 40+ até o próximo dia 15.",
-        date: "02/10/2026"
-      }
-    ];
+    // Lista de Notícias Padrão (Vazio por padrão - apenas publicações reais do usuário)
+    const DEFAULT_NEWS = [];
 
     /* =========================================================
        INICIALIZAÇÃO DO SUPABASE
@@ -9676,76 +9648,74 @@
        GERENCIAMENTO DE NOTÍCIAS & TORNEIOS (ABA NOTÍCIAS)
        Fiel ao Painel Oficial de Gerenciamento de Notícias
        ========================================================= */
-    const INITIAL_NEWS = [
-      {
-        id: 'news-1',
-        title: 'II CAMPEONATO MUNDIAL DE FUTEBOL DE MESA — ROMA AGUARDA SEUS NOVOS CAMPEÕES',
-        category: 'MUNDIAL ROMA',
-        date: '2026-09-28',
-        featured: true,
-        summary: 'O Campeonato Mundial começa de 1 a 4 de outubro em Roma, Itália, com mais de 50 países competindo em todas as categorias de Foot Table.',
-        content: 'A Federação Internacional confirmou os detalhes da cerimônia de abertura e sorteio dos grupos para o II Campeonato Mundial em Roma. A delegação brasileira embarca com recorde de inscritos visando o pódio em todas as divisões.',
-        image: 'assets/images/quadra 2.jpg',
-        link: 'https://mundial.foottable.org'
-      },
-      {
-        id: 'news-2',
-        title: 'VITÓRIA FERNANDES CHEGA A ROMA COMO A MULHER A SER BATIDA NO CIRCUITO MUNDIAL',
-        category: 'CAMPEONATO',
-        date: '2026-09-25',
-        featured: false,
-        summary: 'A estrela brasileira lidera os rankings mundiais de simples e duplas femininas com 2.000 pontos acumulados na temporada.',
-        content: 'Com apresentações impecáveis nas etapas continentais, a atleta conquistou a admiração unânime da crítica técnica esportiva. Seus saques com efeito tornaram-se referência técnica no Foot Table moderno.',
-        image: 'assets/images/futmesa 2.jpg',
-        link: ''
-      },
-      {
-        id: 'news-3',
-        title: 'HOMOLOGADO O REGULAMENTO OFICIAL DE QUADRAS E MESAS CURVAS PARA A TEMPORADA PERNAMBUCANA',
-        category: 'REGULAMENTO',
-        date: '2026-09-20',
-        featured: false,
-        summary: 'A Federação Pernambucana publicou as diretrizes técnicas atualizadas de saque e altura das redes centrais para torneios oficiais.',
-        content: 'A mesa de jogo deverá seguir medidas estritas de angulação curvada e textura de borracha sintética com homologação da comissão de árbitros antes de cada rodada do circuito estadual.',
-        image: '',
-        link: 'https://federacao.pe.gov.br/regras-oficiais.pdf'
-      }
-    ];
+    const INITIAL_NEWS = [];
+
+    // Purga imediata de notícias mock/fictícias de teste
+    (function purgeInitialMockNews() {
+      try {
+        const mockIds = ['1', '2', '3', '4', 'news-1', 'news-2', 'news-3', 'news-4'];
+        let deleted = JSON.parse(localStorage.getItem('pe_deleted_news_ids') || '[]');
+        let updated = false;
+        mockIds.forEach(id => {
+          if (!deleted.includes(id)) {
+            deleted.push(id);
+            updated = true;
+          }
+        });
+        localStorage.setItem('pe_deleted_news_ids', JSON.stringify(deleted));
+      } catch (e) {}
+    })();
+
+    const isMockNewsItem = (item) => {
+      if (!item) return false;
+      const idStr = String(item.id || '');
+      const titleStr = (item.title || item.titulo || '').toLowerCase();
+      return idStr === '1' || idStr === '2' || idStr === '3' || idStr === '4' ||
+             idStr === 'news-1' || idStr === 'news-2' || idStr === 'news-3' || idStr === 'news-4' ||
+             titleStr.includes('roma aguarda seus novos campeões') ||
+             titleStr.includes('vitória fernandes chega a roma') ||
+             titleStr.includes('homologado o regulamento oficial de quadras') ||
+             titleStr.includes('abertas as inscrições para a 3ª etapa');
+    };
 
     let newsItems = [];
     let currentFilter = 'ALL';
     let pendingDeleteId = null;
 
     async function loadNewsData() {
+      const deletedIds = new Set(JSON.parse(localStorage.getItem('pe_deleted_news_ids') || '[]').map(String));
+
       // 1. Tentar ler do localStorage unificado
       const saved = localStorage.getItem('pe_news_db') || localStorage.getItem('foot_table_news_db');
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            newsItems = parsed.map(item => ({
-              id: item.id || ('news-' + Math.random().toString(36).substr(2, 9)),
-              title: item.title || item.titulo || '',
-              category: item.category || item.categoria || 'INFORMATIVO',
-              date: item.date || item.data_publicacao || new Date().toISOString().split('T')[0],
-              featured: !!item.featured || !!item.destaque,
-              summary: item.summary || item.resumo || (item.content ? item.content.slice(0, 180) : '') || '',
-              content: item.content || item.conteudo || '',
-              image: item.image || item.imagem || '',
-              link: item.link || ''
-            }));
+          if (Array.isArray(parsed)) {
+            newsItems = parsed
+              .filter(item => !deletedIds.has(String(item.id)) && !isMockNewsItem(item))
+              .map(item => ({
+                id: item.id || ('news-' + Math.random().toString(36).substr(2, 9)),
+                title: item.title || item.titulo || '',
+                category: item.category || item.categoria || 'INFORMATIVO',
+                date: item.date || item.data_publicacao || new Date().toISOString().split('T')[0],
+                featured: !!item.featured || !!item.destaque,
+                summary: item.summary || item.resumo || (item.content ? item.content.slice(0, 180) : '') || '',
+                content: item.content || item.conteudo || '',
+                image: item.image || item.imagem || '',
+                link: item.link || ''
+              }));
           } else {
-            newsItems = INITIAL_NEWS;
+            newsItems = [];
           }
         } catch (e) {
-          newsItems = INITIAL_NEWS;
+          newsItems = [];
         }
       } else {
-        newsItems = INITIAL_NEWS;
+        newsItems = [];
         saveNewsData();
       }
 
-      // 2. Se Supabase conectado, sincronizar da nuvem
+      // 2. Se Supabase conectado, sincronizar da nuvem (respeitando exclusões feitas pelo gestor)
       if (supabaseClient) {
         try {
           const { data, error } = await supabaseClient
@@ -9753,8 +9723,9 @@
             .select('*')
             .order('created_at', { ascending: false });
 
-          if (!error && data && data.length > 0) {
-            newsItems = data.map(d => ({
+          if (!error && data) {
+            const validData = data.filter(d => !deletedIds.has(String(d.id)) && !isMockNewsItem(d));
+            newsItems = validData.map(d => ({
               id: d.id,
               title: d.titulo || d.title || '',
               category: d.categoria || d.category || 'INFORMATIVO',
@@ -9792,10 +9763,6 @@
     }
 
     function saveNewsData(syncSupabase = false) {
-      if (!hasPermission('noticias_publicar') && !hasPermission('noticias_editar')) {
-        showToast('⚠️ Seu cargo não possui permissão para publicar ou editar notícias.', true);
-        return;
-      }
       localStorage.setItem('pe_news_db', JSON.stringify(newsItems));
       localStorage.setItem('foot_table_news_db', JSON.stringify(newsItems));
       updateCounter();
@@ -10117,6 +10084,16 @@
 
       const deleteTargetId = pendingDeleteId;
       newsItems = newsItems.filter(item => String(item.id) !== String(deleteTargetId));
+      
+      // Armazena ID na lista negra de exclusões para blindar contra recargas
+      try {
+        let deletedIds = JSON.parse(localStorage.getItem('pe_deleted_news_ids') || '[]');
+        if (!deletedIds.includes(String(deleteTargetId))) {
+          deletedIds.push(String(deleteTargetId));
+          localStorage.setItem('pe_deleted_news_ids', JSON.stringify(deletedIds));
+        }
+      } catch (e) {}
+
       saveNewsData();
       renderNewsList();
 
