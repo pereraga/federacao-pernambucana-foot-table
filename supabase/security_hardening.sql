@@ -282,7 +282,9 @@ GRANT EXECUTE ON FUNCTION public.autenticar_gestor_institucional(TEXT, TEXT) TO 
 -- Oferece consulta pública para crachás sem expor CPF completo nem telefone
 -- ==============================================================================
 
-CREATE OR REPLACE VIEW public.vw_atletas_publicos AS
+CREATE OR REPLACE VIEW public.vw_atletas_publicos
+WITH (security_invoker = true)
+AS
 SELECT 
     id,
     codigo,

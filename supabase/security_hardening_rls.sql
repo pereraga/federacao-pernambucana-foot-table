@@ -227,3 +227,31 @@ BEGIN
     END IF;
 END;
 $$;
+
+-- 11. VIEW PÚBLICA COM MASCARAMENTO LGPD E SECURITY INVOKER
+-- Enforça estritamente as políticas RLS do usuário consultante (sem bypass de privilégios)
+CREATE OR REPLACE VIEW public.vw_atletas_publicos
+WITH (security_invoker = true)
+AS
+SELECT 
+    id,
+    codigo,
+    nome,
+    CASE 
+        WHEN cpf IS NOT NULL AND length(regexp_replace(cpf, '\D', '', 'g')) = 11 THEN
+            '***.' || substr(regexp_replace(cpf, '\D', '', 'g'), 4, 3) || '.' || substr(regexp_replace(cpf, '\D', '', 'g'), 7, 3) || '-**'
+        ELSE '***.***.***-**'
+    END AS cpf_mascarado,
+    municipio,
+    categoria,
+    modalidade,
+    status,
+    clube,
+    federado,
+    validade,
+    foto_url,
+    created_at
+FROM public.atletas
+WHERE status IN ('HOMOLOGADO', 'REGULAR');
+
+GRANT SELECT ON public.vw_atletas_publicos TO anon, authenticated;
