@@ -94,6 +94,9 @@
         const canNoticias = perms.includes('noticias_publicar') || perms.includes('noticias_editar') || perms.includes('noticias_upload') || perms.includes('noticias_excluir');
         if (!canNoticias) hideSelectors.push('#navBtn-noticias, #tabContent-noticias');
 
+        const canGaleria = isMaster || canNoticias || perms.includes('*');
+        if (!canGaleria) hideSelectors.push('#navBtn-galeria, #tabContent-galeria');
+
         const canEmails = perms.includes('gestao_emails') || perms.includes('gestao_cargos');
         if (!canEmails) hideSelectors.push('#navBtn-emails, #tabContent-emails');
 
@@ -579,6 +582,18 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
             </svg>
             <span class="sidebar-text text-sm font-semibold tracking-wide">Notícias & Torneios</span>
+          </div>
+          <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0 sidebar-text"></span>
+        </button>
+
+        <!-- 5. Aba Galeria de Fotos & Arenas -->
+        <button onclick="switchTab('galeria')" id="navBtn-galeria" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group" title="Galeria de Fotos">
+          <div class="flex items-center gap-3.5">
+            <!-- Ícone Imagem / Galeria -->
+            <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <span class="sidebar-text text-sm font-semibold tracking-wide">Galeria & Fotos</span>
           </div>
           <span class="nav-indicator hidden w-2.5 h-2.5 rounded-full bg-[#8a6500] shrink-0 sidebar-text"></span>
         </button>
@@ -1807,6 +1822,267 @@
         </div>
 
         <!-- ===================================================== -->
+        <!-- 5. 🖼️ ABA GALERIA OFICIAL DE FOTOS & ARENAS          -->
+        <!-- ===================================================== -->
+        <div id="tabContent-galeria" class="space-y-8 hidden">
+
+          <!-- Banner Oficial da Galeria -->
+          <div class="bg-gradient-to-r from-[#06173a] via-[#091e4a] to-[#040813] border border-[#1c253b] rounded-2xl p-5 sm:p-6 relative overflow-hidden shadow-xl">
+            <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="flex items-start gap-4">
+                <span class="text-3xl">🖼️</span>
+                <div class="space-y-1">
+                  <h3 class="font-oswald text-lg sm:text-xl uppercase font-bold text-white tracking-wide flex items-center gap-2">
+                    <span>Galeria Oficial de Fotos & Arenas de Foot Table</span>
+                  </h3>
+                  <p class="text-xs text-slate-300">
+                    Gerencie o acervo fotográfico exibido na página pública. Adicione novas fotos, substitua imagens e edite os títulos, categorias e descrições com prévia em tempo real.
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <button type="button" onclick="focusGalleryForm()" class="px-3.5 py-2 bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-oswald text-xs font-bold uppercase rounded-xl transition shadow flex items-center gap-1.5 cursor-pointer">
+                  <i class="fa-solid fa-plus"></i>
+                  <span>Nova Foto</span>
+                </button>
+                <button type="button" onclick="confirmResetGalleryToDefault()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700 transition flex items-center gap-1.5 cursor-pointer" title="Restaurar as 6 fotos oficiais de fábrica">
+                  <i class="fa-solid fa-rotate-left"></i>
+                  <span>Restaurar Padrão</span>
+                </button>
+                <a href="index.html#galeria" target="_blank" class="px-3.5 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 text-xs font-semibold rounded-xl border border-blue-500/30 transition flex items-center gap-1.5">
+                  <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                  <span>Ver no Site</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Formulário de Cadastro / Edição de Foto -->
+          <div id="gallery-form-card" class="bg-[#0b101d] border border-[#1c253b] rounded-2xl p-5 sm:p-6 shadow-xl transition-all">
+            <div class="flex items-center justify-between pb-4 mb-5 border-b border-[#1c253b]">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-pe-gold/10 border border-pe-gold/30 flex items-center justify-center text-pe-gold text-sm">
+                  <i id="gallery-form-icon" class="fa-solid fa-camera"></i>
+                </div>
+                <div>
+                  <h4 id="gallery-form-title" class="font-oswald text-base uppercase font-bold text-white tracking-wide">
+                    Adicionar Nova Foto à Galeria
+                  </h4>
+                  <p class="text-[11px] text-slate-400">Preencha os detalhes e selecione a foto para publicar na página principal</p>
+                </div>
+              </div>
+              <button type="button" id="gallery-cancel-edit-btn" onclick="resetGalleryForm()" class="hidden px-3 py-1.5 text-xs text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition cursor-pointer">
+                Cancelar Edição
+              </button>
+            </div>
+
+            <form id="gallery-form" onsubmit="handleGalleryFormSubmit(event)" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <input type="hidden" id="gallery-edit-id" value="" />
+
+              <!-- Coluna Esquerda: Upload da Foto & Live Preview (5 colunas) -->
+              <div class="lg:col-span-5 space-y-4">
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-300">
+                  Foto da Arena / Foot Table *
+                </label>
+
+                <!-- Botões de Modo de Upload -->
+                <div class="grid grid-cols-3 gap-2">
+                  <button type="button" onclick="setGalleryUploadMode('file')" id="gallery-mode-file-btn" class="py-2 px-2 text-center text-xs font-bold rounded-xl border border-pe-gold bg-pe-gold/10 text-pe-gold transition cursor-pointer">
+                    <i class="fa-solid fa-folder-open block text-sm mb-1"></i>
+                    Arquivo
+                  </button>
+                  <button type="button" onclick="setGalleryUploadMode('camera')" id="gallery-mode-camera-btn" class="py-2 px-2 text-center text-xs font-bold rounded-xl border border-[#1c253b] bg-[#070b14] text-slate-400 hover:text-white transition cursor-pointer">
+                    <i class="fa-solid fa-camera block text-sm mb-1"></i>
+                    Câmera
+                  </button>
+                  <button type="button" onclick="setGalleryUploadMode('url')" id="gallery-mode-url-btn" class="py-2 px-2 text-center text-xs font-bold rounded-xl border border-[#1c253b] bg-[#070b14] text-slate-400 hover:text-white transition cursor-pointer">
+                    <i class="fa-solid fa-link block text-sm mb-1"></i>
+                    Link / URL
+                  </button>
+                </div>
+
+                <!-- Input File Oculto (computador/celular) -->
+                <input type="file" id="gallery-file-input" accept="image/*" class="hidden" onchange="handleGalleryFileSelect(this)" />
+                <!-- Input Camera Oculto (dispositivos móveis/tablet) -->
+                <input type="file" id="gallery-camera-input" accept="image/*" capture="environment" class="hidden" onchange="handleGalleryFileSelect(this)" />
+                <!-- Input Oculto de Troca Rápida de Foto -->
+                <input type="file" id="gallery-quick-replace-input" accept="image/*" class="hidden" onchange="handleQuickReplacePhotoSelected(this)" />
+
+                <!-- Dropzone / Clique para Selecionar Arquivo -->
+                <div id="gallery-dropzone-box" onclick="triggerGalleryFilePicker()" class="border-2 border-dashed border-[#1c253b] hover:border-pe-gold/60 rounded-2xl p-5 text-center cursor-pointer transition bg-[#070b14]/60 group">
+                  <i class="fa-solid fa-cloud-arrow-up text-3xl text-slate-500 group-hover:text-pe-gold transition mb-2 block"></i>
+                  <p class="text-xs font-bold text-slate-200 group-hover:text-white">Clique para escolher foto do seu computador ou celular</p>
+                  <p class="text-[10px] text-slate-500 mt-1">PNG, JPG, WEBP, GIF</p>
+                </div>
+
+                <!-- Input de URL Direta (inicialmente oculto) -->
+                <div id="gallery-url-box" class="hidden space-y-2">
+                  <div class="flex gap-2">
+                    <input type="url" id="gallery-url-input" placeholder="https://exemplo.com/foto.jpg" class="flex-1 bg-[#070b14] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3.5 py-2.5 text-xs text-white outline-none" />
+                    <button type="button" onclick="loadGalleryUrlImage()" class="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition cursor-pointer">
+                      Aplicar
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Card de Pré-visualização Realista (Live Card Preview) -->
+                <div>
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                      <i class="fa-solid fa-eye text-pe-gold"></i> Prévia no Site Público:
+                    </span>
+                    <button type="button" onclick="clearGalleryImage()" id="gallery-clear-photo-btn" class="hidden text-[10px] text-red-400 hover:underline cursor-pointer">
+                      Remover Foto
+                    </button>
+                  </div>
+                  
+                  <div class="rounded-2xl overflow-hidden border border-pe-cardBorder bg-[#05080e] shadow-lg">
+                    <div class="aspect-[4/3] w-full overflow-hidden bg-slate-900 relative">
+                      <img id="gallery-preview-img" src="assets/images/quadra 2.jpg" alt="Prévia" class="w-full h-full object-cover" />
+                      <div id="gallery-preview-empty" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-slate-900 text-slate-500 text-xs">
+                        <i class="fa-solid fa-image text-3xl mb-1"></i>
+                        <span>Nenhuma foto selecionada</span>
+                      </div>
+                    </div>
+                    <div class="p-3.5 bg-gradient-to-t from-[#05080e] via-[#090d16] to-transparent">
+                      <span id="gallery-preview-tag" class="text-[10px] font-bold text-pe-gold uppercase tracking-wider block mb-0.5">Arena Homologada</span>
+                      <h5 id="gallery-preview-title" class="font-oswald text-sm uppercase font-bold text-white leading-tight">Estrutura de Quadra Oficial</h5>
+                      <p id="gallery-preview-desc" class="text-slate-400 text-[11px] mt-1 line-clamp-2">Espaço padronizado para circuitos da Federação Pernambucana.</p>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Coluna Direita: Textos, Títulos e Tags (7 colunas) -->
+              <div class="lg:col-span-7 space-y-4">
+                <!-- Categoria / Tag Oficial -->
+                <div>
+                  <label for="gallery-input-tag" class="block text-[11px] font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                    Etiqueta / Categoria da Imagem *
+                  </label>
+                  <input 
+                    type="text" 
+                    id="gallery-input-tag" 
+                    required 
+                    placeholder="Ex: Arena Homologada, Equipamento Chancelado..."
+                    oninput="updateGalleryLivePreview()"
+                    class="w-full bg-[#070b14] border border-[#1c253b] focus:border-pe-gold rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 outline-none transition"
+                  />
+                  <!-- Sugestões Rápidas de 1 Clique -->
+                  <div class="flex flex-wrap gap-1.5 mt-2">
+                    <span class="text-[10px] text-slate-500 self-center mr-1">Sugestões:</span>
+                    <button type="button" onclick="setGalleryTagValue('Arena Homologada')" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 hover:bg-pe-gold hover:text-pe-dark text-slate-300 transition cursor-pointer">Arena Homologada</button>
+                    <button type="button" onclick="setGalleryTagValue('Equipamento Chancelado')" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 hover:bg-pe-gold hover:text-pe-dark text-slate-300 transition cursor-pointer">Equipamento Chancelado</button>
+                    <button type="button" onclick="setGalleryTagValue('Competições Oficiais')" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 hover:bg-pe-gold hover:text-pe-dark text-slate-300 transition cursor-pointer">Competições Oficiais</button>
+                    <button type="button" onclick="setGalleryTagValue('Formação & Treino')" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 hover:bg-pe-gold hover:text-pe-dark text-slate-300 transition cursor-pointer">Formação & Treino</button>
+                    <button type="button" onclick="setGalleryTagValue('Litoral Pernambucano')" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 hover:bg-pe-gold hover:text-pe-dark text-slate-300 transition cursor-pointer">Litoral Pernambucano</button>
+                    <button type="button" onclick="setGalleryTagValue('Premiação')" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 hover:bg-pe-gold hover:text-pe-dark text-slate-300 transition cursor-pointer">Premiação</button>
+                  </div>
+                </div>
+
+                <!-- Título da Foto -->
+                <div>
+                  <label for="gallery-input-title" class="block text-[11px] font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                    Título Oficial da Foto *
+                  </label>
+                  <input 
+                    type="text" 
+                    id="gallery-input-title" 
+                    required 
+                    placeholder="Ex: ESTRUTURA DE QUADRA OFICIAL"
+                    oninput="updateGalleryLivePreview()"
+                    class="w-full bg-[#070b14] border border-[#1c253b] focus:border-pe-gold rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 outline-none transition font-semibold"
+                  />
+                </div>
+
+                <!-- Descrição / Detalhes da Foto -->
+                <div>
+                  <div class="flex items-center justify-between mb-1.5">
+                    <label for="gallery-input-desc" class="block text-[11px] font-bold uppercase tracking-wider text-slate-300">
+                      Descrição / Subtítulo da Foto *
+                    </label>
+                    <span id="gallery-desc-counter" class="text-[10px] text-slate-500 font-mono">0/150 carac.</span>
+                  </div>
+                  <textarea 
+                    id="gallery-input-desc" 
+                    rows="4" 
+                    required 
+                    maxlength="200"
+                    placeholder="Ex: Espaço padronizado para circuitos da Federação Pernambucana de Foot Table e FutMesa."
+                    oninput="updateGalleryLivePreview()"
+                    class="w-full bg-[#070b14] border border-[#1c253b] focus:border-pe-gold rounded-xl p-4 text-xs sm:text-sm text-white placeholder-slate-600 outline-none transition resize-none leading-relaxed"
+                  ></textarea>
+                </div>
+
+                <!-- Botões de Ação -->
+                <div class="pt-3 flex flex-col sm:flex-row items-center gap-3">
+                  <button 
+                    type="submit" 
+                    id="gallery-submit-btn" 
+                    class="w-full sm:flex-1 bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-oswald text-base uppercase font-bold py-3.5 px-6 rounded-xl shadow-lg glow-gold transition flex items-center justify-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span id="gallery-submit-text">SALVAR FOTO NA GALERIA</span>
+                  </button>
+                  <button 
+                    type="button" 
+                    onclick="resetGalleryForm()" 
+                    class="w-full sm:w-auto px-5 py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition cursor-pointer">
+                    Limpar
+                  </button>
+                </div>
+
+              </div>
+            </form>
+          </div>
+
+          <!-- Grade de Fotos Ativas na Galeria -->
+          <div class="space-y-4">
+            <div class="flex items-center justify-between pb-2 border-b border-[#1c253b]">
+              <div class="flex items-center gap-3">
+                <span class="w-2.5 h-2.5 rounded-full bg-pe-gold"></span>
+                <h4 class="font-oswald text-base sm:text-lg uppercase font-bold text-white tracking-wide">
+                  Fotos Ativas na Galeria Oficial (<span id="gallery-active-counter" class="text-pe-gold">0</span>)
+                </h4>
+              </div>
+              <div class="text-[11px] text-slate-400">
+                Altere textos, substitua fotos ou exclua itens a qualquer momento
+              </div>
+            </div>
+
+            <!-- Grid onde os cards serão gerados dinamicamente -->
+            <div id="adminGalleryGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              <!-- Gerado via JavaScript -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Modal de Confirmação de Exclusão de Foto da Galeria -->
+        <div id="gallery-delete-modal" class="fixed inset-0 z-[10000] bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+          <div class="bg-[#0f172a] border border-[#1e293b] max-w-sm w-full rounded-2xl p-6 text-center shadow-2xl space-y-4">
+            <div class="w-12 h-12 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center mx-auto text-xl border border-red-500/30">
+              <i class="fa-solid fa-trash-can"></i>
+            </div>
+            <div>
+              <h3 class="font-oswald font-black text-lg text-white uppercase">Excluir Foto da Galeria</h3>
+              <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                Tem certeza de que deseja remover esta foto e seus textos da galeria pública do site?
+              </p>
+            </div>
+            <div class="flex items-center gap-3 pt-2">
+              <button onclick="closeGalleryDeleteModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold py-2.5 rounded-xl transition cursor-pointer">
+                Cancelar
+              </button>
+              <button id="gallery-confirm-delete-btn" onclick="confirmDeleteGalleryItem()" class="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2.5 rounded-xl shadow-lg shadow-red-600/30 transition cursor-pointer">
+                Sim, Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===================================================== -->
         <!-- 5. 📧 ABA E-MAILS INSTITUCIONAIS & GESTÃO              -->
         <!-- ===================================================== -->
         <div id="tabContent-emails" class="space-y-8 hidden">
@@ -2605,14 +2881,15 @@
       }
     }
 
-    const ALL_TABS = ['inicio', 'atletas', 'jogadores', 'noticias', 'emails', 'config', 'guia'];
+    const ALL_TABS = ['inicio', 'atletas', 'jogadores', 'noticias', 'galeria', 'emails', 'config', 'guia'];
     const TAB_TITLES = {
       inicio: '🏠 Início & Carteiras Homologadas',
       atletas: 'Studio de Emissão de Carteira de Federados CR80',
       jogadores: '2. 👥 Jogadores Cadastrados & Homologação',
       noticias: '3. 📰 Aba Notícias & Torneios',
-      emails: '4. 📧 Aba E-mails Institucionais & Gestão',
-      config: '5. ⚙️ Banco de Dados & Ajustes',
+      galeria: '4. 🖼️ Galeria Oficial de Arenas & Foot Table',
+      emails: '5. 📧 Aba E-mails Institucionais & Gestão',
+      config: '6. ⚙️ Banco de Dados & Ajustes',
       guia: '📋 Guia do Painel Administrativo'
     };
 
@@ -2730,7 +3007,7 @@
     function isTabAllowed(tabName) {
       const perms = getCurrentUserPermissions();
       if (perms.includes('*')) return true;
-      if (tabName === 'inicio' || tabName === 'guia') return true;
+      if (tabName === 'inicio' || tabName === 'guia' || tabName === 'galeria') return true;
       if (tabName === 'atletas') return perms.includes('carteira_studio') || perms.includes('carteira_pdf') || perms.includes('carteira_png') || perms.includes('carteira_imprimir');
       if (tabName === 'jogadores') return perms.includes('atletas_visualizar') || perms.includes('atletas_homologar') || perms.includes('atletas_editar') || perms.includes('atletas_excluir') || perms.includes('atletas_exportar');
       if (tabName === 'noticias') return perms.includes('noticias_publicar') || perms.includes('noticias_editar') || perms.includes('noticias_upload') || perms.includes('noticias_excluir');
@@ -3363,6 +3640,7 @@
           if (!isTabAllowed('atletas')) hideSelectors.push('#navBtn-atletas, #tabContent-atletas');
           if (!isTabAllowed('jogadores')) hideSelectors.push('#navBtn-jogadores, #tabContent-jogadores');
           if (!isTabAllowed('noticias')) hideSelectors.push('#navBtn-noticias, #tabContent-noticias');
+          if (!isTabAllowed('galeria')) hideSelectors.push('#navBtn-galeria, #tabContent-galeria');
           if (!isTabAllowed('emails')) hideSelectors.push('#navBtn-emails, #tabContent-emails');
           if (!isTabAllowed('config')) hideSelectors.push('#navBtn-config, #tabContent-config');
           if (!hasPermission('carteira_pdf')) hideSelectors.push('#btnExportPDF, #btnDownloadPdf, #btnDownloadPdfMobile');
@@ -3434,6 +3712,8 @@
           renderJogadoresCadastradosTable();
         } else if (tabName === 'noticias') {
           renderAdminNews();
+        } else if (tabName === 'galeria') {
+          renderGalleryManager();
         } else if (tabName === 'emails') {
           renderOperationsSchemeForm();
           populateRoleSelect();
@@ -10308,6 +10588,486 @@
     }
 
     /* =========================================================
+       GERENCIAMENTO OFICIAL DA GALERIA DE FOTOS & ARENAS
+       Sincronizado diretamente com a Seção #galeria do Portal Público
+       ========================================================= */
+
+    const DEFAULT_GALLERY_ITEMS = [
+      {
+        id: 'gal-1',
+        tag: 'Arena Homologada',
+        title: 'Estrutura de Quadra Oficial',
+        desc: 'Espaço padronizado para circuitos da Federação Pernambucana.',
+        image: 'assets/images/quadra 2.jpg'
+      },
+      {
+        id: 'gal-2',
+        tag: 'Equipamento Chancelado',
+        title: 'Mesa Curva Oficial',
+        desc: 'Dimensões regulamentares e curvatura para alta performance.',
+        image: 'assets/images/futmesa 2.jpg'
+      },
+      {
+        id: 'gal-3',
+        tag: 'Competições Oficiais',
+        title: 'Etapa Pernambucana',
+        desc: 'Disputas intensas entre os melhores atletas do estado.',
+        image: 'assets/images/fut 6 3.jpg'
+      },
+      {
+        id: 'gal-4',
+        tag: 'Formação & Treino',
+        title: 'Preparação Técnica',
+        desc: 'Centros de treinamento credenciados pela federação.',
+        image: 'assets/images/fut 7 editada.jpg'
+      },
+      {
+        id: 'gal-5',
+        tag: 'Litoral Pernambucano',
+        title: 'Foot Table Praiano',
+        desc: 'Etapas à beira-mar celebrando o esporte ao ar livre.',
+        image: 'assets/images/DA PRAIA.jpg'
+      },
+      {
+        id: 'gal-6',
+        tag: 'Premiação',
+        title: 'Pódio dos Campeões',
+        desc: 'Reconhecimento oficial dos atletas de destaque estadual.',
+        image: 'assets/images/Fut 5 editado (2).jpg'
+      }
+    ];
+
+    let galleryItems = [];
+    let currentGalleryImageBase64 = 'assets/images/quadra 2.jpg';
+    let pendingGalleryDeleteId = null;
+    let pendingQuickReplaceId = null;
+
+    function getStoredGalleryItems() {
+      try {
+        const saved = localStorage.getItem('pe_gallery_db');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed;
+          }
+        }
+      } catch (e) {}
+      return JSON.parse(JSON.stringify(DEFAULT_GALLERY_ITEMS));
+    }
+
+    function saveGalleryItems(items) {
+      galleryItems = items;
+      localStorage.setItem('pe_gallery_db', JSON.stringify(galleryItems));
+      window.dispatchEvent(new Event('pe_gallery_updated'));
+      renderGalleryManager();
+    }
+
+    function renderGalleryManager() {
+      galleryItems = getStoredGalleryItems();
+      const container = document.getElementById('adminGalleryGrid');
+      const counter = document.getElementById('gallery-active-counter');
+      if (counter) counter.textContent = galleryItems.length;
+      if (!container) return;
+
+      if (galleryItems.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full border border-[#1e293b]/60 bg-[#0f172a]/40 rounded-2xl p-10 text-center text-slate-500 space-y-3">
+            <i class="fa-regular fa-images text-4xl text-slate-600 block"></i>
+            <p class="text-sm font-semibold text-slate-400">Nenhuma foto ativa na galeria.</p>
+            <p class="text-xs text-slate-500">Adicione uma foto no formulário acima ou restaure o padrão oficial da federação.</p>
+            <button type="button" onclick="confirmResetGalleryToDefault()" class="mt-2 px-4 py-2 bg-pe-gold text-pe-dark font-oswald text-xs font-bold uppercase rounded-xl shadow cursor-pointer">
+              Restaurar 6 Fotos Padrão
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = galleryItems.map((item, index) => `
+        <article class="bg-[#0b101d] border border-[#1c253b] hover:border-slate-500 rounded-2xl overflow-hidden shadow-lg transition flex flex-col group relative">
+          <!-- Miniatura da Imagem com Aspect Ratio 4:3 -->
+          <div class="aspect-[4/3] w-full overflow-hidden bg-slate-900 relative">
+            <img src="${item.image || 'assets/images/quadra 2.jpg'}" alt="${escapeHTML(item.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='assets/images/quadra 2.jpg'" />
+            <div class="absolute top-2.5 right-2.5 flex items-center gap-1.5 bg-black/70 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10 text-[10px] text-white font-mono">
+              <span>#${index + 1}</span>
+            </div>
+          </div>
+
+          <!-- Informações de Texto -->
+          <div class="p-4 flex-1 flex flex-col justify-between bg-gradient-to-t from-[#070b14] via-[#0b101d] to-transparent">
+            <div>
+              <span class="text-[10px] font-bold text-pe-gold uppercase tracking-wider block mb-1">
+                ${escapeHTML(item.tag || 'ARENA HOMOLOGADA')}
+              </span>
+              <h4 class="font-oswald text-sm sm:text-base uppercase font-bold text-white leading-tight mb-1.5 group-hover:text-amber-300 transition">
+                ${escapeHTML(item.title || 'Sem Título')}
+              </h4>
+              <p class="text-slate-400 text-xs leading-relaxed line-clamp-2">
+                ${escapeHTML(item.desc || '')}
+              </p>
+            </div>
+
+            <!-- Barra de Ações com Trocar Foto, Editar Textos e Excluir -->
+            <div class="pt-4 mt-3 border-t border-[#1c253b] flex items-center justify-between gap-2 text-xs">
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="editGalleryItem('${item.id}')" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 transition flex items-center gap-1 cursor-pointer" title="Editar textos ou foto no formulário">
+                  <i class="fa-solid fa-pen text-pe-gold text-[10px]"></i>
+                  <span>Editar</span>
+                </button>
+                <button type="button" onclick="triggerQuickReplacePhoto('${item.id}')" class="px-2.5 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 text-xs font-semibold rounded-lg border border-blue-500/30 transition flex items-center gap-1 cursor-pointer" title="Substituir apenas a foto deste card mantendo os textos">
+                  <i class="fa-solid fa-camera text-[10px]"></i>
+                  <span>Trocar Foto</span>
+                </button>
+              </div>
+
+              <div class="flex items-center gap-1">
+                ${index > 0 ? `
+                  <button type="button" onclick="moveGalleryItem('${item.id}', -1)" class="p-1.5 text-slate-400 hover:text-white rounded hover:bg-slate-800 transition cursor-pointer" title="Mover para esquerda/cima">
+                    <i class="fa-solid fa-arrow-left text-[10px]"></i>
+                  </button>
+                ` : ''}
+                ${index < galleryItems.length - 1 ? `
+                  <button type="button" onclick="moveGalleryItem('${item.id}', 1)" class="p-1.5 text-slate-400 hover:text-white rounded hover:bg-slate-800 transition cursor-pointer" title="Mover para direita/baixo">
+                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                  </button>
+                ` : ''}
+                <button type="button" onclick="promptDeleteGalleryItem('${item.id}')" class="p-1.5 text-red-400 hover:text-red-300 rounded hover:bg-red-950/40 transition cursor-pointer" title="Excluir Foto">
+                  <i class="fa-solid fa-trash-can text-[11px]"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function setGalleryUploadMode(mode) {
+      const btnFile = document.getElementById('gallery-mode-file-btn');
+      const btnCam = document.getElementById('gallery-mode-camera-btn');
+      const btnUrl = document.getElementById('gallery-mode-url-btn');
+      const dropzone = document.getElementById('gallery-dropzone-box');
+      const urlBox = document.getElementById('gallery-url-box');
+
+      [btnFile, btnCam, btnUrl].forEach(b => {
+        if (!b) return;
+        b.className = "py-2 px-2 text-center text-xs font-bold rounded-xl border border-[#1c253b] bg-[#070b14] text-slate-400 hover:text-white transition cursor-pointer";
+      });
+
+      if (mode === 'file') {
+        if (btnFile) btnFile.className = "py-2 px-2 text-center text-xs font-bold rounded-xl border border-pe-gold bg-pe-gold/10 text-pe-gold transition cursor-pointer";
+        if (dropzone) dropzone.classList.remove('hidden');
+        if (urlBox) urlBox.classList.add('hidden');
+        triggerGalleryFilePicker();
+      } else if (mode === 'camera') {
+        if (btnCam) btnCam.className = "py-2 px-2 text-center text-xs font-bold rounded-xl border border-pe-gold bg-pe-gold/10 text-pe-gold transition cursor-pointer";
+        if (dropzone) dropzone.classList.remove('hidden');
+        if (urlBox) urlBox.classList.add('hidden');
+        const camInput = document.getElementById('gallery-camera-input');
+        if (camInput) camInput.click();
+      } else if (mode === 'url') {
+        if (btnUrl) btnUrl.className = "py-2 px-2 text-center text-xs font-bold rounded-xl border border-pe-gold bg-pe-gold/10 text-pe-gold transition cursor-pointer";
+        if (dropzone) dropzone.classList.add('hidden');
+        if (urlBox) urlBox.classList.remove('hidden');
+        const urlInput = document.getElementById('gallery-url-input');
+        if (urlInput) urlInput.focus();
+      }
+    }
+
+    function triggerGalleryFilePicker() {
+      const fileInput = document.getElementById('gallery-file-input');
+      if (fileInput) fileInput.click();
+    }
+
+    function handleGalleryFileSelect(input) {
+      const file = input && input.files && input.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        showToast("Selecione um arquivo de imagem válido (JPG, PNG, WEBP).", true);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const maxDim = 1600;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+
+          setGalleryPreviewImage(dataUrl);
+          showToast("Foto carregada com sucesso! Ajuste os textos e clique em Salvar.");
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function loadGalleryUrlImage() {
+      const urlInput = document.getElementById('gallery-url-input');
+      const url = urlInput ? urlInput.value.trim() : '';
+      if (!url) {
+        showToast("Insira uma URL de imagem válida.", true);
+        return;
+      }
+      setGalleryPreviewImage(url);
+      showToast("Link da foto aplicado na prévia!");
+    }
+
+    function setGalleryPreviewImage(src) {
+      currentGalleryImageBase64 = src;
+      const previewImg = document.getElementById('gallery-preview-img');
+      const emptyBox = document.getElementById('gallery-preview-empty');
+      const clearBtn = document.getElementById('gallery-clear-photo-btn');
+      if (previewImg) {
+        previewImg.src = src;
+        previewImg.classList.remove('hidden');
+      }
+      if (emptyBox) emptyBox.classList.add('hidden');
+      if (clearBtn) clearBtn.classList.remove('hidden');
+    }
+
+    function clearGalleryImage() {
+      currentGalleryImageBase64 = '';
+      const previewImg = document.getElementById('gallery-preview-img');
+      const emptyBox = document.getElementById('gallery-preview-empty');
+      const clearBtn = document.getElementById('gallery-clear-photo-btn');
+      if (previewImg) {
+        previewImg.src = '';
+        previewImg.classList.add('hidden');
+      }
+      if (emptyBox) emptyBox.classList.remove('hidden');
+      if (clearBtn) clearBtn.classList.add('hidden');
+    }
+
+    function updateGalleryLivePreview() {
+      const tagInput = document.getElementById('gallery-input-tag');
+      const titleInput = document.getElementById('gallery-input-title');
+      const descInput = document.getElementById('gallery-input-desc');
+
+      const tagVal = (tagInput && tagInput.value.trim()) || 'ARENA HOMOLOGADA';
+      const titleVal = (titleInput && titleInput.value.trim()) || 'ESTRUTURA DE QUADRA OFICIAL';
+      const descVal = (descInput && descInput.value.trim()) || 'Espaço padronizado para circuitos da Federação Pernambucana.';
+
+      const previewTag = document.getElementById('gallery-preview-tag');
+      const previewTitle = document.getElementById('gallery-preview-title');
+      const previewDesc = document.getElementById('gallery-preview-desc');
+      const counter = document.getElementById('gallery-desc-counter');
+
+      if (previewTag) previewTag.textContent = tagVal;
+      if (previewTitle) previewTitle.textContent = titleVal;
+      if (previewDesc) previewDesc.textContent = descVal;
+      if (counter && descInput) counter.textContent = `${descInput.value.length}/150 carac.`;
+    }
+
+    function setGalleryTagValue(val) {
+      const input = document.getElementById('gallery-input-tag');
+      if (input) {
+        input.value = val;
+        updateGalleryLivePreview();
+      }
+    }
+
+    function focusGalleryForm() {
+      resetGalleryForm();
+      const formCard = document.getElementById('gallery-form-card');
+      if (formCard) formCard.scrollIntoView({ behavior: 'smooth' });
+      const tagInput = document.getElementById('gallery-input-tag');
+      if (tagInput) tagInput.focus();
+    }
+
+    function resetGalleryForm() {
+      const form = document.getElementById('gallery-form');
+      if (form) form.reset();
+      const editId = document.getElementById('gallery-edit-id');
+      if (editId) editId.value = '';
+      const titleEl = document.getElementById('gallery-form-title');
+      if (titleEl) titleEl.textContent = 'Adicionar Nova Foto à Galeria';
+      const submitText = document.getElementById('gallery-submit-text');
+      if (submitText) submitText.textContent = 'SALVAR FOTO NA GALERIA';
+      const icon = document.getElementById('gallery-form-icon');
+      if (icon) icon.className = 'fa-solid fa-camera';
+      const cancelBtn = document.getElementById('gallery-cancel-edit-btn');
+      if (cancelBtn) cancelBtn.classList.add('hidden');
+      currentGalleryImageBase64 = 'assets/images/quadra 2.jpg';
+      setGalleryPreviewImage('assets/images/quadra 2.jpg');
+      updateGalleryLivePreview();
+    }
+
+    function editGalleryItem(id) {
+      const items = getStoredGalleryItems();
+      const item = items.find(i => String(i.id) === String(id));
+      if (!item) return;
+
+      document.getElementById('gallery-edit-id').value = item.id;
+      document.getElementById('gallery-input-tag').value = item.tag || '';
+      document.getElementById('gallery-input-title').value = item.title || '';
+      document.getElementById('gallery-input-desc').value = item.desc || '';
+
+      setGalleryPreviewImage(item.image || 'assets/images/quadra 2.jpg');
+      updateGalleryLivePreview();
+
+      document.getElementById('gallery-form-title').textContent = 'Editar Foto & Textos';
+      document.getElementById('gallery-submit-text').textContent = 'SALVAR ALTERAÇÕES DA FOTO';
+      document.getElementById('gallery-form-icon').className = 'fa-solid fa-pen-nib';
+      document.getElementById('gallery-cancel-edit-btn').classList.remove('hidden');
+
+      const formCard = document.getElementById('gallery-form-card');
+      if (formCard) formCard.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function handleGalleryFormSubmit(e) {
+      if (e) e.preventDefault();
+
+      const editId = document.getElementById('gallery-edit-id').value.trim();
+      const tag = document.getElementById('gallery-input-tag').value.trim();
+      const title = document.getElementById('gallery-input-title').value.trim();
+      const desc = document.getElementById('gallery-input-desc').value.trim();
+      const image = currentGalleryImageBase64 || 'assets/images/quadra 2.jpg';
+
+      if (!tag || !title) {
+        showToast("Preencha a categoria e o título da foto.", true);
+        return;
+      }
+
+      let items = getStoredGalleryItems();
+
+      if (editId) {
+        // Atualiza item existente
+        const idx = items.findIndex(i => String(i.id) === String(editId));
+        if (idx !== -1) {
+          items[idx] = {
+            ...items[idx],
+            tag,
+            title,
+            desc,
+            image: image || items[idx].image
+          };
+          showToast("Foto e textos atualizados com sucesso!");
+        }
+      } else {
+        // Adiciona novo item
+        const newItem = {
+          id: 'gal-' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4),
+          tag,
+          title,
+          desc,
+          image
+        };
+        items.unshift(newItem);
+        showToast("Nova foto adicionada à galeria com sucesso!");
+      }
+
+      saveGalleryItems(items);
+      resetGalleryForm();
+    }
+
+    // Troca rápida de foto direto no card
+    function triggerQuickReplacePhoto(id) {
+      pendingQuickReplaceId = id;
+      const input = document.getElementById('gallery-quick-replace-input');
+      if (input) input.click();
+    }
+
+    function handleQuickReplacePhotoSelected(input) {
+      const file = input && input.files && input.files[0];
+      if (!file || !pendingQuickReplaceId) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const maxDim = 1600;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+
+          let items = getStoredGalleryItems();
+          const target = items.find(i => String(i.id) === String(pendingQuickReplaceId));
+          if (target) {
+            target.image = dataUrl;
+            saveGalleryItems(items);
+            showToast(`Foto substituída com sucesso para "${target.title}"!`);
+          }
+          pendingQuickReplaceId = null;
+          input.value = '';
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function moveGalleryItem(id, offset) {
+      let items = getStoredGalleryItems();
+      const idx = items.findIndex(i => String(i.id) === String(id));
+      if (idx === -1) return;
+      const newIdx = idx + offset;
+      if (newIdx < 0 || newIdx >= items.length) return;
+
+      const temp = items[idx];
+      items[idx] = items[newIdx];
+      items[newIdx] = temp;
+      saveGalleryItems(items);
+    }
+
+    function promptDeleteGalleryItem(id) {
+      pendingGalleryDeleteId = id;
+      const modal = document.getElementById('gallery-delete-modal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeGalleryDeleteModal() {
+      pendingGalleryDeleteId = null;
+      const modal = document.getElementById('gallery-delete-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function confirmDeleteGalleryItem() {
+      if (!pendingGalleryDeleteId) return;
+      let items = getStoredGalleryItems();
+      items = items.filter(i => String(i.id) !== String(pendingGalleryDeleteId));
+      saveGalleryItems(items);
+      closeGalleryDeleteModal();
+      showToast("Foto removida da galeria com sucesso.", true);
+    }
+
+    function confirmResetGalleryToDefault() {
+      if (confirm("Deseja restaurar as 6 fotos oficiais e textos de fábrica da Federação?")) {
+        saveGalleryItems(JSON.parse(JSON.stringify(DEFAULT_GALLERY_ITEMS)));
+        showToast("Galeria oficial restaurada com sucesso!");
+      }
+    }
+
+    /* =========================================================
        CONFIGURAÇÃO DO BANCO & KEEP-ALIVE (ABA 4)
        ========================================================= */
     function handleSaveAdminConfig() {
@@ -12007,6 +12767,7 @@
         setAthleteCategoryValue('AMADOR');
         renderJogadoresCadastradosTable();
         renderAdminNews();
+        renderGalleryManager();
         syncStudioWithCurrentLayout();
         updateDashboardData();
         renderOperationsSchemeForm();

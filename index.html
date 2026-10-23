@@ -433,9 +433,10 @@
       </div>
     </div>
 
-    <!-- Grid de Imagens Oficiais -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-      <!-- Imagem 1: Quadra 2 -->
+    <!-- Grid de Imagens Oficiais Dinâmico -->
+    <div id="publicGalleryContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <!-- As fotos e textos oficiais são gerenciados pelo painel administrativo e renderizados dinamicamente -->
+      <!-- Fallback estático inicial caso JS ainda esteja carregando -->
       <div class="group relative rounded-2xl overflow-hidden border border-pe-cardBorder bg-pe-card shadow-lg hover:border-pe-gold/60 transition">
         <div class="aspect-[4/3] w-full overflow-hidden bg-slate-900">
           <img src="assets/images/quadra 2.jpg" alt="Quadra Oficial Foot Table" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" decoding="async" onerror="this.src='assets/images/quadra 2.jpg'" />
@@ -446,8 +447,6 @@
           <p class="text-slate-400 text-xs mt-1">Espaço padronizado para circuitos da Federação Pernambucana.</p>
         </div>
       </div>
-
-      <!-- Imagem 2: Futmesa 2 -->
       <div class="group relative rounded-2xl overflow-hidden border border-pe-cardBorder bg-pe-card shadow-lg hover:border-pe-gold/60 transition">
         <div class="aspect-[4/3] w-full overflow-hidden bg-slate-900">
           <img src="assets/images/futmesa 2.jpg" alt="Mesa Oficial Foot Table" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" decoding="async" onerror="this.src='assets/images/futmesa 2.jpg'" />
@@ -458,8 +457,6 @@
           <p class="text-slate-400 text-xs mt-1">Dimensões regulamentares e curvatura para alta performance.</p>
         </div>
       </div>
-
-      <!-- Imagem 3: Fut 6 3 -->
       <div class="group relative rounded-2xl overflow-hidden border border-pe-cardBorder bg-pe-card shadow-lg hover:border-pe-gold/60 transition">
         <div class="aspect-[4/3] w-full overflow-hidden bg-slate-900">
           <img src="assets/images/fut 6 3.jpg" alt="Circuito Foot Table" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" decoding="async" onerror="this.src='assets/images/fut 6 3.jpg'" />
@@ -468,42 +465,6 @@
           <span class="text-[10px] font-bold text-pe-gold uppercase tracking-wider block mb-1">Competições Oficiais</span>
           <h4 class="font-oswald text-base uppercase font-bold text-white leading-tight">Etapa Pernambucana</h4>
           <p class="text-slate-400 text-xs mt-1">Disputas intensas entre os melhores atletas do estado.</p>
-        </div>
-      </div>
-
-      <!-- Imagem 4: Fut 7 editada -->
-      <div class="group relative rounded-2xl overflow-hidden border border-pe-cardBorder bg-pe-card shadow-lg hover:border-pe-gold/60 transition">
-        <div class="aspect-[4/3] w-full overflow-hidden bg-slate-900">
-          <img src="assets/images/fut 7 editada.jpg" alt="Treino e Preparação" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" decoding="async" onerror="this.src='assets/images/fut 7 editada.jpg'" />
-        </div>
-        <div class="p-4 bg-gradient-to-t from-pe-dark via-pe-card to-transparent">
-          <span class="text-[10px] font-bold text-pe-gold uppercase tracking-wider block mb-1">Formação & Treino</span>
-          <h4 class="font-oswald text-base uppercase font-bold text-white leading-tight">Preparação Técnica</h4>
-          <p class="text-slate-400 text-xs mt-1">Centros de treinamento credenciados pela federação.</p>
-        </div>
-      </div>
-
-      <!-- Imagem 5: DA PRAIA.jpg -->
-      <div class="group relative rounded-2xl overflow-hidden border border-pe-cardBorder bg-pe-card shadow-lg hover:border-pe-gold/60 transition">
-        <div class="aspect-[4/3] w-full overflow-hidden bg-slate-900">
-          <img src="assets/images/DA PRAIA.jpg" alt="Foot Table na Praia" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" decoding="async" onerror="this.src='assets/images/DA PRAIA.PNG'" />
-        </div>
-        <div class="p-4 bg-gradient-to-t from-pe-dark via-pe-card to-transparent">
-          <span class="text-[10px] font-bold text-pe-gold uppercase tracking-wider block mb-1">Litoral Pernambucano</span>
-          <h4 class="font-oswald text-base uppercase font-bold text-white leading-tight">Foot Table Praiano</h4>
-          <p class="text-slate-400 text-xs mt-1">Etapas à beira-mar celebrando o esporte ao ar livre.</p>
-        </div>
-      </div>
-
-      <!-- Imagem 6: Fut 5 editado (2) -->
-      <div class="group relative rounded-2xl overflow-hidden border border-pe-cardBorder bg-pe-card shadow-lg hover:border-pe-gold/60 transition">
-        <div class="aspect-[4/3] w-full overflow-hidden bg-slate-900">
-          <img src="assets/images/Fut 5 editado (2).jpg" alt="Confraternização e Pódio" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" decoding="async" onerror="this.src='assets/images/Fut 5 editado (2).jpg'" />
-        </div>
-        <div class="p-4 bg-gradient-to-t from-pe-dark via-pe-card to-transparent">
-          <span class="text-[10px] font-bold text-pe-gold uppercase tracking-wider block mb-1">Premiação</span>
-          <h4 class="font-oswald text-base uppercase font-bold text-white leading-tight">Pódio dos Campeões</h4>
-          <p class="text-slate-400 text-xs mt-1">Reconhecimento oficial dos atletas de destaque estadual.</p>
         </div>
       </div>
     </div>
@@ -822,6 +783,121 @@
         `;
         container.appendChild(card);
       });
+    }
+
+    function escapeHTML(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+      }[tag] || tag));
+    }
+
+    /* =======================================================
+       RENDERIZADOR DE GALERIA PÚBLICA (LOCALSTORAGE + FALLBACK)
+       ======================================================= */
+    const DEFAULT_PUBLIC_GALLERY = [
+      {
+        id: 'gal-1',
+        tag: 'Arena Homologada',
+        title: 'Estrutura de Quadra Oficial',
+        desc: 'Espaço padronizado para circuitos da Federação Pernambucana.',
+        image: 'assets/images/quadra 2.jpg'
+      },
+      {
+        id: 'gal-2',
+        tag: 'Equipamento Chancelado',
+        title: 'Mesa Curva Oficial',
+        desc: 'Dimensões regulamentares e curvatura para alta performance.',
+        image: 'assets/images/futmesa 2.jpg'
+      },
+      {
+        id: 'gal-3',
+        tag: 'Competições Oficiais',
+        title: 'Etapa Pernambucana',
+        desc: 'Disputas intensas entre os melhores atletas do estado.',
+        image: 'assets/images/fut 6 3.jpg'
+      },
+      {
+        id: 'gal-4',
+        tag: 'Formação & Treino',
+        title: 'Preparação Técnica',
+        desc: 'Centros de treinamento credenciados pela federação.',
+        image: 'assets/images/fut 7 editada.jpg'
+      },
+      {
+        id: 'gal-5',
+        tag: 'Litoral Pernambucano',
+        title: 'Foot Table Praiano',
+        desc: 'Etapas à beira-mar celebrando o esporte ao ar livre.',
+        image: 'assets/images/DA PRAIA.jpg'
+      },
+      {
+        id: 'gal-6',
+        tag: 'Premiação',
+        title: 'Pódio dos Campeões',
+        desc: 'Reconhecimento oficial dos atletas de destaque estadual.',
+        image: 'assets/images/Fut 5 editado (2).jpg'
+      }
+    ];
+
+    function getPublicGalleryItems() {
+      try {
+        const saved = localStorage.getItem('pe_gallery_db');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed;
+          }
+        }
+      } catch (e) {}
+      return DEFAULT_PUBLIC_GALLERY;
+    }
+
+    function renderPublicGallery() {
+      const container = document.getElementById('publicGalleryContainer');
+      if (!container) return;
+
+      const items = getPublicGalleryItems();
+      if (items.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full bg-pe-card border border-pe-cardBorder rounded-xl p-8 text-center text-slate-400 text-xs">
+            Nenhuma foto publicada na galeria no momento.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = items.map(item => `
+        <div class="group relative rounded-2xl overflow-hidden border border-pe-cardBorder bg-pe-card shadow-lg hover:border-pe-gold/60 transition flex flex-col justify-between">
+          <div class="aspect-[4/3] w-full overflow-hidden bg-slate-900 relative">
+            <img 
+              src="${item.image || 'assets/images/quadra 2.jpg'}" 
+              alt="${escapeHTML(item.title || 'Foto Oficial')}" 
+              class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
+              loading="lazy" 
+              decoding="async" 
+              onerror="this.src='assets/images/quadra 2.jpg'" 
+            />
+          </div>
+          <div class="p-4 bg-gradient-to-t from-pe-dark via-pe-card to-transparent flex-1 flex flex-col justify-between">
+            <div>
+              <span class="text-[10px] font-bold text-pe-gold uppercase tracking-wider block mb-1">
+                ${escapeHTML(item.tag || 'ARENA HOMOLOGADA')}
+              </span>
+              <h4 class="font-oswald text-base uppercase font-bold text-white leading-tight">
+                ${escapeHTML(item.title || 'Sem Título')}
+              </h4>
+              <p class="text-slate-400 text-xs mt-1 leading-relaxed">
+                ${escapeHTML(item.desc || '')}
+              </p>
+            </div>
+          </div>
+        </div>
+      `).join('');
     }
 
     /* =======================================================
@@ -1184,6 +1260,9 @@
       if (e.key === 'pe_news_db' || e.key === 'pe_futmesa_news') {
         renderPublicNews();
       }
+      if (e.key === 'pe_gallery_db') {
+        renderPublicGallery();
+      }
       if (e.key === 'pe_athletes_db' && !document.getElementById('publicBadgeResultArea').classList.contains('hidden')) {
         executePublicSearch();
       }
@@ -1191,11 +1270,13 @@
         applySavedBadgeLayout();
       }
     });
+    window.addEventListener('pe_gallery_updated', renderPublicGallery);
 
     // Inicialização ao carregar página (com suporte a leitura automática de QR Code via URL)
     async function initIndexApp() {
       await initSupabase();
       renderPublicNews();
+      renderPublicGallery();
       applySavedBadgeLayout();
 
       // Detecta leitura de QR Code via parâmetro de URL (?id=... / ?codigo=...)
