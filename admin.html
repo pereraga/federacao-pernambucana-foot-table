@@ -24,8 +24,9 @@
   <script>
     (function() {
       try {
-        // Validação de sessão no servidor com cookie HttpOnly blindado
-        if (typeof fetch === 'function') {
+        // Validação de sessão no servidor com cookie HttpOnly blindado (apenas em produção/nuvem)
+        const isLocalHostEnv = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        if (typeof fetch === 'function' && !isLocalHostEnv) {
           fetch('/api/auth/session')
             .then(res => {
               if (res.status === 401 || res.status === 403) {

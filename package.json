@@ -6,7 +6,7 @@
   "description": "Portal Oficial da Federação Pernambucana de Foot Table e FutMesa com Supabase e Vercel Keep-Alive",
   "main": "index.html",
   "scripts": {
-    "dev": "vercel dev --listen 3000",
+    "dev:server": "tsx server.ts",
     "serve": "npx serve -l 3000 .",
     "start": "npx serve .",
     "test:security": "tsx scripts/test-security.ts"

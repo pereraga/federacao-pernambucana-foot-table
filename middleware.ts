@@ -171,6 +171,15 @@ export default function middleware(request: Request) {
   securityHeaders.delete('x-powered-by');
   securityHeaders.delete('Server');
 
+  // Liberação imediata e total para desenvolvimento local (localhost)
+  if (isLocalhost) {
+    securityHeaders.set('x-middleware-next', '1');
+    return new Response(null, {
+      status: 200,
+      headers: securityHeaders,
+    });
+  }
+
   // Libera ativos estáticos (imagens, estilos, scripts) mesmo em manutenção
   if (pathname.startsWith('/assets/')) {
     securityHeaders.set('x-middleware-next', '1');
@@ -196,21 +205,27 @@ export default function middleware(request: Request) {
   const isRestricted = RESTRICTED_ROUTES.some((route) => pathname === route || pathname.startsWith(route + '/'));
 
   if (isRestricted) {
-    const cookieHeader = request.headers.get('cookie');
-    const session = getSessionFromCookieHeader(cookieHeader);
+    try {
+      const cookieHeader = request.headers.get('cookie');
+      const session = getSessionFromCookieHeader(cookieHeader);
 
-    // Se não autenticado ou sem perfil de administrador
-    if (!session || session.role !== 'admin') {
-      // Bloqueio genérico silencioso para APIs (401 Não autorizado)
-      if (pathname.startsWith('/api/')) {
-        securityHeaders.set('Content-Type', 'application/json');
-        return new Response(JSON.stringify({ error: 'Não autorizado' }), {
-          status: 401,
-          headers: securityHeaders,
-        });
+      // Se não autenticado ou sem perfil de administrador
+      if (!session || session.role !== 'admin') {
+        // Bloqueio genérico silencioso para APIs (401 Não autorizado)
+        if (pathname.startsWith('/api/')) {
+          securityHeaders.set('Content-Type', 'application/json');
+          return new Response(JSON.stringify({ error: 'Não autorizado' }), {
+            status: 401,
+            headers: securityHeaders,
+          });
+        }
+
+        // Redirecionamento seguro para tela de login em rotas de páginas
+        const loginUrl = new URL('/login.html', request.url);
+        return Response.redirect(loginUrl, 307);
       }
-
-      // Redirecionamento seguro para tela de login em rotas de páginas
+    } catch {
+      // Em caso de falha de parsing no Edge Runtime, redireciona para login com segurança
       const loginUrl = new URL('/login.html', request.url);
       return Response.redirect(loginUrl, 307);
     }
