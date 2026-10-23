@@ -8516,12 +8516,13 @@
       if (!a) return;
 
       const isHomologado = a.status === 'HOMOLOGADO' || a.status === 'REGULAR';
-      const photoUrl = a.foto || a.foto_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80';
+      const rawPhoto = a.foto || a.foto_url || '';
+      const photoUrl = (rawPhoto && !rawPhoto.includes('unsplash.com')) ? rawPhoto : OFFICIAL_DEFAULT_PHOTO_SVG;
 
       container.innerHTML = `
         <div class="flex items-start gap-3 border-b border-[#1c253b] pb-3">
           <div class="w-16 h-20 rounded-xl overflow-hidden border-2 border-pe-gold shrink-0 bg-[#0c1424] shadow">
-            <img src="${photoUrl}" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80'" />
+            <img src="${photoUrl}" class="w-full h-full object-cover" onerror="this.src=OFFICIAL_DEFAULT_PHOTO_SVG" />
           </div>
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between gap-1 mb-1">
@@ -8662,8 +8663,9 @@
       if (codeHeader) codeHeader.textContent = `#${a.codigo} (${fedCode})`;
 
       const isHomologado = a.status === 'HOMOLOGADO' || a.status === 'REGULAR';
-      const defaultPhoto = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80';
-      const photoUrl = a.foto || a.foto_url || defaultPhoto;
+      const defaultPhoto = OFFICIAL_DEFAULT_PHOTO_SVG;
+      const rawPhoto = a.foto || a.foto_url || '';
+      const photoUrl = (rawPhoto && !rawPhoto.includes('unsplash.com')) ? rawPhoto : defaultPhoto;
       const nowStr = new Date().toLocaleString('pt-BR');
       const hashStr = `FPEFT-${String(a.codigo).padStart(6, '0')}-${isHomologado ? 'AUTH-REGULAR' : 'PENDING'}`;
 
@@ -8672,7 +8674,7 @@
         <div class="bg-[#05080e] border border-[#1c253b] rounded-2xl p-4 sm:p-5 space-y-4 shadow-xl">
           <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4">
             <div class="w-20 h-24 sm:w-22 sm:h-28 rounded-2xl overflow-hidden border-2 border-pe-gold shrink-0 bg-[#0c1424] shadow-xl relative">
-              <img src="${photoUrl}" alt="${escapeHtml(a.nome)}" class="w-full h-full object-cover" onerror="this.src='${defaultPhoto}'" />
+              <img src="${photoUrl}" alt="${escapeHtml(a.nome)}" class="w-full h-full object-cover" onerror="this.src=OFFICIAL_DEFAULT_PHOTO_SVG" />
               <div class="absolute bottom-1 right-1 w-3.5 h-3.5 rounded-full border-2 border-[#0c1424] ${isHomologado ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}"></div>
             </div>
             <div class="flex-1 min-w-0 text-center sm:text-left space-y-1.5">
@@ -9350,8 +9352,9 @@
         if (crossMatch) {
           const crossModUpper = (crossMatch.modalidade || '').toUpperCase();
           const crossIsDupla = crossModUpper.includes('DUPLA') || crossModUpper.includes('EQUIPE');
-          const defaultPhoto = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80";
-          const photoUrl = crossMatch.foto || defaultPhoto;
+          const defaultPhoto = OFFICIAL_DEFAULT_PHOTO_SVG;
+          const rawPhoto = crossMatch.foto || '';
+          const photoUrl = (rawPhoto && !rawPhoto.includes('unsplash.com')) ? rawPhoto : defaultPhoto;
 
           resultsContainer.innerHTML = `
             <div class="w-full space-y-2">
@@ -9360,7 +9363,7 @@
               </div>
               <div class="bg-[#05080e] border border-amber-500/40 rounded-xl p-2.5 flex items-center justify-between gap-3 transition">
                 <div class="flex items-center gap-2.5 min-w-0">
-                  <img src="${photoUrl}" alt="${escapeText(crossMatch.nome)}" class="w-9 h-9 rounded-lg object-cover border border-amber-500/50 flex-shrink-0" onerror="this.src='${defaultPhoto}'" />
+                  <img src="${photoUrl}" alt="${escapeText(crossMatch.nome)}" class="w-9 h-9 rounded-lg object-cover border border-amber-500/50 flex-shrink-0" onerror="this.src=OFFICIAL_DEFAULT_PHOTO_SVG" />
                   <div class="min-w-0">
                     <div class="flex items-center gap-1.5 flex-wrap">
                       <span class="font-bold text-white uppercase text-xs truncate">${escapeText(crossMatch.nome)}</span>
@@ -9400,13 +9403,14 @@
           ${matches.slice(0, 4).map(a => {
             const modUpper = (a.modalidade || '').toUpperCase();
             const isDupla = modUpper.includes('DUPLA') || modUpper.includes('EQUIPE');
-            const defaultPhoto = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80";
-            const photoUrl = a.foto || defaultPhoto;
+            const defaultPhoto = OFFICIAL_DEFAULT_PHOTO_SVG;
+            const rawPhoto = a.foto || '';
+            const photoUrl = (rawPhoto && !rawPhoto.includes('unsplash.com')) ? rawPhoto : defaultPhoto;
 
             return `
               <div class="bg-[#05080e] border border-[#1c253b] hover:border-pe-gold/40 rounded-xl p-2.5 flex items-center justify-between gap-3 transition">
                 <div class="flex items-center gap-2.5 min-w-0">
-                  <img src="${photoUrl}" alt="${escapeText(a.nome)}" class="w-9 h-9 rounded-lg object-cover border border-pe-gold/50 flex-shrink-0" onerror="this.src='${defaultPhoto}'" />
+                  <img src="${photoUrl}" alt="${escapeText(a.nome)}" class="w-9 h-9 rounded-lg object-cover border border-pe-gold/50 flex-shrink-0" onerror="this.src=OFFICIAL_DEFAULT_PHOTO_SVG" />
                   <div class="min-w-0">
                     <div class="flex items-center gap-1.5 flex-wrap">
                       <span class="font-bold text-white uppercase text-xs truncate">${escapeText(a.nome)}</span>
@@ -9680,7 +9684,7 @@
         featured: true,
         summary: 'O Campeonato Mundial começa de 1 a 4 de outubro em Roma, Itália, com mais de 50 países competindo em todas as categorias de Foot Table.',
         content: 'A Federação Internacional confirmou os detalhes da cerimônia de abertura e sorteio dos grupos para o II Campeonato Mundial em Roma. A delegação brasileira embarca com recorde de inscritos visando o pódio em todas as divisões.',
-        image: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&q=80',
+        image: 'assets/images/quadra 2.jpg',
         link: 'https://mundial.foottable.org'
       },
       {
@@ -9691,7 +9695,7 @@
         featured: false,
         summary: 'A estrela brasileira lidera os rankings mundiais de simples e duplas femininas com 2.000 pontos acumulados na temporada.',
         content: 'Com apresentações impecáveis nas etapas continentais, a atleta conquistou a admiração unânime da crítica técnica esportiva. Seus saques com efeito tornaram-se referência técnica no Foot Table moderno.',
-        image: 'https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&w=800&q=80',
+        image: 'assets/images/futmesa 2.jpg',
         link: ''
       },
       {
@@ -12322,6 +12326,21 @@ Rodrigo Albuquerque; 333.444.555-66; Caruaru - PE; Central Foot Table; SOLO (IND
   </style>
   <script>
     (function() {
+      // Sanitização de cache de atletas contra fotos externas não autorizadas
+      try {
+        const rawAthletes = localStorage.getItem('pe_athletes_db');
+        if (rawAthletes && rawAthletes.includes('unsplash.com')) {
+          const parsed = JSON.parse(rawAthletes);
+          if (Array.isArray(parsed)) {
+            parsed.forEach(a => {
+              if (a.foto && a.foto.includes('unsplash.com')) a.foto = '';
+              if (a.foto_url && a.foto_url.includes('unsplash.com')) a.foto_url = '';
+            });
+            localStorage.setItem('pe_athletes_db', JSON.stringify(parsed));
+          }
+        }
+      } catch(e) {}
+
       const VALID_LOGOS = ['assets/images/logo-federacao.png', '/assets/images/logo-federacao.png', 'assets/logo.png', '/assets/logo.png', 'assets/logo-federacao.png', '/assets/logo-federacao.png'];
       const lockLogos = () => {
         document.querySelectorAll('img[src*="logo-federacao"], img[alt*="Federação"], img[alt="FPEFT"]').forEach(img => {

@@ -438,7 +438,7 @@
       <!-- Imagem 1: Quadra 2 -->
       <div class="group relative rounded-2xl overflow-hidden border border-pe-cardBorder bg-pe-card shadow-lg hover:border-pe-gold/60 transition">
         <div class="aspect-[4/3] w-full overflow-hidden bg-slate-900">
-          <img src="assets/images/quadra 2.jpg" alt="Quadra Oficial Foot Table" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" decoding="async" onerror="this.src='https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=600&q=80'" />
+          <img src="assets/images/quadra 2.jpg" alt="Quadra Oficial Foot Table" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" decoding="async" onerror="this.src='assets/images/quadra 2.jpg'" />
         </div>
         <div class="p-4 bg-gradient-to-t from-pe-dark via-pe-card to-transparent">
           <span class="text-[10px] font-bold text-pe-gold uppercase tracking-wider block mb-1">Arena Homologada</span>
@@ -450,7 +450,7 @@
       <!-- Imagem 2: Futmesa 2 -->
       <div class="group relative rounded-2xl overflow-hidden border border-pe-cardBorder bg-pe-card shadow-lg hover:border-pe-gold/60 transition">
         <div class="aspect-[4/3] w-full overflow-hidden bg-slate-900">
-          <img src="assets/images/futmesa 2.jpg" alt="Mesa Oficial Foot Table" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" decoding="async" onerror="this.src='https://images.unsplash.com/photo-1511886929837-354d827aae26?auto=format&fit=crop&w=600&q=80'" />
+          <img src="assets/images/futmesa 2.jpg" alt="Mesa Oficial Foot Table" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" decoding="async" onerror="this.src='assets/images/futmesa 2.jpg'" />
         </div>
         <div class="p-4 bg-gradient-to-t from-pe-dark via-pe-card to-transparent">
           <span class="text-[10px] font-bold text-pe-gold uppercase tracking-wider block mb-1">Equipamento Chancelado</span>
@@ -462,7 +462,7 @@
       <!-- Imagem 3: Fut 6 3 -->
       <div class="group relative rounded-2xl overflow-hidden border border-pe-cardBorder bg-pe-card shadow-lg hover:border-pe-gold/60 transition">
         <div class="aspect-[4/3] w-full overflow-hidden bg-slate-900">
-          <img src="assets/images/fut 6 3.jpg" alt="Circuito Foot Table" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" decoding="async" onerror="this.src='https://images.unsplash.com/photo-1526232761682-d26e03ac148e?auto=format&fit=crop&w=600&q=80'" />
+          <img src="assets/images/fut 6 3.jpg" alt="Circuito Foot Table" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" decoding="async" onerror="this.src='assets/images/fut 6 3.jpg'" />
         </div>
         <div class="p-4 bg-gradient-to-t from-pe-dark via-pe-card to-transparent">
           <span class="text-[10px] font-bold text-pe-gold uppercase tracking-wider block mb-1">Competições Oficiais</span>
@@ -474,7 +474,7 @@
       <!-- Imagem 4: Fut 7 editada -->
       <div class="group relative rounded-2xl overflow-hidden border border-pe-cardBorder bg-pe-card shadow-lg hover:border-pe-gold/60 transition">
         <div class="aspect-[4/3] w-full overflow-hidden bg-slate-900">
-          <img src="assets/images/fut 7 editada.jpg" alt="Treino e Preparação" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" decoding="async" onerror="this.src='https://images.unsplash.com/photo-1543351611-58f69d7c1781?auto=format&fit=crop&w=600&q=80'" />
+          <img src="assets/images/fut 7 editada.jpg" alt="Treino e Preparação" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" decoding="async" onerror="this.src='assets/images/fut 7 editada.jpg'" />
         </div>
         <div class="p-4 bg-gradient-to-t from-pe-dark via-pe-card to-transparent">
           <span class="text-[10px] font-bold text-pe-gold uppercase tracking-wider block mb-1">Formação & Treino</span>
@@ -498,7 +498,7 @@
       <!-- Imagem 6: Fut 5 editado (2) -->
       <div class="group relative rounded-2xl overflow-hidden border border-pe-cardBorder bg-pe-card shadow-lg hover:border-pe-gold/60 transition">
         <div class="aspect-[4/3] w-full overflow-hidden bg-slate-900">
-          <img src="assets/images/Fut 5 editado (2).jpg" alt="Confraternização e Pódio" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" decoding="async" onerror="this.src='https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=600&q=80'" />
+          <img src="assets/images/Fut 5 editado (2).jpg" alt="Confraternização e Pódio" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" decoding="async" onerror="this.src='assets/images/Fut 5 editado (2).jpg'" />
         </div>
         <div class="p-4 bg-gradient-to-t from-pe-dark via-pe-card to-transparent">
           <span class="text-[10px] font-bold text-pe-gold uppercase tracking-wider block mb-1">Premiação</span>
@@ -888,7 +888,7 @@
               modalidade: data.modalidade || 'SOLO (INDIVIDUAL)',
               categoria: data.categoria || 'ASPIRANTE',
               status: data.status || 'PENDENTE',
-              foto: data.foto_url
+              foto: (data.foto_url && !data.foto_url.includes('unsplash.com')) ? data.foto_url : ''
             };
           }
         } catch (e) {
@@ -953,7 +953,8 @@
       const cardPhotoEl = document.getElementById('cardBadgePhoto');
       if (cardPhotoEl) {
         cardPhotoEl.onerror = function() { this.src = defaultAthletePhoto; };
-        cardPhotoEl.src = athlete.foto || defaultAthletePhoto;
+        const cleanPhoto = (athlete.foto && !athlete.foto.includes('unsplash.com')) ? athlete.foto : defaultAthletePhoto;
+        cardPhotoEl.src = cleanPhoto;
       }
 
       // Verifica status de homologação
@@ -1278,6 +1279,21 @@
   </style>
   <script>
     (function() {
+      // Sanitização de cache de atletas contra fotos externas não autorizadas
+      try {
+        const rawAthletes = localStorage.getItem('pe_athletes_db');
+        if (rawAthletes && rawAthletes.includes('unsplash.com')) {
+          const parsed = JSON.parse(rawAthletes);
+          if (Array.isArray(parsed)) {
+            parsed.forEach(a => {
+              if (a.foto && a.foto.includes('unsplash.com')) a.foto = '';
+              if (a.foto_url && a.foto_url.includes('unsplash.com')) a.foto_url = '';
+            });
+            localStorage.setItem('pe_athletes_db', JSON.stringify(parsed));
+          }
+        }
+      } catch(e) {}
+
       const VALID_LOGOS = ['assets/images/logo-federacao.png', '/assets/images/logo-federacao.png', 'assets/logo.png', '/assets/logo.png', 'assets/logo-federacao.png', '/assets/logo-federacao.png'];
       const lockLogos = () => {
         document.querySelectorAll('img[src*="logo-federacao"], img[alt*="Federação"], img[alt="FPEFT"]').forEach(img => {
