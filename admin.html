@@ -495,7 +495,7 @@
         <div class="flex items-center justify-between gap-2 sidebar-header-content">
           <div class="flex items-center gap-3 min-w-0">
             <div class="rounded-full bg-[#06173a] border-2 border-pe-gold p-0.5 overflow-hidden shrink-0 shadow cursor-pointer" onclick="toggleSidebarCollapse()" style="width: 42px; height: 42px; min-width: 42px; min-height: 42px;" title="Clique para alternar tamanho do menu">
-              <img src="assets/images/logo-federacao.png" alt="Federação Pernambucana" class="w-full h-full object-contain rounded-full" />
+              <img src="assets/images/logo-federacao.png" alt="Federação Pernambucana" class="w-full h-full object-contain rounded-full select-none pointer-events-none" draggable="false" onerror="if(!this.dataset.retry){this.dataset.retry=1;this.src='/assets/images/logo-federacao.png';}else if(this.dataset.retry==1){this.dataset.retry=2;this.src='assets/logo.png';}" />
             </div>
             <div class="min-w-0 sidebar-text">
               <h1 class="font-oswald text-base uppercase font-bold text-white tracking-wide truncate">
@@ -12130,8 +12130,8 @@
       <!-- Topo do Modal -->
       <div class="flex items-start justify-between border-b border-[#1c253b] pb-4">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-pe-gold/20 to-amber-500/10 border border-pe-gold/40 flex items-center justify-center shrink-0 shadow-lg">
-            <img src="assets/images/logo-federacao.png" alt="FPEFT" class="w-9 h-9 object-contain" onerror="this.src='assets/logo.png'" />
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-pe-gold/20 to-amber-500/10 border border-pe-gold/40 flex items-center justify-center shrink-0 shadow-lg overflow-hidden p-1">
+            <img src="assets/images/logo-federacao.png" alt="FPEFT" class="w-full h-full object-contain rounded-full select-none pointer-events-none" draggable="false" onerror="if(!this.dataset.retry){this.dataset.retry=1;this.src='/assets/images/logo-federacao.png';}else if(this.dataset.retry==1){this.dataset.retry=2;this.src='assets/logo.png';}" />
           </div>
           <div>
             <div class="flex items-center gap-2">
@@ -12312,5 +12312,44 @@ Rodrigo Albuquerque; 333.444.555-66; Caruaru - PE; Central Foot Table; SOLO (IND
       Notícia atualizada com sucesso!
     </div>
   </div>
+  <!-- Blindagem e Imutabilidade da Identidade Visual Oficial -->
+  <style>
+    img[src*="logo-federacao"], img[alt*="Federação"], img[alt*="FPEFT"] {
+      user-select: none !important;
+      -webkit-user-drag: none !important;
+      pointer-events: none !important;
+    }
+  </style>
+  <script>
+    (function() {
+      const VALID_LOGOS = ['assets/images/logo-federacao.png', '/assets/images/logo-federacao.png', 'assets/logo.png', '/assets/logo.png', 'assets/logo-federacao.png', '/assets/logo-federacao.png'];
+      const lockLogos = () => {
+        document.querySelectorAll('img[src*="logo-federacao"], img[alt*="Federação"], img[alt="FPEFT"]').forEach(img => {
+          img.setAttribute('draggable', 'false');
+          img.addEventListener('contextmenu', e => e.preventDefault());
+        });
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', lockLogos);
+      } else {
+        lockLogos();
+      }
+      if (window.MutationObserver) {
+        new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
+              const target = mutation.target;
+              if (target.tagName === 'IMG' && ((target.getAttribute('alt') || '').includes('Federação') || target.getAttribute('alt') === 'FPEFT')) {
+                const currentSrc = target.getAttribute('src') || '';
+                if (!VALID_LOGOS.some(v => currentSrc.endsWith(v))) {
+                  target.setAttribute('src', 'assets/images/logo-federacao.png');
+                }
+              }
+            }
+          });
+        }).observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ['src'] });
+      }
+    })();
+  </script>
 </body>
 </html>

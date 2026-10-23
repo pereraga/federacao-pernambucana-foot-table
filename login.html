@@ -85,7 +85,7 @@
       <!-- Brand & Emblema Oficial da Federação -->
       <a href="index.html" class="flex items-center gap-3 group shrink-0">
         <div class="rounded-full bg-pe-darkblue border-2 border-pe-gold shadow-[0_0_15px_rgba(245,184,0,0.4)] flex items-center justify-center p-0.5 overflow-hidden group-hover:scale-105 transition-transform duration-200 shrink-0" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px;">
-          <img src="assets/images/logo-federacao.png" alt="Federação Pernambucana Foot Table" class="w-full h-full object-contain rounded-full block" style="max-width: 100%; max-height: 100%;" />
+          <img src="assets/images/logo-federacao.png" alt="Federação Pernambucana Foot Table" class="w-full h-full object-contain rounded-full block select-none pointer-events-none" draggable="false" style="max-width: 100%; max-height: 100%;" onerror="if(!this.dataset.retry){this.dataset.retry=1;this.src='/assets/images/logo-federacao.png';}else if(this.dataset.retry==1){this.dataset.retry=2;this.src='assets/logo.png';}" />
         </div>
         
         <div class="flex flex-col justify-center">
@@ -115,8 +115,8 @@
       
       <!-- Brasão Oficial em Destaque -->
       <div class="text-center mb-5">
-        <div class="inline-flex p-1 rounded-full bg-pe-darkblue border-2 border-pe-gold shadow-[0_0_20px_rgba(245,184,0,0.35)] mb-3" style="width: 72px; height: 72px; min-width: 72px; min-height: 72px;">
-          <img src="assets/images/logo-federacao.png" alt="Brasão Federação Pernambucana" class="w-full h-full object-contain rounded-full" />
+        <div class="inline-flex p-1 rounded-full bg-pe-darkblue border-2 border-pe-gold shadow-[0_0_20px_rgba(245,184,0,0.35)] mb-3 overflow-hidden" style="width: 72px; height: 72px; min-width: 72px; min-height: 72px;">
+          <img src="assets/images/logo-federacao.png" alt="Brasão Federação Pernambucana" class="w-full h-full object-contain rounded-full select-none pointer-events-none" draggable="false" onerror="if(!this.dataset.retry){this.dataset.retry=1;this.src='/assets/images/logo-federacao.png';}else if(this.dataset.retry==1){this.dataset.retry=2;this.src='assets/logo.png';}" />
         </div>
 
         <h1 class="font-oswald text-2xl sm:text-3xl uppercase font-extrabold text-white tracking-wide">
@@ -559,6 +559,45 @@
         document.getElementById('adminUser').value = savedUser;
       }
     });
+  </script>
+  <!-- Blindagem e Imutabilidade da Identidade Visual Oficial -->
+  <style>
+    img[src*="logo-federacao"], img[alt*="Federação"], img[alt*="Brasão"] {
+      user-select: none !important;
+      -webkit-user-drag: none !important;
+      pointer-events: none !important;
+    }
+  </style>
+  <script>
+    (function() {
+      const VALID_LOGOS = ['assets/images/logo-federacao.png', '/assets/images/logo-federacao.png', 'assets/logo.png', '/assets/logo.png', 'assets/logo-federacao.png', '/assets/logo-federacao.png'];
+      const lockLogos = () => {
+        document.querySelectorAll('img[src*="logo-federacao"], img[alt*="Federação"], img[alt*="Brasão"]').forEach(img => {
+          img.setAttribute('draggable', 'false');
+          img.addEventListener('contextmenu', e => e.preventDefault());
+        });
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', lockLogos);
+      } else {
+        lockLogos();
+      }
+      if (window.MutationObserver) {
+        new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
+              const target = mutation.target;
+              if (target.tagName === 'IMG' && ((target.getAttribute('alt') || '').includes('Federação') || (target.getAttribute('alt') || '').includes('Brasão'))) {
+                const currentSrc = target.getAttribute('src') || '';
+                if (!VALID_LOGOS.some(v => currentSrc.endsWith(v))) {
+                  target.setAttribute('src', 'assets/images/logo-federacao.png');
+                }
+              }
+            }
+          });
+        }).observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ['src'] });
+      }
+    })();
   </script>
 </body>
 </html>

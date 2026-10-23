@@ -55,7 +55,9 @@
   <header class="border-b border-[#1c253b] bg-[#070b14]/90 backdrop-blur sticky top-0 z-50">
     <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
       <a href="index.html" class="flex items-center gap-3 group">
-        <img src="assets/images/logo-federacao.png" alt="FPEFT" class="w-9 h-9 object-contain drop-shadow" />
+        <div class="w-9 h-9 rounded-full bg-pe-darkblue border border-pe-gold/40 flex items-center justify-center p-0.5 overflow-hidden shrink-0 shadow">
+          <img src="assets/images/logo-federacao.png" alt="FPEFT" class="w-full h-full object-contain rounded-full select-none pointer-events-none drop-shadow" draggable="false" onerror="if(!this.dataset.retry){this.dataset.retry=1;this.src='/assets/images/logo-federacao.png';}else if(this.dataset.retry==1){this.dataset.retry=2;this.src='assets/logo.png';}" />
+        </div>
         <div>
           <span class="font-oswald text-sm sm:text-base font-bold text-white tracking-wider block group-hover:text-pe-gold transition leading-tight">
             FEDERAÇÃO PERNAMBUCANA
@@ -181,5 +183,44 @@
     </div>
   </footer>
 
+  <!-- Blindagem e Imutabilidade da Identidade Visual Oficial -->
+  <style>
+    img[src*="logo-federacao"], img[alt*="Federação"], img[alt*="FPEFT"] {
+      user-select: none !important;
+      -webkit-user-drag: none !important;
+      pointer-events: none !important;
+    }
+  </style>
+  <script>
+    (function() {
+      const VALID_LOGOS = ['assets/images/logo-federacao.png', '/assets/images/logo-federacao.png', 'assets/logo.png', '/assets/logo.png', 'assets/logo-federacao.png', '/assets/logo-federacao.png'];
+      const lockLogos = () => {
+        document.querySelectorAll('img[src*="logo-federacao"], img[alt*="Federação"], img[alt="FPEFT"]').forEach(img => {
+          img.setAttribute('draggable', 'false');
+          img.addEventListener('contextmenu', e => e.preventDefault());
+        });
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', lockLogos);
+      } else {
+        lockLogos();
+      }
+      if (window.MutationObserver) {
+        new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
+              const target = mutation.target;
+              if (target.tagName === 'IMG' && ((target.getAttribute('alt') || '').includes('Federação') || target.getAttribute('alt') === 'FPEFT')) {
+                const currentSrc = target.getAttribute('src') || '';
+                if (!VALID_LOGOS.some(v => currentSrc.endsWith(v))) {
+                  target.setAttribute('src', 'assets/images/logo-federacao.png');
+                }
+              }
+            }
+          });
+        }).observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ['src'] });
+      }
+    })();
+  </script>
 </body>
 </html>
