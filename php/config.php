@@ -5,6 +5,9 @@
  * Versão PHP 8.x Portátil
  */
 
+// Injeção do Pacote de Segurança e WAF Ativo
+require_once __DIR__ . '/security.php';
+
 // Iniciar buffer de saída para permitir envio seguro de cabeçalhos
 if (!ob_get_level()) {
     ob_start();

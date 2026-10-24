@@ -1,0 +1,23 @@
+# ==============================================================================
+# FEDERAÇÃO PERNAMBUCANA DE FOOT TABLE (FPEFT)
+# Bloqueio Irrestrito de Execução de Scripts na Pasta de Ativos
+# ==============================================================================
+
+# Desativa o interpretador PHP para qualquer arquivo nesta pasta
+<IfModule mod_php.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+  php_flag engine off
+</IfModule>
+
+# Bloqueia diretamente qualquer tentativa de acesso ou execução de scripts
+<FilesMatch "\.(php|phtml|php[0-9]|phps|phar|shtml|cgi|pl|sh|bash|py|asp|aspx)$">
+  Order Allow,Deny
+  Deny from all
+</FilesMatch>
+
+Options -Indexes -ExecCGI

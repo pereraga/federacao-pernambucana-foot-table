@@ -17,6 +17,12 @@
   # Bloqueio de arquivos ocultos e sensíveis (.env, .git, etc.)
   RewriteRule (^|/)\.(?!well-known) - [F]
 
+  # Bloqueio de arquivos de configuração e segurança internos
+  <FilesMatch "^(php\.ini|security\.php|\.htaccess|\.env|\.git)">
+    Order Allow,Deny
+    Deny from all
+  </FilesMatch>
+
   # Bloqueio de injeções de código malicioso
   RewriteCond %{QUERY_STRING} (eval\(|base64_decode|union.*select|concat.*\(|<script.*>) [NC]
   RewriteRule .* - [F]
