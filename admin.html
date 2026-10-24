@@ -7715,7 +7715,31 @@
       // 5. Controle Inteligente de Câmera com Permissão do Navegador, Visto (✓) e Lixeira (🗑️)
       let athleteWebcamStream = null;
       let athleteCameraFacingMode = 'user';
+      let athleteCameraMirrored = true; // Câmera invertida (espelho) ativada por padrão para visualização correta do atleta
       let currentPendingPhotoDataUrl = null;
+
+      function updateAthleteVideoMirroring() {
+        const video = document.getElementById('webcamAthleteVideo');
+        if (video) {
+          const transformVal = athleteCameraMirrored ? 'scaleX(-1)' : 'scaleX(1)';
+          video.style.transform = transformVal;
+          video.style.webkitTransform = transformVal;
+        }
+        const mirrorBtns = document.querySelectorAll('.btn-mirror-camera-indicator');
+        mirrorBtns.forEach(btn => {
+          if (athleteCameraMirrored) {
+            btn.classList.add('bg-pe-gold/20', 'text-pe-gold', 'border-pe-gold/60');
+          } else {
+            btn.classList.remove('bg-pe-gold/20', 'text-pe-gold', 'border-pe-gold/60');
+          }
+        });
+      }
+
+      window.toggleAthleteCameraMirror = function() {
+        athleteCameraMirrored = !athleteCameraMirrored;
+        updateAthleteVideoMirroring();
+        showToast(athleteCameraMirrored ? '↔️ Câmera invertida (Modo Espelho Ativado)' : '↔️ Câmera padrão direto (Espelho Desativado)');
+      };
 
       async function startAthleteCameraStream(facingMode) {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -7746,6 +7770,7 @@
           video.srcObject = stream;
           video.setAttribute('playsinline', 'true');
           video.setAttribute('muted', 'true');
+          updateAthleteVideoMirroring();
           await video.play();
         }
         return stream;
@@ -7766,6 +7791,7 @@
         const subtitle = document.getElementById('webcamModalSubtitle');
 
         currentPendingPhotoDataUrl = null;
+        updateAthleteVideoMirroring();
 
         if (snapshotPreview) {
           snapshotPreview.src = '';
@@ -7808,9 +7834,12 @@
 
       window.flipAthleteCamera = async function() {
         athleteCameraFacingMode = athleteCameraFacingMode === 'user' ? 'environment' : 'user';
+        // Se for frontal, mantém espelhado por padrão para enquadramento correto; se traseira, desliga espelho
+        athleteCameraMirrored = (athleteCameraFacingMode === 'user');
         try {
           await startAthleteCameraStream(athleteCameraFacingMode);
-          showToast(athleteCameraFacingMode === 'environment' ? '📷 Câmera traseira ativada' : '🤳 Câmera frontal ativada');
+          updateAthleteVideoMirroring();
+          showToast(athleteCameraFacingMode === 'environment' ? '📷 Câmera traseira ativada' : '🤳 Câmera frontal invertida (modo espelho)');
         } catch (err) {
           console.warn('Não foi possível alternar de câmera:', err);
           showToast('Não foi possível alternar a câmera neste aparelho.', true);
@@ -7845,7 +7874,15 @@
           sy = 0;
         }
 
+        // Se a câmera estiver em modo espelho, inverte o desenho para a foto final bater 100% com o visor
+        if (athleteCameraMirrored) {
+          ctx.translate(420, 0);
+          ctx.scale(-1, 1);
+        }
+
         ctx.drawImage(video, sx, sy, sWidth, sHeight, 0, 0, 420, 560);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+
         const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
 
         openAthletePhotoConfirmationModal(dataUrl);
@@ -14384,6 +14421,11 @@ Rodrigo Albuquerque; 333.444.555-66; Caruaru - PE; Central Foot Table; SOLO (IND
           </div>
         </div>
         <div class="flex items-center gap-1.5">
+          <!-- Botão Inverter Câmera (Espelhar) -->
+          <button type="button" onclick="toggleAthleteCameraMirror()" class="btn-mirror-camera-indicator text-slate-300 hover:text-pe-gold bg-[#141d33] hover:bg-[#1c2846] px-2.5 py-1.5 rounded-lg text-xs cursor-pointer border border-[#1c253b] flex items-center gap-1 transition" title="Inverter / Espelhar Câmera Horizontalmente">
+            <i class="fa-solid fa-arrows-left-right text-xs"></i>
+            <span class="text-[10px] font-bold">Inverter</span>
+          </button>
           <button type="button" id="btnFlipAthleteCamera" onclick="flipAthleteCamera()" class="text-slate-300 hover:text-pe-gold bg-[#141d33] hover:bg-[#1c2846] px-2 py-1 rounded-lg text-xs cursor-pointer border border-[#1c253b] flex items-center gap-1" title="Alternar Câmera (Frontal / Traseira)">
             <i class="fa-solid fa-camera-rotate"></i>
             <span class="text-[10px] font-semibold hidden sm:inline">Virar</span>
@@ -14396,8 +14438,8 @@ Rodrigo Albuquerque; 333.444.555-66; Caruaru - PE; Central Foot Table; SOLO (IND
 
       <!-- Área de Visualização (Vídeo ao Vivo / Prévia da Foto) com Moldura Guia 3x4 -->
       <div class="relative w-full aspect-[3/4] max-h-[360px] bg-black rounded-xl overflow-hidden border border-pe-gold/50 flex items-center justify-center shadow-inner">
-        <!-- Vídeo da Câmera em Tempo Real -->
-        <video id="webcamAthleteVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
+        <!-- Vídeo da Câmera em Tempo Real (Invertido/Espelhado por padrão para enquadramento natural) -->
+        <video id="webcamAthleteVideo" autoplay playsinline muted class="w-full h-full object-cover" style="transform: scaleX(-1);"></video>
 
         <!-- Prévia Congelada para Confirmação -->
         <img id="webcamAthleteSnapshotPreview" class="hidden w-full h-full object-cover" alt="Foto Capturada" />
@@ -14411,12 +14453,16 @@ Rodrigo Albuquerque; 333.444.555-66; Caruaru - PE; Central Foot Table; SOLO (IND
 
       <!-- Controles: Modo 1 - Câmera ao Vivo (Tirar Foto) -->
       <div id="webcamControlsLive" class="w-full flex items-center justify-between gap-2 mt-3 pt-3 border-t border-[#1c253b]">
-        <button type="button" onclick="closeAthleteWebcam()" class="px-3.5 py-2.5 bg-[#05080e] hover:bg-[#152038] text-slate-300 text-xs font-bold rounded-xl border border-[#1c253b] transition cursor-pointer">
-          Cancelar
+        <button type="button" onclick="toggleAthleteCameraMirror()" class="btn-mirror-camera-indicator px-3 py-2.5 bg-[#05080e] hover:bg-[#152038] text-slate-300 hover:text-pe-gold text-xs font-bold rounded-xl border border-[#1c253b] transition cursor-pointer flex items-center gap-1.5 shadow" title="Inverter / Espelhar a visualização da câmera">
+          <i class="fa-solid fa-arrows-left-right text-xs"></i>
+          <span>Inverter</span>
         </button>
-        <button type="button" onclick="captureAthleteWebcamSnapshot()" class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-pe-gold hover:bg-pe-goldHover text-black font-extrabold text-xs uppercase rounded-xl shadow-lg transition cursor-pointer active:scale-95">
+        <button type="button" onclick="captureAthleteWebcamSnapshot()" class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-pe-gold hover:bg-pe-goldHover text-black font-extrabold text-xs uppercase rounded-xl shadow-lg transition cursor-pointer active:scale-95 min-h-[42px]">
           <i class="fa-solid fa-camera text-sm"></i>
           <span>📸 Tirar Foto</span>
+        </button>
+        <button type="button" onclick="closeAthleteWebcam()" class="px-3 py-2.5 bg-[#05080e] hover:bg-[#152038] text-slate-300 text-xs font-bold rounded-xl border border-[#1c253b] transition cursor-pointer">
+          Cancelar
         </button>
       </div>
 
