@@ -401,22 +401,66 @@
     </div>
   </section>
 
-  <!-- Seção de Notícias Dinâmicas -->
+  <!-- Seção de Notícias Dinâmicas (Inspirada no Portal de Notícias & Torneios) -->
   <section id="noticias" class="py-12 px-4 max-w-5xl mx-auto w-full flex-1">
-    <div class="flex items-center justify-between mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
       <div>
-        <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Boletim Informativo</span>
-        <h2 class="font-oswald text-3xl uppercase font-bold text-white">Notícias & Torneios</h2>
+        <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block mb-1">
+          <i class="fa-solid fa-bullhorn text-[11px] mr-1"></i> Boletim Informativo Oficial
+        </span>
+        <h2 class="font-oswald text-3xl sm:text-4xl uppercase font-bold text-white">Notícias &amp; Torneios</h2>
+        <p class="text-xs text-slate-400 mt-1 max-w-xl">
+          Resultados oficiais, cobertura dos campeonatos, notas da federação e regulamentos homologados.
+        </p>
       </div>
-      <div class="flex items-center gap-3">
-        <a href="noticias.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-pe-card hover:bg-pe-darkblue border border-pe-cardBorder hover:border-pe-gold/60 text-xs font-bold text-pe-gold uppercase tracking-wider transition">
-          <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-          <span>Portal Completo</span>
+      <div class="flex items-center gap-3 shrink-0">
+        <a href="noticias.html" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-oswald font-bold text-xs uppercase tracking-wider transition shadow-md">
+          <i class="fa-solid fa-pen-to-square text-xs"></i>
+          <span>Publicar / Portal Completo</span>
         </a>
-        <div class="text-xs text-slate-400 font-mono flex items-center gap-2">
+        <div class="text-xs text-slate-400 font-mono hidden sm:flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-          Feed Oficial
+          Feed Atualizado
         </div>
+      </div>
+    </div>
+
+    <!-- Barra de Ferramentas: Busca e Filtros de Categoria -->
+    <div class="bg-pe-card border border-pe-cardBorder rounded-2xl p-4 sm:p-5 mb-6 backdrop-blur-md">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+        <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-300">
+          <i class="fa-solid fa-newspaper text-pe-gold text-sm"></i>
+          <span>Notícias no Ar</span>
+        </div>
+        <div class="relative w-full sm:w-64">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+          <input 
+            type="text" 
+            id="publicSearchNews" 
+            oninput="handlePublicNewsSearch()"
+            placeholder="Buscar por título ou tema..." 
+            class="w-full bg-pe-inputBg border border-pe-cardBorder rounded-xl pl-8 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-pe-gold transition"
+          >
+        </div>
+      </div>
+
+      <!-- Filtros de Categoria em Pills -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <button onclick="filterPublicNewsCategory('TODAS')" class="pub-filter-btn active-pub-filter px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide uppercase transition bg-pe-blue text-white shadow-sm">
+          TODAS
+        </button>
+        <button onclick="filterPublicNewsCategory('CAMPEONATO')" class="pub-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide uppercase transition bg-pe-inputBg text-slate-400 hover:text-white border border-pe-cardBorder">
+          CAMPEONATO
+        </button>
+        <button onclick="filterPublicNewsCategory('MUNDIAL ROMA')" class="pub-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide uppercase transition bg-pe-inputBg text-slate-400 hover:text-white border border-pe-cardBorder">
+          MUNDIAL ROMA
+        </button>
+        <button onclick="filterPublicNewsCategory('REGULAMENTO')" class="pub-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide uppercase transition bg-pe-inputBg text-slate-400 hover:text-white border border-pe-cardBorder">
+          REGULAMENTO
+        </button>
+        <button onclick="filterPublicNewsCategory('NOTAS OFICIAIS')" class="pub-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide uppercase transition bg-pe-inputBg text-slate-400 hover:text-white border border-pe-cardBorder">
+          NOTAS OFICIAIS
+        </button>
       </div>
     </div>
 
@@ -714,8 +758,94 @@
        RENDERIZADOR DE NOTÍCIAS PÚBLICAS (SUPABASE + CACHE LOCAL)
        ======================================================= */
     let _lastNewsFetchTime = 0;
+    let currentPublicNewsFilter = 'TODAS';
+
+    function filterPublicNewsCategory(cat) {
+      currentPublicNewsFilter = cat;
+      const btns = document.querySelectorAll('.pub-filter-btn');
+      btns.forEach(b => {
+        if (b.innerText.trim() === cat) {
+          b.className = 'pub-filter-btn active-pub-filter px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide uppercase transition bg-pe-blue text-white shadow-sm';
+        } else {
+          b.className = 'pub-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide uppercase transition bg-pe-inputBg text-slate-400 hover:text-white border border-pe-cardBorder';
+        }
+      });
+      renderPublicNews();
+    }
+
+    function handlePublicNewsSearch() {
+      renderPublicNews();
+    }
+
+    function openPublicNewsModal(id) {
+      const newsList = getStoredNews();
+      const item = newsList.find(n => String(n.id) === String(id));
+      if (!item) return;
+
+      let dataFormatada = item.date || 'Recente';
+      if (item.date && item.date.includes('-')) {
+        const [ano, mes, dia] = item.date.split('-');
+        dataFormatada = `${dia}/${mes}/${ano}`;
+      }
+
+      const catEl = document.getElementById('pubModalCategory');
+      if (catEl) catEl.innerText = item.category || 'INFORMATIVO';
+      const dateEl = document.getElementById('pubModalDate');
+      if (dateEl) dateEl.innerText = dataFormatada;
+      const titleEl = document.getElementById('pubModalTitle');
+      if (titleEl) titleEl.innerText = item.title;
+      const excerptEl = document.getElementById('pubModalExcerpt');
+      if (excerptEl) excerptEl.innerText = item.excerpt ? `"${item.excerpt}"` : '';
+      const contentEl = document.getElementById('pubModalFullContent');
+      if (contentEl) contentEl.innerText = item.content || item.excerpt || '';
+
+      const imgContainer = document.getElementById('pubModalImageContainer');
+      const imgTag = document.getElementById('pubModalImage');
+      if (item.image) {
+        if (imgTag) imgTag.src = item.image;
+        if (imgContainer) imgContainer.classList.remove('hidden');
+      } else {
+        if (imgContainer) imgContainer.classList.add('hidden');
+      }
+
+      const pdfArea = document.getElementById('pubModalPdfArea');
+      const pdfLink = document.getElementById('pubModalPdfLink');
+      const link = item.pdfLink || item.link;
+      if (link) {
+        if (pdfLink) pdfLink.href = link;
+        if (pdfArea) pdfArea.classList.remove('hidden');
+      } else {
+        if (pdfArea) pdfArea.classList.add('hidden');
+      }
+
+      const modal = document.getElementById('publicNewsModal');
+      const card = document.getElementById('publicNewsModalCard');
+      if (modal && card) {
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+          modal.classList.remove('opacity-0');
+          card.classList.remove('scale-95');
+          card.classList.add('scale-100');
+        }, 10);
+      }
+    }
+
+    function closePublicNewsModal() {
+      const modal = document.getElementById('publicNewsModal');
+      const card = document.getElementById('publicNewsModalCard');
+      if (modal && card) {
+        modal.classList.add('opacity-0');
+        card.classList.remove('scale-100');
+        card.classList.add('scale-95');
+        setTimeout(() => {
+          modal.classList.add('hidden');
+        }, 300);
+      }
+    }
+
     async function renderPublicNews(force = false) {
       const container = document.getElementById('publicNewsContainer');
+      if (!container) return;
       let newsList = getStoredNews();
 
       const now = Date.now();
@@ -748,45 +878,64 @@
         }
       }
 
+      const searchInput = document.getElementById('publicSearchNews');
+      const searchTerm = (searchInput ? searchInput.value : '').toLowerCase().trim();
+
+      let filtered = newsList.filter(item => {
+        const matchesCategory = currentPublicNewsFilter === 'TODAS' || item.category === currentPublicNewsFilter;
+        const matchesSearch = !searchTerm || 
+                              (item.title && item.title.toLowerCase().includes(searchTerm)) || 
+                              (item.content && item.content.toLowerCase().includes(searchTerm)) ||
+                              (item.category && item.category.toLowerCase().includes(searchTerm));
+        return matchesCategory && matchesSearch;
+      });
+
       container.innerHTML = "";
 
-      if (newsList.length === 0) {
+      if (filtered.length === 0) {
         container.innerHTML = `
           <div class="bg-pe-card border border-pe-cardBorder rounded-xl p-8 text-center text-slate-400 text-xs">
-            Nenhuma notícia publicada no momento pela Federação.
+            <i class="fa-regular fa-folder-open text-3xl text-slate-600 mb-2 block"></i>
+            Nenhuma notícia encontrada com os filtros selecionados.
           </div>
         `;
         return;
       }
 
-      newsList.forEach(item => {
+      filtered.forEach(item => {
         let tagColor = "bg-pe-blue text-white";
         if (item.category && item.category.includes('MUNDIAL')) tagColor = "bg-pe-gold text-pe-dark font-extrabold";
         if (item.category && item.category.includes('REGULAMENTO')) tagColor = "bg-pe-red text-white";
+        if (item.category && item.category.includes('NOTAS')) tagColor = "bg-emerald-600 text-white font-bold";
 
         const card = document.createElement('article');
-        card.className = "bg-pe-card border border-pe-cardBorder hover:border-pe-gold/60 transition p-4 sm:p-5 rounded-xl flex flex-col md:flex-row items-stretch md:items-center gap-4 group";
+        card.className = "bg-pe-card border border-pe-cardBorder hover:border-pe-gold/60 transition p-4 sm:p-5 rounded-2xl flex flex-col md:flex-row items-stretch md:items-center gap-4 group backdrop-blur-md relative overflow-hidden";
         
         const imageHtml = item.image ? `
           <div class="w-full md:w-52 h-44 md:h-32 rounded-xl overflow-hidden shrink-0 bg-[#070a13] border border-pe-cardBorder relative">
-            <img src="${item.image}" alt="${item.title || 'Foto Notícia'}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy" onerror="this.parentElement.style.display='none'">
+            <img src="${item.image}" alt="${escapeHTML(item.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy" onerror="this.parentElement.style.display='none'">
           </div>
         ` : '';
 
+        const safeTitle = escapeHTML(item.title);
+        const safeContent = escapeHTML(item.content || item.summary || '');
+
         card.innerHTML = `
           ${imageHtml}
-          <div class="space-y-1.5 flex-1 min-w-0">
+          <div class="space-y-2 flex-1 min-w-0">
             <div class="flex items-center justify-between flex-wrap gap-2">
               <div class="flex items-center gap-2">
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded ${tagColor} uppercase tracking-wider">${item.category || 'INFORMATIVO'}</span>
-                <span class="text-[11px] text-slate-500 font-mono">${item.date || 'Recente'}</span>
+                <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-md ${tagColor} uppercase tracking-wider">${escapeHTML(item.category || 'INFORMATIVO')}</span>
+                <span class="text-[11px] text-slate-400 font-mono flex items-center gap-1">
+                  <i class="fa-regular fa-calendar text-[10px]"></i> ${item.date || 'Recente'}
+                </span>
               </div>
-              <a href="noticias.html" class="text-[11px] font-bold text-pe-gold hover:underline flex items-center gap-1">
-                <span>Ler no Portal Oficial</span> <i class="fa-solid fa-arrow-right text-[9px]"></i>
-              </a>
+              <button onclick="openPublicNewsModal('${item.id}')" class="text-xs font-bold text-pe-gold hover:text-amber-300 transition flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-eye text-xs"></i> <span>Ler Notícia Completa</span>
+              </button>
             </div>
-            <h3 class="font-oswald text-base sm:text-lg uppercase font-bold text-white leading-snug group-hover:text-blue-300 transition">${item.title}</h3>
-            <p class="text-xs text-slate-400 leading-relaxed line-clamp-3">${item.content}</p>
+            <h3 class="font-oswald text-lg sm:text-xl uppercase font-bold text-white leading-snug group-hover:text-pe-gold transition">${safeTitle}</h3>
+            <p class="text-xs text-slate-300 leading-relaxed line-clamp-3">${safeContent}</p>
           </div>
         `;
         container.appendChild(card);
@@ -1404,5 +1553,50 @@
       }
     })();
   </script>
+  <!-- MODAL: Leitura Completa da Matéria Oficial -->
+  <div id="publicNewsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+    <div class="bg-[#0b0f19] border border-white/15 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl transform scale-95 transition-transform duration-300" id="publicNewsModalCard">
+      <!-- Topo Modal -->
+      <div class="p-6 border-b border-white/10 flex items-start justify-between">
+        <div class="pr-4">
+          <div class="flex items-center gap-2 mb-2">
+            <span id="pubModalCategory" class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-blue-500/20 text-blue-400 border border-blue-500/30"></span>
+            <span id="pubModalDate" class="text-xs text-slate-400 font-mono"></span>
+          </div>
+          <h3 id="pubModalTitle" class="text-xl sm:text-2xl font-oswald uppercase font-bold text-white leading-tight"></h3>
+        </div>
+        <button onclick="closePublicNewsModal()" class="text-slate-400 hover:text-white p-2 rounded-lg bg-dark-800 transition shrink-0 cursor-pointer">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Conteúdo com Scroll -->
+      <div class="p-6 overflow-y-auto space-y-4 text-slate-300 text-sm leading-relaxed">
+        <div id="pubModalImageContainer" class="hidden rounded-xl overflow-hidden mb-4 border border-white/10 max-h-72">
+          <img id="pubModalImage" src="" alt="Capa" class="w-full h-full object-cover">
+        </div>
+
+        <p id="pubModalExcerpt" class="text-amber-200/90 font-medium text-base italic border-l-2 border-pe-gold pl-3 py-1 bg-amber-500/5 rounded-r-lg"></p>
+        
+        <div id="pubModalFullContent" class="space-y-3 whitespace-pre-line text-slate-300 text-sm leading-relaxed"></div>
+
+        <div id="pubModalPdfArea" class="hidden pt-4 border-t border-white/10">
+          <a id="pubModalPdfLink" href="#" target="_blank" class="inline-flex items-center gap-2 text-xs font-mono font-semibold px-4 py-2.5 rounded-xl bg-dark-800 hover:bg-dark-700 text-white border border-white/10 transition-colors">
+            <i class="fa-solid fa-file-pdf text-red-400"></i>
+            <span>Acessar Documento / PDF Oficial Anexo</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400 ml-1"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Rodapé Modal -->
+      <div class="p-4 bg-dark-950/60 border-t border-white/10 flex justify-end">
+        <button onclick="closePublicNewsModal()" class="px-5 py-2 rounded-xl text-xs font-bold text-slate-300 bg-dark-800 hover:bg-dark-700 transition-colors cursor-pointer">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
