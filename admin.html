@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261024_v42_news_preview_modal';
+      const APP_REV = '20261024_v43_fix_modal_nesting';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -10366,13 +10366,24 @@
     function promptDelete(id) {
       pendingDeleteId = id;
       const modal = document.getElementById('delete-modal');
-      if (modal) modal.classList.remove('hidden');
+      if (modal) {
+        if (modal.parentElement !== document.body) {
+          document.body.appendChild(modal);
+        }
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        modal.style.display = 'flex';
+      }
     }
 
     function closeDeleteModal() {
       pendingDeleteId = null;
       const modal = document.getElementById('delete-modal');
-      if (modal) modal.classList.add('hidden');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        modal.style.display = 'none';
+      }
     }
 
     async function confirmDeleteNews() {
@@ -10501,6 +10512,9 @@
 
       const modal = document.getElementById('preview-modal');
       if (modal) {
+        if (modal.parentElement !== document.body) {
+          document.body.appendChild(modal);
+        }
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         modal.style.display = 'flex';
@@ -13039,6 +13053,8 @@ Rodrigo Albuquerque; 333.444.555-66; Caruaru - PE; Central Foot Table; SOLO (IND
         </div>
       </div>
     </div>
+  </div>
+
   <!-- Modal de Confirmação de Exclusão de Notícias -->
   <div id="delete-modal" class="fixed inset-0 z-[10000] bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-[#0f172a] border border-[#1e293b] max-w-sm w-full rounded-2xl p-6 text-center shadow-2xl space-y-4">
