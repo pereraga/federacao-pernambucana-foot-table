@@ -9,7 +9,7 @@
   <!-- Forçar carregamento da versão mais recente sem cache residual do navegador -->
   <script>
     (function() {
-      const APP_REV = '20261008_v41_dynamic_screen_autofit';
+      const APP_REV = '20261024_v42_news_preview_modal';
       if (!window.location.search.includes('v=' + APP_REV)) {
         const u = new URL(window.location.href);
         u.searchParams.set('v', APP_REV);
@@ -9082,6 +9082,8 @@
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         fecharModalVerCarteira();
+        if (typeof closePreviewModal === 'function') closePreviewModal();
+        if (typeof closeDeleteModal === 'function') closeDeleteModal();
         if (typeof closeEditInstitutionalAdminModal === 'function') closeEditInstitutionalAdminModal();
         if (typeof closeRoleOperationsModal === 'function') closeRoleOperationsModal();
         if (typeof closeAddCustomOperationModal === 'function') closeAddCustomOperationModal();
@@ -10071,7 +10073,8 @@
 
     function formatDate(dateStr) {
       if (!dateStr) return '';
-      const parts = dateStr.split('-');
+      const cleanDate = String(dateStr).includes('T') ? String(dateStr).split('T')[0] : String(dateStr);
+      const parts = cleanDate.split('-');
       if (parts.length === 3) {
         return `${parts[2]}/${parts[1]}/${parts[0]}`;
       }
@@ -10178,6 +10181,7 @@
           <div class="flex items-center justify-between pt-2 border-t border-[#1e293b]/60 text-xs">
             <div class="flex items-center gap-3">
               <button 
+                type="button"
                 onclick="editNews('${item.id}')" 
                 class="text-slate-300 hover:text-[#f59e0b] flex items-center gap-1.5 transition font-medium cursor-pointer"
               >
@@ -10185,6 +10189,7 @@
               </button>
 
               <button 
+                type="button"
                 onclick="openPreviewModal('${item.id}')" 
                 class="text-slate-400 hover:text-blue-400 flex items-center gap-1.5 transition font-medium cursor-pointer"
               >
@@ -10400,56 +10405,117 @@
       closeDeleteModal();
     }
 
-    function openPreviewModal(id) {
-      const item = newsItems.find(n => String(n.id) === String(id));
-      if (!item) return;
+    async function openPreviewModal(id) {
+      let item = newsItems.find(n => String(n.id) === String(id));
+      if (!item) {
+        try {
+          const raw = localStorage.getItem('pe_news_db') || localStorage.getItem('foot_table_news_db');
+          if (raw) {
+            const arr = JSON.parse(raw);
+            if (Array.isArray(arr)) {
+              item = arr.find(n => String(n.id) === String(id));
+            }
+          }
+        } catch (e) {}
+      }
+      if (!item && supabaseClient) {
+        try {
+          const { data } = await supabaseClient.from('noticias').select('*').eq('id', id).single();
+          if (data) {
+            item = {
+              id: data.id,
+              title: data.titulo || data.title || '',
+              category: data.categoria || data.category || 'INFORMATIVO',
+              date: data.data_publicacao || (data.created_at ? data.created_at.split('T')[0] : ''),
+              featured: !!data.destaque || !!data.featured,
+              image: data.imagem_url || data.imagem || data.image || '',
+              summary: data.resumo || data.summary || (data.conteudo ? data.conteudo.slice(0, 180) : ''),
+              content: data.conteudo || data.content || '',
+              link: data.link || ''
+            };
+          }
+        } catch (e) {}
+      }
+      if (!item && newsItems && newsItems.length > 0) {
+        item = newsItems[0];
+      }
+      if (!item) {
+        if (typeof showToast === 'function') {
+          showToast("Matéria não encontrada para pré-visualização.", true);
+        }
+        return;
+      }
 
       const body = document.getElementById('preview-modal-body');
       if (!body) return;
 
+      const imageSrc = item.image || item.imagem || item.imagem_url || '';
+      const itemTitle = item.title || item.titulo || 'Sem Título';
+      const itemCategory = item.category || item.categoria || 'INFORMATIVO';
+      const itemDate = item.date || item.data_publicacao || '';
+      const itemSummary = item.summary || item.resumo || (item.content ? item.content.slice(0, 180) : '') || '';
+      const itemContent = item.content || item.conteudo || itemSummary || 'Nenhum texto adicional inserido para esta notícia.';
+      const itemLink = item.link || item.pdfLink || item.pdf_url || '';
+
       body.innerHTML = `
-        ${item.image ? `
-          <div class="w-full h-48 sm:h-64 rounded-xl overflow-hidden border border-[#1e293b]">
-            <img src="${item.image}" alt="${escapeHTML(item.title)}" class="w-full h-full object-cover">
+        ${imageSrc ? `
+          <div class="w-full h-48 sm:h-64 rounded-xl overflow-hidden border border-[#1e293b] bg-black/40">
+            <img src="${imageSrc}" alt="${escapeHTML(itemTitle)}" class="w-full h-full object-cover">
           </div>
         ` : ''}
 
-        <div class="flex items-center gap-2 text-xs">
-          <span class="bg-blue-600 text-white font-bold px-2 py-0.5 rounded text-[10px] uppercase">
-            ${escapeHTML(item.category)}
+        <div class="flex items-center gap-2 text-xs flex-wrap">
+          <span class="bg-blue-600 text-white font-bold px-2.5 py-1 rounded-md text-[10px] uppercase tracking-wider">
+            ${escapeHTML(itemCategory)}
           </span>
-          <span class="text-slate-400 font-mono">${formatDate(item.date)}</span>
-          ${item.featured ? '<span class="text-amber-400 font-bold text-[10px]"><i class="fa-solid fa-star"></i> Matéria em Destaque</span>' : ''}
+          <span class="text-slate-400 font-mono flex items-center gap-1">
+            <i class="fa-regular fa-calendar text-[11px]"></i> ${formatDate(itemDate)}
+          </span>
+          ${item.featured ? '<span class="text-amber-400 font-bold text-[10px] flex items-center gap-1"><i class="fa-solid fa-star text-amber-400"></i> Matéria em Destaque</span>' : ''}
         </div>
 
-        <h3 class="font-oswald font-black text-xl text-white uppercase leading-snug">
-          ${escapeHTML(item.title)}
+        <h3 class="font-oswald font-black text-xl sm:text-2xl text-white uppercase leading-snug">
+          ${escapeHTML(itemTitle)}
         </h3>
 
-        <p class="text-sm text-slate-300 font-medium border-l-2 border-[#f59e0b] pl-3 italic">
-          ${escapeHTML(item.summary || '')}
-        </p>
+        ${itemSummary ? `
+          <p class="text-sm text-amber-200/90 font-medium border-l-2 border-[#f59e0b] pl-3 py-1 bg-amber-500/5 rounded-r-lg italic">
+            ${escapeHTML(itemSummary)}
+          </p>
+        ` : ''}
 
-        <div class="text-xs text-slate-300 leading-relaxed whitespace-pre-line pt-2">
-          ${escapeHTML(item.content || item.summary || 'Nenhum texto adicional inserido para esta notícia.')}
+        <div class="text-xs sm:text-sm text-slate-300 leading-relaxed whitespace-pre-line pt-2 font-normal">
+          ${escapeHTML(itemContent)}
         </div>
 
-        ${item.link ? `
-          <div class="pt-3">
-            <a href="${item.link}" target="_blank" class="inline-flex items-center gap-2 text-xs text-blue-400 hover:text-blue-300 underline font-medium">
-              <i class="fa-solid fa-file-pdf"></i> Acessar Documento / Link Anexo
+        ${itemLink ? `
+          <div class="pt-3 border-t border-[#1e293b]">
+            <a href="${itemLink}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-xs font-semibold px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-[#1e293b] transition">
+              <i class="fa-solid fa-file-pdf text-red-400"></i>
+              <span>Acessar Documento / Link Anexo</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400 ml-1"></i>
             </a>
           </div>
         ` : ''}
       `;
 
       const modal = document.getElementById('preview-modal');
-      if (modal) modal.classList.remove('hidden');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+      }
     }
 
     function closePreviewModal() {
       const modal = document.getElementById('preview-modal');
-      if (modal) modal.classList.add('hidden');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+      }
     }
 
     function updateImagePreview(url) {
@@ -12997,13 +13063,13 @@ Rodrigo Albuquerque; 333.444.555-66; Caruaru - PE; Central Foot Table; SOLO (IND
   </div>
 
   <!-- Modal de Prévia da Notícia Completa -->
-  <div id="preview-modal" class="fixed inset-0 z-[10000] bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-[#0f172a] border border-[#1e293b] max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl p-6 space-y-4">
+  <div id="preview-modal" class="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 sm:p-5 overflow-y-auto" style="display: none;" onclick="if(event.target === this) closePreviewModal()">
+    <div class="bg-[#0f172a] border border-[#1e293b] max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl p-6 space-y-4 my-auto relative">
       <div class="flex items-center justify-between border-b border-[#1e293b] pb-3">
         <span class="text-xs font-bold text-[#f59e0b] uppercase tracking-wider flex items-center gap-1.5">
           <i class="fa-solid fa-eye"></i> Prévia da Matéria Oficial
         </span>
-        <button onclick="closePreviewModal()" class="text-slate-400 hover:text-white text-sm p-1 cursor-pointer">
+        <button type="button" onclick="closePreviewModal()" class="text-slate-400 hover:text-white text-sm p-1 cursor-pointer">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
@@ -13013,7 +13079,7 @@ Rodrigo Albuquerque; 333.444.555-66; Caruaru - PE; Central Foot Table; SOLO (IND
       </div>
 
       <div class="pt-3 border-t border-[#1e293b] text-right">
-        <button onclick="closePreviewModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-4 py-2 rounded-xl transition cursor-pointer">
+        <button type="button" onclick="closePreviewModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-4 py-2 rounded-xl transition cursor-pointer">
           Fechar Visualização
         </button>
       </div>

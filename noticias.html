@@ -1043,7 +1043,17 @@
 
     // Modal de Leitura Completa
     function openModal(id) {
-      const item = newsItems.find(n => String(n.id) === String(id));
+      let item = newsItems.find(n => String(n.id) === String(id));
+      if (!item) {
+        try {
+          const raw = localStorage.getItem('pe_news_db') || localStorage.getItem('foot_table_news_db');
+          if (raw) {
+            const arr = JSON.parse(raw);
+            if (Array.isArray(arr)) item = arr.find(n => String(n.id) === String(id));
+          }
+        } catch (e) {}
+      }
+      if (!item && newsItems && newsItems.length > 0) item = newsItems[0];
       if (!item) return;
 
       let dataFormatada = item.date || 'Recente';
