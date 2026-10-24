@@ -683,7 +683,7 @@
     const DEFAULT_ATHLETES = [];
 
     function getStoredNews() {
-      let list = JSON.parse(localStorage.getItem('pe_news_db')) || JSON.parse(localStorage.getItem('pe_futmesa_news'));
+      let list = JSON.parse(localStorage.getItem('pe_news_db')) || JSON.parse(localStorage.getItem('foot_table_news_db')) || JSON.parse(localStorage.getItem('pe_futmesa_news'));
       if (!list || !Array.isArray(list)) {
         list = [];
       }
@@ -736,10 +736,7 @@
             }));
             localStorage.setItem('pe_news_db', JSON.stringify(newsList));
           }
-        } catch (e) {
-            localStorage.setItem('pe_news_db', JSON.stringify(newsList));
-            _lastNewsFetchTime = now;
-          }
+          _lastNewsFetchTime = now;
         } catch (e) {
           console.warn("Supabase indisponível para notícias, usando fallback:", e);
         }
@@ -1257,8 +1254,8 @@
     }
 
     window.addEventListener('storage', (e) => {
-      if (e.key === 'pe_news_db' || e.key === 'pe_futmesa_news') {
-        renderPublicNews();
+      if (e.key === 'pe_news_db' || e.key === 'pe_futmesa_news' || e.key === 'foot_table_news_db') {
+        renderPublicNews(true);
       }
       if (e.key === 'pe_gallery_db') {
         renderPublicGallery();
@@ -1271,11 +1268,15 @@
       }
     });
     window.addEventListener('pe_gallery_updated', renderPublicGallery);
+    window.addEventListener('focus', () => {
+      renderPublicNews(true);
+      renderPublicGallery();
+    });
 
     // Inicialização ao carregar página (com suporte a leitura automática de QR Code via URL)
     async function initIndexApp() {
       await initSupabase();
-      renderPublicNews();
+      renderPublicNews(true);
       renderPublicGallery();
       applySavedBadgeLayout();
 
