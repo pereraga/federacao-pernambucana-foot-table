@@ -401,67 +401,16 @@
     </div>
   </section>
 
-  <!-- Seção de Notícias Dinâmicas (Inspirada no Portal de Notícias & Torneios) -->
+  <!-- Seção de Notícias Dinâmicas -->
   <section id="noticias" class="py-12 px-4 max-w-5xl mx-auto w-full flex-1">
-    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
-      <div>
-        <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block mb-1">
-          <i class="fa-solid fa-bullhorn text-[11px] mr-1"></i> Boletim Informativo Oficial
-        </span>
-        <h2 class="font-oswald text-3xl sm:text-4xl uppercase font-bold text-white">Notícias &amp; Torneios</h2>
-        <p class="text-xs text-slate-400 mt-1 max-w-xl">
-          Resultados oficiais, cobertura dos campeonatos, notas da federação e regulamentos homologados.
-        </p>
-      </div>
-      <div class="flex items-center gap-3 shrink-0">
-        <a href="noticias.html" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-oswald font-bold text-xs uppercase tracking-wider transition shadow-md">
-          <i class="fa-solid fa-pen-to-square text-xs"></i>
-          <span>Publicar / Portal Completo</span>
-        </a>
-        <div class="text-xs text-slate-400 font-mono hidden sm:flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-          Feed Atualizado
-        </div>
-      </div>
-    </div>
-
-    <!-- Barra de Ferramentas: Busca e Filtros de Categoria -->
-    <div class="bg-pe-card border border-pe-cardBorder rounded-2xl p-4 sm:p-5 mb-6 backdrop-blur-md">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
-        <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-300">
-          <i class="fa-solid fa-newspaper text-pe-gold text-sm"></i>
-          <span>Notícias no Ar</span>
-        </div>
-        <div class="relative w-full sm:w-64">
-          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-          <input 
-            type="text" 
-            id="publicSearchNews" 
-            oninput="handlePublicNewsSearch()"
-            placeholder="Buscar por título ou tema..." 
-            class="w-full bg-pe-inputBg border border-pe-cardBorder rounded-xl pl-8 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-pe-gold transition"
-          >
-        </div>
-      </div>
-
-      <!-- Filtros de Categoria em Pills -->
-      <div class="flex items-center gap-2 flex-wrap">
-        <button onclick="filterPublicNewsCategory('TODAS')" class="pub-filter-btn active-pub-filter px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide uppercase transition bg-pe-blue text-white shadow-sm">
-          TODAS
-        </button>
-        <button onclick="filterPublicNewsCategory('CAMPEONATO')" class="pub-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide uppercase transition bg-pe-inputBg text-slate-400 hover:text-white border border-pe-cardBorder">
-          CAMPEONATO
-        </button>
-        <button onclick="filterPublicNewsCategory('MUNDIAL ROMA')" class="pub-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide uppercase transition bg-pe-inputBg text-slate-400 hover:text-white border border-pe-cardBorder">
-          MUNDIAL ROMA
-        </button>
-        <button onclick="filterPublicNewsCategory('REGULAMENTO')" class="pub-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide uppercase transition bg-pe-inputBg text-slate-400 hover:text-white border border-pe-cardBorder">
-          REGULAMENTO
-        </button>
-        <button onclick="filterPublicNewsCategory('NOTAS OFICIAIS')" class="pub-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide uppercase transition bg-pe-inputBg text-slate-400 hover:text-white border border-pe-cardBorder">
-          NOTAS OFICIAIS
-        </button>
-      </div>
+    <div class="mb-6">
+      <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block mb-1">
+        <i class="fa-solid fa-bullhorn text-[11px] mr-1"></i> Boletim Informativo Oficial
+      </span>
+      <h2 class="font-oswald text-3xl sm:text-4xl uppercase font-bold text-white">Notícias &amp; Torneios</h2>
+      <p class="text-xs text-slate-400 mt-1 max-w-xl">
+        Resultados oficiais, cobertura dos campeonatos, notas da federação e regulamentos homologados.
+      </p>
     </div>
 
     <!-- Container de Notícias (Atualizado em tempo real caso venha de um CMS externo) -->
