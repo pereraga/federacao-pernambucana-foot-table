@@ -6,7 +6,7 @@ import { getSessionFromCookieHeader } from './api/lib/session.js';
 //          O ambiente local (localhost / 127.0.0.1) continua 100% liberado!
 // - false: Portal ativo e online para todo o público.
 // ==============================================================================
-export const MAINTENANCE_MODE = true;
+export const MAINTENANCE_MODE = false;
 
 // Rotas restritas que exigem sessão administrativa válida
 const RESTRICTED_ROUTES = ['/admin', '/admin.html', '/painel', '/api/gestao'];
