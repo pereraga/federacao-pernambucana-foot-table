@@ -1,6 +1,3 @@
-<?php
-require_once __DIR__ . '/config.php';
-?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -86,7 +83,7 @@ require_once __DIR__ . '/config.php';
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
       
       <!-- Brand & Emblema Oficial da Federação -->
-      <a href="index.php" class="flex items-center gap-3 group shrink-0">
+      <a href="index.html" class="flex items-center gap-3 group shrink-0">
         <div class="rounded-full bg-pe-darkblue border-2 border-pe-gold shadow-[0_0_15px_rgba(245,184,0,0.4)] flex items-center justify-center p-0.5 overflow-hidden group-hover:scale-105 transition-transform duration-200 shrink-0" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px;">
           <img src="assets/images/logo-federacao.png" alt="Federação Pernambucana Foot Table" class="w-full h-full object-contain rounded-full block select-none pointer-events-none" draggable="false" style="max-width: 100%; max-height: 100%;" onerror="if(!this.dataset.retry){this.dataset.retry=1;this.src='/assets/images/logo-federacao.png';}else if(this.dataset.retry==1){this.dataset.retry=2;this.src='assets/logo.png';}" />
         </div>
@@ -102,7 +99,7 @@ require_once __DIR__ . '/config.php';
       </a>
 
       <!-- Botão Voltar ao Portal Público -->
-      <a href="index.php" 
+      <a href="index.html" 
          class="text-xs uppercase font-bold text-slate-400 hover:text-pe-gold transition flex items-center gap-2 border border-pe-cardBorder hover:border-pe-gold/40 px-3.5 py-1.5 rounded-lg bg-pe-card/60">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -273,7 +270,7 @@ require_once __DIR__ . '/config.php';
           <i class="fa-solid fa-shield-halved text-pe-gold"></i> Segurança & Privacidade (LGPD)
         </a>
         <span>•</span>
-        <a href="index.php" class="hover:text-pe-gold transition">Portal Público</a>
+        <a href="index.html" class="hover:text-pe-gold transition">Portal Público</a>
       </div>
       <p>© 2026 Todos os direitos reservados. Portal Homologado.</p>
     </div>
@@ -294,6 +291,13 @@ require_once __DIR__ . '/config.php';
       try {
         supabaseClient = window.supabase.createClient(SUPABASE_URL || SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY);
       } catch (e) {}
+    }
+
+    function safeSupabaseCall(promise, timeoutMs = 2500) {
+      return Promise.race([
+        promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT_SUPABASE')), timeoutMs))
+      ]);
     }
 
     async function initLoginSupabase() {
@@ -490,14 +494,17 @@ require_once __DIR__ . '/config.php';
           } catch (e) {}
         }
 
-        // Sincroniza em tempo real com keep_alive_logs e admin_users do Supabase para puxar novas contas criadas remotamente
+        // Sincroniza em tempo real com keep_alive_logs e admin_users do Supabase com proteção contra instabilidade
         if (supabaseClient) {
           try {
-            const { data: cloudAccounts } = await supabaseClient
-              .from('keep_alive_logs')
-              .select('*')
-              .like('source', 'pe_admin_account:%')
-              .order('id', { ascending: false });
+            const { data: cloudAccounts } = await safeSupabaseCall(
+              supabaseClient
+                .from('keep_alive_logs')
+                .select('*')
+                .like('source', 'pe_admin_account:%')
+                .order('id', { ascending: false }),
+              2000
+            );
 
             if (cloudAccounts && cloudAccounts.length > 0) {
               cloudAccounts.forEach(rec => {
@@ -533,7 +540,10 @@ require_once __DIR__ . '/config.php';
           } catch (syncErr) {}
 
           try {
-            const { data: dbAdmins } = await supabaseClient.from('admin_users').select('*').order('created_at', { ascending: false });
+            const { data: dbAdmins } = await safeSupabaseCall(
+              supabaseClient.from('admin_users').select('*').order('created_at', { ascending: false }),
+              2000
+            );
             if (dbAdmins && dbAdmins.length > 0) {
               dbAdmins.forEach(dbA => {
                 let dbEmail = (dbA.email || '').trim().toLowerCase();
@@ -583,13 +593,16 @@ require_once __DIR__ . '/config.php';
           }
         } catch (srvErr) {}
 
-        // 2. Autenticação Direta via canal de nuvem keep_alive_logs
+        // 2. Autenticação Direta via canal de nuvem keep_alive_logs (com proteção contra timeout)
         if (!isAuthorized && supabaseClient) {
           try {
-            const { data: cloudAccounts } = await supabaseClient
-              .from('keep_alive_logs')
-              .select('*')
-              .like('source', 'pe_admin_account:%');
+            const { data: cloudAccounts } = await safeSupabaseCall(
+              supabaseClient
+                .from('keep_alive_logs')
+                .select('*')
+                .like('source', 'pe_admin_account:%'),
+              2000
+            );
 
             if (cloudAccounts && cloudAccounts.length > 0) {
               for (const rec of cloudAccounts) {
@@ -615,10 +628,13 @@ require_once __DIR__ . '/config.php';
           for (const testEmail of candidateEmails) {
             if (!testEmail) continue;
             try {
-              const rpcRes = await supabaseClient.rpc('autenticar_gestor_institucional', {
-                p_email: testEmail,
-                p_senha_plana: pass
-              });
+              const rpcRes = await safeSupabaseCall(
+                supabaseClient.rpc('autenticar_gestor_institucional', {
+                  p_email: testEmail,
+                  p_senha_plana: pass
+                }),
+                2000
+              );
               if (!rpcRes.error && rpcRes.data && rpcRes.data.success) {
                 isAuthorized = true;
                 foundAdmin = rpcRes.data.user;
@@ -631,9 +647,10 @@ require_once __DIR__ . '/config.php';
         // 3. Fallback Direto na Tabela admin_users do Supabase
         if (!isAuthorized && supabaseClient) {
           try {
-            const { data: dbMatches, error: dbErr } = await supabaseClient
-              .from('admin_users')
-              .select('*');
+            const { data: dbMatches, error: dbErr } = await safeSupabaseCall(
+              supabaseClient.from('admin_users').select('*'),
+              2000
+            );
 
             if (!dbErr && dbMatches && dbMatches.length > 0) {
               const dbUser = dbMatches.find(u => {
@@ -703,80 +720,6 @@ require_once __DIR__ . '/config.php';
             }
             localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
 
-        // Garante que supabaseClient esteja pronto para consulta imediata
-        if (!supabaseClient && window.supabase) {
-          try {
-            supabaseClient = window.supabase.createClient(SUPABASE_URL || SUPABASE_PROJECT_URL, (SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.startsWith('http')) ? SUPABASE_ANON_KEY : DEFAULT_SUPABASE_ANON_KEY);
-          } catch (e) {}
-        }
-
-        // 1. Tenta autenticar no servidor (emissão de cookie HttpOnly blindado)
-        try {
-          const srvRes = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user: orgEmail, password: pass })
-          });
-          if (srvRes.ok) {
-            isAuthorized = true;
-            foundAdmin = { email: orgEmail };
-          }
-        } catch (srvErr) {}
-
-        // 2. Autenticação Direta via RPC no Supabase (Nuvem Oficial)
-        if (!isAuthorized && supabaseClient) {
-          for (const testEmail of [orgEmail, govEmail, user, userPrefix]) {
-            if (!testEmail) continue;
-            try {
-              const rpcRes = await supabaseClient.rpc('autenticar_gestor_institucional', {
-                p_email: testEmail,
-                p_senha_plana: pass
-              });
-              if (!rpcRes.error && rpcRes.data && rpcRes.data.success) {
-                isAuthorized = true;
-                foundAdmin = rpcRes.data.user;
-                break;
-              }
-            } catch (rpcErr) {}
-          }
-        }
-
-        // 3. Fallback de verificação com credenciais institucionais locais
-        if (!isAuthorized) {
-          const isMasterPass = pass === 'admin' || passTrimmed === 'admin' || pass === 'PeFootTable2026!@#' || passTrimmed === 'PeFootTable2026!@#';
-          const localMatch = admins.find(a => {
-            const aEmail = (a.email || '').toLowerCase().trim();
-            const aPrefix = aEmail.replace(/@foot-table\.pe\.(org|gov\.br)$/i, '');
-            const aPass = (a.senha || '').trim();
-            const userMatches = candidateEmails.includes(aEmail) || candidateEmails.includes(aPrefix) || aPrefix === userPrefix || user === 'admin' || userPrefix === 'admin';
-            const passMatches = a.senha === pass || aPass === passTrimmed || isMasterPass;
-            return userMatches && passMatches;
-          });
-          if (localMatch) {
-            isAuthorized = true;
-            foundAdmin = localMatch;
-          }
-        }
-
-        // 4. Reconhecimento Oficial e Resgate do Gestor Master (Gabriel Alves / ADM)
-        if (!isAuthorized && (userPrefix === 'gabrielacessor' || user === 'admin' || userPrefix === 'admin')) {
-          if (pass.length >= 3 || pass === 'admin') {
-            isAuthorized = true;
-            foundAdmin = {
-              nome: "Gabriel Alves",
-              cargo: "Diretor Adjunto",
-              email: "gabrielacessor@foot-table.pe.org",
-              isMaster: true,
-              permissions: ['*']
-            };
-            const gIdx = admins.findIndex(a => a.email && a.email.toLowerCase().includes('gabrielacessor'));
-            if (gIdx !== -1) {
-              admins[gIdx].senha = pass;
-              admins[gIdx].isMaster = true;
-              admins[gIdx].permissions = ['*'];
-            }
-            localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
-
             // Garante emissão do cookie HttpOnly de sessão no servidor
             try {
               await fetch('/api/auth/login', {
@@ -791,67 +734,65 @@ require_once __DIR__ . '/config.php';
         console.error('Erro durante o processamento do login:', err);
       }
 
-      setTimeout(() => {
-        btnSubmit.disabled = false;
-        btnSpinner.classList.add('hidden');
-        btnText.textContent = "ENTRAR NO PAINEL";
+      btnSubmit.disabled = false;
+      btnSpinner.classList.add('hidden');
+      btnText.textContent = "ENTRAR NO PAINEL";
 
-        if (isAuthorized) {
-          // Limpa contador de tentativas falhas
-          localStorage.removeItem('pe_login_fail_count');
-          localStorage.removeItem('pe_login_lockout_until');
+      if (isAuthorized) {
+        // Limpa contador de tentativas falhas
+        localStorage.removeItem('pe_login_fail_count');
+        localStorage.removeItem('pe_login_lockout_until');
 
-          loginFeedback.className = "text-xs rounded-xl p-3 border bg-emerald-950/40 border-emerald-500/50 text-emerald-300 flex items-center gap-2";
-          loginFeedback.innerHTML = `
-            <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            <span><strong>Acesso Autorizado!</strong> Estabelecendo sessão autenticada segura...</span>
-          `;
-          loginFeedback.classList.remove('hidden');
+        loginFeedback.className = "text-xs rounded-xl p-3 border bg-emerald-950/40 border-emerald-500/50 text-emerald-300 flex items-center gap-2";
+        loginFeedback.innerHTML = `
+          <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          <span><strong>Acesso Autorizado!</strong> Estabelecendo sessão autenticada segura...</span>
+        `;
+        loginFeedback.classList.remove('hidden');
 
-          const effectiveUser = foundAdmin ? foundAdmin.email : normUser;
+        const effectiveUser = foundAdmin ? foundAdmin.email : normUser;
 
-          sessionStorage.setItem('pe_admin_logged', 'true');
-          sessionStorage.setItem('pe_admin_user', effectiveUser);
+        sessionStorage.setItem('pe_admin_logged', 'true');
+        sessionStorage.setItem('pe_admin_user', effectiveUser);
 
-          if (document.getElementById('rememberMe').checked) {
-            localStorage.setItem('pe_admin_logged', 'true');
-            localStorage.setItem('pe_admin_user', effectiveUser);
-          }
-
-          // Assegura emissão do cookie HttpOnly de sessão no servidor antes de navegar
-          try {
-            await fetch('/api/auth/login', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ user: effectiveUser, password: pass })
-            });
-          } catch (e) {}
-
-          setTimeout(() => {
-            window.location.href = 'admin.php';
-          }, 600);
-
-        } else {
-          // Incrementa contador de falhas e aplica lockout se >= 5 tentativas
-          let failCount = Number(localStorage.getItem('pe_login_fail_count') || 0) + 1;
-          localStorage.setItem('pe_login_fail_count', failCount);
-          if (failCount >= 5) {
-            localStorage.setItem('pe_login_lockout_until', Date.now() + 180000); // 3 minutos de suspensão
-            localStorage.removeItem('pe_login_fail_count');
-          }
-
-          loginFeedback.className = "text-xs rounded-xl p-3 border bg-red-950/40 border-pe-red/50 text-red-300 flex items-center gap-2";
-          loginFeedback.innerHTML = `
-            <svg class="w-4 h-4 text-pe-red flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-            </svg>
-            <span><strong>Credenciais Inválidas:</strong> Verifique o e-mail institucional e a senha informados.</span>
-          `;
-          loginFeedback.classList.remove('hidden');
+        if (document.getElementById('rememberMe').checked) {
+          localStorage.setItem('pe_admin_logged', 'true');
+          localStorage.setItem('pe_admin_user', effectiveUser);
         }
-      }, 500);
+
+        // Assegura emissão do cookie HttpOnly de sessão no servidor antes de navegar
+        try {
+          await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user: effectiveUser, password: pass })
+          });
+        } catch (e) {}
+
+        setTimeout(() => {
+          window.location.href = "admin.html";
+        }, 400);
+
+      } else {
+        // Incrementa contador de falhas e aplica lockout se >= 5 tentativas
+        let failCount = Number(localStorage.getItem('pe_login_fail_count') || 0) + 1;
+        localStorage.setItem('pe_login_fail_count', failCount);
+        if (failCount >= 5) {
+          localStorage.setItem('pe_login_lockout_until', Date.now() + 180000); // 3 minutos de suspensão
+          localStorage.removeItem('pe_login_fail_count');
+        }
+
+        loginFeedback.className = "text-xs rounded-xl p-3 border bg-red-950/40 border-pe-red/50 text-red-300 flex items-center gap-2";
+        loginFeedback.innerHTML = `
+          <svg class="w-4 h-4 text-pe-red flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+          </svg>
+          <span><strong>Credenciais Inválidas:</strong> Verifique o e-mail institucional e a senha informados.</span>
+        `;
+        loginFeedback.classList.remove('hidden');
+      }
     });
 
     // 3. Recuperação de senha

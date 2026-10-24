@@ -734,67 +734,65 @@
         console.error('Erro durante o processamento do login:', err);
       }
 
-      setTimeout(() => {
-        btnSubmit.disabled = false;
-        btnSpinner.classList.add('hidden');
-        btnText.textContent = "ENTRAR NO PAINEL";
+      btnSubmit.disabled = false;
+      btnSpinner.classList.add('hidden');
+      btnText.textContent = "ENTRAR NO PAINEL";
 
-        if (isAuthorized) {
-          // Limpa contador de tentativas falhas
-          localStorage.removeItem('pe_login_fail_count');
-          localStorage.removeItem('pe_login_lockout_until');
+      if (isAuthorized) {
+        // Limpa contador de tentativas falhas
+        localStorage.removeItem('pe_login_fail_count');
+        localStorage.removeItem('pe_login_lockout_until');
 
-          loginFeedback.className = "text-xs rounded-xl p-3 border bg-emerald-950/40 border-emerald-500/50 text-emerald-300 flex items-center gap-2";
-          loginFeedback.innerHTML = `
-            <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            <span><strong>Acesso Autorizado!</strong> Estabelecendo sessão autenticada segura...</span>
-          `;
-          loginFeedback.classList.remove('hidden');
+        loginFeedback.className = "text-xs rounded-xl p-3 border bg-emerald-950/40 border-emerald-500/50 text-emerald-300 flex items-center gap-2";
+        loginFeedback.innerHTML = `
+          <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          <span><strong>Acesso Autorizado!</strong> Estabelecendo sessão autenticada segura...</span>
+        `;
+        loginFeedback.classList.remove('hidden');
 
-          const effectiveUser = foundAdmin ? foundAdmin.email : normUser;
+        const effectiveUser = foundAdmin ? foundAdmin.email : normUser;
 
-          sessionStorage.setItem('pe_admin_logged', 'true');
-          sessionStorage.setItem('pe_admin_user', effectiveUser);
+        sessionStorage.setItem('pe_admin_logged', 'true');
+        sessionStorage.setItem('pe_admin_user', effectiveUser);
 
-          if (document.getElementById('rememberMe').checked) {
-            localStorage.setItem('pe_admin_logged', 'true');
-            localStorage.setItem('pe_admin_user', effectiveUser);
-          }
-
-          // Assegura emissão do cookie HttpOnly de sessão no servidor antes de navegar
-          try {
-            await fetch('/api/auth/login', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ user: effectiveUser, password: pass })
-            });
-          } catch (e) {}
-
-          setTimeout(() => {
-            window.location.href = "admin.html";
-          }, 600);
-
-        } else {
-          // Incrementa contador de falhas e aplica lockout se >= 5 tentativas
-          let failCount = Number(localStorage.getItem('pe_login_fail_count') || 0) + 1;
-          localStorage.setItem('pe_login_fail_count', failCount);
-          if (failCount >= 5) {
-            localStorage.setItem('pe_login_lockout_until', Date.now() + 180000); // 3 minutos de suspensão
-            localStorage.removeItem('pe_login_fail_count');
-          }
-
-          loginFeedback.className = "text-xs rounded-xl p-3 border bg-red-950/40 border-pe-red/50 text-red-300 flex items-center gap-2";
-          loginFeedback.innerHTML = `
-            <svg class="w-4 h-4 text-pe-red flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-            </svg>
-            <span><strong>Credenciais Inválidas:</strong> Verifique o e-mail institucional e a senha informados.</span>
-          `;
-          loginFeedback.classList.remove('hidden');
+        if (document.getElementById('rememberMe').checked) {
+          localStorage.setItem('pe_admin_logged', 'true');
+          localStorage.setItem('pe_admin_user', effectiveUser);
         }
-      }, 500);
+
+        // Assegura emissão do cookie HttpOnly de sessão no servidor antes de navegar
+        try {
+          await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user: effectiveUser, password: pass })
+          });
+        } catch (e) {}
+
+        setTimeout(() => {
+          window.location.href = "admin.html";
+        }, 400);
+
+      } else {
+        // Incrementa contador de falhas e aplica lockout se >= 5 tentativas
+        let failCount = Number(localStorage.getItem('pe_login_fail_count') || 0) + 1;
+        localStorage.setItem('pe_login_fail_count', failCount);
+        if (failCount >= 5) {
+          localStorage.setItem('pe_login_lockout_until', Date.now() + 180000); // 3 minutos de suspensão
+          localStorage.removeItem('pe_login_fail_count');
+        }
+
+        loginFeedback.className = "text-xs rounded-xl p-3 border bg-red-950/40 border-pe-red/50 text-red-300 flex items-center gap-2";
+        loginFeedback.innerHTML = `
+          <svg class="w-4 h-4 text-pe-red flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+          </svg>
+          <span><strong>Credenciais Inválidas:</strong> Verifique o e-mail institucional e a senha informados.</span>
+        `;
+        loginFeedback.classList.remove('hidden');
+      }
     });
 
     // 3. Recuperação de senha
