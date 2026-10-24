@@ -233,6 +233,21 @@
   </script>
 
   <style>
+    /* Inputs de upload de imagem mantidos 100% invisíveis no layout (disparados exclusivamente via botões estéticos) */
+    input[type="file"].hidden,
+    #uploadFotoCameraInput,
+    #uploadFotoInput,
+    #inputSignatureFile {
+      display: none !important;
+      position: absolute !important;
+      left: -9999px !important;
+      top: -9999px !important;
+      width: 0 !important;
+      height: 0 !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      visibility: hidden !important;
+    }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #060911; }
     ::-webkit-scrollbar-thumb { background: #1a233a; border-radius: 4px; }
@@ -1030,7 +1045,7 @@
                           <span class="text-[11px] font-bold text-white block leading-tight">Tirar Foto</span>
                           <span class="text-[9px] text-slate-400 block leading-tight mt-0.5">Celular / Tablet</span>
                         </button>
-                        <input type="file" id="uploadFotoCameraInput" accept="image/*" capture="environment" class="hidden">
+                        <input type="file" id="uploadFotoCameraInput" accept="image/*" capture="environment" class="hidden" style="display: none !important; position: absolute !important; left: -9999px !important; width: 0 !important; height: 0 !important; opacity: 0 !important; pointer-events: none !important;">
 
                         <!-- Opção 2: Gerenciador de Arquivos da Plataforma (PC, Celular, Tablet) -->
                         <label class="flex flex-col items-center justify-center p-2.5 bg-gradient-to-b from-[#0b1220] to-[#05080e] hover:from-[#131f38] hover:to-[#090e1a] text-slate-200 border border-[#1c253b] hover:border-blue-400 rounded-xl cursor-pointer transition text-center group shadow-md active:scale-95">
@@ -1039,7 +1054,7 @@
                           </div>
                           <span class="text-[11px] font-bold text-white block leading-tight">Arquivos</span>
                           <span class="text-[9px] text-slate-400 block leading-tight mt-0.5">Gerenciador / PC</span>
-                          <input type="file" id="uploadFotoInput" accept="image/*" class="hidden">
+                          <input type="file" id="uploadFotoInput" accept="image/*" class="hidden" style="display: none !important; position: absolute !important; left: -9999px !important; width: 0 !important; height: 0 !important; opacity: 0 !important; pointer-events: none !important;">
                         </label>
                       </div>
 
@@ -1085,7 +1100,7 @@
                         <label for="inputSignatureFile" class="text-[9px] font-bold text-pe-gold hover:text-amber-300 flex items-center gap-1 cursor-pointer transition select-none" title="Upar imagem transparente da assinatura (PNG/SVG)">
                           <i class="fa-solid fa-file-arrow-up"></i> Upar Imagem
                         </label>
-                        <input type="file" id="inputSignatureFile" accept="image/*" class="hidden" onchange="handlePresidentSignatureUpload(event)" />
+                        <input type="file" id="inputSignatureFile" accept="image/*" class="hidden" style="display: none !important; position: absolute !important; left: -9999px !important; width: 0 !important; height: 0 !important; opacity: 0 !important; pointer-events: none !important;" onchange="handlePresidentSignatureUpload(event)" />
                       </div>
                       <div class="flex items-center gap-1.5">
                         <input type="text" id="inputAssinatura" value="ASSINATURA DA DIRETORIA ADJUNTA FPEFT" class="flex-1 bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-2.5 py-1.5 text-[10px] uppercase text-white outline-none font-fpeft" />
@@ -3666,21 +3681,28 @@
         }
       });
 
-      // Foto buttons and upload triggers
-      ['uploadFotoCameraInput', 'uploadFotoInput', 'btnResetFoto', 'btnRemoveSignatureImg', 'inputSignatureFile'].forEach(cId => {
+      // Inputs de arquivo permanecem permanentemente invisíveis no layout (acionados por botões estéticos)
+      ['uploadFotoCameraInput', 'uploadFotoInput', 'inputSignatureFile'].forEach(cId => {
         const el = document.getElementById(cId);
         if (el) {
-          if (!canEditAtletas) {
-            el.disabled = true;
-            el.classList.add('hidden');
-            el.style.display = 'none';
-          } else {
-            el.disabled = false;
-            el.classList.remove('hidden');
-            el.style.display = '';
-          }
+          el.disabled = !canEditAtletas;
+          el.classList.add('hidden');
+          el.style.setProperty('display', 'none', 'important');
         }
       });
+
+      // Botão para restaurar silhueta oficial padrão
+      const btnResetFoto = document.getElementById('btnResetFoto');
+      if (btnResetFoto) {
+        btnResetFoto.disabled = !canEditAtletas;
+        if (!canEditAtletas) {
+          btnResetFoto.classList.add('hidden');
+          btnResetFoto.style.display = 'none';
+        } else {
+          btnResetFoto.classList.remove('hidden');
+          btnResetFoto.style.display = '';
+        }
+      }
 
       // Banner de Acesso Controlado no Formulário de Atletas
       const athleteFormEl = document.getElementById('athleteForm');
@@ -8524,26 +8546,28 @@
       if (supabaseClient) {
         try {
           const upsertTask = (async () => {
+            const supabasePayload = {
+              codigo: athleteObj.codigo,
+              nome: athleteObj.nome,
+              cpf: athleteObj.cpf,
+              nascimento: athleteObj.nascimento,
+              telefone: athleteObj.telefone,
+              municipio: athleteObj.municipio,
+              categoria: athleteObj.categoria,
+              modalidade: athleteObj.modalidade,
+              status: athleteObj.status,
+              clube: athleteObj.clube,
+              federado: athleteObj.federado,
+              validade: athleteObj.validade,
+              foto_url: athleteObj.foto_url
+            };
             let res = await supabaseClient
               .from('atletas')
-              .upsert([athleteObj], { onConflict: 'codigo' });
-            if (res.error && res.error.message && res.error.message.includes('column')) {
-              const baseObj = {
-                codigo: athleteObj.codigo,
-                nome: athleteObj.nome,
-                cpf: athleteObj.cpf,
-                nascimento: athleteObj.nascimento,
-                municipio: athleteObj.municipio,
-                modalidade: athleteObj.modalidade,
-                status: athleteObj.status,
-                foto_url: athleteObj.foto_url
-              };
-              res = await supabaseClient.from('atletas').upsert([baseObj], { onConflict: 'codigo' });
-            }
+              .upsert([supabasePayload], { onConflict: 'codigo' });
             return res;
           })();
 
-          const res = await safeSupabaseCall(upsertTask, 3000);
+          const res = await safeSupabaseCall(upsertTask, 3500);
           if (res && !res.error) savedInSupabase = true;
           else if (res && res.error) console.warn("Supabase aviso:", res.error);
         } catch (err) {
@@ -8738,8 +8762,11 @@
             );
             if (!error && Array.isArray(data)) {
               const localMap = new Map(list.map(a => [String(a.codigo), a]));
-              list = data.map(d => {
-                const localMatch = localMap.get(String(d.codigo));
+              const cloudCodes = new Set();
+              const cloudList = data.map(d => {
+                const cCode = String(d.codigo);
+                cloudCodes.add(cCode);
+                const localMatch = localMap.get(cCode);
                 const effectiveStatus = (d.status && String(d.status).trim()) ? d.status : (localMatch && localMatch.status ? localMatch.status : 'HOMOLOGADO');
                 const photoVal = d.foto_url || d.foto || (localMatch ? (localMatch.foto_url || localMatch.foto) : '');
                 return {
@@ -8760,6 +8787,11 @@
                   foto_url: photoVal
                 };
               });
+
+              // Preserva integralmente atletas cadastrados localmente que ainda não foram sincronizados com a nuvem
+              const localOnlyAthletes = list.filter(a => a && a.codigo && !cloudCodes.has(String(a.codigo)));
+              list = [...cloudList, ...localOnlyAthletes];
+
               localStorage.setItem('pe_athletes_db', JSON.stringify(list));
               _lastAthletesFetchTime = Date.now();
             }
