@@ -621,6 +621,13 @@
     }
     let supabaseClient = null;
 
+    function safeSupabaseCall(promise, timeoutMs = 2500) {
+      return Promise.race([
+        promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT_SUPABASE')), timeoutMs))
+      ]);
+    }
+
     async function initSupabase() {
       const dot = document.getElementById('supabaseStatusDot');
       const text = document.getElementById('supabaseStatusText');
@@ -1042,11 +1049,14 @@
           </div>
         `;
         try {
-          const { data, error } = await supabaseClient
-            .from('atletas')
-            .select('*')
-            .eq('codigo', code)
-            .maybeSingle();
+          const { data, error } = await safeSupabaseCall(
+            supabaseClient
+              .from('atletas')
+              .select('*')
+              .eq('codigo', code)
+              .maybeSingle(),
+            2500
+          );
 
           if (!error && data) {
             athlete = {

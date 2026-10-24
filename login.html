@@ -293,6 +293,13 @@
       } catch (e) {}
     }
 
+    function safeSupabaseCall(promise, timeoutMs = 2500) {
+      return Promise.race([
+        promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT_SUPABASE')), timeoutMs))
+      ]);
+    }
+
     async function initLoginSupabase() {
       if ((!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.startsWith('http') || SUPABASE_ANON_KEY.length < 20) && typeof fetch === 'function') {
         try {
@@ -487,14 +494,17 @@
           } catch (e) {}
         }
 
-        // Sincroniza em tempo real com keep_alive_logs e admin_users do Supabase para puxar novas contas criadas remotamente
+        // Sincroniza em tempo real com keep_alive_logs e admin_users do Supabase com proteção contra instabilidade
         if (supabaseClient) {
           try {
-            const { data: cloudAccounts } = await supabaseClient
-              .from('keep_alive_logs')
-              .select('*')
-              .like('source', 'pe_admin_account:%')
-              .order('id', { ascending: false });
+            const { data: cloudAccounts } = await safeSupabaseCall(
+              supabaseClient
+                .from('keep_alive_logs')
+                .select('*')
+                .like('source', 'pe_admin_account:%')
+                .order('id', { ascending: false }),
+              2000
+            );
 
             if (cloudAccounts && cloudAccounts.length > 0) {
               cloudAccounts.forEach(rec => {
@@ -530,7 +540,10 @@
           } catch (syncErr) {}
 
           try {
-            const { data: dbAdmins } = await supabaseClient.from('admin_users').select('*').order('created_at', { ascending: false });
+            const { data: dbAdmins } = await safeSupabaseCall(
+              supabaseClient.from('admin_users').select('*').order('created_at', { ascending: false }),
+              2000
+            );
             if (dbAdmins && dbAdmins.length > 0) {
               dbAdmins.forEach(dbA => {
                 let dbEmail = (dbA.email || '').trim().toLowerCase();
@@ -580,13 +593,16 @@
           }
         } catch (srvErr) {}
 
-        // 2. Autenticação Direta via canal de nuvem keep_alive_logs
+        // 2. Autenticação Direta via canal de nuvem keep_alive_logs (com proteção contra timeout)
         if (!isAuthorized && supabaseClient) {
           try {
-            const { data: cloudAccounts } = await supabaseClient
-              .from('keep_alive_logs')
-              .select('*')
-              .like('source', 'pe_admin_account:%');
+            const { data: cloudAccounts } = await safeSupabaseCall(
+              supabaseClient
+                .from('keep_alive_logs')
+                .select('*')
+                .like('source', 'pe_admin_account:%'),
+              2000
+            );
 
             if (cloudAccounts && cloudAccounts.length > 0) {
               for (const rec of cloudAccounts) {
@@ -612,10 +628,13 @@
           for (const testEmail of candidateEmails) {
             if (!testEmail) continue;
             try {
-              const rpcRes = await supabaseClient.rpc('autenticar_gestor_institucional', {
-                p_email: testEmail,
-                p_senha_plana: pass
-              });
+              const rpcRes = await safeSupabaseCall(
+                supabaseClient.rpc('autenticar_gestor_institucional', {
+                  p_email: testEmail,
+                  p_senha_plana: pass
+                }),
+                2000
+              );
               if (!rpcRes.error && rpcRes.data && rpcRes.data.success) {
                 isAuthorized = true;
                 foundAdmin = rpcRes.data.user;
@@ -628,9 +647,10 @@
         // 3. Fallback Direto na Tabela admin_users do Supabase
         if (!isAuthorized && supabaseClient) {
           try {
-            const { data: dbMatches, error: dbErr } = await supabaseClient
-              .from('admin_users')
-              .select('*');
+            const { data: dbMatches, error: dbErr } = await safeSupabaseCall(
+              supabaseClient.from('admin_users').select('*'),
+              2000
+            );
 
             if (!dbErr && dbMatches && dbMatches.length > 0) {
               const dbUser = dbMatches.find(u => {

@@ -2811,6 +2811,13 @@
     }
     let supabaseClient = null;
 
+    function safeSupabaseCall(promise, timeoutMs = 3000) {
+      return Promise.race([
+        promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT_SUPABASE')), timeoutMs))
+      ]);
+    }
+
     // Layout padrão da carteira
     const DEFAULT_BADGE_LAYOUT = {
       cardWidth: 540,
@@ -2865,16 +2872,35 @@
       if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.startsWith('http')) {
         try {
           supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-          if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-pe-gold";
-          if (text) text.textContent = "Supabase Conectado (Nuvem Oficial)";
 
-          // Executa sincronização em paralelo de alta velocidade (Design + Atletas)
+          // Teste ativo de integridade da nuvem com timeout de 2.5s (tolerância a falhas na infraestrutura)
+          let isCloudHealthy = false;
+          try {
+            const pingRes = await safeSupabaseCall(
+              supabaseClient.from('atletas').select('count', { count: 'exact', head: true }),
+              2500
+            );
+            isCloudHealthy = !pingRes.error;
+          } catch (pingErr) {
+            console.warn("Supabase nuvem instável ou em manutenção:", pingErr);
+            isCloudHealthy = false;
+          }
+
+          if (isCloudHealthy) {
+            if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-pe-gold";
+            if (text) text.textContent = "Supabase Conectado (Nuvem Oficial)";
+          } else {
+            if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
+            if (text) text.textContent = "Supabase Instável (Modo Resiliência Local Ativo)";
+          }
+
+          // Executa sincronização em paralelo protegida com timeout
           const syncTasks = [];
           if (typeof fetchStudioDesignFromSupabase === 'function') {
-            syncTasks.push(fetchStudioDesignFromSupabase(true));
+            syncTasks.push(safeSupabaseCall(fetchStudioDesignFromSupabase(true), 3500).catch(() => null));
           }
           if (typeof loadAthletes === 'function') {
-            syncTasks.push(loadAthletes(true));
+            syncTasks.push(safeSupabaseCall(loadAthletes(true), 3500).catch(() => null));
           }
           await Promise.allSettled(syncTasks);
 
@@ -2887,7 +2913,7 @@
           if (typeof updateDashboardData === 'function') {
             updateDashboardData();
           }
-          return true;
+          return isCloudHealthy;
         } catch (e) {
           console.warn("Erro ao instanciar Supabase:", e);
         }
@@ -4453,21 +4479,27 @@
       const payloadStr = JSON.stringify(payload);
 
       try {
-        // 1. Tenta gravar na tabela de configurações chave-valor
+        // 1. Tenta gravar na tabela de configurações chave-valor com timeout seguro
         try {
-          await supabaseClient.from('configuracoes').upsert([{
-            chave: 'carteira_studio_layout',
-            valor: payloadStr,
-            updated_at: payload.updated_at
-          }], { onConflict: 'chave' });
+          await safeSupabaseCall(
+            supabaseClient.from('configuracoes').upsert([{
+              chave: 'carteira_studio_layout',
+              valor: payloadStr,
+              updated_at: payload.updated_at
+            }], { onConflict: 'chave' }),
+            3000
+          );
         } catch (e1) {}
 
-        // 2. Grava também no log central para persistência e histórico
+        // 2. Grava também no log central para persistência e histórico com timeout seguro
         try {
-          await supabaseClient.from('keep_alive_logs').insert([{
-            source: 'studio_layout_sync',
-            status: payloadStr
-          }]);
+          await safeSupabaseCall(
+            supabaseClient.from('keep_alive_logs').insert([{
+              source: 'studio_layout_sync',
+              status: payloadStr
+            }]),
+            3000
+          );
         } catch (e2) {}
 
         // 3. Persiste localmente com carimbo de tempo
@@ -4580,27 +4612,33 @@
       try {
         let cloudData = null;
 
-        // 1. Tenta carregar da tabela configuracoes
+        // 1. Tenta carregar da tabela configuracoes com timeout seguro
         try {
-          const { data, error } = await supabaseClient
-            .from('configuracoes')
-            .select('*')
-            .eq('chave', 'carteira_studio_layout')
-            .maybeSingle();
+          const { data, error } = await safeSupabaseCall(
+            supabaseClient
+              .from('configuracoes')
+              .select('*')
+              .eq('chave', 'carteira_studio_layout')
+              .maybeSingle(),
+            3000
+          );
           if (!error && data && data.valor) {
             cloudData = typeof data.valor === 'string' ? JSON.parse(data.valor) : data.valor;
           }
         } catch (e1) {}
 
-        // 2. Se não encontrou, busca do log central mais recente
+        // 2. Se não encontrou, busca do log central mais recente com timeout seguro
         if (!cloudData) {
           try {
-            const { data, error } = await supabaseClient
-              .from('keep_alive_logs')
-              .select('*')
-              .eq('source', 'studio_layout_sync')
-              .order('pinged_at', { ascending: false })
-              .limit(1);
+            const { data, error } = await safeSupabaseCall(
+              supabaseClient
+                .from('keep_alive_logs')
+                .select('*')
+                .eq('source', 'studio_layout_sync')
+                .order('pinged_at', { ascending: false })
+                .limit(1),
+              3000
+            );
             if (!error && data && data.length > 0 && data[0].status) {
               cloudData = typeof data[0].status === 'string' ? JSON.parse(data[0].status) : data[0].status;
             }
@@ -7471,20 +7509,20 @@
             console.warn('Erro ao atualizar foto no localStorage:', e);
           }
 
-          // B) Se Supabase estiver conectado e disponível, atualiza imediatamente no banco de dados na nuvem
+          // B) Se Supabase estiver conectado e disponível, atualiza imediatamente no banco de dados na nuvem com timeout seguro
           if (typeof supabaseClient !== 'undefined' && supabaseClient) {
             try {
-              supabaseClient
-                .from('atletas')
-                .update({ foto_url: compressedDataUrl, foto: compressedDataUrl })
-                .eq('codigo', currentCode)
-                .then(({ error }) => {
-                  if (error) {
-                    // Fallback se a coluna foto não existir
-                    supabaseClient.from('atletas').update({ foto_url: compressedDataUrl }).eq('codigo', currentCode);
-                  }
-                })
-                .catch(err => console.warn('Atualização remota da foto:', err));
+              const photoUpdateTask = (async () => {
+                let res = await supabaseClient
+                  .from('atletas')
+                  .update({ foto_url: compressedDataUrl, foto: compressedDataUrl })
+                  .eq('codigo', currentCode);
+                if (res.error) {
+                  res = await supabaseClient.from('atletas').update({ foto_url: compressedDataUrl }).eq('codigo', currentCode);
+                }
+                return res;
+              })();
+              safeSupabaseCall(photoUpdateTask, 3000).catch(err => console.warn('Atualização remota da foto em background:', err));
             } catch (err) {
               console.warn('Erro ao sincronizar foto com o Supabase:', err);
             }
@@ -8485,27 +8523,31 @@
       let savedInSupabase = false;
       if (supabaseClient) {
         try {
-          let { data, error } = await supabaseClient
-            .from('atletas')
-            .upsert([athleteObj], { onConflict: 'codigo' });
-          if (error && error.message && error.message.includes('column')) {
-            const baseObj = {
-              codigo: athleteObj.codigo,
-              nome: athleteObj.nome,
-              cpf: athleteObj.cpf,
-              nascimento: athleteObj.nascimento,
-              municipio: athleteObj.municipio,
-              modalidade: athleteObj.modalidade,
-              status: athleteObj.status,
-              foto_url: athleteObj.foto_url
-            };
-            const retry = await supabaseClient.from('atletas').upsert([baseObj], { onConflict: 'codigo' });
-            error = retry.error;
-          }
-          if (!error) savedInSupabase = true;
-          else console.warn("Supabase aviso:", error);
+          const upsertTask = (async () => {
+            let res = await supabaseClient
+              .from('atletas')
+              .upsert([athleteObj], { onConflict: 'codigo' });
+            if (res.error && res.error.message && res.error.message.includes('column')) {
+              const baseObj = {
+                codigo: athleteObj.codigo,
+                nome: athleteObj.nome,
+                cpf: athleteObj.cpf,
+                nascimento: athleteObj.nascimento,
+                municipio: athleteObj.municipio,
+                modalidade: athleteObj.modalidade,
+                status: athleteObj.status,
+                foto_url: athleteObj.foto_url
+              };
+              res = await supabaseClient.from('atletas').upsert([baseObj], { onConflict: 'codigo' });
+            }
+            return res;
+          })();
+
+          const res = await safeSupabaseCall(upsertTask, 3000);
+          if (res && !res.error) savedInSupabase = true;
+          else if (res && res.error) console.warn("Supabase aviso:", res.error);
         } catch (err) {
-          console.warn("Falha de rede Supabase:", err);
+          console.warn("Falha ou timeout de rede Supabase:", err);
         }
       }
 
@@ -8690,7 +8732,10 @@
 
         if (supabaseClient) {
           try {
-            const { data, error } = await supabaseClient.from('atletas').select('*').order('created_at', { ascending: false });
+            const { data, error } = await safeSupabaseCall(
+              supabaseClient.from('atletas').select('*').order('created_at', { ascending: false }),
+              3500
+            );
             if (!error && Array.isArray(data)) {
               const localMap = new Map(list.map(a => [String(a.codigo), a]));
               list = data.map(d => {
@@ -10580,13 +10625,16 @@
         saveNewsData();
       }
 
-      // 2. Se Supabase conectado, sincronizar da nuvem (respeitando exclusões feitas pelo gestor)
+      // 2. Se Supabase conectado, sincronizar da nuvem com timeout seguro
       if (supabaseClient) {
         try {
-          const { data, error } = await supabaseClient
-            .from('noticias')
-            .select('*')
-            .order('created_at', { ascending: false });
+          const { data, error } = await safeSupabaseCall(
+            supabaseClient
+              .from('noticias')
+              .select('*')
+              .order('created_at', { ascending: false }),
+            3000
+          );
 
           if (!error && data) {
             const validData = data.filter(d => !deletedIds.has(String(d.id)) && !isMockNewsItem(d));
