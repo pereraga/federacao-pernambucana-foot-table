@@ -2316,13 +2316,16 @@ if (!is_admin_logged()) {
                     <label class="block text-slate-300 font-bold mb-1.5 uppercase tracking-wider text-[11px]">
                       Senha *
                     </label>
-                    <input type="password" id="panelRegPassword" required minlength="4" placeholder="••••••••" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3.5 py-2.5 text-white outline-none font-mono" />
+                    <input type="password" id="panelRegPassword" required minlength="3" placeholder="••••••••" oninput="checkAdminCreatePasswordMatch()" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3.5 py-2.5 text-white outline-none font-mono" />
                   </div>
                   <div>
-                    <label class="block text-slate-300 font-bold mb-1.5 uppercase tracking-wider text-[11px]">
-                      Confirmar Senha *
-                    </label>
-                    <input type="password" id="panelRegConfirmPassword" required minlength="4" placeholder="••••••••" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3.5 py-2.5 text-white outline-none font-mono" />
+                    <div class="flex items-center justify-between mb-1.5">
+                      <label class="block text-slate-300 font-bold uppercase tracking-wider text-[11px]">
+                        Confirmar Senha *
+                      </label>
+                      <span id="passMatchStatus" class="text-[10px] font-bold hidden"></span>
+                    </div>
+                    <input type="password" id="panelRegConfirmPassword" required minlength="3" placeholder="••••••••" oninput="checkAdminCreatePasswordMatch()" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3.5 py-2.5 text-white outline-none font-mono" />
                   </div>
                 </div>
 
@@ -12184,7 +12187,36 @@ if (!is_admin_logged()) {
         .toLowerCase();
     }
 
-    // Função de Deduplicação Inteligente: elimina versões antigas e variações sutis mantendo a mais recente
+    function checkAdminCreatePasswordMatch() {
+      const p1 = document.getElementById('panelRegPassword');
+      const p2 = document.getElementById('panelRegConfirmPassword');
+      const status = document.getElementById('passMatchStatus');
+      if (!p1 || !p2 || !status) return;
+
+      const v1 = p1.value;
+      const v2 = p2.value;
+
+      if (!v2) {
+        status.classList.add('hidden');
+        p2.classList.remove('border-emerald-500', 'border-red-500');
+        return;
+      }
+
+      status.classList.remove('hidden');
+      if (v1 === v2) {
+        status.className = "text-[10px] font-bold text-emerald-400 flex items-center gap-1";
+        status.innerHTML = `<i class="fa-solid fa-check"></i> Senhas coincidem`;
+        p2.classList.remove('border-red-500');
+        p2.classList.add('border-emerald-500');
+      } else {
+        status.className = "text-[10px] font-bold text-rose-400 flex items-center gap-1";
+        status.innerHTML = `<i class="fa-solid fa-xmark"></i> Não coincidem`;
+        p2.classList.remove('border-emerald-500');
+        p2.classList.add('border-red-500');
+      }
+    }
+
+    // Função de Deduplicação Inteligente: elimina versões antigas e variações de digitação mantendo a mais recente
     function deduplicateInstitutionalAdmins(adminList) {
       if (!Array.isArray(adminList) || adminList.length === 0) return { unique: [], removedOldDuplicates: [] };
 
@@ -12197,17 +12229,13 @@ if (!is_admin_logged()) {
         const prefix = email.split('@')[0].replace(/[^a-z0-9]/g, '');
         // Colapsa letras repetidas consecutivas para pegar variações (ex: 'mello' e 'melo' -> 'melo')
         const collapsedPrefix = prefix.replace(/([a-z])\1+/g, '$1');
-        const cleanName = (adm.nome || '').trim().toLowerCase()
-          .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-          .replace(/[^a-z0-9]/g, '')
-          .replace(/([a-z])\1+/g, '$1');
 
         let time = 0;
         if (adm.created_at) {
           const parsed = new Date(adm.created_at).getTime();
           if (!isNaN(parsed)) time = parsed;
         }
-        return { email, prefix, collapsedPrefix, cleanName, time };
+        return { email, prefix, collapsedPrefix, time };
       };
 
       // Ordena decrescente pela data de criação (o mais novo primeiro)
@@ -12224,17 +12252,22 @@ if (!is_admin_logged()) {
         const cKey = normalizeRecord(item);
         if (!cKey.email) continue;
 
-        // Procura se já guardamos uma versão mais recente correspondente à mesma pessoa/conta
+        // O Diretor Master Gabriel Alves é permanente e protegido contra remoção
+        if (cKey.email === 'gabrielacessor@foot-table.pe.org') {
+          if (!unique.some(u => normalizeRecord(u).email === 'gabrielacessor@foot-table.pe.org')) {
+            unique.push(item);
+          }
+          continue;
+        }
+
+        // Procura se já guardamos uma versão mais recente correspondente à mesma conta
         const matchIdx = unique.findIndex(kept => {
           const kKey = normalizeRecord(kept);
           // 1. Mesmo e-mail exato
           if (kKey.email === cKey.email) return true;
-          // 2. Mesmo nome normalizado (mínimo 4 caracteres) e mesmo prefixo simplificado (ex: adrianomello vs adrianomelo)
-          if (kKey.cleanName && cKey.cleanName && kKey.cleanName === cKey.cleanName && kKey.cleanName.length >= 4) {
-            return true;
-          }
-          // 3. Prefixos simplificados idênticos para nomes longos (ex: adrianomello vs adrianomelo)
-          if (kKey.collapsedPrefix && cKey.collapsedPrefix && kKey.collapsedPrefix === cKey.collapsedPrefix && kKey.collapsedPrefix.length >= 5) {
+          // 2. Mesma variação de digitação de prefixo (ex: adrianomello vs adrianomelo)
+          // APENAS se o prefixo colapsado for idêntico e de tamanho relevante (>= 6)
+          if (kKey.collapsedPrefix && cKey.collapsedPrefix && kKey.collapsedPrefix === cKey.collapsedPrefix && kKey.collapsedPrefix.length >= 6) {
             return true;
           }
           return false;
@@ -12245,6 +12278,12 @@ if (!is_admin_logged()) {
         } else {
           removedOldDuplicates.push(item);
         }
+      }
+
+      // Garante que a conta master esteja presente
+      if (!unique.some(u => normalizeRecord(u).email === 'gabrielacessor@foot-table.pe.org')) {
+        const masterOrig = adminList.find(a => normalizeRecord(a).email === 'gabrielacessor@foot-table.pe.org') || DEFAULT_INSTITUTIONAL_ADMINS[0];
+        unique.unshift(masterOrig);
       }
 
       return { unique, removedOldDuplicates };
@@ -12271,8 +12310,52 @@ if (!is_admin_logged()) {
         }
       });
 
-      // 2. Sincronização bidirecional com Supabase
+      // 2. Sincronização bidirecional com Supabase (Canal de Alta Disponibilidade keep_alive_logs + admin_users)
       if (supabaseClient) {
+        try {
+          const { data: cloudLogs, error: cloudErr } = await supabaseClient
+            .from('keep_alive_logs')
+            .select('*')
+            .like('source', 'pe_admin_account:%')
+            .order('id', { ascending: false });
+
+          if (!cloudErr && cloudLogs && cloudLogs.length > 0) {
+            cloudLogs.forEach(rec => {
+              try {
+                const acc = JSON.parse(rec.status);
+                let normEmail = (acc.email || '').trim().toLowerCase();
+                if (normEmail === 'gabrielacessor@foot-table.pe.gov.br') normEmail = 'gabrielacessor@foot-table.pe.org';
+                else if (normEmail === 'adrianomelofpeft@foot-table.pe.org' || normEmail === 'adrianomelo@foot-table.pe.org') normEmail = 'adrianomello@foot-table.pe.org';
+                else if (normEmail.endsWith('@foot-table.pe.gov.br')) normEmail = normEmail.replace(/@foot-table\.pe\.gov\.br$/i, '@foot-table.pe.org');
+
+                if (!normEmail) return;
+
+                const existingIdx = list.findIndex(l => (l.email || '').toLowerCase() === normEmail);
+                if (existingIdx !== -1) {
+                  list[existingIdx].nome = acc.nome || list[existingIdx].nome;
+                  list[existingIdx].cargo = acc.cargo || list[existingIdx].cargo;
+                  if (acc.senha) list[existingIdx].senha = acc.senha;
+                  if (acc.permissions) list[existingIdx].permissions = acc.permissions;
+                  if (typeof acc.isMaster !== 'undefined') list[existingIdx].isMaster = acc.isMaster;
+                  if (acc.created_at && !list[existingIdx].created_at) list[existingIdx].created_at = acc.created_at;
+                } else {
+                  list.push({
+                    nome: acc.nome || 'Gestor Autorizado',
+                    cargo: acc.cargo || 'Diretor Adjunto',
+                    email: normEmail,
+                    senha: acc.senha || 'admin',
+                    isMaster: normEmail.includes('gabrielacessor') || acc.cargo === 'Diretor Adjunto' || !!acc.isMaster,
+                    permissions: acc.permissions || (normEmail.includes('gabrielacessor') ? ['*'] : []),
+                    created_at: acc.created_at || new Date().toISOString()
+                  });
+                }
+              } catch (e) {}
+            });
+          }
+        } catch (e) {
+          console.warn("Supabase keep_alive_logs sync:", e);
+        }
+
         try {
           const { data, error } = await supabaseClient.from('admin_users').select('*').order('created_at', { ascending: false });
           if (!error && data && data.length > 0) {
@@ -12286,7 +12369,6 @@ if (!is_admin_logged()) {
 
               const existingIdx = list.findIndex(l => (l.email || '').toLowerCase() === normEmail);
               if (existingIdx !== -1) {
-                // Atualiza dados locais com os mais recentes da nuvem
                 list[existingIdx].nome = dbItem.nome || list[existingIdx].nome;
                 list[existingIdx].cargo = dbItem.cargo || list[existingIdx].cargo;
                 if (dbItem.senha) list[existingIdx].senha = dbItem.senha;
@@ -12303,26 +12385,6 @@ if (!is_admin_logged()) {
                 });
               }
             });
-
-            // Sincroniza do local para a nuvem caso haja contas cadastradas localmente ausentes no banco
-            for (const localAdmin of list) {
-              const localEmail = (localAdmin.email || '').trim().toLowerCase();
-              if (localEmail && !data.some(d => (d.email || '').trim().toLowerCase() === localEmail)) {
-                try {
-                  await supabaseClient.from('admin_users').upsert([{
-                    nome: localAdmin.nome || 'Gestor Autorizado',
-                    cargo: localAdmin.cargo || 'Diretor Adjunto',
-                    email: localEmail,
-                    senha: localAdmin.senha || 'admin'
-                  }], { onConflict: 'email' });
-                } catch (upErr) {}
-              }
-            }
-
-            // Limpa registro antigo .gov.br da nuvem
-            try {
-              await supabaseClient.from('admin_users').delete().eq('email', 'gabrielacessor@foot-table.pe.gov.br');
-            } catch (delErr) {}
           }
         } catch (e) {
           console.warn("Supabase admin_users sync:", e);
@@ -12339,12 +12401,15 @@ if (!is_admin_logged()) {
           const oldEm = (oldDup.email || '').trim().toLowerCase();
           if (oldEm && oldEm !== 'gabrielacessor@foot-table.pe.org') {
             try {
+              await supabaseClient.from('keep_alive_logs').delete().eq('source', 'pe_admin_account:' + oldEm);
               await supabaseClient.from('admin_users').delete().eq('email', oldEm);
             } catch (e) {}
           }
         }
         // Expurga especificamente a variação antiga com 1 'l' se existir no banco
         try {
+          await supabaseClient.from('keep_alive_logs').delete().eq('source', 'pe_admin_account:adrianomelo@foot-table.pe.org');
+          await supabaseClient.from('keep_alive_logs').delete().eq('source', 'pe_admin_account:adrianomelofpeft@foot-table.pe.org');
           await supabaseClient.from('admin_users').delete().eq('email', 'adrianomelo@foot-table.pe.org');
           await supabaseClient.from('admin_users').delete().eq('email', 'adrianomelofpeft@foot-table.pe.org');
         } catch (e) {}
@@ -12465,7 +12530,11 @@ if (!is_admin_logged()) {
       const fedKeyInput = document.getElementById('panelRegFederationKey');
       const feedback = document.getElementById('panelRegFeedback');
 
-      const name = nameInput.value.trim();
+      // Reseta bordas de erro
+      passwordInput.classList.remove('border-red-500');
+      confirmPasswordInput.classList.remove('border-red-500');
+
+      let name = nameInput.value.trim();
       const role = roleSelect.value;
       let rawEmail = emailInput.value.trim().toLowerCase();
       const password = passwordInput.value;
@@ -12474,27 +12543,42 @@ if (!is_admin_logged()) {
 
       feedback.classList.remove('hidden');
 
+      // Se o usuário digitou um email no campo Nome (ex: gabrielacessor@foot-table.pe.org), limpa e formata em nome legível
+      if (name.includes('@')) {
+        const rawPrefix = name.split('@')[0].replace(/[._-]/g, ' ').trim();
+        name = rawPrefix.split(' ').filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+        nameInput.value = name;
+      }
+
       if (!name || name.length < 2) {
         feedback.className = "text-xs rounded-xl p-3 border bg-red-950/40 border-red-500/40 text-red-300";
         feedback.textContent = "❌ Informe o nome completo do Diretor ou Gestor responsável.";
+        nameInput.focus();
         return;
       }
 
       if (password !== confirmPassword) {
-        feedback.className = "text-xs rounded-xl p-3 border bg-red-950/40 border-red-500/40 text-red-300";
-        feedback.textContent = "❌ As senhas digitadas não coincidem. Verifique e tente novamente.";
+        feedback.className = "text-xs rounded-xl p-3 border bg-red-950/40 border-red-500/40 text-red-300 font-bold";
+        feedback.textContent = "❌ As senhas digitadas não coincidem. Digite a mesma senha no campo Senha e no campo Confirmar Senha.";
+        passwordInput.classList.add('border-red-500');
+        confirmPasswordInput.classList.add('border-red-500');
+        confirmPasswordInput.focus();
+        feedback.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         return;
       }
 
       if (password.length < 3) {
         feedback.className = "text-xs rounded-xl p-3 border bg-red-950/40 border-red-500/40 text-red-300";
         feedback.textContent = "❌ A senha deve conter pelo menos 3 caracteres.";
+        passwordInput.classList.add('border-red-500');
+        passwordInput.focus();
         return;
       }
 
       if (fedKey !== 'FPFTM-2026') {
         feedback.className = "text-xs rounded-xl p-3 border bg-red-950/40 border-red-500/40 text-red-300";
-        feedback.textContent = "❌ Chave de homologação da Federação inválida.";
+        feedback.textContent = "❌ Chave de homologação da Federação inválida (use FPFTM-2026).";
+        fedKeyInput.focus();
         return;
       }
 
@@ -12508,6 +12592,7 @@ if (!is_admin_logged()) {
       if (!emailPrefix) {
         feedback.className = "text-xs rounded-xl p-3 border bg-red-950/40 border-red-500/40 text-red-300";
         feedback.textContent = "❌ Informe um prefixo válido para o e-mail institucional (ex: gabriel.alves).";
+        emailInput.focus();
         return;
       }
 
@@ -12554,34 +12639,46 @@ if (!is_admin_logged()) {
         admins.unshift(newAdmin);
       }
 
-      // Deduplicação imediata
+      // Deduplicação inteligente imediata
       const { unique: cleanAdmins, removedOldDuplicates } = deduplicateInstitutionalAdmins(admins);
       admins = cleanAdmins;
       localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
 
-      // Gravação no Supabase (admin_users)
+      // Gravação no Supabase (keep_alive_logs como canal de nuvem e admin_users)
       if (supabaseClient) {
         try {
+          const cloudKey = 'pe_admin_account:' + fullEmail.toLowerCase();
+          try {
+            await supabaseClient.from('keep_alive_logs').delete().eq('source', cloudKey);
+          } catch (e) {}
+          await supabaseClient.from('keep_alive_logs').insert([{
+            source: cloudKey,
+            status: JSON.stringify(newAdmin),
+            pinged_at: new Date().toISOString()
+          }]);
+
           const dbPayload = {
             nome: name,
             cargo: role,
             email: fullEmail.toLowerCase(),
             senha: password
           };
-          const { error: upsertErr } = await supabaseClient.from('admin_users').upsert([dbPayload], { onConflict: 'email' });
-          if (upsertErr) {
-            console.warn("Upsert Supabase tentou alternativa:", upsertErr);
-            const { error: updErr } = await supabaseClient.from('admin_users').update(dbPayload).eq('email', dbPayload.email);
-            if (updErr) {
-              await supabaseClient.from('admin_users').insert([dbPayload]);
+          try {
+            const { error: upsertErr } = await supabaseClient.from('admin_users').upsert([dbPayload], { onConflict: 'email' });
+            if (upsertErr) {
+              const { error: updErr } = await supabaseClient.from('admin_users').update(dbPayload).eq('email', dbPayload.email);
+              if (updErr) {
+                await supabaseClient.from('admin_users').insert([dbPayload]);
+              }
             }
-          }
+          } catch (e) {}
 
-          // Se houver duplicados antigos removidos, apaga do banco de dados
+          // Se houver duplicados antigos removidos, apaga da nuvem também
           if (removedOldDuplicates && removedOldDuplicates.length > 0) {
             for (const oldD of removedOldDuplicates) {
               if (oldD.email && oldD.email !== 'gabrielacessor@foot-table.pe.org' && oldD.email !== fullEmail) {
                 try {
+                  await supabaseClient.from('keep_alive_logs').delete().eq('source', 'pe_admin_account:' + oldD.email.toLowerCase());
                   await supabaseClient.from('admin_users').delete().eq('email', oldD.email);
                 } catch (e) {}
               }
@@ -12614,6 +12711,8 @@ if (!is_admin_logged()) {
 
       document.getElementById('adminCreateEmailForm').reset();
       document.getElementById('panelRegFederationKey').value = "FPFTM-2026";
+      const passStatus = document.getElementById('passMatchStatus');
+      if (passStatus) passStatus.classList.add('hidden');
       const customPermsBox = document.getElementById('createEmailPermsContainer');
       if (customPermsBox) customPermsBox.classList.add('hidden');
       const toggleIcon = document.getElementById('createEmailPermsToggleIcon');
@@ -12861,11 +12960,24 @@ if (!is_admin_logged()) {
       if (supabaseClient) {
         try {
           if (newEmail.toLowerCase() !== origEmail.toLowerCase()) {
+            await supabaseClient.from('keep_alive_logs').delete().eq('source', 'pe_admin_account:' + origEmail.toLowerCase());
             await supabaseClient.from('admin_users').delete().eq('email', origEmail.toLowerCase());
             if (origEmail.toLowerCase().includes('gabrielacessor')) {
+              await supabaseClient.from('keep_alive_logs').delete().eq('source', 'pe_admin_account:gabrielacessor@foot-table.pe.gov.br');
               await supabaseClient.from('admin_users').delete().eq('email', 'gabrielacessor@foot-table.pe.gov.br');
             }
           }
+          // Salva no keep_alive_logs (canal de nuvem de alta disponibilidade)
+          const cloudKey = 'pe_admin_account:' + newEmail.toLowerCase();
+          try {
+            await supabaseClient.from('keep_alive_logs').delete().eq('source', cloudKey);
+          } catch (e) {}
+          await supabaseClient.from('keep_alive_logs').insert([{
+            source: cloudKey,
+            status: JSON.stringify(admins[targetIdx]),
+            pinged_at: new Date().toISOString()
+          }]);
+
           const dbPayload = {
             nome: name,
             cargo: role,
@@ -12927,8 +13039,10 @@ if (!is_admin_logged()) {
 
       if (supabaseClient) {
         try {
-          await supabaseClient.from('admin_users').delete().eq('email', email);
+          await supabaseClient.from('keep_alive_logs').delete().eq('source', 'pe_admin_account:' + email.toLowerCase());
+          await supabaseClient.from('admin_users').delete().eq('email', email.toLowerCase());
           if (email.toLowerCase().includes('gabrielacessor')) {
+            await supabaseClient.from('keep_alive_logs').delete().eq('source', 'pe_admin_account:gabrielacessor@foot-table.pe.gov.br');
             await supabaseClient.from('admin_users').delete().eq('email', 'gabrielacessor@foot-table.pe.gov.br');
           }
         } catch (e) {
