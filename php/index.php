@@ -1,6 +1,3 @@
-<?php
-require_once __DIR__ . '/config.php';
-?>
 <!DOCTYPE html>
 <html lang="pt-BR" class="dark">
 <head>
@@ -141,7 +138,7 @@ require_once __DIR__ . '/config.php';
       <!-- Navegação Pública Limpa -->
       <nav class="hidden md:flex items-center gap-6">
         <a href="#home" class="text-xs uppercase font-bold text-slate-300 hover:text-pe-gold transition tracking-wider">Início</a>
-        <a href="noticias.php" class="text-xs uppercase font-bold text-slate-300 hover:text-pe-gold transition tracking-wider">Notícias & Torneios</a>
+        <a href="noticias.html" class="text-xs uppercase font-bold text-slate-300 hover:text-pe-gold transition tracking-wider">Notícias & Torneios</a>
         <a href="#galeria" class="text-xs uppercase font-bold text-slate-300 hover:text-pe-gold transition tracking-wider">Fotos & Arenas</a>
         <a href="#regulamento" class="text-xs uppercase font-bold text-slate-300 hover:text-pe-gold transition tracking-wider">Regulamento</a>
       </nav>
@@ -172,7 +169,7 @@ require_once __DIR__ . '/config.php';
         <a href="#consulta" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase tracking-wider px-7 py-3.5 rounded-xl shadow-[0_0_20px_rgba(245,184,0,0.35)] transition transform hover:-translate-y-0.5 flex items-center gap-2">
           <span>🔍</span> Consultar Carteira (6 Dígitos)
         </a>
-        <a href="noticias.php" class="bg-pe-card border border-pe-cardBorder hover:border-pe-gold/60 text-slate-300 font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl transition">
+        <a href="noticias.html" class="bg-pe-card border border-pe-cardBorder hover:border-pe-gold/60 text-slate-300 font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl transition">
           Ver Notícias & Torneios
         </a>
       </div>
@@ -562,7 +559,7 @@ require_once __DIR__ . '/config.php';
             </a>
           </li>
           <li>
-            <a href="noticias.php" class="hover:text-pe-gold transition flex items-center gap-1.5">
+            <a href="noticias.html" class="hover:text-pe-gold transition flex items-center gap-1.5">
               <i class="fa-solid fa-newspaper text-slate-500 text-[10px]"></i>
               Notícias, Calendário e Torneios
             </a>
@@ -623,6 +620,13 @@ require_once __DIR__ . '/config.php';
       localStorage.setItem('pe_supabase_anon_key', SUPABASE_ANON_KEY);
     }
     let supabaseClient = null;
+
+    function safeSupabaseCall(promise, timeoutMs = 2500) {
+      return Promise.race([
+        promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT_SUPABASE')), timeoutMs))
+      ]);
+    }
 
     async function initSupabase() {
       const dot = document.getElementById('supabaseStatusDot');
@@ -1045,11 +1049,14 @@ require_once __DIR__ . '/config.php';
           </div>
         `;
         try {
-          const { data, error } = await supabaseClient
-            .from('atletas')
-            .select('*')
-            .eq('codigo', code)
-            .maybeSingle();
+          const { data, error } = await safeSupabaseCall(
+            supabaseClient
+              .from('atletas')
+              .select('*')
+              .eq('codigo', code)
+              .maybeSingle(),
+            2500
+          );
 
           if (!error && data) {
             athlete = {
@@ -1063,6 +1070,11 @@ require_once __DIR__ . '/config.php';
               status: data.status || 'PENDENTE',
               foto: (data.foto_url && !data.foto_url.includes('unsplash.com')) ? data.foto_url : ''
             };
+            const localAthletes = getStoredAthletes();
+            const localMatch = localAthletes.find(a => String(a.codigo) === String(code));
+            if (localMatch && localMatch.status && (localMatch.status !== 'PENDENTE' || !data.status)) {
+              athlete.status = localMatch.status;
+            }
           }
         } catch (e) {
           console.warn("Falha na consulta remota do Supabase, buscando local:", e);
@@ -1133,6 +1145,7 @@ require_once __DIR__ . '/config.php';
       // Verifica status de homologação
       const upperStatus = (athlete.status || 'PENDENTE').toUpperCase().trim();
       const isHomologado = upperStatus === 'HOMOLOGADO' || upperStatus === 'REGULAR';
+      const isDesabilitado = upperStatus === 'DESABILITADO' || upperStatus === 'SUSPENSO' || upperStatus === 'INATIVO';
       
       // Atualiza Painel de Validação Digital do QR Code
       const qrFullName = document.getElementById('qrAthleteFullName');
@@ -1159,7 +1172,7 @@ require_once __DIR__ . '/config.php';
       if (qrCity) qrCity.textContent = athlete.municipio;
       if (qrValidity) qrValidity.textContent = '31/12/2026 (Temporada Oficial)';
       if (qrTimestamp) qrTimestamp.textContent = new Date().toLocaleString('pt-BR');
-      if (qrHash) qrHash.textContent = `FPEFT-${athlete.codigo}-${isHomologado ? 'AUTH-REGULAR' : 'PENDING'}`;
+      if (qrHash) qrHash.textContent = `FPEFT-${athlete.codigo}-${isHomologado ? 'AUTH-REGULAR' : (isDesabilitado ? 'DISABLED' : 'PENDING')}`;
 
       if (isHomologado) {
         if (qrStatusMain) {
@@ -1172,6 +1185,17 @@ require_once __DIR__ . '/config.php';
         if (qrSituationIcon) qrSituationIcon.textContent = "✅";
         if (qrSituationTitle) qrSituationTitle.textContent = "REGISTRO OFICIAL HOMOLOGADO E REGULAR";
         if (qrSituationDesc) qrSituationDesc.textContent = "Este atleta está devidamente ativo, cadastrado e homologado perante a Federação Pernambucana de Foot Table.";
+      } else if (isDesabilitado) {
+        if (qrStatusMain) {
+          qrStatusMain.className = "px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider flex items-center gap-1.5 bg-rose-950/90 border border-rose-500 text-rose-300 shadow-md";
+        }
+        if (qrStatusText) qrStatusText.textContent = "CARTEIRA DESABILITADA";
+        if (qrSituationBox) {
+          qrSituationBox.className = "p-3.5 rounded-xl bg-rose-950/40 border border-rose-500/50 text-rose-300 text-xs flex items-center gap-3";
+        }
+        if (qrSituationIcon) qrSituationIcon.textContent = "🚫";
+        if (qrSituationTitle) qrSituationTitle.textContent = "CARTEIRA DESABILITADA / SUSPENSA";
+        if (qrSituationDesc) qrSituationDesc.textContent = "A carteira digital deste atleta foi temporariamente desabilitada/suspensa pela diretoria da Federação. O download e o uso em competições oficiais estão bloqueados.";
       } else {
         if (qrStatusMain) {
           qrStatusMain.className = "px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider flex items-center gap-1.5 bg-amber-950/90 border border-amber-500 text-amber-300 shadow-md";
@@ -1194,6 +1218,9 @@ require_once __DIR__ . '/config.php';
         if (isHomologado) {
           statusBadge.className = "text-[10px] font-bold uppercase text-emerald-400 flex items-center justify-end gap-1";
           statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> REGULAR';
+        } else if (isDesabilitado) {
+          statusBadge.className = "text-[10px] font-bold uppercase text-rose-400 flex items-center justify-end gap-1 font-mono";
+          statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-rose-500"></span> 🚫 CARTEIRA DESABILITADA';
         } else {
           statusBadge.className = "text-[10px] font-bold uppercase text-amber-400 flex items-center justify-end gap-1 font-mono";
           statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span> HOMOLOGAÇÃO PENDENTE';
@@ -1203,8 +1230,28 @@ require_once __DIR__ . '/config.php';
       if (pendingWarning) {
         if (isHomologado) {
           pendingWarning.classList.add('hidden');
+        } else if (isDesabilitado) {
+          pendingWarning.classList.remove('hidden');
+          pendingWarning.className = "max-w-[560px] mx-auto mt-4 p-4 rounded-xl bg-rose-950/80 border border-rose-500/50 text-rose-200 text-xs shadow-lg space-y-1.5";
+          pendingWarning.innerHTML = `
+            <div class="flex items-center gap-2 font-extrabold text-rose-400">
+              <span class="text-base">🚫</span> <span>CARTEIRA DESABILITADA / SUSPENSA</span>
+            </div>
+            <p class="text-slate-300 text-[11px] leading-relaxed">
+              A carteira deste atleta foi <strong>temporariamente desabilitada pela diretoria da Federação</strong>. O download e a impressão em PDF/PNG estão bloqueados no momento.
+            </p>
+          `;
         } else {
           pendingWarning.classList.remove('hidden');
+          pendingWarning.className = "max-w-[560px] mx-auto mt-4 p-4 rounded-xl bg-amber-950/80 border border-amber-500/50 text-amber-200 text-xs shadow-lg space-y-1.5";
+          pendingWarning.innerHTML = `
+            <div class="flex items-center gap-2 font-extrabold text-amber-400">
+              <span class="text-base">⏳</span> <span>HOMOLOGAÇÃO PENDENTE</span>
+            </div>
+            <p class="text-slate-300 text-[11px] leading-relaxed">
+              Este cadastro foi registrado e está aguardando a homologação oficial da Federação. <strong>A impressão e o download em PDF/PNG da carteira digital estão temporariamente bloqueados</strong> até a conclusão da validação.
+            </p>
+          `;
         }
       }
 
@@ -1216,7 +1263,7 @@ require_once __DIR__ . '/config.php';
         } else {
           btnDownload.disabled = true;
           btnDownload.className = "bg-slate-800/80 border border-slate-700/60 text-slate-500 font-bold text-xs uppercase tracking-wider py-3 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed opacity-60";
-          btnDownload.title = "Download bloqueado: Homologação Pendente";
+          btnDownload.title = isDesabilitado ? "Download bloqueado: Carteira Desabilitada" : "Download bloqueado: Homologação Pendente";
         }
       }
 
@@ -1228,7 +1275,7 @@ require_once __DIR__ . '/config.php';
         } else {
           btnPrint.disabled = true;
           btnPrint.className = "bg-slate-800/80 border border-slate-700/60 text-slate-500 font-bold text-xs uppercase tracking-wider py-3 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed opacity-60";
-          btnPrint.title = "Impressão bloqueada: Homologação Pendente";
+          btnPrint.title = isDesabilitado ? "Impressão bloqueada: Carteira Desabilitada" : "Impressão bloqueada: Homologação Pendente";
         }
       }
 

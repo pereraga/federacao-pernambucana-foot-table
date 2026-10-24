@@ -1544,11 +1544,15 @@
                   Todos (Ordem A-Z)
                 </button>
                 <button type="button" onclick="setJogadoresFilterStatus('HOMOLOGADO')" id="filterTabStatus-HOMOLOGADO" class="text-xs px-3.5 py-2 rounded-xl font-bold transition cursor-pointer bg-[#05080e] border border-[#1c253b] text-slate-300 hover:text-white">
-                  Homologados
+                  Homologados (<span id="countBtnHomologados">0</span>)
                 </button>
                 <!-- BOTÃO CONDICIONAL: Só aparece via JS se houver pendentes -->
                 <button type="button" onclick="setJogadoresFilterStatus('PENDENTE')" id="filterTabStatus-PENDENTE" class="hidden text-xs px-3.5 py-2 rounded-xl font-bold transition cursor-pointer bg-[#05080e] border border-amber-500/50 text-amber-400 hover:bg-amber-500/20">
                   ⏳ Aguardando Homologação (<span id="countBtnPendentes">0</span>)
+                </button>
+                <!-- BOTÃO CONDICIONAL: Só aparece via JS se houver desabilitados -->
+                <button type="button" onclick="setJogadoresFilterStatus('DESABILITADO')" id="filterTabStatus-DESABILITADO" class="hidden text-xs px-3.5 py-2 rounded-xl font-bold transition cursor-pointer bg-[#05080e] border border-rose-500/50 text-rose-400 hover:bg-rose-500/20">
+                  🚫 Desabilitados (<span id="countBtnDesabilitados">0</span>)
                 </button>
 
                 <!-- Filtro por Categoria (4 Bases) -->
@@ -1577,17 +1581,17 @@
               <table class="w-full text-left text-xs whitespace-nowrap">
                 <thead class="bg-[#05080e] text-slate-400 uppercase text-[10px] font-mono border-b border-[#1c253b]">
                   <tr>
-                    <th class="py-3 px-4">Nº Federado</th>
-                    <th class="py-3 px-4">Nome do Jogador (A-Z)</th>
-                    <th class="py-3 px-4">CPF</th>
-                    <th class="py-3 px-4">Nascimento</th>
-                    <th class="py-3 px-4">Telefone</th>
-                    <th class="py-3 px-4">Município</th>
-                    <th class="py-3 px-4">Categoria</th>
-                    <th class="py-3 px-4">Modalidade</th>
-                    <th class="py-3 px-4">Validade</th>
-                    <th class="py-3 px-4">Status</th>
-                    <th class="py-3 px-4 text-right">Ações</th>
+                    <th class="py-3 px-3.5">Nº Federado</th>
+                    <th class="py-3 px-3.5">Nome do Jogador (A-Z)</th>
+                    <th class="py-3 px-3.5">Status da Carteira</th>
+                    <th class="py-3 px-3.5">Ações da Carteira</th>
+                    <th class="py-3 px-3.5">Categoria</th>
+                    <th class="py-3 px-3.5">Modalidade</th>
+                    <th class="py-3 px-3.5">Município</th>
+                    <th class="py-3 px-3.5">CPF</th>
+                    <th class="py-3 px-3.5">Nascimento</th>
+                    <th class="py-3 px-3.5">Telefone</th>
+                    <th class="py-3 px-3.5">Validade</th>
                   </tr>
                 </thead>
                 <tbody id="jogadoresTableBody" class="divide-y divide-[#1c253b]/60">
@@ -8767,7 +8771,15 @@
                 const cCode = String(d.codigo);
                 cloudCodes.add(cCode);
                 const localMatch = localMap.get(cCode);
-                const effectiveStatus = (d.status && String(d.status).trim()) ? d.status : (localMatch && localMatch.status ? localMatch.status : 'HOMOLOGADO');
+                let effectiveStatus = (d.status && String(d.status).trim()) ? d.status : 'HOMOLOGADO';
+                if (localMatch && localMatch.status) {
+                  // Prioriza o status definido pelo administrador (HOMOLOGADO, DESABILITADO, etc.)
+                  if (localMatch.status_updated_at || localMatch.status !== 'PENDENTE') {
+                    effectiveStatus = localMatch.status;
+                  } else if (!d.status) {
+                    effectiveStatus = localMatch.status;
+                  }
+                }
                 const photoVal = d.foto_url || d.foto || (localMatch ? (localMatch.foto_url || localMatch.foto) : '');
                 return {
                   id: d.id,
@@ -8884,17 +8896,35 @@
         : await loadAthletes();
       
       const totalCount = athletes.length;
-      const pendentesList = athletes.filter(a => a.status === 'PENDENTE' || a.status === 'PENDENTE DE HOMOLOGAÇÃO');
+      const pendentesList = athletes.filter(a => {
+        const s = (a.status || 'PENDENTE').toUpperCase().trim();
+        return s === 'PENDENTE' || s === 'PENDENTE DE HOMOLOGAÇÃO';
+      });
       const pendingCount = pendentesList.length;
-      const homologadosCount = athletes.filter(a => a.status === 'HOMOLOGADO' || a.status === 'REGULAR').length;
+      const homologadosCount = athletes.filter(a => {
+        const s = (a.status || 'PENDENTE').toUpperCase().trim();
+        return s === 'HOMOLOGADO' || s === 'REGULAR';
+      }).length;
+      const desabilitadosCount = athletes.filter(a => {
+        const s = (a.status || 'PENDENTE').toUpperCase().trim();
+        return s === 'DESABILITADO' || s === 'SUSPENSO' || s === 'INATIVO';
+      }).length;
 
-      // Atualiza contadores dos cards
+      // Atualiza contadores dos cards principais
       const statTotal = document.getElementById('statTotalJogadores');
       const statHomolog = document.getElementById('statHomologadosJogadores');
       const statPend = document.getElementById('statPendentesJogadores');
       if (statTotal) statTotal.textContent = totalCount;
       if (statHomolog) statHomolog.textContent = homologadosCount;
       if (statPend) statPend.textContent = pendingCount;
+
+      // Atualiza contadores das abas de filtro
+      const countHomolog = document.getElementById('countBtnHomologados');
+      const countPend = document.getElementById('countBtnPendentes');
+      const countDesab = document.getElementById('countBtnDesabilitados');
+      if (countHomolog) countHomolog.textContent = homologadosCount;
+      if (countPend) countPend.textContent = pendingCount;
+      if (countDesab) countDesab.textContent = desabilitadosCount;
 
       // Atualiza badge de pendentes na sidebar de navegação
       const navBadge = document.getElementById('navPendingBadge');
@@ -8911,21 +8941,31 @@
       // FILTRO CONDICIONAL: O filtro e o alerta de pendentes SÓ aparecem se houver pelo menos 1 pendente!
       const bannerPendentes = document.getElementById('bannerHomologacaoPendente');
       const btnFilterPendente = document.getElementById('filterTabStatus-PENDENTE');
-      const countBtnPendentes = document.getElementById('countBtnPendentes');
+      const btnFilterDesab = document.getElementById('filterTabStatus-DESABILITADO');
       const badgeCountPendentes = document.getElementById('badgeCountPendentes');
 
       if (pendingCount > 0) {
         if (bannerPendentes) bannerPendentes.classList.remove('hidden');
         if (btnFilterPendente) btnFilterPendente.classList.remove('hidden');
-        if (countBtnPendentes) countBtnPendentes.textContent = pendingCount;
         if (badgeCountPendentes) badgeCountPendentes.textContent = `${pendingCount} pendente${pendingCount > 1 ? 's' : ''}`;
       } else {
         if (bannerPendentes) bannerPendentes.classList.add('hidden');
         if (btnFilterPendente) btnFilterPendente.classList.add('hidden');
-        // Se estava filtrando por pendente e não há mais pendentes, volta para todos
         if (jogadoresFilterStatus === 'PENDENTE') {
           jogadoresFilterStatus = 'ALL';
           updateFilterButtonsUI();
+        }
+      }
+
+      if (btnFilterDesab) {
+        if (desabilitadosCount > 0) {
+          btnFilterDesab.classList.remove('hidden');
+        } else {
+          btnFilterDesab.classList.add('hidden');
+          if (jogadoresFilterStatus === 'DESABILITADO') {
+            jogadoresFilterStatus = 'ALL';
+            updateFilterButtonsUI();
+          }
         }
       }
 
@@ -8935,9 +8975,20 @@
       // Filtra por status
       let list = [...athletes];
       if (jogadoresFilterStatus === 'HOMOLOGADO') {
-        list = list.filter(a => a.status === 'HOMOLOGADO' || a.status === 'REGULAR');
+        list = list.filter(a => {
+          const s = (a.status || 'PENDENTE').toUpperCase().trim();
+          return s === 'HOMOLOGADO' || s === 'REGULAR';
+        });
       } else if (jogadoresFilterStatus === 'PENDENTE') {
-        list = list.filter(a => a.status === 'PENDENTE' || a.status === 'PENDENTE DE HOMOLOGAÇÃO');
+        list = list.filter(a => {
+          const s = (a.status || 'PENDENTE').toUpperCase().trim();
+          return s === 'PENDENTE' || s === 'PENDENTE DE HOMOLOGAÇÃO';
+        });
+      } else if (jogadoresFilterStatus === 'DESABILITADO') {
+        list = list.filter(a => {
+          const s = (a.status || 'PENDENTE').toUpperCase().trim();
+          return s === 'DESABILITADO' || s === 'SUSPENSO' || s === 'INATIVO';
+        });
       }
 
       // Filtra por Categoria (4 Bases)
@@ -8979,52 +9030,74 @@
       } else {
         const fragment = document.createDocumentFragment();
         list.forEach(a => {
-          const isPending = a.status === 'PENDENTE' || a.status === 'PENDENTE DE HOMOLOGAÇÃO';
+          const normStatus = (a.status || 'PENDENTE').toUpperCase().trim();
+          const isPending = normStatus === 'PENDENTE' || normStatus === 'PENDENTE DE HOMOLOGAÇÃO';
+          const isHomologado = normStatus === 'HOMOLOGADO' || normStatus === 'REGULAR';
+          const isDesabilitado = normStatus === 'DESABILITADO' || normStatus === 'SUSPENSO' || normStatus === 'INATIVO';
+
           const tr = document.createElement('tr');
           tr.className = "hover:bg-[#070e1d] transition cursor-pointer border-b border-[#1c253b]/50 group";
           tr.setAttribute('data-code', a.codigo);
 
           const fedDisplay = a.federado || (String(a.codigo).startsWith('PE-') ? a.codigo : `PE-2026/${String(a.codigo).slice(-3)}`);
+
+          let statusBadgeHtml = '';
+          if (isPending) {
+            statusBadgeHtml = `<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-950/80 text-amber-300 border border-amber-500/50 flex items-center gap-1.5 w-fit shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> ⏳ PENDENTE</span>`;
+          } else if (isDesabilitado) {
+            statusBadgeHtml = `<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-rose-950/80 text-rose-300 border border-rose-500/50 flex items-center gap-1.5 w-fit shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span> 🚫 DESABILITADA</span>`;
+          } else {
+            statusBadgeHtml = `<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/50 flex items-center gap-1.5 w-fit shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> ✓ HOMOLOGADA (ATIVA)</span>`;
+          }
+
+          let actionButtonsHtml = '';
+          if (hasPermission('atletas_homologar')) {
+            if (isPending) {
+              actionButtonsHtml = `
+                <button type="button" onclick="homologarAthlete('${a.codigo}')" title="Homologar Este Jogador Oficialmente" class="bg-amber-400 hover:bg-amber-300 text-black text-[11px] font-extrabold px-3 py-1.5 rounded-lg transition cursor-pointer shadow flex items-center gap-1.5 active:scale-95">
+                  <i class="fa-solid fa-check"></i> <span>Homologar</span>
+                </button>
+              `;
+            } else if (isHomologado) {
+              actionButtonsHtml = `
+                <button type="button" onclick="desabilitarCarteiraAthlete('${a.codigo}')" title="Desabilitar / Suspender temporariamente esta carteira" class="bg-rose-950/80 hover:bg-rose-900 border border-rose-500/50 text-rose-300 hover:text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition cursor-pointer shadow flex items-center gap-1.5 active:scale-95">
+                  <i class="fa-solid fa-ban text-xs"></i> <span>Desabilitar Carteira</span>
+                </button>
+              `;
+            } else if (isDesabilitado) {
+              actionButtonsHtml = `
+                <button type="button" onclick="habilitarCarteiraAthlete('${a.codigo}')" title="Reativar e Habilitar esta carteira oficial" class="bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition cursor-pointer shadow flex items-center gap-1.5 active:scale-95">
+                  <i class="fa-solid fa-circle-check text-xs"></i> <span>Habilitar Carteira</span>
+                </button>
+              `;
+            }
+          }
+
           tr.innerHTML = `
-            <td class="py-3 px-4 font-mono font-bold text-pe-gold text-xs">${escapeHtml(fedDisplay)}</td>
-            <td class="py-3 px-4 font-bold text-white uppercase text-xs">
+            <td class="py-3 px-3.5 font-mono font-bold text-pe-gold text-xs">${escapeHtml(fedDisplay)}</td>
+            <td class="py-3 px-3.5 font-bold text-white uppercase text-xs">
               <div class="flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full ${isPending ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}"></span>
+                <span class="w-1.5 h-1.5 rounded-full ${isPending ? 'bg-amber-400 animate-pulse' : (isDesabilitado ? 'bg-rose-400' : 'bg-emerald-400')}"></span>
                 <span class="hover:text-pe-gold transition">${escapeHtml(a.nome)}</span>
               </div>
             </td>
-            <td class="py-3 px-4 font-mono text-slate-300 text-xs">${escapeHtml(a.cpf || '-')}</td>
-            <td class="py-3 px-4 text-slate-300 text-xs">${escapeHtml(a.nascimento || '-')}</td>
-            <td class="py-3 px-4 text-slate-300 text-xs">${escapeHtml(a.telefone || '-')}</td>
-            <td class="py-3 px-4 text-slate-300 text-xs truncate max-w-[130px]">${escapeHtml(a.municipio || '-')}</td>
-            <td class="py-3 px-4">${getCategoryBadgeHtml(a.categoria)}</td>
-            <td class="py-3 px-4 text-pe-gold text-xs font-semibold">${escapeHtml(a.modalidade || a.clube || 'SOLO')}</td>
-            <td class="py-3 px-4 text-slate-400 text-xs font-mono">${escapeHtml(a.validade || '12/2026')}</td>
-            <td class="py-3 px-4">
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isPending ? 'bg-amber-950/70 text-amber-400 border border-amber-500/40 animate-pulse' : 'bg-emerald-950/70 text-emerald-400 border border-emerald-500/40'}">
-                ${isPending ? '⏳ PENDENTE' : '✓ HOMOLOGADO'}
-              </span>
-            </td>
-            <td class="py-3 px-4 text-right">
-              <div class="flex items-center justify-end gap-1.5" onclick="event.stopPropagation()">
-                ${(isPending && hasPermission('atletas_homologar')) ? `
-                  <button type="button" onclick="homologarAthlete('${a.codigo}')" title="Homologar Imediatamente" class="bg-amber-400 hover:bg-amber-300 text-black text-[11px] font-extrabold px-2.5 py-1 rounded-lg transition cursor-pointer shadow flex items-center gap-1">
-                    <i class="fa-solid fa-check"></i> Homologar
-                  </button>
-                ` : ''}
-                <button type="button" onclick="abrirModalVerCarteira('${a.codigo}')" title="Ver Identificação e Carteira" class="text-xs text-pe-gold hover:text-white bg-slate-800/90 hover:bg-[#15203a] px-2.5 py-1 rounded-lg border border-pe-gold/40 font-bold transition cursor-pointer flex items-center gap-1">
+            <td class="py-3 px-3.5">${statusBadgeHtml}</td>
+            <td class="py-3 px-3.5">
+              <div class="flex items-center gap-1.5" onclick="event.stopPropagation()">
+                ${actionButtonsHtml}
+                <button type="button" onclick="abrirModalVerCarteira('${a.codigo}')" title="Ver Identificação e Carteira" class="text-xs text-pe-gold hover:text-white bg-slate-800/90 hover:bg-[#15203a] px-2.5 py-1.5 rounded-lg border border-pe-gold/40 font-bold transition cursor-pointer flex items-center gap-1">
                   <i class="fa-solid fa-id-card"></i> Ver
                 </button>
                 ${hasPermission('carteira_pdf') ? `
-                <button type="button" onclick="baixarCarteiraAtletaPorCodigo('${a.codigo}', 'pdf', this)" title="Baixar Carteira em PDF" class="text-xs text-rose-400 hover:text-white bg-slate-800/90 hover:bg-rose-600 px-2.5 py-1 rounded-lg border border-rose-500/30 font-bold transition cursor-pointer flex items-center gap-1">
+                <button type="button" onclick="baixarCarteiraAtletaPorCodigo('${a.codigo}', 'pdf', this)" title="Baixar Carteira em PDF" class="text-xs text-rose-400 hover:text-white bg-slate-800/90 hover:bg-rose-600 px-2.5 py-1.5 rounded-lg border border-rose-500/30 font-bold transition cursor-pointer flex items-center gap-1">
                   <i class="fa-solid fa-file-pdf"></i> PDF
                 </button>` : ''}
                 ${hasPermission('carteira_png') ? `
-                <button type="button" onclick="baixarCarteiraAtletaPorCodigo('${a.codigo}', 'png', this)" title="Baixar Carteira em PNG" class="text-xs text-sky-400 hover:text-white bg-slate-800/90 hover:bg-sky-600 px-2.5 py-1 rounded-lg border border-sky-500/30 font-bold transition cursor-pointer flex items-center gap-1">
+                <button type="button" onclick="baixarCarteiraAtletaPorCodigo('${a.codigo}', 'png', this)" title="Baixar Carteira em PNG" class="text-xs text-sky-400 hover:text-white bg-slate-800/90 hover:bg-sky-600 px-2.5 py-1.5 rounded-lg border border-sky-500/30 font-bold transition cursor-pointer flex items-center gap-1">
                   <i class="fa-solid fa-file-image"></i> PNG
                 </button>` : ''}
                 ${hasPermission('carteira_studio') ? `
-                <button type="button" onclick="fillFormWithAthlete('${a.codigo}')" title="Abrir no Studio de Emissão" class="text-xs text-sky-400 hover:text-white bg-slate-800/90 hover:bg-sky-600 px-2.5 py-1 rounded-lg border border-sky-500/30 font-bold transition cursor-pointer">
+                <button type="button" onclick="fillFormWithAthlete('${a.codigo}')" title="Abrir no Studio de Emissão" class="text-xs text-sky-400 hover:text-white bg-slate-800/90 hover:bg-sky-600 px-2.5 py-1.5 rounded-lg border border-sky-500/30 font-bold transition cursor-pointer">
                   Studio
                 </button>` : ''}
                 ${hasPermission('atletas_excluir') ? `
@@ -9033,6 +9106,13 @@
                 </button>` : ''}
               </div>
             </td>
+            <td class="py-3 px-3.5">${getCategoryBadgeHtml(a.categoria)}</td>
+            <td class="py-3 px-3.5 text-pe-gold text-xs font-semibold">${escapeHtml(a.modalidade || a.clube || 'SOLO')}</td>
+            <td class="py-3 px-3.5 text-slate-300 text-xs truncate max-w-[130px]">${escapeHtml(a.municipio || '-')}</td>
+            <td class="py-3 px-3.5 font-mono text-slate-300 text-xs">${escapeHtml(a.cpf || '-')}</td>
+            <td class="py-3 px-3.5 text-slate-300 text-xs">${escapeHtml(a.nascimento || '-')}</td>
+            <td class="py-3 px-3.5 text-slate-300 text-xs">${escapeHtml(a.telefone || '-')}</td>
+            <td class="py-3 px-3.5 text-slate-400 text-xs font-mono">${escapeHtml(a.validade || '12/2026')}</td>
           `;
           fragment.appendChild(tr);
         });
@@ -9065,16 +9145,17 @@
     }
 
     function updateFilterButtonsUI() {
-      const btns = ['ALL', 'HOMOLOGADO', 'PENDENTE'];
+      const btns = ['ALL', 'HOMOLOGADO', 'PENDENTE', 'DESABILITADO'];
       btns.forEach(b => {
         const el = document.getElementById(`filterTabStatus-${b}`);
         if (!el) return;
         if (b === jogadoresFilterStatus) {
           el.className = "text-xs px-3.5 py-2 rounded-xl font-bold transition cursor-pointer bg-pe-gold text-pe-dark shadow";
         } else {
-          el.className = b === 'PENDENTE' 
-            ? "text-xs px-3.5 py-2 rounded-xl font-bold transition cursor-pointer bg-[#05080e] border border-amber-500/50 text-amber-400 hover:bg-amber-500/20"
-            : "text-xs px-3.5 py-2 rounded-xl font-bold transition cursor-pointer bg-[#05080e] border border-[#1c253b] text-slate-300 hover:text-white";
+          let extraClasses = "bg-[#05080e] border border-[#1c253b] text-slate-300 hover:text-white";
+          if (b === 'PENDENTE') extraClasses = "bg-[#05080e] border border-amber-500/50 text-amber-400 hover:bg-amber-500/20";
+          if (b === 'DESABILITADO') extraClasses = "bg-[#05080e] border border-rose-500/50 text-rose-400 hover:bg-rose-500/20";
+          el.className = `text-xs px-3.5 py-2 rounded-xl font-bold transition cursor-pointer ${extraClasses}`;
         }
       });
     }
@@ -9092,52 +9173,54 @@
     }
 
     /* =========================================================
-       HOMOLOGAÇÃO DE ATLETAS (INDIVIDUAL E EM MASSA)
+       HOMOLOGAÇÃO E GESTÃO DE STATUS DA CARTEIRA (HABILITAR / DESABILITAR)
        ========================================================= */
-    async function homologarAthlete(codigo) {
-      if (!hasPermission('atletas_homologar')) {
-        showToast('⚠️ Seu cargo não possui permissão para homologar atletas.', true);
+    async function setAthleteStatus(codigo, newStatus) {
+      if (!hasPermission('atletas_homologar') && !hasPermission('*')) {
+        showToast('⚠️ Seu cargo não possui permissão para alterar status de carteiras.', true);
         return;
       }
+      const normStatus = (newStatus || 'HOMOLOGADO').toUpperCase().trim();
       let athletes = JSON.parse(localStorage.getItem('pe_athletes_db')) || [];
-      const a = athletes.find(item => String(item.codigo) === String(codigo) || String(item.federado) === String(codigo));
-      if (a) {
-        a.status = 'HOMOLOGADO';
-        localStorage.setItem('pe_athletes_db', JSON.stringify(athletes));
-        currentCachedAthletes = athletes;
+      if (athletes.length === 0 && currentCachedAthletes && currentCachedAthletes.length > 0) {
+        athletes = [...currentCachedAthletes];
       }
 
-      // Se o formulário ou a tela do Studio estiver com este atleta aberto, atualiza imediatamente para HOMOLOGADO
+      let a = athletes.find(item => String(item.codigo) === String(codigo) || String(item.federado) === String(codigo));
+      if (!a && currentCachedAthletes) {
+        a = currentCachedAthletes.find(item => String(item.codigo) === String(codigo) || String(item.federado) === String(codigo));
+        if (a) athletes.push(a);
+      }
+
+      if (a) {
+        a.status = normStatus;
+        a.status_updated_at = Date.now();
+        localStorage.setItem('pe_athletes_db', JSON.stringify(athletes));
+        currentCachedAthletes = athletes;
+        _lastAthletesFetchTime = Date.now();
+      }
+
+      // Se o formulário ou a tela do Studio estiver com este atleta aberto, atualiza imediatamente
       const currentFormCode = (document.getElementById('athleteCode') ? document.getElementById('athleteCode').value : '') || (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '');
       if (String(currentFormCode) === String(codigo) || (window._lastActiveAthlete && (String(window._lastActiveAthlete.codigo) === String(codigo) || String(window._lastActiveAthlete.federado) === String(codigo)))) {
         const statusSelect = document.getElementById('athleteStatus');
-        if (statusSelect) statusSelect.value = 'HOMOLOGADO';
-        if (window._lastActiveAthlete) window._lastActiveAthlete.status = 'HOMOLOGADO';
+        if (statusSelect) statusSelect.value = normStatus;
+        if (window._lastActiveAthlete) window._lastActiveAthlete.status = normStatus;
 
         const feedback = document.getElementById('athleteFeedback');
-        if (feedback) {
-          feedback.classList.remove('hidden');
-          feedback.className = "text-xs p-3.5 rounded-xl font-bold bg-emerald-950/80 border border-emerald-500/50 text-emerald-200 shadow-xl space-y-2.5";
+        if (feedback && !feedback.classList.contains('hidden')) {
+          const isHomolog = normStatus === 'HOMOLOGADO';
+          const isDesab = normStatus === 'DESABILITADO';
+          feedback.className = `text-xs p-3.5 rounded-xl font-bold ${isHomolog ? 'bg-emerald-950/80 border border-emerald-500/50 text-emerald-200' : (isDesab ? 'bg-rose-950/80 border border-rose-500/50 text-rose-200' : 'bg-amber-950/80 border border-amber-500/50 text-amber-200')} shadow-xl space-y-2.5`;
           feedback.innerHTML = `
             <div class="flex items-start gap-2.5">
-              <span class="text-lg text-emerald-400">✓</span>
+              <span class="text-lg">${isHomolog ? '✓' : (isDesab ? '🚫' : '⏳')}</span>
               <div>
-                <p class="font-extrabold text-emerald-300 text-xs uppercase tracking-wide">Atleta Homologado Oficialmente!</p>
+                <p class="font-extrabold text-xs uppercase tracking-wide">${isHomolog ? 'Carteira Homologada Oficialmente!' : (isDesab ? 'Carteira Desabilitada / Suspensa!' : 'Homologação Pendente')}</p>
                 <p class="text-[11px] font-normal text-slate-200 mt-0.5 leading-snug">
-                  Atleta <strong>#${escapeHtml(codigo)} - ${escapeHtml((a && a.nome) || 'Atleta')}</strong> homologado com sucesso. A emissão de carteira (PDF e PNG) está liberada!
+                  Atleta <strong>#${escapeHtml(codigo)} - ${escapeHtml((a && a.nome) || 'Atleta')}</strong> atualizado para status <strong>${normStatus}</strong>.
                 </p>
               </div>
-            </div>
-            <div class="pt-1 flex flex-wrap items-center gap-2">
-              <button type="button" onclick="exportCarteiraPDF(window._lastActiveAthlete, this)" class="px-3 py-1.5 bg-rose-700 hover:bg-rose-600 text-white font-bold text-[10px] uppercase rounded-lg transition flex items-center gap-1.5 cursor-pointer shadow">
-                <i class="fa-solid fa-file-pdf"></i> <span>Baixar PDF Oficial</span>
-              </button>
-              <button type="button" onclick="exportHdPng(window._lastActiveAthlete, this)" class="px-3 py-1.5 bg-sky-700 hover:bg-sky-600 text-white font-bold text-[10px] uppercase rounded-lg transition flex items-center gap-1.5 cursor-pointer shadow">
-                <i class="fa-solid fa-file-image"></i> <span>Baixar PNG HD</span>
-              </button>
-              <button type="button" onclick="prepararProximoCadastro()" class="px-3 py-1.5 bg-[#0e172a] hover:bg-[#1a2942] border border-slate-600 text-white font-bold text-[10px] uppercase rounded-lg transition flex items-center gap-1.5 cursor-pointer">
-                <i class="fa-solid fa-plus text-sky-400"></i> <span>Cadastrar Próximo</span>
-              </button>
             </div>
           `;
         }
@@ -9145,32 +9228,63 @@
 
       if (supabaseClient) {
         try {
-          const { error } = await supabaseClient.from('atletas').update({ status: 'HOMOLOGADO' }).eq('codigo', codigo);
-          if (error) {
-            console.warn("Supabase update status aviso:", error);
-            await supabaseClient.from('atletas').update({ status: 'HOMOLOGADO' }).eq('federado', codigo);
-          }
+          const updateTask = async () => {
+            let res = await supabaseClient.from('atletas').update({ status: normStatus }).eq('codigo', codigo);
+            if (res.error) {
+              await supabaseClient.from('atletas').update({ status: normStatus }).eq('federado', codigo);
+            }
+          };
+          safeSupabaseCall(updateTask(), 3500).catch(e => console.warn("Supabase update notice:", e));
         } catch (e) {
           console.warn("Supabase update status error:", e);
         }
       }
 
-      logAuditEvent('HOMOLOGATE_ATHLETE', 'atletas', { codigo });
-      showToast(`✓ Atleta #${codigo} (${(a && a.nome) || ''}) homologado com sucesso!`);
+      logAuditEvent('CHANGE_ATHLETE_STATUS', 'atletas', { codigo, status: normStatus });
+      
+      const toastMessages = {
+        'HOMOLOGADO': `✓ Atleta #${codigo} (${(a && a.nome) || ''}): Carteira HOMOLOGADA (Ativa)!`,
+        'DESABILITADO': `🚫 Atleta #${codigo} (${(a && a.nome) || ''}): Carteira DESABILITADA / Suspensa!`,
+        'PENDENTE': `⏳ Atleta #${codigo} (${(a && a.nome) || ''}) marcado como Pendente.`
+      };
+      showToast(toastMessages[normStatus] || `✓ Status do atleta #${codigo} alterado para ${normStatus}!`);
+
       await renderJogadoresCadastradosTable();
       updateDashboardData();
     }
 
+    async function homologarAthlete(codigo) {
+      await setAthleteStatus(codigo, 'HOMOLOGADO');
+    }
+
+    async function desabilitarCarteiraAthlete(codigo) {
+      await setAthleteStatus(codigo, 'DESABILITADO');
+    }
+
+    async function habilitarCarteiraAthlete(codigo) {
+      await setAthleteStatus(codigo, 'HOMOLOGADO');
+    }
+
+    window.homologarAthlete = homologarAthlete;
+    window.desabilitarCarteiraAthlete = desabilitarCarteiraAthlete;
+    window.habilitarCarteiraAthlete = habilitarCarteiraAthlete;
+    window.setAthleteStatus = setAthleteStatus;
+
     async function homologarTodosPendentes() {
-      if (!hasPermission('atletas_homologar')) {
+      if (!hasPermission('atletas_homologar') && !hasPermission('*')) {
         showToast('⚠️ Seu cargo não possui permissão para homologar atletas.', true);
         return;
       }
       let localAthletes = JSON.parse(localStorage.getItem('pe_athletes_db')) || [];
+      if (localAthletes.length === 0 && currentCachedAthletes && currentCachedAthletes.length > 0) {
+        localAthletes = [...currentCachedAthletes];
+      }
       let updatedCount = 0;
       localAthletes.forEach(a => {
-        if (a.status !== 'HOMOLOGADO' && a.status !== 'REGULAR') {
+        const s = (a.status || 'PENDENTE').toUpperCase().trim();
+        if (s !== 'HOMOLOGADO' && s !== 'REGULAR' && s !== 'DESABILITADO' && s !== 'SUSPENSO') {
           a.status = 'HOMOLOGADO';
+          a.status_updated_at = Date.now();
           updatedCount++;
         }
       });
@@ -9182,6 +9296,7 @@
 
       localStorage.setItem('pe_athletes_db', JSON.stringify(localAthletes));
       currentCachedAthletes = localAthletes;
+      _lastAthletesFetchTime = Date.now();
 
       // Se o formulário ativo estiver com PENDENTE, atualiza para HOMOLOGADO
       const statusSelect = document.getElementById('athleteStatus');
@@ -9218,12 +9333,13 @@
 
       if (supabaseClient) {
         try {
-          await supabaseClient.from('atletas').update({ status: 'HOMOLOGADO' }).neq('status', 'HOMOLOGADO');
+          supabaseClient.from('atletas').update({ status: 'HOMOLOGADO' }).neq('status', 'HOMOLOGADO').catch(() => null);
         } catch (e) {
           console.warn("Supabase update all pendentes error:", e);
         }
       }
 
+      logAuditEvent('HOMOLOGATE_ALL', 'atletas', { count: updatedCount });
       showToast(`✓ Todos os ${updatedCount} jogadores foram homologados com sucesso!`);
       await renderJogadoresCadastradosTable();
       updateDashboardData();
@@ -9534,24 +9650,31 @@
       }
     }
 
-    async function homologarAthleteModal(codigo) {
-      if (!hasPermission('atletas_homologar')) {
-        showToast('⚠️ Acesso Controlado: Seu cargo não possui permissão para homologar atletas.', true);
+    async function toggleAthleteCarteiraModal(codigo, targetStatus) {
+      if (!hasPermission('atletas_homologar') && !hasPermission('*')) {
+        showToast('⚠️ Acesso Controlado: Seu cargo não possui permissão para alterar o status da carteira.', true);
         return;
       }
       const btn = event ? event.currentTarget : null;
       if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-sm"></i> <span>Homologando...</span>';
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-sm"></i> <span>Atualizando...</span>';
       }
-      await homologarAthlete(codigo);
+      await setAthleteStatus(codigo, targetStatus);
       let athletes = (typeof currentCachedAthletes !== 'undefined' && currentCachedAthletes) ? currentCachedAthletes : [];
       const a = athletes.find(item => String(item.codigo) === String(codigo));
       if (a) {
-        a.status = 'HOMOLOGADO';
+        a.status = targetStatus;
         renderModalVerCarteiraContent(a);
       }
-      showToast(`✓ Atleta #${codigo} homologado com sucesso!`);
+    }
+
+    async function homologarAthleteModal(codigo) {
+      if (!hasPermission('atletas_homologar')) {
+        showToast('⚠️ Acesso Controlado: Seu cargo não possui permissão para homologar atletas.', true);
+        return;
+      }
+      await toggleAthleteCarteiraModal(codigo, 'HOMOLOGADO');
     }
 
     function renderModalVerCarteiraContent(a) {
@@ -9562,12 +9685,43 @@
       const fedCode = a.federado || (String(a.codigo).startsWith('PE-') ? a.codigo : `PE-2026/${String(a.codigo).slice(-3)}`);
       if (codeHeader) codeHeader.textContent = `#${a.codigo} (${fedCode})`;
 
-      const isHomologado = a.status === 'HOMOLOGADO' || a.status === 'REGULAR';
+      const rawStatus = (a.status || 'PENDENTE').toUpperCase().trim();
+      const isHomologado = rawStatus === 'HOMOLOGADO' || rawStatus === 'REGULAR';
+      const isDesabilitado = rawStatus === 'DESABILITADO' || rawStatus === 'SUSPENSO';
+      const isPendente = !isHomologado && !isDesabilitado;
+
       const defaultPhoto = OFFICIAL_DEFAULT_PHOTO_SVG;
       const rawPhoto = a.foto || a.foto_url || '';
       const photoUrl = (rawPhoto && !rawPhoto.includes('unsplash.com')) ? rawPhoto : defaultPhoto;
       const nowStr = new Date().toLocaleString('pt-BR');
-      const hashStr = `FPEFT-${String(a.codigo).padStart(6, '0')}-${isHomologado ? 'AUTH-REGULAR' : 'PENDING'}`;
+      const hashStr = `FPEFT-${String(a.codigo).padStart(6, '0')}-${isHomologado ? 'AUTH-REGULAR' : (isDesabilitado ? 'DISABLED' : 'PENDING')}`;
+
+      // Configuração visual da situação cadastral
+      let statusDotClass = 'bg-emerald-400';
+      let statusPillClass = 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40';
+      let statusBadgeLabel = 'REGULAR / HOMOLOGADO';
+      let situationBoxClass = 'bg-emerald-950/40 border border-emerald-500/50 text-emerald-300';
+      let situationIcon = '✅';
+      let situationTitle = 'CADASTRO HOMOLOGADO E REGULAR';
+      let situationText = 'Atleta devidamente filiado e regular perante a Federação Pernambucana de Foot Table (FPEFT). A emissão de carteira física e digital em alta definição está 100% liberada.';
+
+      if (isDesabilitado) {
+        statusDotClass = 'bg-rose-500';
+        statusPillClass = 'bg-rose-500/20 text-rose-400 border border-rose-500/40';
+        statusBadgeLabel = 'CARTEIRA DESABILITADA';
+        situationBoxClass = 'bg-rose-950/40 border border-rose-500/50 text-rose-300';
+        situationIcon = '🚫';
+        situationTitle = 'CARTEIRA DESABILITADA TEMPORARIAMENTE';
+        situationText = 'A carteira digital deste atleta foi temporariamente desabilitada/suspensa pela administração da Federação. No site público, a consulta indicará carteira desabilitada e os downloads estão bloqueados.';
+      } else if (isPendente) {
+        statusDotClass = 'bg-amber-400 animate-pulse';
+        statusPillClass = 'bg-amber-500/20 text-amber-400 border border-amber-500/40';
+        statusBadgeLabel = 'HOMOLOGAÇÃO PENDENTE';
+        situationBoxClass = 'bg-amber-950/40 border border-amber-500/50 text-amber-300';
+        situationIcon = '⏳';
+        situationTitle = 'HOMOLOGAÇÃO EM ANDAMENTO (PENDENTE DE APROVAÇÃO)';
+        situationText = 'O cadastro deste atleta foi registrado no sistema e aguarda homologação oficial da Federação. No site público, o atleta não pode baixar a carteira até ser homologado.';
+      }
 
       container.innerHTML = `
         <!-- Selo de Status e Identificação Principal -->
@@ -9575,16 +9729,16 @@
           <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4">
             <div class="w-20 h-24 sm:w-22 sm:h-28 rounded-2xl overflow-hidden border-2 border-pe-gold shrink-0 bg-[#0c1424] shadow-xl relative">
               <img src="${photoUrl}" alt="${escapeHtml(a.nome)}" class="w-full h-full object-cover" onerror="this.src=OFFICIAL_DEFAULT_PHOTO_SVG" />
-              <div class="absolute bottom-1 right-1 w-3.5 h-3.5 rounded-full border-2 border-[#0c1424] ${isHomologado ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}"></div>
+              <div class="absolute bottom-1 right-1 w-3.5 h-3.5 rounded-full border-2 border-[#0c1424] ${statusDotClass}"></div>
             </div>
             <div class="flex-1 min-w-0 text-center sm:text-left space-y-1.5">
               <div class="flex flex-wrap items-center justify-center sm:justify-between gap-2">
                 <span class="text-xs font-mono font-bold text-pe-gold bg-pe-gold/10 px-2.5 py-0.5 rounded-lg border border-pe-gold/30">
                   REGISTRO: ${escapeHtml(fedCode)}
                 </span>
-                <span class="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider ${isHomologado ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-amber-500/20 text-amber-400 border border-amber-500/40'} flex items-center gap-1.5 shadow">
-                  <span class="w-2 h-2 rounded-full ${isHomologado ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}"></span>
-                  ${isHomologado ? 'REGULAR / HOMOLOGADO' : 'HOMOLOGAÇÃO PENDENTE'}
+                <span class="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider ${statusPillClass} flex items-center gap-1.5 shadow">
+                  <span class="w-2 h-2 rounded-full ${statusDotClass}"></span>
+                  ${statusBadgeLabel}
                 </span>
               </div>
               <h2 class="font-oswald text-xl sm:text-2xl uppercase font-bold text-white tracking-wide leading-tight">
@@ -9600,16 +9754,14 @@
           </div>
 
           <!-- Caixa Informativa de Situação Cadastral -->
-          <div class="p-3.5 rounded-xl ${isHomologado ? 'bg-emerald-950/40 border border-emerald-500/50 text-emerald-300' : 'bg-amber-950/40 border border-amber-500/50 text-amber-300'} text-xs flex items-center gap-3 shadow">
-            <span class="text-2xl shrink-0">${isHomologado ? '✅' : '⏳'}</span>
+          <div class="p-3.5 rounded-xl ${situationBoxClass} text-xs flex items-center gap-3 shadow">
+            <span class="text-2xl shrink-0">${situationIcon}</span>
             <div class="flex-1 text-[11px] leading-tight">
               <strong class="block font-bold text-white text-xs mb-0.5 uppercase tracking-wide">
-                ${isHomologado ? 'CADASTRO HOMOLOGADO E REGULAR' : 'HOMOLOGAÇÃO EM ANDAMENTO (PENDENTE DE APROVAÇÃO)'}
+                ${situationTitle}
               </strong>
-              <span class="${isHomologado ? 'text-slate-300' : 'text-slate-200'}">
-                ${isHomologado 
-                  ? 'Atleta devidamente filiado e regular perante a Federação Pernambucana de Foot Table (FPEFT). A emissão de carteira física e digital em alta definição está 100% liberada.' 
-                  : 'O cadastro deste atleta foi registrado no sistema e aguarda homologação oficial da Federação. No site público, o atleta não pode baixar a carteira até ser homologado.'}
+              <span class="text-slate-200">
+                ${situationText}
               </span>
             </div>
           </div>
@@ -9676,10 +9828,22 @@
               </button>` : ''}
             </div>
 
-            ${(!isHomologado && hasPermission('atletas_homologar')) ? `
-              <button type="button" onclick="homologarAthleteModal('${a.codigo}')" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase py-3 px-4 rounded-xl transition shadow flex items-center justify-center gap-2 cursor-pointer">
-                <i class="fa-solid fa-check text-sm"></i> Homologar Este Atleta Oficialmente Agora
-              </button>
+            ${(hasPermission('atletas_homologar') || hasPermission('*')) ? `
+              ${isPendente ? `
+                <button type="button" onclick="toggleAthleteCarteiraModal('${a.codigo}', 'HOMOLOGADO')" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase py-3 px-4 rounded-xl transition shadow flex items-center justify-center gap-2 cursor-pointer">
+                  <i class="fa-solid fa-check text-sm"></i> Homologar Este Atleta Oficialmente Agora
+                </button>
+              ` : ''}
+              ${isHomologado ? `
+                <button type="button" onclick="toggleAthleteCarteiraModal('${a.codigo}', 'DESABILITADO')" class="w-full bg-rose-600/90 hover:bg-rose-500 text-white font-black text-xs uppercase py-3 px-4 rounded-xl transition shadow flex items-center justify-center gap-2 cursor-pointer">
+                  <i class="fa-solid fa-ban text-sm"></i> Desabilitar / Suspender Carteira
+                </button>
+              ` : ''}
+              ${isDesabilitado ? `
+                <button type="button" onclick="toggleAthleteCarteiraModal('${a.codigo}', 'HOMOLOGADO')" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase py-3 px-4 rounded-xl transition shadow flex items-center justify-center gap-2 cursor-pointer">
+                  <i class="fa-solid fa-check text-sm"></i> Reativar / Habilitar Carteira Oficial
+                </button>
+              ` : ''}
             ` : ''}
 
             <div class="flex items-center justify-between pt-1">
@@ -9717,6 +9881,7 @@
     window.abrirModalVerCarteira = abrirModalVerCarteira;
     window.fecharModalVerCarteira = fecharModalVerCarteira;
     window.homologarAthleteModal = homologarAthleteModal;
+    window.toggleAthleteCarteiraModal = toggleAthleteCarteiraModal;
 
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {

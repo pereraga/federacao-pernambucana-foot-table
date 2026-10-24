@@ -16,6 +16,14 @@ const syncPairs = [
       'C:/Users/PC/Desktop/login.html',
       'C:/Users/PC/Desktop/php/login.php'
     ]
+  },
+  {
+    source: 'C:/Users/PC/Desktop/federacao-foot-table/index.html',
+    targets: [
+      'C:/Users/PC/Desktop/federacao-foot-table/php/index.php',
+      'C:/Users/PC/Desktop/index.html',
+      'C:/Users/PC/Desktop/php/index.php'
+    ]
   }
 ];
 
