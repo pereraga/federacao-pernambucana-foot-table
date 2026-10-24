@@ -96,7 +96,7 @@ export function createSessionCookie(
     `${cookieName}=${token}`,
     'Path=/',
     'HttpOnly',
-    'SameSite=Strict',
+    'SameSite=Lax',
     `Max-Age=${SESSION_MAX_AGE}`
   ];
 
@@ -120,7 +120,7 @@ export function createLogoutCookie(isHttps: boolean = true): string {
     `${cookieName}=`,
     'Path=/',
     'HttpOnly',
-    'SameSite=Strict',
+    'SameSite=Lax',
     'Max-Age=0',
     'Expires=Thu, 01 Jan 1970 00:00:00 GMT'
   ];

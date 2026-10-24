@@ -107,8 +107,8 @@ async function runSecuritySuite() {
     // c) Flag Secure presente
     assert(suite2, 'Flag Secure presente no cabeçalho Set-Cookie', cookieHeader.includes('Secure'));
 
-    // d) Flag SameSite=Strict presente
-    assert(suite2, 'Flag SameSite=Strict configurada', cookieHeader.includes('SameSite=Strict'));
+    // d) Flag SameSite configurada (Lax ou Strict para proteção CSRF)
+    assert(suite2, 'Flag SameSite configurada com segurança (Lax ou Strict)', cookieHeader.includes('SameSite=Lax') || cookieHeader.includes('SameSite=Strict'));
 
     // e) Path=/ configurado
     assert(suite2, 'Flag Path=/ configurada', cookieHeader.includes('Path=/'));
