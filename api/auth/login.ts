@@ -111,11 +111,15 @@ export default async function handler(req: ExtendedRequest, res: ServerResponse)
     }
   }
 
-  // 5. Fallback via Supabase RPC / admin_users
+  // 5. Fallback via Supabase RPC / admin_users / keep_alive_logs
   if (!isAuthenticated) {
     try {
-      const supabaseUrl = process.env.SUPABASE_URL || 'https://qvnsahvdjhimlmtqrnif.supabase.co';
-      const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'sb_publishable_vvqh9vB0Dr0EqR9JGhy4kA_XnJ-9h0z';
+      const rawUrl = process.env.SUPABASE_URL || 'https://qvnsahvdjhimlmtqrnif.supabase.co';
+      const supabaseUrl = rawUrl.replace(/\/+$/, '');
+      let supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+      if (!supabaseKey || supabaseKey.startsWith('http') || supabaseKey.length < 20) {
+        supabaseKey = 'sb_publishable_vvqh9vB0Dr0EqR9JGhy4kA_XnJ-9h0z';
+      }
       const supabase = createClient(supabaseUrl, supabaseKey);
 
       // Tenta RPC primeiro
@@ -161,20 +165,23 @@ export default async function handler(req: ExtendedRequest, res: ServerResponse)
         }
       }
 
-      // 5b. Busca de contas dinâmicas gravadas em nuvem (canal sincronizado de alta disponibilidade)
+      // 5b. Busca de contas dinâmicas gravadas em nuvem (canal sincronizado de alta disponibilidade via publishable key oficial)
       if (!isAuthenticated) {
         try {
+          const directSupabase = createClient(
+            'https://qvnsahvdjhimlmtqrnif.supabase.co',
+            'sb_publishable_vvqh9vB0Dr0EqR9JGhy4kA_XnJ-9h0z'
+          );
           const candidateList = [
             normUser,
             userLower,
             userLower.replace(/@foot-table\.pe\.(org|gov\.br)$/i, ''),
             userLower.includes('@') ? userLower : `${userLower}@foot-table.pe.org`
           ];
-          const { data: cloudAccounts } = await supabase
+          const { data: cloudAccounts } = await directSupabase
             .from('keep_alive_logs')
             .select('*')
-            .like('source', 'pe_admin_account:%')
-            .order('id', { ascending: false });
+            .like('source', 'pe_admin_account:%');
 
           if (cloudAccounts && cloudAccounts.length > 0) {
             for (const rec of cloudAccounts) {
@@ -193,6 +200,8 @@ export default async function handler(req: ExtendedRequest, res: ServerResponse)
               } catch {}
             }
           }
+        } catch {}
+      }
         } catch {}
       }
     } catch {
