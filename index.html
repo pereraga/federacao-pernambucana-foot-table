@@ -138,7 +138,7 @@
       <!-- Navegação Pública Limpa -->
       <nav class="hidden md:flex items-center gap-6">
         <a href="#home" class="text-xs uppercase font-bold text-slate-300 hover:text-pe-gold transition tracking-wider">Início</a>
-        <a href="#noticias" class="text-xs uppercase font-bold text-slate-300 hover:text-pe-gold transition tracking-wider">Notícias & Torneios</a>
+        <a href="noticias.html" class="text-xs uppercase font-bold text-slate-300 hover:text-pe-gold transition tracking-wider">Notícias & Torneios</a>
         <a href="#galeria" class="text-xs uppercase font-bold text-slate-300 hover:text-pe-gold transition tracking-wider">Fotos & Arenas</a>
         <a href="#regulamento" class="text-xs uppercase font-bold text-slate-300 hover:text-pe-gold transition tracking-wider">Regulamento</a>
       </nav>
@@ -169,7 +169,7 @@
         <a href="#consulta" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase tracking-wider px-7 py-3.5 rounded-xl shadow-[0_0_20px_rgba(245,184,0,0.35)] transition transform hover:-translate-y-0.5 flex items-center gap-2">
           <span>🔍</span> Consultar Carteira (6 Dígitos)
         </a>
-        <a href="#noticias" class="bg-pe-card border border-pe-cardBorder hover:border-pe-gold/60 text-slate-300 font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl transition">
+        <a href="noticias.html" class="bg-pe-card border border-pe-cardBorder hover:border-pe-gold/60 text-slate-300 font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl transition">
           Ver Notícias & Torneios
         </a>
       </div>
@@ -408,9 +408,15 @@
         <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Boletim Informativo</span>
         <h2 class="font-oswald text-3xl uppercase font-bold text-white">Notícias & Torneios</h2>
       </div>
-      <div class="text-xs text-slate-400 font-mono flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-        Feed Oficial Atualizado
+      <div class="flex items-center gap-3">
+        <a href="noticias.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-pe-card hover:bg-pe-darkblue border border-pe-cardBorder hover:border-pe-gold/60 text-xs font-bold text-pe-gold uppercase tracking-wider transition">
+          <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+          <span>Portal Completo</span>
+        </a>
+        <div class="text-xs text-slate-400 font-mono flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          Feed Oficial
+        </div>
       </div>
     </div>
 
@@ -560,7 +566,7 @@
             </a>
           </li>
           <li>
-            <a href="#noticias" class="hover:text-pe-gold transition flex items-center gap-1.5">
+            <a href="noticias.html" class="hover:text-pe-gold transition flex items-center gap-1.5">
               <i class="fa-solid fa-newspaper text-slate-500 text-[10px]"></i>
               Notícias, Calendário e Torneios
             </a>
@@ -770,9 +776,14 @@
         card.innerHTML = `
           ${imageHtml}
           <div class="space-y-1.5 flex-1 min-w-0">
-            <div class="flex items-center gap-2">
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded ${tagColor} uppercase tracking-wider">${item.category || 'INFORMATIVO'}</span>
-              <span class="text-[11px] text-slate-500 font-mono">${item.date || 'Recente'}</span>
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded ${tagColor} uppercase tracking-wider">${item.category || 'INFORMATIVO'}</span>
+                <span class="text-[11px] text-slate-500 font-mono">${item.date || 'Recente'}</span>
+              </div>
+              <a href="noticias.html" class="text-[11px] font-bold text-pe-gold hover:underline flex items-center gap-1">
+                <span>Ler no Portal Oficial</span> <i class="fa-solid fa-arrow-right text-[9px]"></i>
+              </a>
             </div>
             <h3 class="font-oswald text-base sm:text-lg uppercase font-bold text-white leading-snug group-hover:text-blue-300 transition">${item.title}</h3>
             <p class="text-xs text-slate-400 leading-relaxed line-clamp-3">${item.content}</p>
