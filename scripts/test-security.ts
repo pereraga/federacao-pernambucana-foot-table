@@ -208,7 +208,7 @@ async function runSecuritySuite() {
         .from('admin_users')
         .update({ cargo: 'Hacker Invasor' })
         .eq('email', 'admin@foot-table.pe.org');
-      if (error || !data || (Array.isArray(data) && data.length === 0)) {
+      if (error || !data || (Array.isArray(data) && (data as any[]).length === 0)) {
         adminUpdateBlocked = true;
       }
     } catch {
@@ -235,7 +235,7 @@ async function runSecuritySuite() {
         .from('atletas')
         .delete()
         .eq('codigo', '999999');
-      if (error || !data || (Array.isArray(data) && data.length === 0)) {
+      if (error || !data || (Array.isArray(data) && (data as any[]).length === 0)) {
         atletaDeleteBlocked = true;
       }
     } catch {

@@ -202,8 +202,6 @@ export default async function handler(req: ExtendedRequest, res: ServerResponse)
           }
         } catch {}
       }
-        } catch {}
-      }
     } catch {
       // Ignora erro de rede e mantém resultado
     }
