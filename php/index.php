@@ -142,6 +142,31 @@
         <a href="#galeria" class="text-xs uppercase font-bold text-slate-300 hover:text-pe-gold transition tracking-wider">Fotos & Arenas</a>
         <a href="#regulamento" class="text-xs uppercase font-bold text-slate-300 hover:text-pe-gold transition tracking-wider">Regulamento</a>
       </nav>
+
+      <!-- Botão Menu Mobile & Tablet -->
+      <button type="button" id="btnTogglePublicMobileMenu" onclick="togglePublicMobileMenu()" class="md:hidden p-2 rounded-xl bg-pe-card border border-pe-cardBorder text-pe-gold hover:text-white transition flex items-center justify-center cursor-pointer shadow min-h-[40px] px-3 gap-1.5" aria-label="Abrir Menu">
+        <i id="publicMobileMenuIcon" class="fa-solid fa-bars text-sm"></i>
+        <span class="text-xs uppercase font-bold tracking-wider">Menu</span>
+      </button>
+    </div>
+
+    <!-- Gaveta de Navegação Dropdown Mobile -->
+    <div id="publicMobileMenuDrawer" class="hidden md:hidden border-t border-pe-cardBorder/80 bg-pe-dark/98 px-5 py-4 space-y-3 backdrop-blur-md shadow-2xl">
+      <a href="#home" onclick="togglePublicMobileMenu()" class="block py-2 text-xs uppercase font-bold text-slate-200 hover:text-pe-gold tracking-wider flex items-center gap-2">
+        <span>🏠</span> Início
+      </a>
+      <a href="noticias.html" onclick="togglePublicMobileMenu()" class="block py-2 text-xs uppercase font-bold text-slate-200 hover:text-pe-gold tracking-wider flex items-center gap-2">
+        <span>📰</span> Notícias & Torneios
+      </a>
+      <a href="#galeria" onclick="togglePublicMobileMenu()" class="block py-2 text-xs uppercase font-bold text-slate-200 hover:text-pe-gold tracking-wider flex items-center gap-2">
+        <span>📸</span> Fotos & Arenas
+      </a>
+      <a href="#regulamento" onclick="togglePublicMobileMenu()" class="block py-2 text-xs uppercase font-bold text-slate-200 hover:text-pe-gold tracking-wider flex items-center gap-2">
+        <span>⚖️</span> Regulamento
+      </a>
+      <a href="#consulta" onclick="togglePublicMobileMenu()" class="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-pe-gold hover:bg-pe-goldHover text-pe-dark text-xs uppercase font-extrabold tracking-wider shadow cursor-pointer">
+        <span>🔍</span> Consultar Carteira (6 Dígitos)
+      </a>
     </div>
   </header>
 
@@ -1464,6 +1489,21 @@
     } else {
       initIndexApp();
     }
+
+    function togglePublicMobileMenu() {
+      const drawer = document.getElementById('publicMobileMenuDrawer');
+      const icon = document.getElementById('publicMobileMenuIcon');
+      if (!drawer) return;
+      const isHidden = drawer.classList.contains('hidden');
+      if (isHidden) {
+        drawer.classList.remove('hidden');
+        if (icon) icon.className = 'fa-solid fa-xmark text-sm';
+      } else {
+        drawer.classList.add('hidden');
+        if (icon) icon.className = 'fa-solid fa-bars text-sm';
+      }
+    }
+    window.togglePublicMobileMenu = togglePublicMobileMenu;
   </script>
 
   <!-- Aviso Institucional de Cookies (LGPD) -->

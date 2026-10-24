@@ -57,6 +57,12 @@
           return aEmail === rawUser || aEmail === user || aPrefix === uPrefix || aPrefix === rawUser;
         });
 
+        const PRESIDENTE_FPEFT_PERMISSIONS = [
+          'carteira_studio', 'carteira_pdf', 'carteira_png', 'carteira_imprimir',
+          'atletas_visualizar', 'atletas_homologar', 'atletas_editar', 'atletas_excluir', 'atletas_exportar',
+          'noticias_publicar', 'noticias_upload', 'noticias_editar', 'noticias_excluir'
+        ];
+
         if (isGabrielMaster || isAdminMaster) {
           if (!current) {
             current = {
@@ -71,6 +77,12 @@
           } else {
             current.isMaster = true;
             current.permissions = ['*'];
+          }
+        } else if (current && (current.cargo === 'Presidente FPEFT' || (current.email && current.email.includes('adrianomello')))) {
+          current.isMaster = false;
+          if (!current.permissions || current.permissions.includes('*')) {
+            current.permissions = [...PRESIDENTE_FPEFT_PERMISSIONS];
+            localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
           }
         }
 
@@ -533,9 +545,34 @@
   <div class="min-h-screen flex flex-col md:flex-row w-full">
 
     <!-- ========================================================= -->
+    <!-- BARRA SUPERIOR MOBILE / TABLET (COM TOGGLE DO MENU)       -->
+    <!-- ========================================================= -->
+    <header class="md:hidden bg-[#05080e] border-b border-[#151c2e] px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-xl">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-full bg-[#06173a] border border-pe-gold p-0.5 overflow-hidden shrink-0 shadow cursor-pointer" onclick="switchTab('inicio')">
+          <img src="assets/images/logo-federacao.png" alt="FPEFT" class="w-full h-full object-contain rounded-full select-none" onerror="this.src='/assets/images/logo-federacao.png'" />
+        </div>
+        <div>
+          <span class="font-oswald text-sm font-bold uppercase text-white tracking-wide block leading-tight">
+            FPEFT <span class="text-pe-gold">ADM</span>
+          </span>
+          <span id="mobileActiveTabLabel" class="block text-[10px] text-pe-gold font-bold uppercase tracking-wider leading-none">
+            Início
+          </span>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="toggleMobileSidebar()" id="btnMobileSidebarToggle" class="px-3.5 py-2 rounded-xl bg-[#0b101d] hover:bg-[#15203a] border border-[#1c253b] text-pe-gold hover:text-white transition flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider cursor-pointer shadow min-h-[40px]">
+          <i id="mobileMenuIcon" class="fa-solid fa-bars text-sm"></i>
+          <span id="mobileMenuText">Menu</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ========================================================= -->
     <!-- PAINEL LATERAL (SIDEBAR COM ABAS OFICIAIS DO SISTEMA)     -->
     <!-- ========================================================= -->
-    <aside id="sidebar" class="w-full md:w-72 bg-[#05080e] border-r border-[#151c2e] flex flex-col shrink-0 z-40 transition-all md:min-h-screen">
+    <aside id="sidebar" class="hidden md:flex w-full md:w-72 bg-[#05080e] border-r border-[#151c2e] flex-col shrink-0 z-40 transition-all md:min-h-screen">
       
       <!-- Topo da Sidebar: Logo & Identidade com Botão Toggle -->
       <div class="p-4 border-b border-[#151c2e] relative sidebar-header-container">
@@ -1454,17 +1491,17 @@
             </div>
 
             <!-- Ações em Lote e Cadastro -->
-            <div class="flex flex-wrap items-center gap-2.5">
-              <button type="button" onclick="switchTab('atletas')" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow cursor-pointer">
+            <div class="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
+              <button type="button" onclick="switchTab('atletas')" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-pe-gold hover:bg-pe-goldHover text-pe-dark transition shadow cursor-pointer active:scale-95 min-h-[42px]">
                 <i class="fa-solid fa-plus"></i> Novo no Studio
               </button>
-              <button type="button" id="btnOpenBatchImport" onclick="openBatchImportModal()" class="bg-[#0b101d] hover:bg-[#121c32] border border-[#1c253b] text-slate-200 font-bold text-xs uppercase px-3.5 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer">
+              <button type="button" id="btnOpenBatchImport" onclick="openBatchImportModal()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-[#0b101d] hover:bg-[#15203a] border border-[#1c253b] text-slate-200 hover:text-white transition cursor-pointer active:scale-95 min-h-[42px]">
                 <i class="fa-solid fa-file-import text-pe-gold"></i> Importar Lista (CSV)
               </button>
-              <button type="button" id="btnExportarZipJogadores" onclick="exportAllAthletesBatchZip()" class="bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow-lg shadow-sky-600/25 cursor-pointer">
+              <button type="button" id="btnExportarZipJogadores" onclick="exportAllAthletesBatchZip()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white transition shadow shadow-sky-600/20 cursor-pointer active:scale-95 min-h-[42px]">
                 <i class="fa-solid fa-file-zipper"></i> Exportar Todas em Lote (HD ZIP)
               </button>
-              <button type="button" id="btnExportarCsvJogadores" onclick="exportAthletesToCsv()" class="bg-[#0b101d] hover:bg-[#121c32] border border-[#1c253b] text-slate-200 font-bold text-xs uppercase px-3.5 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer">
+              <button type="button" id="btnExportarCsvJogadores" onclick="exportAthletesToCsv()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-[#0b101d] hover:bg-[#15203a] border border-[#1c253b] text-slate-200 hover:text-white transition cursor-pointer active:scale-95 min-h-[42px]">
                 <i class="fa-solid fa-file-excel text-emerald-400"></i> Baixar CSV
               </button>
             </div>
@@ -1515,11 +1552,11 @@
                 <p class="text-xs text-amber-200/80">Existem atletas criados recentemente que precisam ser homologados para constarem na validação pública oficial do site.</p>
               </div>
             </div>
-            <div class="flex items-center gap-2 shrink-0">
-              <button type="button" id="btnFiltrarPendentes" onclick="toggleFiltroPendentes()" class="bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500 text-amber-300 font-bold text-xs uppercase px-3.5 py-2 rounded-xl transition cursor-pointer flex items-center gap-1.5">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0 w-full sm:w-auto">
+              <button type="button" id="btnFiltrarPendentes" onclick="toggleFiltroPendentes()" class="inline-flex items-center justify-center gap-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-amber-300 font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition cursor-pointer min-h-[42px]">
                 <i class="fa-solid fa-filter"></i> <span id="labelFiltrarPendentes">Ver Apenas Pendentes</span>
               </button>
-              <button type="button" onclick="homologarTodosPendentes()" class="bg-amber-400 hover:bg-amber-300 text-black font-black text-xs uppercase px-4 py-2 rounded-xl transition shadow cursor-pointer flex items-center gap-1.5">
+              <button type="button" onclick="homologarTodosPendentes()" class="inline-flex items-center justify-center gap-2 bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-black text-xs uppercase px-4 py-2.5 rounded-xl transition shadow cursor-pointer min-h-[42px]">
                 <i class="fa-solid fa-check-double"></i> Homologar Todos Agora
               </button>
             </div>
@@ -1535,28 +1572,28 @@
 
               <div class="flex flex-wrap items-center gap-2">
                 <!-- Botão Limpar Todos -->
-                <button type="button" onclick="clearAllAthletes()" class="bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/40 text-rose-300 font-bold text-xs uppercase px-3.5 py-2 rounded-xl transition cursor-pointer flex items-center gap-1.5" title="Remover todos os jogadores cadastrados">
+                <button type="button" onclick="clearAllAthletes()" class="inline-flex items-center justify-center gap-1.5 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/40 text-rose-300 font-bold text-xs uppercase px-3.5 py-2.5 rounded-xl transition cursor-pointer min-h-[40px]" title="Remover todos os jogadores cadastrados">
                   <i class="fa-solid fa-trash-can"></i> Limpar Todos
                 </button>
 
                 <!-- Filtros por Status -->
-                <button type="button" onclick="setJogadoresFilterStatus('ALL')" id="filterTabStatus-ALL" class="text-xs px-3.5 py-2 rounded-xl font-bold transition cursor-pointer bg-pe-gold text-pe-dark">
+                <button type="button" onclick="setJogadoresFilterStatus('ALL')" id="filterTabStatus-ALL" class="inline-flex items-center justify-center text-xs px-3.5 py-2.5 rounded-xl font-bold transition cursor-pointer bg-pe-gold text-pe-dark min-h-[40px]">
                   Todos (Ordem A-Z)
                 </button>
-                <button type="button" onclick="setJogadoresFilterStatus('HOMOLOGADO')" id="filterTabStatus-HOMOLOGADO" class="text-xs px-3.5 py-2 rounded-xl font-bold transition cursor-pointer bg-[#05080e] border border-[#1c253b] text-slate-300 hover:text-white">
+                <button type="button" onclick="setJogadoresFilterStatus('HOMOLOGADO')" id="filterTabStatus-HOMOLOGADO" class="inline-flex items-center justify-center text-xs px-3.5 py-2.5 rounded-xl font-bold transition cursor-pointer bg-[#05080e] border border-[#1c253b] text-slate-300 hover:text-white min-h-[40px]">
                   Homologados (<span id="countBtnHomologados">0</span>)
                 </button>
                 <!-- BOTÃO CONDICIONAL: Só aparece via JS se houver pendentes -->
-                <button type="button" onclick="setJogadoresFilterStatus('PENDENTE')" id="filterTabStatus-PENDENTE" class="hidden text-xs px-3.5 py-2 rounded-xl font-bold transition cursor-pointer bg-[#05080e] border border-amber-500/50 text-amber-400 hover:bg-amber-500/20">
+                <button type="button" onclick="setJogadoresFilterStatus('PENDENTE')" id="filterTabStatus-PENDENTE" class="hidden inline-flex items-center justify-center text-xs px-3.5 py-2.5 rounded-xl font-bold transition cursor-pointer bg-[#05080e] border border-amber-500/50 text-amber-400 hover:bg-amber-500/20 min-h-[40px]">
                   ⏳ Aguardando Homologação (<span id="countBtnPendentes">0</span>)
                 </button>
                 <!-- BOTÃO CONDICIONAL: Só aparece via JS se houver desabilitados -->
-                <button type="button" onclick="setJogadoresFilterStatus('DESABILITADO')" id="filterTabStatus-DESABILITADO" class="hidden text-xs px-3.5 py-2 rounded-xl font-bold transition cursor-pointer bg-[#05080e] border border-rose-500/50 text-rose-400 hover:bg-rose-500/20">
+                <button type="button" onclick="setJogadoresFilterStatus('DESABILITADO')" id="filterTabStatus-DESABILITADO" class="hidden inline-flex items-center justify-center text-xs px-3.5 py-2.5 rounded-xl font-bold transition cursor-pointer bg-[#05080e] border border-rose-500/50 text-rose-400 hover:bg-rose-500/20 min-h-[40px]">
                   🚫 Desabilitados (<span id="countBtnDesabilitados">0</span>)
                 </button>
 
                 <!-- Filtro por Categoria (4 Bases) -->
-                <div class="flex items-center gap-1.5 bg-[#05080e] border border-[#1c253b] rounded-xl px-2.5 py-1.5">
+                <div class="inline-flex items-center gap-1.5 bg-[#05080e] border border-[#1c253b] rounded-xl px-3 py-2 min-h-[40px]">
                   <i class="fa-solid fa-layer-group text-pe-gold text-xs"></i>
                   <span class="text-[10px] text-slate-400 font-bold uppercase">Categoria:</span>
                   <select id="filterJogadoresCategoria" onchange="renderJogadoresCadastradosTable()" class="bg-transparent text-xs text-white font-bold outline-none cursor-pointer">
@@ -2983,6 +3020,26 @@
       }
     }
 
+    function toggleMobileSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const icon = document.getElementById('mobileMenuIcon');
+      const text = document.getElementById('mobileMenuText');
+      if (!sidebar) return;
+      const isHidden = sidebar.classList.contains('hidden');
+      if (isHidden) {
+        sidebar.classList.remove('hidden');
+        sidebar.classList.add('flex');
+        if (icon) icon.className = 'fa-solid fa-xmark text-sm';
+        if (text) text.textContent = 'Fechar';
+      } else {
+        sidebar.classList.add('hidden');
+        sidebar.classList.remove('flex');
+        if (icon) icon.className = 'fa-solid fa-bars text-sm';
+        if (text) text.textContent = 'Menu';
+      }
+    }
+    window.toggleMobileSidebar = toggleMobileSidebar;
+
     const ALL_TABS = ['inicio', 'atletas', 'jogadores', 'noticias', 'galeria', 'emails', 'config', 'guia'];
     const TAB_TITLES = {
       inicio: '🏠 Início & Carteiras Homologadas',
@@ -3109,10 +3166,11 @@
     function isTabAllowed(tabName) {
       const perms = getCurrentUserPermissions();
       if (perms.includes('*')) return true;
-      if (tabName === 'inicio' || tabName === 'guia' || tabName === 'galeria') return true;
+      if (tabName === 'inicio' || tabName === 'guia') return true;
       if (tabName === 'atletas') return perms.includes('carteira_studio') || perms.includes('carteira_pdf') || perms.includes('carteira_png') || perms.includes('carteira_imprimir');
       if (tabName === 'jogadores') return perms.includes('atletas_visualizar') || perms.includes('atletas_homologar') || perms.includes('atletas_editar') || perms.includes('atletas_excluir') || perms.includes('atletas_exportar');
       if (tabName === 'noticias') return perms.includes('noticias_publicar') || perms.includes('noticias_editar') || perms.includes('noticias_upload') || perms.includes('noticias_excluir');
+      if (tabName === 'galeria') return perms.includes('noticias_publicar') || perms.includes('noticias_editar') || perms.includes('noticias_upload');
       if (tabName === 'emails') return perms.includes('gestao_emails') || perms.includes('gestao_cargos');
       if (tabName === 'config') return perms.includes('gestao_supabase') || perms.includes('gestao_limpeza');
       return false;
@@ -3955,6 +4013,33 @@
       const titleEl = document.getElementById('headerPageTitle');
       if (titleEl && TAB_TITLES[tabName]) {
         titleEl.textContent = TAB_TITLES[tabName];
+      }
+
+      // No modo smartphone e tablet (< 768px), fecha automaticamente o menu lateral após o toque
+      if (window.innerWidth < 768) {
+        const sidebar = document.getElementById('sidebar');
+        const icon = document.getElementById('mobileMenuIcon');
+        const text = document.getElementById('mobileMenuText');
+        if (sidebar) {
+          sidebar.classList.add('hidden');
+          sidebar.classList.remove('flex');
+        }
+        if (icon) icon.className = 'fa-solid fa-bars text-sm';
+        if (text) text.textContent = 'Menu';
+      }
+      const mobileActiveLabel = document.getElementById('mobileActiveTabLabel');
+      if (mobileActiveLabel) {
+        const tabLabels = {
+          'inicio': 'Início',
+          'atletas': 'Studio de Emissão',
+          'jogadores': 'Jogadores Cadastrados',
+          'noticias': 'Notícias & Torneios',
+          'galeria': 'Galeria & Fotos',
+          'emails': 'E-mail Institucional',
+          'config': 'Banco & Ajustes',
+          'guia': 'Guia do Painel'
+        };
+        mobileActiveLabel.textContent = tabLabels[tabName] || tabName;
       }
 
       // Aplica bloqueios visuais de botões na aba aberta
@@ -12087,13 +12172,19 @@
     // loadSystemOperationGroups e saveSystemOperationGroups estão definidos no topo do script
     // para suporte instantâneo às permissões e renderização imediata do Guia do Painel.
 
+    const PRESIDENTE_FPEFT_PERMISSIONS = [
+      'carteira_studio', 'carteira_pdf', 'carteira_png', 'carteira_imprimir',
+      'atletas_visualizar', 'atletas_homologar', 'atletas_editar', 'atletas_excluir', 'atletas_exportar',
+      'noticias_publicar', 'noticias_upload', 'noticias_editar', 'noticias_excluir'
+    ];
+
     const DEFAULT_ROLES = [
       {
         id: 'presidente_fpeft',
         name: 'Presidente FPEFT',
         desc: 'Presidência da Federação Pernambucana de Foot-Table - Gestão institucional e representação oficial máxima',
         isMaster: false,
-        permissions: ['*'],
+        permissions: [...PRESIDENTE_FPEFT_PERMISSIONS],
         created_at: '2026-01-01T00:00:00Z'
       },
       {
@@ -12120,10 +12211,10 @@
         roles.unshift(JSON.parse(JSON.stringify(DEFAULT_ROLES[0])));
       } else {
         roles[presIdx].name = 'Presidente FPEFT';
-        if (!roles[presIdx].permissions || !Array.isArray(roles[presIdx].permissions) || roles[presIdx].permissions.length === 0) {
-          roles[presIdx].permissions = ['*'];
+        roles[presIdx].isMaster = false;
+        if (!roles[presIdx].permissions || !Array.isArray(roles[presIdx].permissions) || roles[presIdx].permissions.length === 0 || roles[presIdx].permissions.includes('*')) {
+          roles[presIdx].permissions = [...PRESIDENTE_FPEFT_PERMISSIONS];
         }
-        roles[presIdx].isMaster = roles[presIdx].permissions.includes('*') || (roles[presIdx].permissions.length >= ALL_OPERATION_IDS.length && ALL_OPERATION_IDS.length > 0);
       }
 
       // 2. Garante que Diretor Adjunto esteja sempre presente
@@ -13035,7 +13126,11 @@
         email: "adrianomello@foot-table.pe.org",
         senha: "admin",
         isMaster: false,
-        permissions: ['*'],
+        permissions: [
+          'carteira_studio', 'carteira_pdf', 'carteira_png', 'carteira_imprimir',
+          'atletas_visualizar', 'atletas_homologar', 'atletas_editar', 'atletas_excluir', 'atletas_exportar',
+          'noticias_publicar', 'noticias_upload', 'noticias_editar', 'noticias_excluir'
+        ],
         created_at: "2026-10-09T00:00:00Z"
       }
     ];
@@ -13291,6 +13386,14 @@
         if (presAdminIdx !== -1) {
           list[presAdminIdx].email = 'adrianomello@foot-table.pe.org';
           if (!list[presAdminIdx].cargo) list[presAdminIdx].cargo = "Presidente FPEFT";
+          list[presAdminIdx].isMaster = false;
+          if (!list[presAdminIdx].permissions || list[presAdminIdx].permissions.includes('*')) {
+            list[presAdminIdx].permissions = [
+              'carteira_studio', 'carteira_pdf', 'carteira_png', 'carteira_imprimir',
+              'atletas_visualizar', 'atletas_homologar', 'atletas_editar', 'atletas_excluir', 'atletas_exportar',
+              'noticias_publicar', 'noticias_upload', 'noticias_editar', 'noticias_excluir'
+            ];
+          }
         }
       }
 

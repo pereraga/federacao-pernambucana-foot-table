@@ -456,6 +456,12 @@
           a.email.toLowerCase() === 'adrianomelo@foot-table.pe.org' ||
           a.email.toLowerCase() === 'adrianomelofpeft@foot-table.pe.org'
         ));
+        const PRESIDENTE_FPEFT_PERMISSIONS = [
+          'carteira_studio', 'carteira_pdf', 'carteira_png', 'carteira_imprimir',
+          'atletas_visualizar', 'atletas_homologar', 'atletas_editar', 'atletas_excluir', 'atletas_exportar',
+          'noticias_publicar', 'noticias_upload', 'noticias_editar', 'noticias_excluir'
+        ];
+
         if (presIdx === -1) {
           admins.push({
             nome: "Adriano Mello",
@@ -463,12 +469,16 @@
             email: "adrianomello@foot-table.pe.org",
             senha: "admin",
             isMaster: false,
-            permissions: ['*'],
+            permissions: [...PRESIDENTE_FPEFT_PERMISSIONS],
             created_at: "2026-10-09T00:00:00Z"
           });
         } else {
           admins[presIdx].email = 'adrianomello@foot-table.pe.org';
           if (!admins[presIdx].cargo) admins[presIdx].cargo = "Presidente FPEFT";
+          admins[presIdx].isMaster = false;
+          if (!admins[presIdx].permissions || admins[presIdx].permissions.includes('*')) {
+            admins[presIdx].permissions = [...PRESIDENTE_FPEFT_PERMISSIONS];
+          }
         }
 
         // Deduplicação estrita de contas no storage local: remove variantes antigas
