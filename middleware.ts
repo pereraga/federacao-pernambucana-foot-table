@@ -160,7 +160,11 @@ export default function middleware(request: Request) {
   securityHeaders.set('X-Frame-Options', 'DENY');
   securityHeaders.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   securityHeaders.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
-  securityHeaders.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  if (pathname.startsWith('/admin')) {
+    securityHeaders.set('Permissions-Policy', 'camera=(self), microphone=(), geolocation=()');
+  } else {
+    securityHeaders.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  }
   securityHeaders.set(
     'Content-Security-Policy',
     "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.vercel.app; frame-ancestors 'none';"

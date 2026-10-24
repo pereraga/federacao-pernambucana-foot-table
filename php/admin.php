@@ -1,11 +1,3 @@
-<?php
-require_once __DIR__ . '/config.php';
-// Proteção de acesso administrativo no servidor PHP
-if (!is_admin_logged()) {
-    header('Location: login.php');
-    exit;
-}
-?>
 <!DOCTYPE html>
 <html lang="pt-BR" class="dark">
 <head>
@@ -129,7 +121,7 @@ if (!is_admin_logged()) {
 
         // Modificação de atletas (Acesso Controlado)
         if (!perms.includes('atletas_editar')) {
-          hideSelectors.push('#btnConcluirCadastro', '#btnResetFoto', '#btnOpenBatchImport', 'button[onclick*="generateFederatedNumber"]', '#uploadFotoCameraInput', '#uploadFotoInput');
+          hideSelectors.push('#btnConcluirCadastro', '#btnResetFoto', '#btnOpenBatchImport', 'button[onclick*="generateFederatedNumber"]', 'button[onclick*="openAthleteCameraSelector"]', 'button[onclick*="resetAthletePhoto"]', '#uploadFotoCameraInput', '#uploadFotoInput');
         }
 
         // Alteração de Layout Studio e Nuvem
@@ -1052,19 +1044,25 @@ if (!is_admin_logged()) {
                       </div>
 
                       <!-- Miniatura / Confirmação Visual da Foto Selecionada -->
-                      <div id="athleteFormPhotoPreview" class="hidden p-2 bg-[#05080e] border border-pe-gold/40 rounded-xl flex items-center gap-3 shadow-md">
-                        <div class="w-11 h-14 rounded-lg overflow-hidden border border-pe-gold/70 shrink-0 bg-slate-900 shadow">
-                          <img id="athleteFormPhotoImg" src="" class="w-full h-full object-cover" alt="Foto do Atleta" />
+                      <div id="athleteFormPhotoPreview" class="hidden p-2.5 bg-[#05080e] border border-pe-gold/50 rounded-xl flex items-center gap-3 shadow-lg">
+                        <div class="w-12 h-16 rounded-lg overflow-hidden border-2 border-pe-gold shrink-0 bg-slate-900 shadow-md">
+                          <img id="athleteFormPhotoImg" src="" class="w-full h-full object-cover" alt="Foto Oficial do Atleta" />
                         </div>
                         <div class="flex-1 min-w-0">
-                          <span class="text-[11px] font-bold text-emerald-400 flex items-center gap-1">
-                            <i class="fa-solid fa-circle-check text-xs"></i> Foto 3x4 pronta
+                          <span class="text-[11px] font-bold text-emerald-400 flex items-center gap-1.5 leading-tight">
+                            <i class="fa-solid fa-circle-check text-xs"></i> Foto 3x4 Oficial Ativa
                           </span>
-                          <span id="athleteFormPhotoInfo" class="text-[9px] text-slate-400 block truncate">Visível no Studio e Prévia</span>
+                          <span id="athleteFormPhotoInfo" class="text-[9px] text-slate-400 block truncate mt-0.5">Sobrepondo foto anterior</span>
                         </div>
-                        <button type="button" onclick="resetAthletePhoto()" class="text-rose-400 hover:text-rose-300 hover:bg-rose-950/60 p-2 rounded-lg transition border border-rose-500/30 cursor-pointer" title="Remover Foto">
-                          <i class="fa-solid fa-trash-can text-xs"></i>
-                        </button>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                          <button type="button" onclick="openAthleteCameraSelector()" class="px-2.5 py-1.5 bg-[#121a2d] hover:bg-[#1d2a4a] text-pe-gold border border-pe-gold/40 rounded-lg text-[10px] font-bold flex items-center gap-1 transition cursor-pointer shadow-sm hover:scale-105 active:scale-95" title="Tirar outra foto para sobrepor e substituir a atual">
+                            <i class="fa-solid fa-camera-rotate text-[11px]"></i>
+                            <span>Trocar</span>
+                          </button>
+                          <button type="button" onclick="resetAthletePhoto()" class="p-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 hover:text-rose-200 border border-rose-500/30 rounded-lg text-xs transition cursor-pointer shadow-sm hover:scale-105 active:scale-95" title="Excluir foto atual e restaurar silhueta padrão">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                          </button>
+                        </div>
                       </div>
 
                       <!-- Restaurar Silhueta Padrão -->
@@ -3851,7 +3849,7 @@ if (!is_admin_logged()) {
           if (!isTabAllowed('galeria')) hideSelectors.push('#navBtn-galeria, #tabContent-galeria');
           if (!isTabAllowed('emails')) hideSelectors.push('#navBtn-emails, #tabContent-emails');
           if (!isTabAllowed('config')) hideSelectors.push('#navBtn-config, #tabContent-config');
-          if (!canEditAtletas) hideSelectors.push('#btnConcluirCadastro, #btnResetFoto, #btnOpenBatchImport, button[onclick*="generateFederatedNumber"], #uploadFotoCameraInput, #uploadFotoInput');
+          if (!canEditAtletas) hideSelectors.push('#btnConcluirCadastro, #btnResetFoto, #btnOpenBatchImport, button[onclick*="generateFederatedNumber"], button[onclick*="openAthleteCameraSelector"], button[onclick*="resetAthletePhoto"], #uploadFotoCameraInput, #uploadFotoInput');
           if (!canEditLayout) hideSelectors.push('#btnSaveOfficialCloud, #btnModeDesign, button[onclick*="restoreOfficialElementPositions"]');
           if (!canPdf) hideSelectors.push('#btnExportPDF, #btnDownloadPdf, #btnDownloadPdfMobile');
           if (!canPng) hideSelectors.push('#btnExportPNG, #btnDownloadPng, #btnDownloadPngMobile');
@@ -7383,6 +7381,10 @@ if (!is_admin_logged()) {
       window.updateAthleteFormPhotoPreview = updateAthleteFormPhotoPreview;
 
       function resetAthletePhoto() {
+        if (!hasPermission('atletas_editar') && !hasPermission('*')) {
+          showToast('🔒 Acesso Controlado: Sua conta não possui permissão para modificar atletas.', true);
+          return;
+        }
         window._currentAthletePhoto = '';
         const photoInput = document.getElementById('athletePhotoVal');
         if (photoInput) photoInput.value = '';
@@ -7396,13 +7398,105 @@ if (!is_admin_logged()) {
           window._lastActiveAthlete.foto = '';
           window._lastActiveAthlete.foto_url = '';
         }
+
+        // Remove do banco de dados local e Supabase se houver atleta ativo
+        const currentCode = (document.getElementById('athleteCode')?.value || window._lastActiveAthlete?.codigo || '').trim();
+        if (currentCode) {
+          try {
+            const localList = JSON.parse(localStorage.getItem('pe_athletes_db') || '[]');
+            const idx = localList.findIndex(a => a.codigo === currentCode);
+            if (idx >= 0) {
+              localList[idx].foto = '';
+              localList[idx].foto_url = '';
+              localStorage.setItem('pe_athletes_db', JSON.stringify(localList));
+            }
+          } catch (e) {}
+
+          if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+            try {
+              supabaseClient
+                .from('atletas')
+                .update({ foto_url: '', foto: '' })
+                .eq('codigo', currentCode)
+                .catch(() => {});
+            } catch (e) {}
+          }
+        }
+
         renderInteractiveElements();
-        showToast('Foto removida. Silhueta padrão restaurada.');
+        showToast('Foto removida. Silhueta oficial padrão restaurada.');
       }
       window.resetAthletePhoto = resetAthletePhoto;
 
-      // Função Unificada de Processamento de Foto 3x4 do Atleta (Câmera ou Arquivos)
-      function processAthletePhotoFile(file) {
+      // 1. Aplicação e Sobreposição de Foto Oficial do Atleta (Atualiza Formulário, Studio e Banco)
+      window.applyAthletePhotoDataUrl = function(compressedDataUrl, info = '') {
+        if (!compressedDataUrl) return;
+
+        // 1. Armazena foto ativa em memória e no input persistente
+        window._currentAthletePhoto = compressedDataUrl;
+        const photoInput = document.getElementById('athletePhotoVal');
+        if (photoInput) photoInput.value = compressedDataUrl;
+
+        // 2. Atualiza miniatura visual no formulário com status e botões de ação
+        updateAthleteFormPhotoPreview(compressedDataUrl, info || 'Sobreposta com sucesso');
+
+        // 3. Atualiza o elemento no Studio CR80 (canvas de prévia interativa)
+        const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
+        if (photoTarget) {
+          photoTarget.photoUrl = compressedDataUrl;
+        }
+
+        // 4. Se houver um atleta em edição/ativo na sessão, sincroniza seus dados
+        if (window._lastActiveAthlete) {
+          window._lastActiveAthlete.foto = compressedDataUrl;
+          window._lastActiveAthlete.foto_url = compressedDataUrl;
+        }
+
+        // 5. Renderiza a tela de prévia imediatamente com a nova foto sobreposta
+        renderInteractiveElements();
+
+        // 6. Substituição imediata no banco de dados local e Supabase (se atleta já possui código registrado)
+        const currentCode = (document.getElementById('athleteCode')?.value || window._lastActiveAthlete?.codigo || '').trim();
+        if (currentCode) {
+          // A) Atualiza no banco de dados local (localStorage)
+          try {
+            const localList = JSON.parse(localStorage.getItem('pe_athletes_db') || '[]');
+            const idx = localList.findIndex(a => a.codigo === currentCode);
+            if (idx >= 0) {
+              localList[idx].foto = compressedDataUrl;
+              localList[idx].foto_url = compressedDataUrl;
+              localStorage.setItem('pe_athletes_db', JSON.stringify(localList));
+            }
+          } catch (e) {
+            console.warn('Erro ao atualizar foto no localStorage:', e);
+          }
+
+          // B) Se Supabase estiver conectado e disponível, atualiza imediatamente no banco de dados na nuvem
+          if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+            try {
+              supabaseClient
+                .from('atletas')
+                .update({ foto_url: compressedDataUrl, foto: compressedDataUrl })
+                .eq('codigo', currentCode)
+                .then(({ error }) => {
+                  if (error) {
+                    // Fallback se a coluna foto não existir
+                    supabaseClient.from('atletas').update({ foto_url: compressedDataUrl }).eq('codigo', currentCode);
+                  }
+                })
+                .catch(err => console.warn('Atualização remota da foto:', err));
+            } catch (err) {
+              console.warn('Erro ao sincronizar foto com o Supabase:', err);
+            }
+          }
+        }
+
+        const sizeKb = Math.round((compressedDataUrl.length * 3 / 4) / 1024);
+        showToast(`✓ Foto 3x4 confirmada (${sizeKb} KB)! Substituindo foto anterior.`);
+      };
+
+      // 2. Processamento Unificado de Foto 3x4 do Atleta (Câmera ou Arquivos)
+      function processAthletePhotoFile(file, promptConfirm = false) {
         if (!file) return;
         if (!file.type.startsWith('image/')) {
           showToast('Por favor, selecione um arquivo de imagem válido (JPG, PNG, WEBP).', true);
@@ -7434,31 +7528,11 @@ if (!is_admin_logged()) {
             // Compressão otimizada com 82% de qualidade JPEG
             const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
 
-            // 1. Armazena a foto ativa com persistência total no formulário e sessão
-            window._currentAthletePhoto = compressedDataUrl;
-            const photoInput = document.getElementById('athletePhotoVal');
-            if (photoInput) photoInput.value = compressedDataUrl;
-
-            // 2. Atualiza miniatura visual no formulário
-            updateAthleteFormPhotoPreview(compressedDataUrl, `${width}x${height}px`);
-
-            // 3. Atualiza o elemento no Studio CR80 (canvas de prévia)
-            const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
-            if (photoTarget) {
-              photoTarget.photoUrl = compressedDataUrl;
+            if (promptConfirm) {
+              openAthletePhotoConfirmationModal(compressedDataUrl);
+            } else {
+              applyAthletePhotoDataUrl(compressedDataUrl, `${width}x${height}px`);
             }
-
-            // 4. Se houver um atleta em edição, sincroniza foto e foto_url
-            if (window._lastActiveAthlete) {
-              window._lastActiveAthlete.foto = compressedDataUrl;
-              window._lastActiveAthlete.foto_url = compressedDataUrl;
-            }
-
-            // 5. Renderiza a tela de prévia imediatamente com a nova foto
-            renderInteractiveElements();
-
-            const sizeKb = Math.round((compressedDataUrl.length * 3 / 4) / 1024);
-            showToast(`Foto 3x4 carregada e nítida (${sizeKb} KB)!`);
           };
           img.onerror = () => {
             showToast('Erro ao processar imagem da foto.', true);
@@ -7467,67 +7541,235 @@ if (!is_admin_logged()) {
         };
         reader.readAsDataURL(file);
       }
+      window.processAthletePhotoFile = processAthletePhotoFile;
 
-      // 1. Upload via Gerenciador de Arquivos (PC, Celular ou Tablet)
+      // 3. Upload via Gerenciador de Arquivos (PC, Celular ou Tablet)
       const fotoInp = document.getElementById('uploadFotoInput');
       if (fotoInp) {
         fotoInp.addEventListener('change', (e) => {
           const file = e.target.files && e.target.files[0];
-          if (file) processAthletePhotoFile(file);
+          if (file) processAthletePhotoFile(file, true);
           e.target.value = '';
         });
       }
 
-      // 2. Upload via Câmera Nativa (Celular ou Tablet)
+      // 4. Upload via Câmera Nativa (Fallback Celular ou Tablet)
       const fotoCameraInp = document.getElementById('uploadFotoCameraInput');
       if (fotoCameraInp) {
         fotoCameraInp.addEventListener('change', (e) => {
           const file = e.target.files && e.target.files[0];
-          if (file) processAthletePhotoFile(file);
+          if (file) processAthletePhotoFile(file, true);
           e.target.value = '';
         });
       }
 
-      // 3. Controle Inteligente de Câmera (Mobile Nativo / Webcam Desktop)
+      // 5. Controle Inteligente de Câmera com Permissão do Navegador, Visto (✓) e Lixeira (🗑️)
       let athleteWebcamStream = null;
-      window.openAthleteCameraSelector = function() {
-        const isMobileOrTablet = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
-        
-        // Em celulares e tablets, aciona a câmera nativa do sistema operacional diretamente
-        if (isMobileOrTablet) {
-          const camInp = document.getElementById('uploadFotoCameraInput');
-          if (camInp) {
-            camInp.click();
-            return;
-          }
+      let athleteCameraFacingMode = 'user';
+      let currentPendingPhotoDataUrl = null;
+
+      async function startAthleteCameraStream(facingMode) {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('API getUserMedia não suportada pelo navegador.');
         }
 
-        // No Desktop com webcam: abre modal visual em tempo real
+        if (athleteWebcamStream) {
+          athleteWebcamStream.getTracks().forEach(track => track.stop());
+          athleteWebcamStream = null;
+        }
+
+        const constraints = {
+          video: facingMode ? {
+            facingMode: { ideal: facingMode },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          } : {
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        };
+
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        athleteWebcamStream = stream;
+        const video = document.getElementById('webcamAthleteVideo');
+        if (video) {
+          video.srcObject = stream;
+          video.setAttribute('playsinline', 'true');
+          video.setAttribute('muted', 'true');
+          await video.play();
+        }
+        return stream;
+      }
+
+      window.openAthleteCameraSelector = async function() {
+        if (!hasPermission('atletas_editar') && !hasPermission('*')) {
+          showToast('🔒 Acesso Controlado: Sua conta não possui permissão para modificar fotos de atletas.', true);
+          return;
+        }
+
+        const modal = document.getElementById('modalWebcamAthlete');
+        const video = document.getElementById('webcamAthleteVideo');
+        const snapshotPreview = document.getElementById('webcamAthleteSnapshotPreview');
+        const overlay = document.getElementById('webcamAthleteOverlay');
+        const controlsLive = document.getElementById('webcamControlsLive');
+        const controlsConfirm = document.getElementById('webcamControlsConfirm');
+        const subtitle = document.getElementById('webcamModalSubtitle');
+
+        currentPendingPhotoDataUrl = null;
+
+        if (snapshotPreview) {
+          snapshotPreview.src = '';
+          snapshotPreview.classList.add('hidden');
+        }
+        if (video) video.classList.remove('hidden');
+        if (overlay) overlay.classList.remove('hidden');
+        if (controlsLive) controlsLive.classList.remove('hidden');
+        if (controlsConfirm) controlsConfirm.classList.add('hidden');
+        if (subtitle) subtitle.textContent = 'Enquadre o rosto no centro e tire a foto';
+
+        if (modal) modal.classList.remove('hidden');
+
+        // Solicita permissão ao navegador para abrir a câmera (Celular, Tablet ou Desktop)
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-          const modal = document.getElementById('modalWebcamAthlete');
-          const video = document.getElementById('webcamAthleteVideo');
-          if (modal && video) {
-            modal.classList.remove('hidden');
-            navigator.mediaDevices.getUserMedia({
-              video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
-              audio: false
-            }).then(stream => {
-              athleteWebcamStream = stream;
-              video.srcObject = stream;
-              video.play();
-            }).catch(err => {
-              console.warn('Acesso à webcam recusado ou não disponível, abrindo seletor nativo:', err);
+          try {
+            await startAthleteCameraStream(athleteCameraFacingMode);
+            return;
+          } catch (err) {
+            console.warn('Tentativa com modo ' + athleteCameraFacingMode + ' falhou, tentando fallback genérico:', err);
+            try {
+              await startAthleteCameraStream('');
+              return;
+            } catch (fallbackErr) {
+              console.warn('Acesso à câmera recusado ou indisponível:', fallbackErr);
               closeAthleteWebcam();
+              showToast('Permissão da câmera não concedida. Abrindo câmera do dispositivo...');
               const camInp = document.getElementById('uploadFotoCameraInput');
               if (camInp) camInp.click();
-            });
-            return;
+              return;
+            }
           }
         }
 
-        // Fallback para input de câmera nativo
+        // Fallback caso o navegador não suporte getUserMedia
+        closeAthleteWebcam();
         const camInp = document.getElementById('uploadFotoCameraInput');
         if (camInp) camInp.click();
+      };
+
+      window.flipAthleteCamera = async function() {
+        athleteCameraFacingMode = athleteCameraFacingMode === 'user' ? 'environment' : 'user';
+        try {
+          await startAthleteCameraStream(athleteCameraFacingMode);
+          showToast(athleteCameraFacingMode === 'environment' ? '📷 Câmera traseira ativada' : '🤳 Câmera frontal ativada');
+        } catch (err) {
+          console.warn('Não foi possível alternar de câmera:', err);
+          showToast('Não foi possível alternar a câmera neste aparelho.', true);
+        }
+      };
+
+      window.captureAthleteWebcamSnapshot = function() {
+        const video = document.getElementById('webcamAthleteVideo');
+        if (!video) return;
+
+        const w = video.videoWidth || 640;
+        const h = video.videoHeight || 480;
+
+        // Cria canvas com proporção 3x4 (420x560) e recorte centralizado
+        const canvas = document.createElement('canvas');
+        canvas.width = 420;
+        canvas.height = 560;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+
+        const targetRatio = 3 / 4;
+        let sWidth = w;
+        let sHeight = w / targetRatio;
+        let sx = 0;
+        let sy = (h - sHeight) / 2;
+
+        if (sHeight > h) {
+          sHeight = h;
+          sWidth = h * targetRatio;
+          sx = (w - sWidth) / 2;
+          sy = 0;
+        }
+
+        ctx.drawImage(video, sx, sy, sWidth, sHeight, 0, 0, 420, 560);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+        openAthletePhotoConfirmationModal(dataUrl);
+      };
+
+      window.openAthletePhotoConfirmationModal = function(dataUrl) {
+        const modal = document.getElementById('modalWebcamAthlete');
+        const video = document.getElementById('webcamAthleteVideo');
+        const snapshotPreview = document.getElementById('webcamAthleteSnapshotPreview');
+        const overlay = document.getElementById('webcamAthleteOverlay');
+        const controlsLive = document.getElementById('webcamControlsLive');
+        const controlsConfirm = document.getElementById('webcamControlsConfirm');
+        const subtitle = document.getElementById('webcamModalSubtitle');
+
+        currentPendingPhotoDataUrl = dataUrl;
+
+        if (video) {
+          try { video.pause(); } catch (e) {}
+          video.classList.add('hidden');
+        }
+        if (snapshotPreview) {
+          snapshotPreview.src = dataUrl;
+          snapshotPreview.classList.remove('hidden');
+        }
+        if (overlay) overlay.classList.add('hidden');
+        if (controlsLive) controlsLive.classList.add('hidden');
+        if (controlsConfirm) controlsConfirm.classList.remove('hidden');
+        if (subtitle) subtitle.textContent = 'Gostou da foto? Confirme no visto (✓) ou descarte na lixeira (🗑️)';
+
+        if (modal) modal.classList.remove('hidden');
+      };
+
+      // Ação da Lixeira: Descartar foto tirada e voltar à câmera imediatamente
+      window.discardAthleteWebcamSnapshot = function() {
+        currentPendingPhotoDataUrl = null;
+
+        const video = document.getElementById('webcamAthleteVideo');
+        const snapshotPreview = document.getElementById('webcamAthleteSnapshotPreview');
+        const overlay = document.getElementById('webcamAthleteOverlay');
+        const controlsLive = document.getElementById('webcamControlsLive');
+        const controlsConfirm = document.getElementById('webcamControlsConfirm');
+        const subtitle = document.getElementById('webcamModalSubtitle');
+
+        if (snapshotPreview) {
+          snapshotPreview.src = '';
+          snapshotPreview.classList.add('hidden');
+        }
+        if (video) {
+          video.classList.remove('hidden');
+          if (athleteWebcamStream) {
+            video.play().catch(() => {});
+          } else {
+            startAthleteCameraStream(athleteCameraFacingMode).catch(() => {});
+          }
+        }
+        if (overlay) overlay.classList.remove('hidden');
+        if (controlsLive) controlsLive.classList.remove('hidden');
+        if (controlsConfirm) controlsConfirm.classList.add('hidden');
+        if (subtitle) subtitle.textContent = 'Enquadre o rosto no centro e tire uma nova foto';
+
+        showToast('Foto descartada. Câmera pronta para tirar outra!');
+      };
+
+      // Ação do Visto: Aceitar foto tirada e sobrepor a anterior no formulário e banco
+      window.acceptAthleteWebcamSnapshot = function() {
+        if (!currentPendingPhotoDataUrl) {
+          showToast('Nenhuma foto capturada para salvar.', true);
+          return;
+        }
+
+        applyAthletePhotoDataUrl(currentPendingPhotoDataUrl);
+        closeAthleteWebcam();
+        showToast('✓ Foto aceita! Substituindo foto anterior no atleta e carteira.');
       };
 
       window.closeAthleteWebcam = function() {
@@ -7537,23 +7779,7 @@ if (!is_admin_logged()) {
         }
         const modal = document.getElementById('modalWebcamAthlete');
         if (modal) modal.classList.add('hidden');
-      };
-
-      window.captureAthleteWebcamSnapshot = function() {
-        const video = document.getElementById('webcamAthleteVideo');
-        if (!video) return;
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth || 640;
-        canvas.height = video.videoHeight || 480;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        canvas.toBlob(blob => {
-          if (blob) {
-            const file = new File([blob], 'foto_3x4_camera.jpg', { type: 'image/jpeg' });
-            processAthletePhotoFile(file);
-          }
-          closeAthleteWebcam();
-        }, 'image/jpeg', 0.9);
+        currentPendingPhotoDataUrl = null;
       };
 
       const btnResetFoto = document.getElementById('btnResetFoto');
@@ -13795,39 +14021,76 @@ Rodrigo Albuquerque; 333.444.555-66; Caruaru - PE; Central Foot Table; SOLO (IND
     </div>
   </div>
 
-  <!-- Modal de Captura via Câmera / Webcam (Desktop) -->
-  <div id="modalWebcamAthlete" class="hidden fixed inset-0 z-[10000] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+  <!-- Modal de Captura via Câmera / Webcam (Mobile e Desktop) -->
+  <div id="modalWebcamAthlete" class="hidden fixed inset-0 z-[10000] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
     <div class="bg-[#0b101d] border border-[#1c253b] rounded-2xl max-w-sm w-full p-4 shadow-2xl relative flex flex-col items-center">
+      <!-- Cabeçalho do Modal -->
       <div class="w-full flex items-center justify-between pb-3 border-b border-[#1c253b] mb-3">
         <div class="flex items-center gap-2">
           <div class="w-7 h-7 rounded-lg bg-pe-gold/20 text-pe-gold flex items-center justify-center">
             <i class="fa-solid fa-camera text-xs"></i>
           </div>
           <div>
-            <h4 class="font-bold text-white text-xs">Tirar Foto 3x4 do Atleta</h4>
-            <p class="text-[10px] text-slate-400">Enquadre o rosto no centro</p>
+            <h4 class="font-bold text-white text-xs">Foto 3x4 Oficial do Atleta</h4>
+            <p id="webcamModalSubtitle" class="text-[10px] text-slate-400">Enquadre o rosto e tire a foto</p>
           </div>
         </div>
-        <button type="button" onclick="closeAthleteWebcam()" class="text-slate-400 hover:text-white p-1 rounded-lg text-sm cursor-pointer">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <div class="relative w-full aspect-[3/4] max-h-[340px] bg-black rounded-xl overflow-hidden border border-pe-gold/40 flex items-center justify-center">
-        <video id="webcamAthleteVideo" autoplay playsinline class="w-full h-full object-cover"></video>
-        <div class="absolute inset-0 border-2 border-dashed border-pe-gold/40 rounded-xl pointer-events-none flex items-center justify-center">
-          <div class="w-36 h-48 border border-pe-gold/60 rounded-[50%] pointer-events-none"></div>
+        <div class="flex items-center gap-1.5">
+          <button type="button" id="btnFlipAthleteCamera" onclick="flipAthleteCamera()" class="text-slate-300 hover:text-pe-gold bg-[#141d33] hover:bg-[#1c2846] px-2 py-1 rounded-lg text-xs cursor-pointer border border-[#1c253b] flex items-center gap-1" title="Alternar Câmera (Frontal / Traseira)">
+            <i class="fa-solid fa-camera-rotate"></i>
+            <span class="text-[10px] font-semibold hidden sm:inline">Virar</span>
+          </button>
+          <button type="button" onclick="closeAthleteWebcam()" class="text-slate-400 hover:text-white p-1 rounded-lg text-sm cursor-pointer ml-1" title="Fechar">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
         </div>
       </div>
 
-      <div class="w-full flex items-center justify-between gap-2 mt-3 pt-3 border-t border-[#1c253b]">
-        <button type="button" onclick="closeAthleteWebcam()" class="px-3 py-2 bg-[#05080e] hover:bg-[#152038] text-slate-300 text-xs font-bold rounded-xl border border-[#1c253b] transition cursor-pointer">
+      <!-- Área de Visualização (Vídeo ao Vivo / Prévia da Foto) com Moldura Guia 3x4 -->
+      <div class="relative w-full aspect-[3/4] max-h-[360px] bg-black rounded-xl overflow-hidden border border-pe-gold/50 flex items-center justify-center shadow-inner">
+        <!-- Vídeo da Câmera em Tempo Real -->
+        <video id="webcamAthleteVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
+
+        <!-- Prévia Congelada para Confirmação -->
+        <img id="webcamAthleteSnapshotPreview" class="hidden w-full h-full object-cover" alt="Foto Capturada" />
+
+        <!-- Moldura Guia 3x4 Facial -->
+        <div id="webcamAthleteOverlay" class="absolute inset-0 border-2 border-dashed border-pe-gold/50 rounded-xl pointer-events-none flex flex-col items-center justify-center">
+          <div class="w-36 h-48 border-2 border-pe-gold/80 rounded-[50%] pointer-events-none shadow-[0_0_20px_rgba(217,169,79,0.35)]"></div>
+          <span class="mt-2 text-[9px] text-pe-gold font-bold bg-black/75 border border-pe-gold/40 px-2.5 py-0.5 rounded pointer-events-none">Alinhe o rosto no centro</span>
+        </div>
+      </div>
+
+      <!-- Controles: Modo 1 - Câmera ao Vivo (Tirar Foto) -->
+      <div id="webcamControlsLive" class="w-full flex items-center justify-between gap-2 mt-3 pt-3 border-t border-[#1c253b]">
+        <button type="button" onclick="closeAthleteWebcam()" class="px-3.5 py-2.5 bg-[#05080e] hover:bg-[#152038] text-slate-300 text-xs font-bold rounded-xl border border-[#1c253b] transition cursor-pointer">
           Cancelar
         </button>
-        <button type="button" onclick="captureAthleteWebcamSnapshot()" class="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-pe-gold hover:bg-pe-goldHover text-black font-extrabold text-xs uppercase rounded-xl shadow-lg transition cursor-pointer">
-          <i class="fa-solid fa-camera text-xs"></i>
-          <span>Capturar Foto</span>
+        <button type="button" onclick="captureAthleteWebcamSnapshot()" class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-pe-gold hover:bg-pe-goldHover text-black font-extrabold text-xs uppercase rounded-xl shadow-lg transition cursor-pointer active:scale-95">
+          <i class="fa-solid fa-camera text-sm"></i>
+          <span>📸 Tirar Foto</span>
         </button>
+      </div>
+
+      <!-- Controles: Modo 2 - Confirmação da Foto (Visto ✓ ou Lixeira 🗑️) -->
+      <div id="webcamControlsConfirm" class="hidden w-full flex flex-col gap-2 mt-3 pt-3 border-t border-[#1c253b]">
+        <div class="text-center w-full">
+          <p class="text-xs font-extrabold text-white">Gostou da foto tirada?</p>
+          <p class="text-[10px] text-slate-300">Escolha se vai usar esta foto ou descartar na lixeira para tirar outra</p>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mt-1 w-full">
+          <!-- Botão Lixeira: Descartar e tirar outra foto -->
+          <button type="button" onclick="discardAthleteWebcamSnapshot()" class="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-rose-600/25 hover:bg-rose-600/40 text-rose-300 hover:text-white border border-rose-500/50 rounded-xl font-bold text-xs transition cursor-pointer active:scale-95 shadow-md" title="Descartar esta foto e tirar outra com a câmera">
+            <i class="fa-solid fa-trash-can text-sm text-rose-400"></i>
+            <span>🗑️ Descartar</span>
+          </button>
+
+          <!-- Botão Visto: Confirmar e usar esta foto para sobrepor a anterior -->
+          <button type="button" onclick="acceptAthleteWebcamSnapshot()" class="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase rounded-xl transition cursor-pointer active:scale-95 shadow-lg shadow-emerald-500/25" title="Aceitar esta foto e sobrepor foto anterior no atleta">
+            <i class="fa-solid fa-check text-base font-black"></i>
+            <span>✓ Usar Foto</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
