@@ -42,13 +42,13 @@ if (!is_admin_logged()) {
           localStorage.removeItem('pe_admin_user');
           localStorage.removeItem('pe_admin_session_token');
           localStorage.removeItem('pe_admin_session_expires');
-          window.location.replace('login.php');
+          window.location.replace('login.html');
           return;
         }
 
         const rawUser = (sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user') || '').toLowerCase().trim();
         if (!rawUser) {
-          window.location.replace('login.php');
+          window.location.replace('login.html');
           return;
         }
         const user = rawUser.includes('@') ? rawUser : (rawUser + '@foot-table.pe.org');
@@ -83,7 +83,7 @@ if (!is_admin_logged()) {
         }
 
         if (!current && !isAdminMaster && !isGabrielMaster) {
-          window.location.replace('login.php');
+          window.location.replace('login.html');
           return;
         }
 
@@ -658,7 +658,7 @@ if (!is_admin_logged()) {
 
       <!-- Rodapé da Sidebar: Ver Site & Sair -->
       <div id="sidebarFooter" class="p-4 border-t border-[#151c2e] bg-[#04060b] space-y-2">
-        <a href="index.php" class="w-full bg-[#0c1424] hover:bg-[#121e36] border border-pe-cardBorder text-white font-bold text-xs uppercase px-3 py-2.5 rounded-xl transition flex items-center justify-center gap-2" title="Ver Site Público">
+        <a href="index.html" class="w-full bg-[#0c1424] hover:bg-[#121e36] border border-pe-cardBorder text-white font-bold text-xs uppercase px-3 py-2.5 rounded-xl transition flex items-center justify-center gap-2" title="Ver Site Público">
           <span class="text-base shrink-0">🌐</span>
           <span class="sidebar-text">Ver Site Público</span>
         </a>
@@ -1006,6 +1006,9 @@ if (!is_admin_logged()) {
                       <span class="text-[9px] uppercase tracking-wider text-pe-gold font-bold bg-pe-gold/10 px-2 py-0.5 rounded-md border border-pe-gold/20">Seleção Rápida</span>
                     </div>
 
+                    <!-- Input oculto persistente da foto 3x4 do atleta -->
+                    <input type="hidden" id="athletePhotoVal" value="" />
+
                     <!-- Área de Seleção Rápida: Tirar Foto ou Gerenciador de Arquivos -->
                     <div class="space-y-1.5">
                       <div class="grid grid-cols-2 gap-2">
@@ -1030,8 +1033,24 @@ if (!is_admin_logged()) {
                         </label>
                       </div>
 
+                      <!-- Miniatura / Confirmação Visual da Foto Selecionada -->
+                      <div id="athleteFormPhotoPreview" class="hidden p-2 bg-[#05080e] border border-pe-gold/40 rounded-xl flex items-center gap-3 shadow-md">
+                        <div class="w-11 h-14 rounded-lg overflow-hidden border border-pe-gold/70 shrink-0 bg-slate-900 shadow">
+                          <img id="athleteFormPhotoImg" src="" class="w-full h-full object-cover" alt="Foto do Atleta" />
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <span class="text-[11px] font-bold text-emerald-400 flex items-center gap-1">
+                            <i class="fa-solid fa-circle-check text-xs"></i> Foto 3x4 pronta
+                          </span>
+                          <span id="athleteFormPhotoInfo" class="text-[9px] text-slate-400 block truncate">Visível no Studio e Prévia</span>
+                        </div>
+                        <button type="button" onclick="resetAthletePhoto()" class="text-rose-400 hover:text-rose-300 hover:bg-rose-950/60 p-2 rounded-lg transition border border-rose-500/30 cursor-pointer" title="Remover Foto">
+                          <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                      </div>
+
                       <!-- Restaurar Silhueta Padrão -->
-                      <button type="button" id="btnResetFoto" title="Restaurar Silhueta Oficial Padrão" class="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 bg-[#05080e] hover:bg-[#121c32] border border-[#1c253b] hover:border-slate-500 rounded-xl text-[10px] text-slate-400 hover:text-white transition cursor-pointer">
+                      <button type="button" id="btnResetFoto" onclick="resetAthletePhoto()" title="Restaurar Silhueta Oficial Padrão" class="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 bg-[#05080e] hover:bg-[#121c32] border border-[#1c253b] hover:border-slate-500 rounded-xl text-[10px] text-slate-400 hover:text-white transition cursor-pointer">
                         <i class="fa-solid fa-user-circle text-xs text-pe-gold"></i>
                         <span>Restaurar Silhueta Padrão</span>
                       </button>
@@ -4417,7 +4436,12 @@ if (!is_admin_logged()) {
         if (cloudData) {
           const rawElements = Array.isArray(cloudData) ? cloudData : cloudData.elements;
           if (Array.isArray(rawElements) && rawElements.length > 0) {
+            const preservedPhoto = (document.getElementById('athletePhotoVal') ? document.getElementById('athletePhotoVal').value : '') || window._currentAthletePhoto || '';
             studioState.elements = sanitizeStudioElements(rawElements);
+            if (preservedPhoto) {
+              const photoEl = studioState.elements.find(i => i.id === 'field-foto');
+              if (photoEl) photoEl.photoUrl = preservedPhoto;
+            }
             localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(studioState.elements));
           }
 
@@ -4847,8 +4871,10 @@ if (!is_admin_logged()) {
           div.style.overflow = 'hidden';
           div.style.boxShadow = '0 10px 25px rgba(0,0,0,0.55)';
 
-          if (item.photoUrl) {
-            div.innerHTML = `<img src="${item.photoUrl}" class="w-full h-full object-cover pointer-events-none select-none" />`;
+          const activePhoto = item.photoUrl || (document.getElementById('athletePhotoVal') ? document.getElementById('athletePhotoVal').value : '') || window._currentAthletePhoto || '';
+
+          if (activePhoto && activePhoto !== OFFICIAL_DEFAULT_PHOTO_SVG && !activePhoto.startsWith('data:image/svg+xml')) {
+            div.innerHTML = `<img src="${activePhoto}" class="w-full h-full object-cover pointer-events-none select-none" />`;
           } else {
             div.innerHTML = `
               <div class="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-slate-900/80 pointer-events-none select-none">
@@ -6113,13 +6139,19 @@ if (!is_admin_logged()) {
           ctx.fill();
           ctx.restore();
 
-          let pUrl = athlete ? (athlete.foto || athlete.foto_url || item.photoUrl) : item.photoUrl;
+          let pUrl = athlete ? (athlete.foto_url || athlete.foto || item.photoUrl) : item.photoUrl;
+          if (!pUrl && document.getElementById('athletePhotoVal')) {
+            pUrl = document.getElementById('athletePhotoVal').value;
+          }
+          if (!pUrl && window._currentAthletePhoto) {
+            pUrl = window._currentAthletePhoto;
+          }
           const isDefaultPhoto = !pUrl || pUrl.includes('images.unsplash.com') || pUrl === OFFICIAL_DEFAULT_PHOTO_SVG || pUrl.startsWith('data:image/svg+xml');
 
           if (isDefaultPhoto) {
             drawDefaultAthleteAvatar(ctx, item.x * scale, item.y * scale, item.width * scale, item.height * scale, (item.borderRadius || 20) * scale);
           } else if (!isSafeOnly) {
-            const photoImg = await loadImageAsync(pUrl, 2500);
+            const photoImg = await loadImageAsync(pUrl, 4000);
             if (photoImg) {
               ctx.save();
               drawRoundedRectPath(ctx, item.x * scale, item.y * scale, item.width * scale, item.height * scale, (item.borderRadius || 20) * scale);
@@ -6440,8 +6472,11 @@ if (!is_admin_logged()) {
       const codeInputVal = (document.getElementById('athleteCode') ? document.getElementById('athleteCode').value : '').trim();
       const activeFed = fedInputVal || codeInputVal || '945537';
 
+      const photoInput = document.getElementById('athletePhotoVal');
       const photoEl = studioState.elements.find(item => item.id === 'field-foto');
-      const photoVal = (photoEl && photoEl.photoUrl) ? photoEl.photoUrl : '';
+      const photoVal = (photoInput && photoInput.value)
+        ? photoInput.value
+        : (window._currentAthletePhoto || ((photoEl && photoEl.photoUrl) ? photoEl.photoUrl : ''));
 
       return {
         codigo: activeFed,
@@ -6455,7 +6490,8 @@ if (!is_admin_logged()) {
         municipio: (document.getElementById('athleteCity') ? document.getElementById('athleteCity').value : '') || '',
         validade: (document.getElementById('athleteValidity') ? document.getElementById('athleteValidity').value : '12/2026') || '12/2026',
         status: (document.getElementById('athleteStatus') ? document.getElementById('athleteStatus').value : 'PENDENTE') || 'PENDENTE',
-        foto: photoVal
+        foto: photoVal,
+        foto_url: photoVal
       };
     }
 
@@ -6880,6 +6916,13 @@ if (!is_admin_logged()) {
       const effCity = (!cityVal || cityVal === 'RECIFE - PE') ? '- PE' : cityVal;
       setEl('municipio', effCity);
       if (valVal) setEl('validade', valVal);
+
+      // Preserva e sincroniza a foto ativa do atleta no Studio
+      const activePhoto = (document.getElementById('athletePhotoVal') ? document.getElementById('athletePhotoVal').value : '') || window._currentAthletePhoto || '';
+      const photoItem = studioState.elements.find(i => i.id === 'field-foto' || i.type === 'photo');
+      if (photoItem && activePhoto) {
+        photoItem.photoUrl = activePhoto;
+      }
     }
 
     /* =========================================================
@@ -7125,6 +7168,45 @@ if (!is_admin_logged()) {
         });
       }
 
+      // Funções de Gerenciamento da Foto 3x4 do Atleta (Câmera, Arquivos, Miniatura e Prévia)
+      window._currentAthletePhoto = '';
+
+      function updateAthleteFormPhotoPreview(photoUrl, info = '') {
+        const previewBox = document.getElementById('athleteFormPhotoPreview');
+        const imgEl = document.getElementById('athleteFormPhotoImg');
+        const infoEl = document.getElementById('athleteFormPhotoInfo');
+        if (!previewBox || !imgEl) return;
+
+        if (photoUrl && photoUrl !== OFFICIAL_DEFAULT_PHOTO_SVG && !photoUrl.startsWith('data:image/svg+xml')) {
+          imgEl.src = photoUrl;
+          if (infoEl) infoEl.textContent = info ? `Pronta (${info})` : 'Pronta para o Studio e Carteira';
+          previewBox.classList.remove('hidden');
+        } else {
+          imgEl.src = '';
+          previewBox.classList.add('hidden');
+        }
+      }
+      window.updateAthleteFormPhotoPreview = updateAthleteFormPhotoPreview;
+
+      function resetAthletePhoto() {
+        window._currentAthletePhoto = '';
+        const photoInput = document.getElementById('athletePhotoVal');
+        if (photoInput) photoInput.value = '';
+        updateAthleteFormPhotoPreview('');
+
+        const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
+        if (photoTarget) {
+          photoTarget.photoUrl = '';
+        }
+        if (window._lastActiveAthlete) {
+          window._lastActiveAthlete.foto = '';
+          window._lastActiveAthlete.foto_url = '';
+        }
+        renderInteractiveElements();
+        showToast('Foto removida. Silhueta padrão restaurada.');
+      }
+      window.resetAthletePhoto = resetAthletePhoto;
+
       // Função Unificada de Processamento de Foto 3x4 do Atleta (Câmera ou Arquivos)
       function processAthletePhotoFile(file) {
         if (!file) return;
@@ -7158,14 +7240,31 @@ if (!is_admin_logged()) {
             // Compressão otimizada com 82% de qualidade JPEG
             const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
 
+            // 1. Armazena a foto ativa com persistência total no formulário e sessão
+            window._currentAthletePhoto = compressedDataUrl;
+            const photoInput = document.getElementById('athletePhotoVal');
+            if (photoInput) photoInput.value = compressedDataUrl;
+
+            // 2. Atualiza miniatura visual no formulário
+            updateAthleteFormPhotoPreview(compressedDataUrl, `${width}x${height}px`);
+
+            // 3. Atualiza o elemento no Studio CR80 (canvas de prévia)
             const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
             if (photoTarget) {
               photoTarget.photoUrl = compressedDataUrl;
-              renderInteractiveElements();
-              const sizeKb = Math.round((compressedDataUrl.length * 3 / 4) / 1024);
-              showToast(`Foto 3x4 carregada e otimizada (${sizeKb} KB)!`);
-              autoSaveStudioDesign();
             }
+
+            // 4. Se houver um atleta em edição, sincroniza foto e foto_url
+            if (window._lastActiveAthlete) {
+              window._lastActiveAthlete.foto = compressedDataUrl;
+              window._lastActiveAthlete.foto_url = compressedDataUrl;
+            }
+
+            // 5. Renderiza a tela de prévia imediatamente com a nova foto
+            renderInteractiveElements();
+
+            const sizeKb = Math.round((compressedDataUrl.length * 3 / 4) / 1024);
+            showToast(`Foto 3x4 carregada e nítida (${sizeKb} KB)!`);
           };
           img.onerror = () => {
             showToast('Erro ao processar imagem da foto.', true);
@@ -7266,12 +7365,7 @@ if (!is_admin_logged()) {
       const btnResetFoto = document.getElementById('btnResetFoto');
       if (btnResetFoto) {
         btnResetFoto.addEventListener('click', () => {
-          const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
-          if (photoTarget) {
-            photoTarget.photoUrl = OFFICIAL_DEFAULT_PHOTO_SVG;
-            renderInteractiveElements();
-            showToast('Foto restaurada para a silhueta oficial padrão.');
-          }
+          resetAthletePhoto();
         });
       }
 
@@ -7934,8 +8028,11 @@ if (!is_admin_logged()) {
         return;
       }
 
+      const photoInput = document.getElementById('athletePhotoVal');
       const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
-      const photo = (photoTarget && photoTarget.photoUrl) ? photoTarget.photoUrl : '';
+      const photo = (photoInput && photoInput.value)
+        ? photoInput.value
+        : (window._currentAthletePhoto || ((photoTarget && photoTarget.photoUrl) ? photoTarget.photoUrl : ''));
 
       const feedback = document.getElementById('athleteFeedback');
       if (feedback) {
@@ -7957,6 +8054,7 @@ if (!is_admin_logged()) {
         clube: modality,
         federado: fedNum || code,
         validade: validity,
+        foto: photo,
         foto_url: photo
       };
 
@@ -7990,9 +8088,9 @@ if (!is_admin_logged()) {
       let localAthletes = JSON.parse(localStorage.getItem('pe_athletes_db')) || [];
       const existingIdx = localAthletes.findIndex(a => String(a.codigo) === String(code));
       if (existingIdx >= 0) {
-        localAthletes[existingIdx] = { ...localAthletes[existingIdx], ...athleteObj, foto: photo };
+        localAthletes[existingIdx] = { ...localAthletes[existingIdx], ...athleteObj, foto: photo, foto_url: photo };
       } else {
-        localAthletes.unshift({ id: Date.now(), ...athleteObj, foto: photo });
+        localAthletes.unshift({ id: Date.now(), ...athleteObj, foto: photo, foto_url: photo });
       }
       localStorage.setItem('pe_athletes_db', JSON.stringify(localAthletes));
       currentCachedAthletes = localAthletes;
@@ -8039,8 +8137,11 @@ if (!is_admin_logged()) {
       try {
         await handleSaveAthlete();
 
+        const photoInput = document.getElementById('athletePhotoVal');
         const photoEl = studioState.elements.find(item => item.id === 'field-foto');
-        const photoVal = (photoEl && photoEl.photoUrl) ? photoEl.photoUrl : '';
+        const photoVal = (photoInput && photoInput.value)
+          ? photoInput.value
+          : (window._currentAthletePhoto || ((photoEl && photoEl.photoUrl) ? photoEl.photoUrl : ''));
 
         const aObj = {
           codigo: code,
@@ -8054,7 +8155,8 @@ if (!is_admin_logged()) {
           municipio: (document.getElementById('athleteCity').value || '').trim(),
           validade: (document.getElementById('athleteValidity').value || '12/2026').trim(),
           status: 'PENDENTE',
-          foto: photoVal
+          foto: photoVal,
+          foto_url: photoVal
         };
 
         window._lastActiveAthlete = aObj;
@@ -8166,6 +8268,7 @@ if (!is_admin_logged()) {
               list = data.map(d => {
                 const localMatch = localMap.get(String(d.codigo));
                 const effectiveStatus = (d.status && String(d.status).trim()) ? d.status : (localMatch && localMatch.status ? localMatch.status : 'HOMOLOGADO');
+                const photoVal = d.foto_url || d.foto || (localMatch ? (localMatch.foto_url || localMatch.foto) : '');
                 return {
                   id: d.id,
                   codigo: d.codigo,
@@ -8180,7 +8283,8 @@ if (!is_admin_logged()) {
                   clube: d.clube,
                   federado: d.federado || (String(d.codigo).startsWith('PE-') ? d.codigo : `PE-2026/${String(d.codigo).slice(-3)}`),
                   validade: d.validade,
-                  foto: d.foto_url
+                  foto: photoVal,
+                  foto_url: photoVal
                 };
               });
               localStorage.setItem('pe_athletes_db', JSON.stringify(list));
@@ -8716,8 +8820,14 @@ if (!is_admin_logged()) {
       setElText('qr', qrLink);
 
       const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
-      if (photoTarget && a.foto) {
-        photoTarget.photoUrl = a.foto;
+      const rawPhoto = a.foto_url || a.foto || '';
+      window._currentAthletePhoto = rawPhoto;
+      const photoInp = document.getElementById('athletePhotoVal');
+      if (photoInp) photoInp.value = rawPhoto;
+      if (typeof updateAthleteFormPhotoPreview === 'function') updateAthleteFormPhotoPreview(rawPhoto);
+
+      if (photoTarget) {
+        photoTarget.photoUrl = rawPhoto;
       }
 
       window._lastActiveAthlete = a;
@@ -8759,6 +8869,12 @@ if (!is_admin_logged()) {
       if (nameInp) nameInp.value = '';
       const catTarget = studioState.elements.find(item => item.targetKey === 'categoria');
       if (catTarget) catTarget.text = 'AMADOR';
+      
+      window._currentAthletePhoto = '';
+      const photoInp = document.getElementById('athletePhotoVal');
+      if (photoInp) photoInp.value = '';
+      if (typeof updateAthleteFormPhotoPreview === 'function') updateAthleteFormPhotoPreview('');
+
       const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
       if (photoTarget) photoTarget.photoUrl = '';
       
@@ -9117,7 +9233,7 @@ if (!is_admin_logged()) {
       const athleteElements = studioState.elements.map(baseItem => {
         const item = { ...baseItem };
         if (item.type === 'photo') {
-          item.photoUrl = athlete.foto || athlete.foto_url || '';
+          item.photoUrl = athlete.foto_url || athlete.foto || '';
         } else if (item.targetKey === 'nome') {
           item.text = (athlete.nome || '').toUpperCase();
         } else if (item.targetKey === 'cpf') {
@@ -13096,7 +13212,7 @@ if (!is_admin_logged()) {
       localStorage.removeItem('pe_admin_user');
       localStorage.removeItem('pe_admin_session_token');
       localStorage.removeItem('pe_admin_session_expires');
-      window.location.href = 'login.php';
+      window.location.href = 'login.html';
     }
 
     /* Helper Global de Auditoria de Operações Sensíveis */
@@ -13182,7 +13298,12 @@ if (!is_admin_logged()) {
           if (event.data && event.data.type === 'STUDIO_DESIGN_UPDATED' && event.data.payload) {
             const payload = event.data.payload;
             if (payload.elements && Array.isArray(payload.elements)) {
+              const curPhoto = (document.getElementById('athletePhotoVal')?.value || window._currentAthletePhoto || '');
               studioState.elements = sanitizeStudioElements(payload.elements);
+              if (curPhoto) {
+                const pEl = studioState.elements.find(i => i.id === 'field-foto');
+                if (pEl) pEl.photoUrl = curPhoto;
+              }
               if (payload.bgTransform) studioState.bgTransform = payload.bgTransform;
               renderInteractiveElements();
               applyCurrentSvgBackground();
@@ -13193,8 +13314,10 @@ if (!is_admin_logged()) {
       } catch (e) {}
     }
 
-    // Ao focar a janela, verifica se houve alterações no banco de dados na nuvem
+    // Ao focar a janela, sincroniza nuvem somente se não houver cadastro com foto ativa em edição
     window.addEventListener('focus', () => {
+      const activePhoto = document.getElementById('athletePhotoVal')?.value || window._currentAthletePhoto;
+      if (activePhoto) return;
       if (typeof fetchStudioDesignFromSupabase === 'function' && typeof supabaseClient !== 'undefined' && supabaseClient) {
         fetchStudioDesignFromSupabase(false);
       }
