@@ -119,9 +119,27 @@
         if (!perms.includes('carteira_png')) hideSelectors.push('#btnExportPNG, #btnDownloadPng, #btnDownloadPngMobile');
         if (!perms.includes('carteira_imprimir')) hideSelectors.push('#btnPrintCarteira, #btnPrintCarteiraMobile');
 
+        // Modificação de atletas (Acesso Controlado)
+        if (!perms.includes('atletas_editar')) {
+          hideSelectors.push('#btnConcluirCadastro', '#btnResetFoto', '#btnOpenBatchImport', 'button[onclick*="generateFederatedNumber"]', '#uploadFotoCameraInput', '#uploadFotoInput');
+        }
+
+        // Alteração de Layout Studio e Nuvem
+        if (!perms.includes('gestao_supabase')) {
+          hideSelectors.push('#btnSaveOfficialCloud', '#btnModeDesign', 'button[onclick*="restoreOfficialElementPositions"]', '#btnSaveSupabaseCfg');
+        }
+
         // Jogadores actions
         if (!perms.includes('atletas_exportar')) hideSelectors.push('#btnExportZip, #btnExportCsv, #btnExportExcel, #btnExportarZipJogadores, #btnExportarCsvJogadores');
         if (!perms.includes('atletas_homologar')) hideSelectors.push('#btnHomologarTodos');
+
+        // Notícias e Galeria
+        if (!perms.includes('noticias_publicar') && !perms.includes('noticias_editar')) {
+          hideSelectors.push('#adminNewsForm', '#adminGalleryForm');
+        }
+        if (!perms.includes('gestao_limpeza')) {
+          hideSelectors.push('#btnResetSystemDatabase');
+        }
 
         // Selos e tags de bloqueio
         hideSelectors.push('.nav-tab-lock-indicator', '#sidebarAdminBadge');
@@ -1419,13 +1437,13 @@
               <button type="button" onclick="switchTab('atletas')" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow cursor-pointer">
                 <i class="fa-solid fa-plus"></i> Novo no Studio
               </button>
-              <button type="button" onclick="openBatchImportModal()" class="bg-[#0b101d] hover:bg-[#121c32] border border-[#1c253b] text-slate-200 font-bold text-xs uppercase px-3.5 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer">
+              <button type="button" id="btnOpenBatchImport" onclick="openBatchImportModal()" class="bg-[#0b101d] hover:bg-[#121c32] border border-[#1c253b] text-slate-200 font-bold text-xs uppercase px-3.5 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer">
                 <i class="fa-solid fa-file-import text-pe-gold"></i> Importar Lista (CSV)
               </button>
-              <button type="button" onclick="exportAllAthletesBatchZip()" class="bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow-lg shadow-sky-600/25 cursor-pointer">
+              <button type="button" id="btnExportarZipJogadores" onclick="exportAllAthletesBatchZip()" class="bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow-lg shadow-sky-600/25 cursor-pointer">
                 <i class="fa-solid fa-file-zipper"></i> Exportar Todas em Lote (HD ZIP)
               </button>
-              <button type="button" onclick="exportAthletesToCsv()" class="bg-[#0b101d] hover:bg-[#121c32] border border-[#1c253b] text-slate-200 font-bold text-xs uppercase px-3.5 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer">
+              <button type="button" id="btnExportarCsvJogadores" onclick="exportAthletesToCsv()" class="bg-[#0b101d] hover:bg-[#121c32] border border-[#1c253b] text-slate-200 font-bold text-xs uppercase px-3.5 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer">
                 <i class="fa-solid fa-file-excel text-emerald-400"></i> Baixar CSV
               </button>
             </div>
@@ -3569,6 +3587,140 @@
         }
       });
 
+      // 3.1. Controle Estrito de Modificação de Atletas (Acesso Controlado)
+      const canEditAtletas = hasPermission('atletas_editar');
+      const btnConcluir = document.getElementById('btnConcluirCadastro');
+      if (btnConcluir) {
+        if (!canEditAtletas) {
+          btnConcluir.classList.add('hidden');
+          btnConcluir.style.display = 'none';
+          btnConcluir.disabled = true;
+        } else {
+          btnConcluir.classList.remove('hidden');
+          btnConcluir.style.display = '';
+          btnConcluir.disabled = false;
+        }
+      }
+
+      const athleteInputIds = [
+        'athleteFederatedNum', 'athleteStatus', 'athleteName', 'athleteCpf',
+        'athleteBirth', 'athletePhone', 'athleteCity', 'athleteValidity',
+        'inputQrText', 'inputAssinatura'
+      ];
+      athleteInputIds.forEach(inpId => {
+        const el = document.getElementById(inpId);
+        if (el) {
+          if (!canEditAtletas) {
+            el.readOnly = true;
+            if (el.tagName === 'SELECT') el.disabled = true;
+            el.classList.add('opacity-75', 'cursor-not-allowed', 'bg-slate-900/60');
+          } else {
+            el.readOnly = false;
+            if (el.tagName === 'SELECT') el.disabled = false;
+            el.classList.remove('opacity-75', 'cursor-not-allowed', 'bg-slate-900/60');
+          }
+        }
+      });
+
+      // Modality & Category buttons
+      ['modalityPillsContainer', 'categoryPillsContainer'].forEach(cId => {
+        const cont = document.getElementById(cId);
+        if (cont) {
+          if (!canEditAtletas) {
+            cont.classList.add('pointer-events-none', 'opacity-60');
+          } else {
+            cont.classList.remove('pointer-events-none', 'opacity-60');
+          }
+        }
+      });
+
+      // Foto buttons and upload triggers
+      ['uploadFotoCameraInput', 'uploadFotoInput', 'btnResetFoto', 'btnRemoveSignatureImg', 'inputSignatureFile'].forEach(cId => {
+        const el = document.getElementById(cId);
+        if (el) {
+          if (!canEditAtletas) {
+            el.disabled = true;
+            el.classList.add('hidden');
+            el.style.display = 'none';
+          } else {
+            el.disabled = false;
+            el.classList.remove('hidden');
+            el.style.display = '';
+          }
+        }
+      });
+
+      // Banner de Acesso Controlado no Formulário de Atletas
+      const athleteFormEl = document.getElementById('athleteForm');
+      let readonlyNotice = document.getElementById('athleteFormReadonlyNotice');
+      if (athleteFormEl) {
+        if (!canEditAtletas) {
+          if (!readonlyNotice) {
+            readonlyNotice = document.createElement('div');
+            readonlyNotice.id = 'athleteFormReadonlyNotice';
+            readonlyNotice.className = 'p-3 bg-amber-950/70 border border-amber-500/50 rounded-xl text-xs text-amber-200 flex items-center gap-2.5 shadow-md mb-2';
+            readonlyNotice.innerHTML = `
+              <span class="text-lg">🔒</span>
+              <div class="leading-tight">
+                <strong class="text-amber-300 font-bold block text-xs uppercase">Acesso Controlado (Modo Somente Visualização)</strong>
+                <span class="text-[11px] text-slate-300">Sua conta institucional tem acesso restrito para consulta e emissão, estando bloqueada para cadastrar ou modificar dados de atletas.</span>
+              </div>
+            `;
+            athleteFormEl.insertBefore(readonlyNotice, athleteFormEl.firstChild);
+          } else {
+            readonlyNotice.classList.remove('hidden');
+            readonlyNotice.style.display = '';
+          }
+        } else if (readonlyNotice) {
+          readonlyNotice.classList.add('hidden');
+          readonlyNotice.style.display = 'none';
+        }
+      }
+
+      // 3.2. Bloqueio de Alteração de Layout do Studio (Padrão Fixo e Modo Design)
+      const canEditLayout = hasPermission('gestao_supabase') || isMaster;
+      const btnSaveCloud = document.getElementById('btnSaveOfficialCloud');
+      if (btnSaveCloud) {
+        if (!canEditLayout) {
+          btnSaveCloud.classList.add('hidden');
+          btnSaveCloud.style.display = 'none';
+          btnSaveCloud.disabled = true;
+        } else {
+          btnSaveCloud.classList.remove('hidden');
+          btnSaveCloud.style.display = '';
+          btnSaveCloud.disabled = false;
+        }
+      }
+
+      const btnModeDesign = document.getElementById('btnModeDesign');
+      if (btnModeDesign) {
+        if (!canEditLayout) {
+          btnModeDesign.classList.add('hidden');
+          btnModeDesign.style.display = 'none';
+          btnModeDesign.disabled = true;
+          studioState.isDesignLocked = true;
+          const floatingPanel = document.getElementById('floatingControlPanel');
+          if (floatingPanel) floatingPanel.style.display = 'none';
+          updateModeButtonsUI();
+        } else {
+          btnModeDesign.classList.remove('hidden');
+          btnModeDesign.style.display = '';
+          btnModeDesign.disabled = false;
+        }
+      }
+
+      // 3.3. Bloqueio de Importação em Lote de Atletas
+      const btnOpenBatch = document.getElementById('btnOpenBatchImport');
+      if (btnOpenBatch) {
+        if (!canEditAtletas) {
+          btnOpenBatch.classList.add('hidden');
+          btnOpenBatch.style.display = 'none';
+        } else {
+          btnOpenBatch.classList.remove('hidden');
+          btnOpenBatch.style.display = '';
+        }
+      }
+
       // 4. Ocultação de Exportação e Homologação na Aba Jogadores
       const canExportJogadores = hasPermission('atletas_exportar');
       ['btnExportZip', 'btnExportCsv', 'btnExportExcel', 'btnExportarZipJogadores', 'btnExportarCsvJogadores'].forEach(id => {
@@ -3600,15 +3752,30 @@
 
       // 5. Ocultação no Formulário de Notícias
       const canPublicarNoticia = hasPermission('noticias_publicar');
+      const canEditarNoticia = hasPermission('noticias_editar');
       const newsForm = document.getElementById('adminNewsForm');
       if (newsForm) {
         const newsCard = newsForm.closest('.bg-\\[\\#0b101d\\]') || newsForm;
-        if (!canPublicarNoticia) {
+        if (!canPublicarNoticia && !canEditarNoticia) {
           newsCard.classList.add('hidden');
           newsCard.style.display = 'none';
         } else {
           newsCard.classList.remove('hidden');
           newsCard.style.display = '';
+        }
+      }
+
+      // 5.1. Ocultação no Formulário da Galeria
+      const canEditGaleria = hasPermission('noticias_editar') || hasPermission('noticias_publicar') || isMaster;
+      const galleryForm = document.getElementById('adminGalleryForm');
+      if (galleryForm) {
+        const galleryCard = galleryForm.closest('.bg-\\[\\#0b101d\\]') || galleryForm;
+        if (!canEditGaleria) {
+          galleryCard.classList.add('hidden');
+          galleryCard.style.display = 'none';
+        } else {
+          galleryCard.classList.remove('hidden');
+          galleryCard.style.display = '';
         }
       }
 
@@ -3676,11 +3843,16 @@
           if (!isTabAllowed('galeria')) hideSelectors.push('#navBtn-galeria, #tabContent-galeria');
           if (!isTabAllowed('emails')) hideSelectors.push('#navBtn-emails, #tabContent-emails');
           if (!isTabAllowed('config')) hideSelectors.push('#navBtn-config, #tabContent-config');
-          if (!hasPermission('carteira_pdf')) hideSelectors.push('#btnExportPDF, #btnDownloadPdf, #btnDownloadPdfMobile');
-          if (!hasPermission('carteira_png')) hideSelectors.push('#btnExportPNG, #btnDownloadPng, #btnDownloadPngMobile');
-          if (!hasPermission('carteira_imprimir')) hideSelectors.push('#btnPrintCarteira, #btnPrintCarteiraMobile');
-          if (!hasPermission('atletas_exportar')) hideSelectors.push('#btnExportZip, #btnExportCsv, #btnExportExcel, #btnExportarZipJogadores, #btnExportarCsvJogadores');
-          if (!hasPermission('atletas_homologar')) hideSelectors.push('#btnHomologarTodos');
+          if (!canEditAtletas) hideSelectors.push('#btnConcluirCadastro, #btnResetFoto, #btnOpenBatchImport, button[onclick*="generateFederatedNumber"], #uploadFotoCameraInput, #uploadFotoInput');
+          if (!canEditLayout) hideSelectors.push('#btnSaveOfficialCloud, #btnModeDesign, button[onclick*="restoreOfficialElementPositions"]');
+          if (!canPdf) hideSelectors.push('#btnExportPDF, #btnDownloadPdf, #btnDownloadPdfMobile');
+          if (!canPng) hideSelectors.push('#btnExportPNG, #btnDownloadPng, #btnDownloadPngMobile');
+          if (!canImprimir) hideSelectors.push('#btnPrintCarteira, #btnPrintCarteiraMobile');
+          if (!canExportJogadores) hideSelectors.push('#btnExportZip, #btnExportCsv, #btnExportExcel, #btnExportarZipJogadores, #btnExportarCsvJogadores');
+          if (!canHomologar) hideSelectors.push('#btnHomologarTodos');
+          if (!canPublicarNoticia && !canEditarNoticia) hideSelectors.push('#adminNewsForm');
+          if (!canEditGaleria) hideSelectors.push('#adminGalleryForm');
+          if (!canLimpeza) hideSelectors.push('#btnResetSystemDatabase');
           hideSelectors.push('.nav-tab-lock-indicator');
         }
         hideSelectors.push('#sidebarAdminBadge');
@@ -4317,6 +4489,10 @@
 
     /* Grava explicitamente o design atual como Padrão Fixo Oficial no Banco de Dados */
     async function saveOfficialLayoutToCloud() {
+      if (!hasPermission('gestao_supabase') && !hasPermission('*')) {
+        showToast('⚠️ Acesso Controlado: Você não possui permissão para alterar o Padrão Fixo Oficial na nuvem.', true);
+        return;
+      }
       try {
         const btn = document.getElementById('btnSaveOfficialCloud');
         if (btn) {
@@ -5419,6 +5595,12 @@
 
     /* Alterna entre Modo Fixo (Bloqueado) e Modo Design (Livre) */
     function toggleDesignLock(locked) {
+      if (!locked && !hasPermission('gestao_supabase') && !hasPermission('*')) {
+        showToast('⚠️ Acesso Controlado: A alteração de layout no Modo Design é restrita à Diretoria. Layout mantido no Modo Fixo.', true);
+        studioState.isDesignLocked = true;
+        updateModeButtonsUI();
+        return;
+      }
       studioState.isDesignLocked = locked;
       try {
         localStorage.setItem('fpeft_studio_design_locked', locked ? 'true' : 'false');
@@ -5459,6 +5641,10 @@
 
     /* Restaura o layout com as posições originais da Carteira Atleta */
     async function restoreOfficialElementPositions() {
+      if (!hasPermission('gestao_supabase') && !hasPermission('*')) {
+        showToast('⚠️ Acesso Controlado: Você não possui permissão para alterar o layout do Studio.', true);
+        return;
+      }
       studioState.elements = JSON.parse(JSON.stringify(OFFICIAL_DEFAULT_ELEMENTS));
       if (typeof syncStudioElementsWithForm === 'function') {
         syncStudioElementsWithForm();
@@ -6497,7 +6683,7 @@
        Garante download imediato e repetível a cada clique
        ========================================================= */
     async function exportCarteiraPDF(athlete = null, triggerBtn = null) {
-      if (!hasPermission('carteira_pdf') && !hasPermission('carteira_studio')) {
+      if (!hasPermission('carteira_pdf')) {
         showToast('⚠️ Seu cargo não possui permissão para baixar carteiras em PDF.', true);
         return;
       }
@@ -6605,7 +6791,7 @@
        Emite RIGOROSAMENTE 1 ÚNICO arquivo PNG por vez via Blob nativo
        ========================================================= */
     async function exportHdPng(athlete = null, triggerBtn = null) {
-      if (!hasPermission('carteira_png') && !hasPermission('carteira_studio')) {
+      if (!hasPermission('carteira_png')) {
         showToast('⚠️ Seu cargo não possui permissão para baixar carteiras em PNG.', true);
         return;
       }
@@ -6705,6 +6891,14 @@
     }
 
     async function baixarCarteiraAtletaPorCodigo(codigo, format = 'pdf', btn = null) {
+      if (format === 'png' && !hasPermission('carteira_png')) {
+        showToast('⚠️ Seu cargo não possui permissão para baixar carteiras em PNG.', true);
+        return;
+      }
+      if (format !== 'png' && !hasPermission('carteira_pdf')) {
+        showToast('⚠️ Seu cargo não possui permissão para baixar carteiras em PDF.', true);
+        return;
+      }
       let athletes = typeof currentCachedAthletes !== 'undefined' && currentCachedAthletes && currentCachedAthletes.length > 0 ? currentCachedAthletes : [];
       if (athletes.length === 0) {
         athletes = await loadAthletes();
@@ -8003,6 +8197,10 @@
 
     async function handleSaveAthlete(e) {
       if (e && e.preventDefault) e.preventDefault();
+      if (!hasPermission('atletas_editar') && !hasPermission('*')) {
+        showToast('⚠️ Acesso Controlado: Sua conta não possui permissão para cadastrar ou modificar atletas.', true);
+        return;
+      }
       const fedNum = (document.getElementById('athleteFederatedNum').value || '').trim();
       const code = fedNum || (document.getElementById('athleteCode') ? document.getElementById('athleteCode').value : '').trim();
       const name = (document.getElementById('athleteName').value || '').trim();
@@ -8100,6 +8298,10 @@
 
     /* Conclui o cadastro, salva o design automaticamente e envia para o banco como PENDENTE DE HOMOLOGAÇÃO */
     async function concluirCadastroEnviarBanco() {
+      if (!hasPermission('atletas_editar') && !hasPermission('*')) {
+        showToast('⚠️ Acesso Controlado: Sua conta não possui permissão para cadastrar ou modificar atletas.', true);
+        return;
+      }
       const name = (document.getElementById('athleteName').value || '').trim();
       if (!name) {
         showToast('⚠️ Preencha o nome do atleta antes de concluir o cadastro.');
@@ -9022,6 +9224,10 @@
     }
 
     async function homologarAthleteModal(codigo) {
+      if (!hasPermission('atletas_homologar')) {
+        showToast('⚠️ Acesso Controlado: Seu cargo não possui permissão para homologar atletas.', true);
+        return;
+      }
       const btn = event ? event.currentTarget : null;
       if (btn) {
         btn.disabled = true;
@@ -9149,24 +9355,27 @@
           <!-- Ações do Administrador -->
           <div class="pt-2 space-y-2">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              ${hasPermission('carteira_pdf') ? `
               <button type="button" onclick="baixarCarteiraAtletaPorCodigo('${a.codigo}', 'pdf', this)" class="bg-gradient-to-r from-rose-700 to-red-600 hover:from-rose-600 hover:to-red-500 text-white font-extrabold text-xs uppercase py-3 px-4 rounded-xl transition shadow flex items-center justify-center gap-2 cursor-pointer">
                 <i class="fa-solid fa-file-pdf text-sm"></i> Baixar Carteira em PDF
-              </button>
+              </button>` : ''}
+              ${hasPermission('carteira_png') ? `
               <button type="button" onclick="baixarCarteiraAtletaPorCodigo('${a.codigo}', 'png', this)" class="bg-gradient-to-r from-sky-700 to-blue-600 hover:from-sky-600 hover:to-blue-500 text-white font-extrabold text-xs uppercase py-3 px-4 rounded-xl transition shadow flex items-center justify-center gap-2 cursor-pointer">
                 <i class="fa-solid fa-file-image text-sm"></i> Baixar Imagem PNG HD
-              </button>
+              </button>` : ''}
             </div>
 
-            ${!isHomologado ? `
+            ${(!isHomologado && hasPermission('atletas_homologar')) ? `
               <button type="button" onclick="homologarAthleteModal('${a.codigo}')" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase py-3 px-4 rounded-xl transition shadow flex items-center justify-center gap-2 cursor-pointer">
                 <i class="fa-solid fa-check text-sm"></i> Homologar Este Atleta Oficialmente Agora
               </button>
             ` : ''}
 
             <div class="flex items-center justify-between pt-1">
+              ${hasPermission('carteira_studio') ? `
               <button type="button" onclick="fillFormWithAthlete('${a.codigo}'); fecharModalVerCarteira();" class="text-xs text-sky-400 hover:text-sky-300 font-bold transition flex items-center gap-1.5 py-1 px-2 cursor-pointer">
-                <i class="fa-solid fa-pen-to-square"></i> Abrir e Editar no Studio
-              </button>
+                <i class="fa-solid fa-pen-to-square"></i> ${hasPermission('atletas_editar') ? 'Abrir e Editar no Studio' : 'Ver Carteira no Studio'}
+              </button>` : '<div></div>'}
               <button type="button" onclick="fecharModalVerCarteira()" class="text-xs text-slate-400 hover:text-white font-bold transition py-1 px-3 rounded-lg border border-slate-700 hover:border-slate-500 cursor-pointer">
                 Fechar Janela
               </button>
@@ -9406,6 +9615,10 @@
     }
 
     function openBatchImportModal() {
+      if (!hasPermission('atletas_editar') && !hasPermission('*')) {
+        showToast('⚠️ Acesso Controlado: Sua conta não possui permissão para importar atletas.', true);
+        return;
+      }
       const modal = document.getElementById('batchImportModal');
       if (modal) modal.classList.remove('hidden');
     }
@@ -9428,6 +9641,10 @@
     }
 
     async function processBatchImport() {
+      if (!hasPermission('atletas_editar') && !hasPermission('*')) {
+        showToast('⚠️ Acesso Controlado: Sua conta não possui permissão para importar atletas.', true);
+        return;
+      }
       const textarea = document.getElementById('batchImportTextarea');
       const text = (textarea ? textarea.value : '').trim();
       if (!text) {
@@ -9574,12 +9791,14 @@
             </td>
             <td class="py-3 px-4 text-right">
               <div class="flex items-center justify-end gap-1.5">
+                ${hasPermission('carteira_pdf') ? `
                 <button type="button" onclick="baixarCarteiraAtletaPorCodigo('${a.codigo}', 'pdf', this)" title="Baixar Carteira em PDF" class="text-xs text-rose-400 hover:text-white font-bold bg-[#0e1526] hover:bg-rose-600 border border-rose-500/30 px-2.5 py-1 rounded-lg transition cursor-pointer flex items-center gap-1">
                   <i class="fa-solid fa-file-pdf"></i> PDF
-                </button>
+                </button>` : ''}
+                ${hasPermission('carteira_png') ? `
                 <button type="button" onclick="baixarCarteiraAtletaPorCodigo('${a.codigo}', 'png', this)" title="Baixar Carteira em PNG" class="text-xs text-sky-400 hover:text-white font-bold bg-[#0e1526] hover:bg-sky-600 border border-sky-500/30 px-2 py-1 rounded-lg transition cursor-pointer flex items-center gap-1">
                   <i class="fa-solid fa-file-image"></i> PNG
-                </button>
+                </button>` : ''}
                 <button type="button" onclick="abrirModalVerCarteira('${a.codigo}')" class="text-xs text-pe-gold hover:text-white font-bold bg-[#0e1526] hover:bg-[#15203a] border border-[#1c253b] px-3 py-1 rounded-lg transition cursor-pointer flex items-center gap-1.5" title="Ver Carteira e Identificação">
                   <i class="fa-solid fa-id-card text-pe-gold"></i> Ver Carteira
                 </button>
@@ -10271,13 +10490,14 @@
             </div>
 
             <!-- Botão de Exclusão Rápida -->
+            ${hasPermission('noticias_excluir') ? `
             <button 
               onclick="promptDelete('${item.id}')"
               class="text-xs font-semibold text-red-500 hover:text-red-400 hover:underline transition flex items-center gap-1 cursor-pointer"
               title="Excluir Matéria"
             >
               Excluir
-            </button>
+            </button>` : ''}
           </div>
 
           ${item.image ? `
@@ -10299,13 +10519,14 @@
           <!-- Barra de Ações do Card -->
           <div class="flex items-center justify-between pt-2 border-t border-[#1e293b]/60 text-xs">
             <div class="flex items-center gap-3">
+              ${hasPermission('noticias_editar') ? `
               <button 
                 type="button"
                 onclick="editNews('${item.id}')" 
                 class="text-slate-300 hover:text-[#f59e0b] flex items-center gap-1.5 transition font-medium cursor-pointer"
               >
                 <i class="fa-solid fa-pen-to-square text-xs"></i> Editar
-              </button>
+              </button>` : ''}
 
               <button 
                 type="button"
@@ -10330,6 +10551,17 @@
       if (e) e.preventDefault();
 
       const editId = document.getElementById('edit-id').value;
+      if (editId) {
+        if (!hasPermission('noticias_editar')) {
+          showToast('⚠️ Acesso Controlado: Você não possui permissão para editar notícias.', true);
+          return;
+        }
+      } else {
+        if (!hasPermission('noticias_publicar')) {
+          showToast('⚠️ Acesso Controlado: Você não possui permissão para publicar notícias.', true);
+          return;
+        }
+      }
       const title = document.getElementById('news-title').value.trim();
       const category = document.getElementById('news-category').value;
       const date = document.getElementById('news-date').value || new Date().toISOString().split('T')[0];
@@ -10418,6 +10650,10 @@
     }
 
     function editNews(id) {
+      if (!hasPermission('noticias_editar')) {
+        showToast('⚠️ Acesso Controlado: Você não possui permissão para editar notícias.', true);
+        return;
+      }
       const item = newsItems.find(n => String(n.id) === String(id));
       if (!item) return;
 
@@ -10507,6 +10743,10 @@
 
     async function confirmDeleteNews() {
       if (!pendingDeleteId) return;
+      if (!hasPermission('noticias_excluir')) {
+        showToast('⚠️ Acesso Controlado: Você não possui permissão para excluir notícias.', true);
+        return;
+      }
 
       const deleteTargetId = pendingDeleteId;
       newsItems = newsItems.filter(item => String(item.id) !== String(deleteTargetId));
@@ -10874,6 +11114,11 @@
 
     function renderGalleryManager() {
       galleryItems = getStoredGalleryItems();
+      const perms = getCurrentUserPermissions();
+      const isMaster = perms.includes('*');
+      const canEditGaleria = hasPermission('noticias_editar') || hasPermission('noticias_publicar') || isMaster;
+      const canDeleteGaleria = hasPermission('noticias_excluir') || isMaster;
+
       const container = document.getElementById('adminGalleryGrid');
       const counter = document.getElementById('gallery-active-counter');
       if (counter) counter.textContent = galleryItems.length;
@@ -10920,6 +11165,7 @@
             <!-- Barra de Ações com Trocar Foto, Editar Textos e Excluir -->
             <div class="pt-4 mt-3 border-t border-[#1c253b] flex items-center justify-between gap-2 text-xs">
               <div class="flex items-center gap-2">
+                ${canEditGaleria ? `
                 <button type="button" onclick="editGalleryItem('${item.id}')" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 transition flex items-center gap-1 cursor-pointer" title="Editar textos ou foto no formulário">
                   <i class="fa-solid fa-pen text-pe-gold text-[10px]"></i>
                   <span>Editar</span>
@@ -10927,23 +11173,24 @@
                 <button type="button" onclick="triggerQuickReplacePhoto('${item.id}')" class="px-2.5 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 text-xs font-semibold rounded-lg border border-blue-500/30 transition flex items-center gap-1 cursor-pointer" title="Substituir apenas a foto deste card mantendo os textos">
                   <i class="fa-solid fa-camera text-[10px]"></i>
                   <span>Trocar Foto</span>
-                </button>
+                </button>` : '<span class="text-[10px] text-slate-500 font-mono italic">🔒 Somente Visualização</span>'}
               </div>
 
               <div class="flex items-center gap-1">
-                ${index > 0 ? `
+                ${(canEditGaleria && index > 0) ? `
                   <button type="button" onclick="moveGalleryItem('${item.id}', -1)" class="p-1.5 text-slate-400 hover:text-white rounded hover:bg-slate-800 transition cursor-pointer" title="Mover para esquerda/cima">
                     <i class="fa-solid fa-arrow-left text-[10px]"></i>
                   </button>
                 ` : ''}
-                ${index < galleryItems.length - 1 ? `
+                ${(canEditGaleria && index < galleryItems.length - 1) ? `
                   <button type="button" onclick="moveGalleryItem('${item.id}', 1)" class="p-1.5 text-slate-400 hover:text-white rounded hover:bg-slate-800 transition cursor-pointer" title="Mover para direita/baixo">
                     <i class="fa-solid fa-arrow-right text-[10px]"></i>
                   </button>
                 ` : ''}
+                ${canDeleteGaleria ? `
                 <button type="button" onclick="promptDeleteGalleryItem('${item.id}')" class="p-1.5 text-red-400 hover:text-red-300 rounded hover:bg-red-950/40 transition cursor-pointer" title="Excluir Foto">
                   <i class="fa-solid fa-trash-can text-[11px]"></i>
-                </button>
+                </button>` : ''}
               </div>
             </div>
           </div>
@@ -11143,6 +11390,10 @@
 
     function handleGalleryFormSubmit(e) {
       if (e) e.preventDefault();
+      if (!hasPermission('noticias_publicar') && !hasPermission('noticias_editar') && !hasPermission('*')) {
+        showToast("⚠️ Acesso Controlado: Sua conta não possui permissão para cadastrar fotos na galeria.", true);
+        return;
+      }
 
       const editId = document.getElementById('gallery-edit-id').value.trim();
       const tag = document.getElementById('gallery-input-tag').value.trim();
@@ -11189,6 +11440,10 @@
 
     // Troca rápida de foto direto no card
     function triggerQuickReplacePhoto(id) {
+      if (!hasPermission('noticias_editar') && !hasPermission('*')) {
+        showToast("⚠️ Acesso Controlado: Sua conta não possui permissão para alterar fotos da galeria.", true);
+        return;
+      }
       pendingQuickReplaceId = id;
       const input = document.getElementById('gallery-quick-replace-input');
       if (input) input.click();
@@ -11237,6 +11492,10 @@
     }
 
     function moveGalleryItem(id, offset) {
+      if (!hasPermission('noticias_editar') && !hasPermission('*')) {
+        showToast("⚠️ Acesso Controlado: Sua conta não possui permissão para reordenar a galeria.", true);
+        return;
+      }
       let items = getStoredGalleryItems();
       const idx = items.findIndex(i => String(i.id) === String(id));
       if (idx === -1) return;
@@ -11263,6 +11522,10 @@
 
     function confirmDeleteGalleryItem() {
       if (!pendingGalleryDeleteId) return;
+      if (!hasPermission('noticias_excluir') && !hasPermission('*')) {
+        showToast("⚠️ Acesso Controlado: Sua conta não possui permissão para excluir fotos da galeria.", true);
+        return;
+      }
       let items = getStoredGalleryItems();
       items = items.filter(i => String(i.id) !== String(pendingGalleryDeleteId));
       saveGalleryItems(items);
@@ -11271,6 +11534,10 @@
     }
 
     function confirmResetGalleryToDefault() {
+      if (!hasPermission('gestao_limpeza') && !hasPermission('*')) {
+        showToast("⚠️ Acesso Controlado: Sua conta não possui permissão para restaurar padrões do sistema.", true);
+        return;
+      }
       if (confirm("Deseja restaurar as 6 fotos oficiais e textos de fábrica da Federação?")) {
         saveGalleryItems(JSON.parse(JSON.stringify(DEFAULT_GALLERY_ITEMS)));
         showToast("Galeria oficial restaurada com sucesso!");
@@ -11281,6 +11548,10 @@
        CONFIGURAÇÃO DO BANCO & KEEP-ALIVE (ABA 4)
        ========================================================= */
     function handleSaveAdminConfig() {
+      if (!hasPermission('gestao_supabase') && !hasPermission('*')) {
+        showToast("⚠️ Acesso Controlado: Sua conta não possui permissão para alterar configurações do banco.", true);
+        return;
+      }
       const url = document.getElementById('adminCfgUrl').value.trim();
       const key = document.getElementById('adminCfgKey').value.trim();
       const feedback = document.getElementById('adminConfigFeedback');
@@ -11924,6 +12195,7 @@
       const counter = document.getElementById('totalCustomRolesCount');
       if (!container) return;
 
+      const canManageCargos = hasPermission('gestao_cargos');
       const roles = loadCustomRoles();
       if (counter) counter.textContent = roles.length;
       container.innerHTML = '';
@@ -11953,6 +12225,7 @@
           </div>
 
           <div class="space-y-2 pt-2 border-t border-[#1c253b]/80 text-[11px]">
+            ${canManageCargos ? `
             <!-- Botões Principais de Ação -->
             <div class="grid grid-cols-2 gap-1.5">
               <button type="button" onclick="selectRoleForNewEmail('${escapeJsString(role.name)}')" class="bg-pe-gold/15 hover:bg-pe-gold text-pe-gold hover:text-black border border-pe-gold/40 py-1.5 px-2 rounded-lg text-[10px] font-bold transition flex items-center justify-center gap-1 cursor-pointer whitespace-nowrap shadow-sm" title="Selecionar este cargo e ir para o formulário de criar e-mail">
@@ -11962,24 +12235,26 @@
                 <span>👤</span> <span>Atribuir a Conta</span>
               </button>
             </div>
+            ` : ''}
 
             <!-- Controles Secundários: Editar, Esquema e Excluir -->
             <div class="flex items-center justify-between pt-1 border-t border-[#1c253b]/50">
               <div class="flex items-center gap-2">
+                ${canManageCargos ? `
                 <button type="button" onclick="editRolePermissions('${escapeJsString(role.id || role.name)}')" class="text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 cursor-pointer" title="Editar permissões nas 4 colunas">
                   <i class="fa-solid fa-pen-to-square text-[10px]"></i> Editar
-                </button>
+                </button>` : ''}
                 <button type="button" onclick="openRoleOperationsModal('${escapeJsString(role.id || role.name)}')" class="text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1 cursor-pointer">
                   <i class="fa-solid fa-eye text-[10px]"></i> Esquema
                 </button>
               </div>
-              ${role.name.toLowerCase() === 'diretor adjunto' ? `
+              ${canManageCargos ? (role.name.toLowerCase() === 'diretor adjunto' ? `
                 <span class="text-[10px] text-amber-400 font-bold font-mono">PROTEGIDO</span>
               ` : `
                 <button type="button" onclick="handleDeleteCustomRole('${escapeJsString(role.id || role.name)}')" class="text-red-400 hover:text-red-300 font-bold cursor-pointer">
                   Excluir
                 </button>
-              `}
+              `) : ''}
             </div>
           </div>
         `;
@@ -12564,6 +12839,7 @@
       const counter = document.getElementById('totalInstitutionalCount');
       if (!tbody) return;
 
+      const canManageEmails = hasPermission('gestao_emails');
       const admins = await loadInstitutionalAdmins();
       const roles = loadCustomRoles();
       if (counter) counter.textContent = admins.length;
@@ -12609,6 +12885,7 @@
             </div>
           </td>
           <td class="py-3 px-3 text-right whitespace-nowrap">
+            ${canManageEmails ? `
             <div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
               <button type="button" onclick="openEditInstitutionalAdminModal('${escapeJsString(admin.email)}')" class="text-[11px] text-amber-300 hover:text-amber-200 bg-amber-950/50 hover:bg-amber-900/70 border border-amber-500/40 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 font-bold cursor-pointer whitespace-nowrap" title="Editar dados e cargo da conta">
                 <i class="fa-solid fa-pen-to-square text-[10px]"></i> <span>Editar</span>
@@ -12616,7 +12893,7 @@
               <button type="button" onclick="handleDeleteInstitutionalAdmin('${escapeJsString(admin.email)}')" class="text-[11px] text-rose-300 hover:text-rose-200 bg-rose-950/50 hover:bg-rose-900/70 border border-rose-500/40 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 font-bold cursor-pointer whitespace-nowrap" title="Remover esta conta do sistema">
                 <i class="fa-solid fa-trash text-[10px]"></i> <span>Remover</span>
               </button>
-            </div>
+            </div>` : '<span class="text-[10px] text-slate-500 italic">Somente leitura</span>'}
           </td>
         `;
         fragment.appendChild(tr);
@@ -13187,6 +13464,23 @@
         sessionStorage.setItem('pe_admin_user', user);
         localStorage.setItem('pe_admin_user', user);
       }
+
+      // Validação de Integridade de Acesso Institucional:
+      // Garante que o usuário logado realmente existe no cadastro de administradores institucionais ou é master
+      const rawUser = user.toLowerCase().trim();
+      const isMasterUser = rawUser === 'admin' || rawUser.includes('gabrielacessor');
+      const admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || [];
+      const currentAdmin = admins.find(a => {
+        const aEmail = (a.email || '').toLowerCase().trim();
+        return aEmail === rawUser || aEmail === `${rawUser}@foot-table.pe.org` || aEmail.replace(/@foot-table\.pe\.(org|gov\.br)$/i, '') === rawUser;
+      });
+
+      if (!isMasterUser && !currentAdmin) {
+        console.warn("Acesso bloqueado: Conta institucional não cadastrada ou revogada.", rawUser);
+        handleLogout();
+        return;
+      }
+
       applyPermissionsToUI();
     }
 
