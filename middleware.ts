@@ -171,6 +171,37 @@ export default function middleware(request: Request) {
   securityHeaders.delete('x-powered-by');
   securityHeaders.delete('Server');
 
+  // ==============================================================================
+  // BLINDAGEM WAF ANTI-EXPLOIT: PROTEÇÃO TOTAL CONTRA VARREDURAS E INVASÕES PHP
+  // Bloqueia qualquer tentativa de sondagem, execução ou injeção de arquivos .php,
+  // webshells, wp-login, phpmyadmin e injeções de código <?php / eval / base64.
+  // ==============================================================================
+  const isPhpExploit = 
+    pathname.endsWith('.php') || 
+    pathname.includes('.php/') || 
+    pathname.includes('.phtml') ||
+    pathname.includes('.phps') ||
+    pathname.includes('wp-admin') ||
+    pathname.includes('wp-login') ||
+    pathname.includes('phpmyadmin') ||
+    pathname.includes('xmlrpc') ||
+    url.search.toLowerCase().includes('<?php') ||
+    url.search.toLowerCase().includes('eval(') ||
+    url.search.toLowerCase().includes('base64_decode') ||
+    url.search.toLowerCase().includes('php://');
+
+  if (isPhpExploit) {
+    securityHeaders.set('Content-Type', 'application/json; charset=utf-8');
+    return new Response(
+      JSON.stringify({
+        error: 'Acesso Negado (WAF Security Shield)',
+        code: 403,
+        motivo: 'Acesso ou sondagem de scripts PHP terminantemente bloqueado pela política de segurança da FPEFT.'
+      }),
+      { status: 403, headers: securityHeaders }
+    );
+  }
+
   // Liberação imediata e total para desenvolvimento local (localhost)
   if (isLocalhost) {
     securityHeaders.set('x-middleware-next', '1');

@@ -1,0 +1,45 @@
+# ==============================================================================
+# FEDERAÇÃO PERNAMBUCANA DE FOOT TABLE (FPEFT)
+# Configuração de Segurança e Roteamento Apache / cPanel / Shared Hosting
+# ==============================================================================
+
+# Ativar mecanismo de reescrita
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Forçar HTTPS se disponível
+  RewriteCond %{HTTPS} off
+  RewriteCond %{HTTP_HOST} !^localhost(:\d+)?$
+  RewriteCond %{HTTP_HOST} !^127\.0\.0\.1(:\d+)?$
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # Bloqueio de arquivos ocultos e sensíveis (.env, .git, etc.)
+  RewriteRule (^|/)\.(?!well-known) - [F]
+
+  # Bloqueio de injeções de código malicioso
+  RewriteCond %{QUERY_STRING} (eval\(|base64_decode|union.*select|concat.*\(|<script.*>) [NC]
+  RewriteRule .* - [F]
+
+  # Roteamento padrão: se não for arquivo ou diretório físico existente
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(.*)$ index.php [L]
+</IfModule>
+
+# Bloquear listagem de diretórios (Directory Listing)
+Options -Indexes
+
+# Cabeçalhos de Segurança HTTP Estritos
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "DENY"
+  Header set X-XSS-Protection "1; mode=block"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header unset X-Powered-By
+</IfModule>
+
+# Compressão GZIP / Deflate para alta performance
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>

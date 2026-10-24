@@ -1,0 +1,1185 @@
+<?php
+require_once __DIR__ . '/config.php';
+?>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boletim Informativo - Notícias & Torneios | Federação Pernambucana de Foot Table</title>
+  <link rel="icon" type="image/png" href="assets/images/logo-federacao.png">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Google Fonts: Bebas Neue, Outfit, Inter e Oswald -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700;800;900&family=Oswald:wght@500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Bebas Neue', 'sans-serif'],
+            heading: ['Outfit', 'sans-serif'],
+            oswald: ['Oswald', 'sans-serif'],
+            montserrat: ['Montserrat', 'sans-serif'],
+          },
+          colors: {
+            dark: {
+              950: '#070a10',
+              900: '#0b0f19',
+              850: '#111726',
+              800: '#161f33',
+              700: '#1e293b',
+              600: '#334155'
+            },
+            pe: {
+              blue: '#0044cc',
+              royal: '#003da5',
+              darkblue: '#06173a',
+              gold: '#f5b800',
+              goldHover: '#d9a300',
+              red: '#d32f2f',
+              green: '#00a859',
+              dark: '#07090e',
+              card: '#0f1422',
+              cardBorder: '#1c253b',
+              inputBg: '#090d16'
+            },
+            accent: {
+              amber: '#f59e0b',
+              gold: '#fbbf24',
+              orange: '#f97316',
+              blue: '#2563eb',
+              cyan: '#06b6d4',
+              emerald: '#10b981'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Faixa tricolor oficial de Pernambuco */
+    .pe-stripe-line {
+      background: linear-gradient(90deg, #003da5 0%, #003da5 40%, #f5b800 40%, #f5b800 70%, #d32f2f 70%, #d32f2f 100%);
+    }
+
+    /* Scrollbar personalizada */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0b0f19;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* Glow e Efeitos Visuais */
+    .glow-amber {
+      box-shadow: 0 0 25px -5px rgba(245, 158, 11, 0.35);
+    }
+    .glow-card {
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+    .glass-panel {
+      background: rgba(17, 23, 38, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  </style>
+</head>
+<body class="bg-dark-950 text-slate-200 font-sans min-h-screen antialiased selection:bg-amber-500/30 selection:text-amber-200 relative overflow-x-hidden">
+
+  <!-- Glows de Fundo -->
+  <div class="fixed top-0 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-10 right-10 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed inset-0 bg-[radial-gradient(circle_at_50%_15%,rgba(0,61,165,0.20)_0%,transparent_65%)] pointer-events-none -z-10"></div>
+
+  <!-- Faixa Tricolor de Pernambuco -->
+  <div class="pe-stripe-line h-[4px] w-full sticky top-0 z-50"></div>
+
+  <!-- Barra Superior de Navegação Oficial -->
+  <nav class="border-b border-white/5 bg-dark-900/90 backdrop-blur-md sticky top-[4px] z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Logo Oficial da Federação -->
+      <a href="index.php" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-full bg-pe-darkblue border-2 border-pe-gold shadow-[0_0_15px_rgba(245,184,0,0.4)] flex items-center justify-center p-0.5 overflow-hidden group-hover:scale-105 transition-transform shrink-0">
+          <img src="assets/images/logo-federacao.png" alt="Federação Pernambucana Foot Table" class="w-full h-full object-contain rounded-full select-none pointer-events-none" draggable="false" onerror="this.src='/assets/images/logo-federacao.png'">
+        </div>
+        <div class="flex flex-col justify-center">
+          <span class="font-heading font-extrabold text-base sm:text-lg tracking-wider text-white leading-none">
+            PERNAMBUCO <span class="text-pe-gold">FUTMESA</span>
+          </span>
+          <span class="block text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mt-1">
+            Federação Pernambucana de Foot Table
+          </span>
+        </div>
+      </a>
+
+      <!-- Ações da Topbar -->
+      <div class="flex items-center gap-3">
+        <!-- Indicador de Status "Feed Oficial Atualizado" com Pulsar -->
+        <div class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 text-xs font-mono tracking-wide shadow-sm">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span>Feed Oficial Atualizado</span>
+        </div>
+
+        <!-- Botão Voltar ao Portal -->
+        <a href="index.php" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-dark-850 hover:bg-dark-800 border border-white/10 hover:border-pe-gold/40 text-xs font-semibold text-slate-300 hover:text-white transition">
+          <i class="fa-solid fa-arrow-left text-xs"></i>
+          <span class="hidden md:inline">Voltar ao</span> Portal
+        </a>
+
+        <!-- Botão Painel Administrativo -->
+        <a href="admin.php" id="adminHeaderBtn" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-heading font-bold text-xs uppercase tracking-wider transition shadow-md">
+          <i class="fa-solid fa-lock text-xs"></i>
+          <span>Painel ADM</span>
+        </a>
+
+        <!-- Botão Alternar Painel Admin (Mobile / Shortcut) -->
+        <button id="toggleAdminBtn" onclick="toggleAdminPanel()" class="lg:hidden p-2 rounded-xl bg-dark-800 border border-white/10 text-slate-300 hover:text-white" title="Alternar formulário">
+          <i class="fa-solid fa-pen-to-square"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Cabeçalho Principal -->
+  <header class="pt-8 pb-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/10 pb-6">
+      <div>
+        <p class="font-mono text-xs font-bold text-amber-400 uppercase tracking-widest flex items-center gap-2 mb-1.5">
+          <i class="fa-solid fa-bullhorn text-[11px]"></i> BOLETIM INFORMATIVO OFICIAL
+        </p>
+        <h1 class="font-display text-4xl sm:text-5xl md:text-6xl tracking-wide text-white font-normal uppercase leading-tight drop-shadow-md">
+          Notícias &amp; Torneios
+        </h1>
+        <p class="text-slate-400 text-xs sm:text-sm max-w-2xl mt-1 leading-relaxed">
+          Acompanhe os resultados oficiais, cobertura dos campeonatos, anúncios de chaves, fotos e comunicados da Federação Pernambucana de Foot Table.
+        </p>
+      </div>
+
+      <!-- Métricas Rápidas -->
+      <div class="flex items-center gap-6 text-sm text-slate-400 shrink-0">
+        <div>
+          <span class="block text-2xl font-bold font-heading text-white" id="totalPostsCount">0</span>
+          <span class="text-[11px] text-slate-400 uppercase tracking-wider">Publicações</span>
+        </div>
+        <div class="h-8 w-px bg-white/10"></div>
+        <div>
+          <span class="block text-2xl font-bold font-heading text-amber-400">2026</span>
+          <span class="text-[11px] text-slate-400 uppercase tracking-wider">Temporada</span>
+        </div>
+        <div class="h-8 w-px bg-white/10"></div>
+        <div>
+          <span class="block text-2xl font-bold font-heading text-emerald-400" id="syncStatusBadge">●</span>
+          <span class="text-[11px] text-slate-400 uppercase tracking-wider">Sincronizado</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Layout Principal de Conteúdo -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- COLUNA ESQUERDA: Formulário de Publicação & Gestão -->
+      <section id="adminSection" class="lg:col-span-5 bg-dark-900/90 rounded-2xl border border-white/10 overflow-hidden shadow-2xl backdrop-blur-md relative">
+        <!-- Barra de Destaque Superior Colorida -->
+        <div class="h-1.5 w-full bg-gradient-to-r from-blue-600 via-amber-500 to-orange-500"></div>
+
+        <div class="p-6">
+          <!-- Cabeçalho do Card de Envio -->
+          <div class="flex items-center justify-between pb-4 mb-5 border-b border-white/10">
+            <h2 class="text-lg font-heading font-bold text-white flex items-center gap-2.5">
+              <span class="p-1.5 rounded-lg bg-amber-500/10 text-amber-400">
+                <i class="fa-solid fa-bullhorn text-sm"></i>
+              </span>
+              <span id="formTitleText">PUBLICAR NOTÍCIA OFICIAL</span>
+            </h2>
+            <button id="cancelEditBtn" onclick="resetForm()" class="hidden text-xs text-slate-400 hover:text-white px-2.5 py-1 rounded-lg bg-dark-800 border border-white/10">
+              Cancelar Edição
+            </button>
+          </div>
+
+          <!-- Banner Informativo para Gestores -->
+          <div id="authNoticeBanner" class="hidden mb-4 p-3 rounded-xl bg-blue-950/40 border border-blue-500/30 text-xs text-blue-200 flex items-center justify-between gap-2">
+            <span>Para publicar novas matérias, acesse sua conta administrativa.</span>
+            <a href="login.php" class="px-2.5 py-1 rounded bg-blue-600 text-white font-bold hover:bg-blue-500 shrink-0">Login</a>
+          </div>
+
+          <!-- Formulário -->
+          <form id="newsForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+            <input type="hidden" id="editingId" value="">
+
+            <!-- Título da Matéria -->
+            <div>
+              <label class="block text-xs font-mono font-medium text-slate-300 uppercase tracking-wider mb-1.5">
+                Título da Matéria <span class="text-amber-400">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="newsTitle" 
+                required 
+                placeholder="ex: Grande Final do Campeonato Estadual de FutMesa" 
+                class="w-full bg-dark-850 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all duration-200"
+              >
+            </div>
+
+            <!-- Categoria e Data Oficial em Linha -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label class="block text-xs font-mono font-medium text-slate-300 uppercase tracking-wider mb-1.5">
+                  Categoria <span class="text-amber-400">*</span>
+                </label>
+                <div class="relative">
+                  <select 
+                    id="newsCategory" 
+                    required 
+                    class="w-full appearance-none bg-dark-850 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500 transition-all cursor-pointer pr-10"
+                  >
+                    <option value="CAMPEONATO">CAMPEONATO</option>
+                    <option value="MUNDIAL ROMA">MUNDIAL ROMA</option>
+                    <option value="REGULAMENTO">REGULAMENTO</option>
+                    <option value="NOTAS OFICIAIS">NOTAS OFICIAIS</option>
+                    <option value="INFORMATIVO">INFORMATIVO</option>
+                  </select>
+                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-mono font-medium text-slate-300 uppercase tracking-wider mb-1.5">
+                  Data Oficial <span class="text-amber-400">*</span>
+                </label>
+                <input 
+                  type="date" 
+                  id="newsDate" 
+                  required 
+                  class="w-full bg-dark-850 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500 transition-all cursor-pointer [color-scheme:dark]"
+                >
+              </div>
+            </div>
+
+            <!-- Switch: Fixar em Destaque na Home -->
+            <div class="flex items-center justify-between p-3 rounded-xl bg-dark-850/80 border border-white/5">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+                <span class="text-xs font-medium text-slate-300">Fixar em Destaque no Portal</span>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="newsFeatured" class="sr-only peer">
+                <div class="w-10 h-5 bg-dark-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+              </label>
+            </div>
+
+            <!-- Upload de Banner / Foto de Capa -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="text-xs font-mono font-medium text-slate-300 uppercase tracking-wider">
+                  Foto / Banner de Capa
+                </label>
+                <span class="text-[10px] text-amber-400 font-mono">JPG, PNG, WEBP</span>
+              </div>
+              
+              <div 
+                id="dropZone"
+                onclick="document.getElementById('fileInput').click()" 
+                class="group border-2 border-dashed border-white/15 hover:border-amber-500/60 rounded-xl p-4 text-center cursor-pointer transition-all bg-dark-850/40 hover:bg-dark-850 flex flex-col items-center justify-center gap-2"
+              >
+                <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                <div class="w-10 h-10 rounded-full bg-blue-600/10 text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <i class="fa-solid fa-cloud-arrow-up text-base"></i>
+                </div>
+                <div class="text-xs text-slate-300 font-medium">
+                  <span class="text-blue-400 underline">Carregar Foto do Computador</span>
+                  <p class="text-[11px] text-slate-500 mt-0.5">Clique ou arraste a imagem até aqui</p>
+                </div>
+              </div>
+
+              <!-- Preview da Imagem Selecionada -->
+              <div id="imagePreviewContainer" class="hidden mt-2 relative rounded-lg overflow-hidden border border-white/10 aspect-video bg-black/40">
+                <img id="imagePreview" src="" alt="Prévia da imagem" class="w-full h-full object-cover">
+                <button type="button" onclick="removeImage(event)" class="absolute top-2 right-2 p-1.5 rounded-md bg-dark-900/80 text-red-400 hover:text-red-300 backdrop-blur-sm cursor-pointer" title="Remover imagem">
+                  <i class="fa-solid fa-trash-can text-xs"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Resumo / Linha-Fina -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="text-xs font-mono font-medium text-slate-300 uppercase tracking-wider">
+                  Resumo / Linha-Fina <span class="text-amber-400">*</span>
+                </label>
+                <span id="charCounter" class="text-[10px] font-mono text-slate-400">0/180 carac.</span>
+              </div>
+              <textarea 
+                id="newsExcerpt" 
+                rows="2" 
+                maxlength="180" 
+                required
+                oninput="updateCharCount(this)"
+                placeholder="Breve descrição atraente para o card da listagem..." 
+                class="w-full bg-dark-850 border border-white/10 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 resize-none transition-all"
+              ></textarea>
+            </div>
+
+            <!-- Conteúdo da Matéria Completa -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="text-xs font-mono font-medium text-slate-300 uppercase tracking-wider">
+                  Conteúdo da Matéria Completa
+                </label>
+                <div class="flex items-center gap-1 text-slate-400 text-xs">
+                  <button type="button" onclick="formatMarkdown('**', '**')" class="p-1 hover:text-white" title="Negrito"><i class="fa-solid fa-bold"></i></button>
+                  <button type="button" onclick="formatMarkdown('*', '*')" class="p-1 hover:text-white" title="Itálico"><i class="fa-solid fa-italic"></i></button>
+                  <button type="button" onclick="formatMarkdown('\n- ', '')" class="p-1 hover:text-white" title="Lista"><i class="fa-solid fa-list-ul"></i></button>
+                </div>
+              </div>
+              <textarea 
+                id="newsContent" 
+                rows="4" 
+                placeholder="Escreva o texto completo, detalhes técnicos, chaves de jogos, escalações e pronunciamentos oficiais..." 
+                class="w-full bg-dark-850 border border-white/10 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 resize-y transition-all"
+              ></textarea>
+            </div>
+
+            <!-- Link Externo ou PDF Oficial -->
+            <div>
+              <label class="block text-xs font-mono font-medium text-slate-400 uppercase tracking-wider mb-1.5">
+                Link Externo ou PDF Oficial <span class="text-slate-500">(opcional)</span>
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500">
+                  <i class="fa-solid fa-paperclip text-xs"></i>
+                </div>
+                <input 
+                  type="url" 
+                  id="newsPdfLink" 
+                  placeholder="https://fpeft.vercel.app/documento.pdf" 
+                  class="w-full bg-dark-850 border border-white/10 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-all"
+                >
+              </div>
+            </div>
+
+            <!-- Botão de Ação Principal -->
+            <button 
+              type="submit" 
+              id="submitBtn"
+              class="w-full py-3.5 px-4 rounded-xl font-heading font-bold uppercase tracking-wider text-sm text-dark-950 bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 hover:from-amber-300 hover:to-orange-400 transition-all duration-300 shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 mt-2 cursor-pointer active:scale-[0.99]"
+            >
+              <i class="fa-solid fa-rocket" id="submitIcon"></i>
+              <span id="submitBtnText">PUBLICAR NO SITE</span>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- COLUNA DIREITA: Feed Oficial de Notícias no Ar -->
+      <section class="lg:col-span-7 space-y-6">
+        
+        <!-- Barra de Ferramentas: Título, Busca e Filtros -->
+        <div class="bg-dark-900/90 rounded-2xl border border-white/10 p-5 backdrop-blur-md">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <h2 class="text-lg font-heading font-bold text-white flex items-center gap-2.5">
+              <span class="p-1.5 rounded-lg bg-blue-500/10 text-blue-400">
+                <i class="fa-solid fa-newspaper text-sm"></i>
+              </span>
+              NOTÍCIAS NO AR
+            </h2>
+
+            <!-- Campo de Busca em Tempo Real -->
+            <div class="relative w-full sm:w-64">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+              <input 
+                type="text" 
+                id="searchNews" 
+                oninput="handleSearch()"
+                placeholder="Buscar por título ou tema..." 
+                class="w-full bg-dark-850 border border-white/10 rounded-xl pl-8 pr-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-all"
+              >
+            </div>
+          </div>
+
+          <!-- Filtros de Categoria em Pills -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="filterCategory('TODAS')" class="filter-btn active-filter px-3.5 py-1.5 rounded-lg text-xs font-medium tracking-wide uppercase transition-all bg-blue-600 text-white shadow-sm shadow-blue-500/30">
+              TODAS
+            </button>
+            <button onclick="filterCategory('CAMPEONATO')" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-medium tracking-wide uppercase transition-all bg-dark-850 text-slate-400 hover:text-white hover:bg-dark-800 border border-white/5">
+              CAMPEONATO
+            </button>
+            <button onclick="filterCategory('MUNDIAL ROMA')" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-medium tracking-wide uppercase transition-all bg-dark-850 text-slate-400 hover:text-white hover:bg-dark-800 border border-white/5">
+              MUNDIAL ROMA
+            </button>
+            <button onclick="filterCategory('REGULAMENTO')" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-medium tracking-wide uppercase transition-all bg-dark-850 text-slate-400 hover:text-white hover:bg-dark-800 border border-white/5">
+              REGULAMENTO
+            </button>
+            <button onclick="filterCategory('NOTAS OFICIAIS')" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-medium tracking-wide uppercase transition-all bg-dark-850 text-slate-400 hover:text-white hover:bg-dark-800 border border-white/5">
+              NOTAS OFICIAIS
+            </button>
+          </div>
+        </div>
+
+        <!-- Lista Dinâmica de Cards de Notícias -->
+        <div id="newsList" class="space-y-4">
+          <!-- Injetado dinamicamente via JavaScript -->
+        </div>
+
+        <!-- Estado Vazio -->
+        <div id="emptyState" class="hidden text-center py-12 px-4 rounded-2xl border border-dashed border-white/10 bg-dark-900/40">
+          <i class="fa-regular fa-folder-open text-4xl text-slate-600 mb-3"></i>
+          <h3 class="text-base font-medium text-white">Nenhuma notícia encontrada</h3>
+          <p class="text-xs text-slate-400 max-w-sm mx-auto mt-1">Tente ajustar seus termos de pesquisa ou publique uma nova notícia pelo formulário ao lado.</p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- MODAL: Leitura Completa da Matéria -->
+  <div id="readModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+    <div class="bg-dark-900 border border-white/15 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl transform scale-95 transition-transform duration-300" id="readModalCard">
+      <!-- Topo Modal -->
+      <div class="p-6 border-b border-white/10 flex items-start justify-between">
+        <div class="pr-4">
+          <div class="flex items-center gap-2 mb-2">
+            <span id="modalCategory" class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-blue-500/20 text-blue-400 border border-blue-500/30"></span>
+            <span id="modalDate" class="text-xs text-slate-400 font-mono"></span>
+          </div>
+          <h3 id="modalTitle" class="text-xl sm:text-2xl font-heading font-bold text-white leading-tight"></h3>
+        </div>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-white p-2 rounded-lg bg-dark-800 transition shrink-0 cursor-pointer">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Conteúdo com Scroll -->
+      <div class="p-6 overflow-y-auto space-y-4 text-slate-300 text-sm leading-relaxed">
+        <div id="modalImageContainer" class="hidden rounded-xl overflow-hidden mb-4 border border-white/10 max-h-72">
+          <img id="modalImage" src="" alt="Capa da Notícia" class="w-full h-full object-cover">
+        </div>
+
+        <p id="modalExcerpt" class="text-amber-200/90 font-medium text-base italic border-l-2 border-amber-400 pl-3 py-1 bg-amber-500/5 rounded-r-lg"></p>
+        
+        <div id="modalFullContent" class="space-y-3 whitespace-pre-line text-slate-300 text-sm leading-relaxed"></div>
+
+        <div id="modalPdfArea" class="hidden pt-4 border-t border-white/10">
+          <a id="modalPdfLink" href="#" target="_blank" class="inline-flex items-center gap-2 text-xs font-mono font-semibold px-4 py-2.5 rounded-xl bg-dark-800 hover:bg-dark-700 text-white border border-white/10 transition-colors">
+            <i class="fa-solid fa-file-pdf text-red-400"></i>
+            <span>Acessar Documento / PDF Oficial Anexo</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400 ml-1"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Rodapé Modal -->
+      <div class="p-4 bg-dark-950/60 border-t border-white/10 flex justify-end">
+        <button onclick="closeModal()" class="px-5 py-2 rounded-xl text-xs font-medium text-slate-300 bg-dark-800 hover:bg-dark-700 transition-colors cursor-pointer">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast de Notificação -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 bg-dark-900 border border-emerald-500/40 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+    <div class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+      <i class="fa-solid fa-check text-xs"></i>
+    </div>
+    <div>
+      <h4 id="toastTitle" class="text-xs font-bold text-emerald-300">Sucesso</h4>
+      <p id="toastMessage" class="text-xs text-slate-300">Operação concluída com êxito.</p>
+    </div>
+  </div>
+
+  <!-- Footer Oficial -->
+  <footer class="border-t border-white/5 bg-dark-950 py-8 px-4 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-pe-gold"></span>
+        <span class="font-bold text-slate-400">Federação Pernambucana de FutMesa &amp; Foot Table</span>
+      </div>
+      <div class="flex items-center gap-4 text-slate-400">
+        <a href="index.php" class="hover:text-pe-gold transition">Portal Oficial</a>
+        <span>•</span>
+        <a href="index.html#galeria" class="hover:text-pe-gold transition">Fotos &amp; Arenas</a>
+        <span>•</span>
+        <a href="admin.php" class="hover:text-pe-gold transition">Gestão Institucional</a>
+      </div>
+      <p>© 2026 Todos os direitos reservados. FPEFT.</p>
+    </div>
+  </footer>
+
+  <!-- JAVASCRIPT DO SISTEMA DE NOTÍCIAS INTEGRADO COM SUPABASE E LOCALSTORAGE -->
+  <script>
+    // Configuração Supabase Oficial
+    const SUPABASE_PROJECT_URL = "https://qvnsahvdjhimlmtqrnif.supabase.co";
+    const DEFAULT_SUPABASE_ANON_KEY = "sb_publishable_vvqh9vB0Dr0EqR9JGhy4kA_XnJ-9h0z";
+    let SUPABASE_URL = localStorage.getItem('pe_supabase_url') || SUPABASE_PROJECT_URL;
+    let SUPABASE_ANON_KEY = localStorage.getItem('pe_supabase_anon_key') || DEFAULT_SUPABASE_ANON_KEY;
+    let supabaseClient = null;
+
+    if (window.supabase) {
+      try {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      } catch (e) {
+        console.warn("Supabase não pôde ser iniciado:", e);
+      }
+    }
+
+    let newsItems = [];
+    let currentFilter = 'TODAS';
+    let uploadedImageBase64 = '';
+
+    // Filtro para ignorar notícias mock antigas
+    const isMockNewsItem = (item) => {
+      if (!item) return false;
+      const idStr = String(item.id || '');
+      const titleStr = (item.title || item.titulo || '').toLowerCase();
+      return idStr === '1' || idStr === '2' || idStr === '3' || idStr === '4' ||
+             idStr === 'news-1' || idStr === 'news-2' || idStr === 'news-3' || idStr === 'news-4' ||
+             titleStr.includes('roma aguarda seus novos campeões') ||
+             titleStr.includes('vitória fernandes chega a roma') ||
+             titleStr.includes('homologado o regulamento oficial de quadras') ||
+             titleStr.includes('abertas as inscrições para a 3ª etapa');
+    };
+
+    // Inicialização da página
+    window.addEventListener('DOMContentLoaded', async () => {
+      // Define a data atual no input de data por padrão
+      const dateEl = document.getElementById('newsDate');
+      if (dateEl) dateEl.value = new Date().toISOString().split('T')[0];
+
+      // Verifica status de login administrativo para permissões no formulário
+      checkAdminStatus();
+
+      // Carrega notícias locais e da nuvem
+      await loadAllNews();
+
+      // Configura realtime Supabase se disponível
+      setupRealtime();
+    });
+
+    function checkAdminStatus() {
+      const isLogged = sessionStorage.getItem('pe_admin_logged') === 'true' || localStorage.getItem('pe_admin_logged') === 'true';
+      const user = sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user');
+      const authNotice = document.getElementById('authNoticeBanner');
+      const submitBtn = document.getElementById('submitBtn');
+      const adminHeaderBtn = document.getElementById('adminHeaderBtn');
+
+      if (isLogged) {
+        if (authNotice) authNotice.classList.add('hidden');
+        if (submitBtn) submitBtn.disabled = false;
+        if (adminHeaderBtn) {
+          adminHeaderBtn.innerHTML = `<i class="fa-solid fa-user-shield text-xs"></i> <span>Painel (${user ? user.split('@')[0] : 'ADM'})</span>`;
+        }
+      } else {
+        if (authNotice) authNotice.classList.remove('hidden');
+      }
+    }
+
+    // Carregar todas as notícias (Supabase + localStorage)
+    async function loadAllNews() {
+      let localList = [];
+      try {
+        const raw = localStorage.getItem('pe_news_db') || localStorage.getItem('foot_table_news_db');
+        if (raw) localList = JSON.parse(raw);
+        if (!Array.isArray(localList)) localList = [];
+      } catch (e) {
+        localList = [];
+      }
+
+      const deletedIds = new Set(JSON.parse(localStorage.getItem('pe_deleted_news_ids') || '[]').map(String));
+
+      // 1. Inicia exibindo o que temos localmente
+      newsItems = localList.filter(n => !deletedIds.has(String(n.id)) && !isMockNewsItem(n));
+      renderNews();
+
+      // 2. Busca na nuvem do Supabase
+      if (supabaseClient) {
+        try {
+          const { data, error } = await supabaseClient
+            .from('noticias')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (!error && Array.isArray(data)) {
+            const cloudValid = data.filter(d => !deletedIds.has(String(d.id)) && !isMockNewsItem(d));
+            const cloudItems = cloudValid.map(d => {
+              // Converte data ISO ou DD/MM/AAAA para YYYY-MM-DD
+              let dataNorm = '';
+              if (d.data_publicacao && d.data_publicacao.includes('/')) {
+                const parts = d.data_publicacao.split('/');
+                if (parts.length === 3) dataNorm = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+              } else if (d.created_at) {
+                dataNorm = d.created_at.split('T')[0];
+              }
+
+              // Procura se tem no localStorage para mesclar campos extras como excerpt, featured e pdfLink
+              const matchLocal = localList.find(l => String(l.id) === String(d.id));
+
+              return {
+                id: d.id,
+                title: d.titulo || d.title || 'Comunicado Oficial',
+                category: d.categoria || d.category || 'CAMPEONATO',
+                date: dataNorm || new Date().toISOString().split('T')[0],
+                featured: matchLocal ? !!matchLocal.featured : false,
+                image: d.imagem_url || d.imagem || (matchLocal ? matchLocal.image : '') || '',
+                excerpt: matchLocal && matchLocal.excerpt ? matchLocal.excerpt : (d.conteudo ? d.conteudo.slice(0, 160) + '...' : ''),
+                content: d.conteudo || (matchLocal ? matchLocal.content : '') || '',
+                pdfLink: matchLocal && matchLocal.pdfLink ? matchLocal.pdfLink : ''
+              };
+            });
+
+            // Une e remove duplicatas mantendo dados da nuvem
+            const mergedMap = new Map();
+            newsItems.forEach(item => mergedMap.set(String(item.id), item));
+            cloudItems.forEach(item => mergedMap.set(String(item.id), item));
+            newsItems = Array.from(mergedMap.values());
+
+            // Persiste no localStorage unificado
+            localStorage.setItem('pe_news_db', JSON.stringify(newsItems));
+            localStorage.setItem('foot_table_news_db', JSON.stringify(newsItems));
+
+            renderNews();
+            const badge = document.getElementById('syncStatusBadge');
+            if (badge) badge.className = "block text-2xl font-bold font-heading text-emerald-400";
+          }
+        } catch (err) {
+          console.warn("Supabase sincronização:", err);
+        }
+      }
+    }
+
+    // Renderizar Feed de Notícias
+    function renderNews() {
+      const container = document.getElementById('newsList');
+      const emptyState = document.getElementById('emptyState');
+      const searchInput = document.getElementById('searchNews');
+      const searchTerm = (searchInput ? searchInput.value : '').toLowerCase().trim();
+
+      // Filtragem
+      let filtered = newsItems.filter(item => {
+        const matchesCategory = currentFilter === 'TODAS' || item.category === currentFilter;
+        const matchesSearch = !searchTerm || 
+                              (item.title && item.title.toLowerCase().includes(searchTerm)) || 
+                              (item.excerpt && item.excerpt.toLowerCase().includes(searchTerm)) ||
+                              (item.content && item.content.toLowerCase().includes(searchTerm)) ||
+                              (item.category && item.category.toLowerCase().includes(searchTerm));
+        return matchesCategory && matchesSearch;
+      });
+
+      // Ordenar: Fixados primeiro, depois mais recentes
+      filtered.sort((a, b) => {
+        if (a.featured && !b.featured) return -1;
+        if (!a.featured && b.featured) return 1;
+        return new Date(b.date || 0) - new Date(a.date || 0);
+      });
+
+      const totalEl = document.getElementById('totalPostsCount');
+      if (totalEl) totalEl.innerText = newsItems.length;
+
+      if (filtered.length === 0) {
+        container.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      
+      const isLogged = sessionStorage.getItem('pe_admin_logged') === 'true' || localStorage.getItem('pe_admin_logged') === 'true';
+
+      container.innerHTML = filtered.map(item => {
+        // Formatar data para DD/MM/AAAA
+        let dataFormatada = item.date || 'Recente';
+        if (item.date && item.date.includes('-')) {
+          const [ano, mes, dia] = item.date.split('-');
+          dataFormatada = `${dia}/${mes}/${ano}`;
+        }
+
+        // Cores de badge conforme categoria
+        let badgeColor = 'bg-blue-600/20 text-blue-400 border-blue-500/30';
+        if (item.category === 'MUNDIAL ROMA') badgeColor = 'bg-amber-500/20 text-amber-400 border-amber-500/30';
+        if (item.category === 'REGULAMENTO') badgeColor = 'bg-purple-500/20 text-purple-400 border-purple-500/30';
+        if (item.category === 'NOTAS OFICIAIS') badgeColor = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+
+        const safeTitle = escapeHTML(item.title);
+        const safeExcerpt = escapeHTML(item.excerpt || (item.content ? item.content.slice(0, 160) : ''));
+
+        return `
+          <article class="group relative rounded-2xl bg-dark-900/80 border ${item.featured ? 'border-amber-500/40 shadow-lg shadow-amber-500/5' : 'border-white/10'} hover:border-white/20 transition-all duration-300 p-5 sm:p-6 backdrop-blur-md overflow-hidden">
+            
+            ${item.featured ? `
+              <div class="absolute -top-1 -right-1">
+                <span class="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-orange-500 text-dark-950 font-bold text-[10px] uppercase font-mono tracking-wider px-3 py-1 rounded-bl-xl shadow-md">
+                  <i class="fa-solid fa-star text-[9px]"></i> Destaque
+                </span>
+              </div>
+            ` : ''}
+
+            <!-- Badges e Data -->
+            <div class="flex items-center gap-2.5 mb-2.5 flex-wrap">
+              <span class="px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold tracking-wider uppercase border ${badgeColor}">
+                ${escapeHTML(item.category)}
+              </span>
+              <span class="text-xs font-mono text-slate-400 flex items-center gap-1.5">
+                <i class="fa-regular fa-calendar text-[11px]"></i> ${dataFormatada}
+              </span>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4 items-start">
+              ${item.image ? `
+                <div class="w-full sm:w-36 h-28 shrink-0 rounded-xl overflow-hidden border border-white/10 relative bg-dark-850">
+                  <img src="${item.image}" alt="${safeTitle}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" onerror="this.parentElement.style.display='none'">
+                </div>
+              ` : ''}
+
+              <div class="flex-1 min-w-0">
+                <!-- Título -->
+                <h3 class="font-display text-2xl tracking-wide text-white uppercase group-hover:text-amber-400 transition-colors leading-snug">
+                  ${safeTitle}
+                </h3>
+
+                <!-- Resumo Legível -->
+                <p class="text-xs sm:text-sm text-slate-300 font-sans leading-relaxed mt-1 line-clamp-3">
+                  ${safeExcerpt}
+                </p>
+              </div>
+            </div>
+
+            <!-- Rodapé do Card com Ações -->
+            <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-medium">
+              <div class="flex items-center gap-4">
+                <button onclick="openModal('${item.id}')" class="text-amber-400 hover:text-amber-300 flex items-center gap-1.5 transition-colors cursor-pointer font-semibold">
+                  <i class="fa-solid fa-eye text-xs"></i> Ler Notícia Completa
+                </button>
+                <button onclick="editItem('${item.id}')" class="text-slate-400 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer">
+                  <i class="fa-solid fa-pen-to-square text-xs"></i> Editar
+                </button>
+              </div>
+
+              <div class="flex items-center gap-3">
+                ${item.pdfLink ? `
+                  <a href="${item.pdfLink}" target="_blank" title="Abrir PDF/Documento Anexo" class="text-slate-400 hover:text-red-400 transition-colors">
+                    <i class="fa-solid fa-file-pdf"></i>
+                  </a>
+                ` : ''}
+                <button onclick="deleteItem('${item.id}')" class="text-slate-500 hover:text-red-400 transition-colors cursor-pointer" title="Excluir Notícia">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
+            </div>
+
+          </article>
+        `;
+      }).join('');
+    }
+
+    // Filtrar por categoria
+    function filterCategory(cat) {
+      currentFilter = cat;
+      const buttons = document.querySelectorAll('.filter-btn');
+      buttons.forEach(btn => {
+        if (btn.innerText.trim() === cat) {
+          btn.classList.add('bg-blue-600', 'text-white', 'shadow-blue-500/30');
+          btn.classList.remove('bg-dark-850', 'text-slate-400');
+        } else {
+          btn.classList.remove('bg-blue-600', 'text-white', 'shadow-blue-500/30');
+          btn.classList.add('bg-dark-850', 'text-slate-400');
+        }
+      });
+      renderNews();
+    }
+
+    // Pesquisa em tempo real
+    function handleSearch() {
+      renderNews();
+    }
+
+    // Contador de Caracteres da Linha-fina
+    function updateCharCount(el) {
+      document.getElementById('charCounter').innerText = `${el.value.length}/180 carac.`;
+    }
+
+    // Upload de Imagem local com Preview
+    function handleImageUpload(e) {
+      const file = e.target.files[0];
+      if (file) {
+        if (file.size > 2 * 1024 * 1024) {
+          showToast('Imagem grande', 'Recomendamos imagens menores que 2MB para carregamento veloz.');
+        }
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          uploadedImageBase64 = evt.target.result;
+          document.getElementById('imagePreview').src = uploadedImageBase64;
+          document.getElementById('imagePreviewContainer').classList.remove('hidden');
+          document.getElementById('dropZone').classList.add('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // Remover Imagem do formulário
+    function removeImage(e) {
+      if (e) e.stopPropagation();
+      uploadedImageBase64 = '';
+      document.getElementById('fileInput').value = '';
+      document.getElementById('imagePreviewContainer').classList.add('hidden');
+      document.getElementById('dropZone').classList.remove('hidden');
+    }
+
+    // Envio do Formulário (Criar ou Atualizar)
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+
+      const submitBtn = document.getElementById('submitBtn');
+      const submitText = document.getElementById('submitBtnText');
+      const editingId = document.getElementById('editingId').value;
+      const title = document.getElementById('newsTitle').value.trim();
+      const category = document.getElementById('newsCategory').value;
+      const date = document.getElementById('newsDate').value;
+      const featured = document.getElementById('newsFeatured').checked;
+      const excerpt = document.getElementById('newsExcerpt').value.trim();
+      const content = document.getElementById('newsContent').value.trim() || excerpt;
+      const pdfLink = document.getElementById('newsPdfLink').value.trim();
+
+      submitBtn.disabled = true;
+      submitText.innerText = "SALVANDO...";
+
+      // Formata data DD/MM/AAAA para o banco
+      let dataPt = date;
+      if (date && date.includes('-')) {
+        const [a, m, d] = date.split('-');
+        dataPt = `${d}/${m}/${a}`;
+      }
+
+      const supabasePayload = {
+        titulo: title,
+        categoria: category,
+        conteudo: content || excerpt,
+        data_publicacao: dataPt,
+        imagem_url: uploadedImageBase64 || null
+      };
+
+      try {
+        if (editingId) {
+          // Atualizar no Supabase se id numérico ou existente
+          if (supabaseClient && !String(editingId).startsWith('post-')) {
+            try {
+              await supabaseClient.from('noticias').update(supabasePayload).eq('id', editingId);
+            } catch (errCloud) {
+              console.warn("Erro ao atualizar no Supabase:", errCloud);
+            }
+          }
+
+          // Atualizar localmente
+          const index = newsItems.findIndex(n => String(n.id) === String(editingId));
+          if (index !== -1) {
+            newsItems[index] = {
+              ...newsItems[index],
+              title,
+              category,
+              date,
+              featured,
+              excerpt,
+              content,
+              pdfLink,
+              image: uploadedImageBase64 || newsItems[index].image
+            };
+          }
+          showToast('Atualizado!', 'A notícia oficial foi atualizada com sucesso.');
+        } else {
+          // Inserir nova notícia
+          let newGeneratedId = 'post-' + Date.now();
+          if (supabaseClient) {
+            try {
+              const { data, error } = await supabaseClient.from('noticias').insert([supabasePayload]).select();
+              if (!error && data && data[0] && data[0].id) {
+                newGeneratedId = data[0].id;
+              }
+            } catch (errCloud) {
+              console.warn("Erro ao inserir no Supabase:", errCloud);
+            }
+          }
+
+          const newPost = {
+            id: newGeneratedId,
+            title,
+            category,
+            date,
+            featured,
+            image: uploadedImageBase64,
+            excerpt,
+            content,
+            pdfLink
+          };
+          newsItems.unshift(newPost);
+          showToast('Publicado!', 'A matéria já está visível para todos os visitantes.');
+        }
+
+        // Salva nos storages locais
+        localStorage.setItem('pe_news_db', JSON.stringify(newsItems));
+        localStorage.setItem('foot_table_news_db', JSON.stringify(newsItems));
+
+        // Dispara evento para sincronizar abas em tempo real
+        window.dispatchEvent(new Event('storage'));
+
+        resetForm();
+        renderNews();
+      } catch (err) {
+        console.error("Erro ao salvar notícia:", err);
+        showToast('Erro', 'Ocorreu um problema ao salvar. Tente novamente.');
+      } finally {
+        submitBtn.disabled = false;
+        submitText.innerText = editingId ? "SALVAR ALTERAÇÕES" : "PUBLICAR NO SITE";
+      }
+    }
+
+    // Edição de notícia
+    function editItem(id) {
+      const item = newsItems.find(n => String(n.id) === String(id));
+      if (!item) return;
+
+      document.getElementById('editingId').value = item.id;
+      document.getElementById('newsTitle').value = item.title;
+      document.getElementById('newsCategory').value = item.category;
+      document.getElementById('newsDate').value = item.date;
+      document.getElementById('newsFeatured').checked = !!item.featured;
+      document.getElementById('newsExcerpt').value = item.excerpt || '';
+      document.getElementById('newsContent').value = item.content || item.excerpt || '';
+      document.getElementById('newsPdfLink').value = item.pdfLink || '';
+
+      updateCharCount(document.getElementById('newsExcerpt'));
+
+      if (item.image) {
+        uploadedImageBase64 = item.image;
+        document.getElementById('imagePreview').src = item.image;
+        document.getElementById('imagePreviewContainer').classList.remove('hidden');
+        document.getElementById('dropZone').classList.add('hidden');
+      } else {
+        removeImage();
+      }
+
+      document.getElementById('formTitleText').innerText = 'EDITAR NOTÍCIA';
+      document.getElementById('submitBtnText').innerText = 'SALVAR ALTERAÇÕES';
+      document.getElementById('cancelEditBtn').classList.remove('hidden');
+
+      // Scroll suave até o formulário
+      document.getElementById('adminSection').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Resetar formulário
+    function resetForm() {
+      document.getElementById('newsForm').reset();
+      document.getElementById('editingId').value = '';
+      document.getElementById('newsDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('charCounter').innerText = '0/180 carac.';
+      document.getElementById('formTitleText').innerText = 'PUBLICAR NOTÍCIA OFICIAL';
+      document.getElementById('submitBtnText').innerText = 'PUBLICAR NO SITE';
+      document.getElementById('cancelEditBtn').classList.add('hidden');
+      removeImage();
+    }
+
+    // Exclusão com confirmação e persistência na nuvem
+    async function deleteItem(id) {
+      const target = newsItems.find(n => String(n.id) === String(id));
+      if (!target) return;
+
+      if (!confirm(`Deseja realmente excluir a notícia "${target.title}"?`)) return;
+
+      // Registra no conjunto de deletados para não ressurgir
+      let deletedIds = [];
+      try {
+        deletedIds = JSON.parse(localStorage.getItem('pe_deleted_news_ids') || '[]');
+      } catch (e) {
+        deletedIds = [];
+      }
+      deletedIds.push(String(id));
+      localStorage.setItem('pe_deleted_news_ids', JSON.stringify(deletedIds));
+
+      // Remove da lista
+      newsItems = newsItems.filter(n => String(n.id) !== String(id));
+      localStorage.setItem('pe_news_db', JSON.stringify(newsItems));
+      localStorage.setItem('foot_table_news_db', JSON.stringify(newsItems));
+
+      // Remove do Supabase se conectado
+      if (supabaseClient && !String(id).startsWith('post-')) {
+        try {
+          await supabaseClient.from('noticias').delete().eq('id', id);
+        } catch (e) {
+          console.warn("Erro ao remover no Supabase:", e);
+        }
+      }
+
+      // Notifica abas
+      window.dispatchEvent(new Event('storage'));
+
+      renderNews();
+      showToast('Excluído', `A publicação "${target.title}" foi removida.`);
+    }
+
+    // Modal de Leitura Completa
+    function openModal(id) {
+      let item = newsItems.find(n => String(n.id) === String(id));
+      if (!item) {
+        try {
+          const raw = localStorage.getItem('pe_news_db') || localStorage.getItem('foot_table_news_db');
+          if (raw) {
+            const arr = JSON.parse(raw);
+            if (Array.isArray(arr)) item = arr.find(n => String(n.id) === String(id));
+          }
+        } catch (e) {}
+      }
+      if (!item && newsItems && newsItems.length > 0) item = newsItems[0];
+      if (!item) return;
+
+      let dataFormatada = item.date || 'Recente';
+      if (item.date && item.date.includes('-')) {
+        const [ano, mes, dia] = item.date.split('-');
+        dataFormatada = `${dia}/${mes}/${ano}`;
+      }
+
+      document.getElementById('modalCategory').innerText = item.category;
+      document.getElementById('modalDate').innerText = dataFormatada;
+      document.getElementById('modalTitle').innerText = item.title;
+      document.getElementById('modalExcerpt').innerText = item.excerpt ? `"${item.excerpt}"` : '';
+      document.getElementById('modalFullContent').innerText = item.content || item.excerpt || '';
+
+      const imgContainer = document.getElementById('modalImageContainer');
+      const imgTag = document.getElementById('modalImage');
+      if (item.image) {
+        imgTag.src = item.image;
+        imgContainer.classList.remove('hidden');
+      } else {
+        imgContainer.classList.add('hidden');
+      }
+
+      const pdfArea = document.getElementById('modalPdfArea');
+      const pdfLink = document.getElementById('modalPdfLink');
+      if (item.pdfLink) {
+        pdfLink.href = item.pdfLink;
+        pdfArea.classList.remove('hidden');
+      } else {
+        pdfArea.classList.add('hidden');
+      }
+
+      const modal = document.getElementById('readModal');
+      const card = document.getElementById('readModalCard');
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        card.classList.remove('scale-95');
+        card.classList.add('scale-100');
+      }, 10);
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('readModal');
+      const card = document.getElementById('readModalCard');
+      modal.classList.add('opacity-0');
+      card.classList.remove('scale-100');
+      card.classList.add('scale-95');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+    }
+
+    // Fechar modal ao clicar fora ou apertar Esc
+    document.getElementById('readModal').addEventListener('click', (e) => {
+      if (e.target.id === 'readModal') closeModal();
+    });
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    // Toast de notificação
+    function showToast(title, msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastTitle').innerText = title;
+      document.getElementById('toastMessage').innerText = msg;
+
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 3500);
+    }
+
+    // Alternar painel admin em telas menores
+    function toggleAdminPanel() {
+      const section = document.getElementById('adminSection');
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Suporte a markdown simplificado no editor
+    function formatMarkdown(startTag, endTag) {
+      const textarea = document.getElementById('newsContent');
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selected = textarea.value.substring(start, end);
+      const replacement = startTag + (selected || 'texto') + endTag;
+      textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+      textarea.focus();
+    }
+
+    // Configuração Realtime com Supabase
+    function setupRealtime() {
+      if (!supabaseClient) return;
+      try {
+        supabaseClient
+          .channel('public:noticias:realtime')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'noticias' }, async () => {
+            await loadAllNews();
+          })
+          .subscribe();
+      } catch (e) {
+        console.warn('Realtime news channel error:', e);
+      }
+    }
+
+    // Utilitário para sanitização de strings
+    function escapeHTML(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+      }[tag] || tag));
+    }
+
+    // Sincronização entre abas
+    window.addEventListener('storage', (e) => {
+      if (!e || !e.key || e.key === 'pe_news_db' || e.key === 'foot_table_news_db') {
+        loadAllNews();
+      }
+    });
+  </script>
+</body>
+</html>

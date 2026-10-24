@@ -1,0 +1,1554 @@
+<?php
+require_once __DIR__ . '/config.php';
+?>
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Federação Pernambucana de FutMesa & Foot Table | Portal Oficial</title>
+  <meta name="title" content="Federação Pernambucana de FutMesa & Foot Table | Portal Oficial" />
+  <meta name="description" content="Portal oficial de homologação de eventos, notícias dos circuitos estaduais e validação da carteira digital dos atletas federados de Pernambuco." />
+  <link rel="icon" type="image/png" href="assets/images/logo-federacao.png" />
+
+  <!-- Open Graph / WhatsApp / Facebook / Telegram -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://fpeft.vercel.app/" />
+  <meta property="og:title" content="Federação Pernambucana de FutMesa & Foot Table | Portal Oficial" />
+  <meta property="og:description" content="Portal oficial de homologação de eventos, notícias dos circuitos estaduais e validação da carteira digital dos atletas federados de Pernambuco." />
+  <meta property="og:image" content="https://fpeft.vercel.app/assets/images/preview-site.png" />
+  <meta property="og:image:secure_url" content="https://fpeft.vercel.app/assets/images/preview-site.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:alt" content="Federação Pernambucana de Foot Table" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://fpeft.vercel.app/" />
+  <meta name="twitter:title" content="Federação Pernambucana de FutMesa & Foot Table | Portal Oficial" />
+  <meta name="twitter:description" content="Portal oficial de homologação de eventos, notícias dos circuitos estaduais e validação da carteira digital dos atletas federados de Pernambuco." />
+  <meta name="twitter:image" content="https://fpeft.vercel.app/assets/images/preview-site.png" />
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Oswald:wght@500;600;700&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- html2canvas for instant HD PNG badge export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- qrcode-generator for generating verified QR codes -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            pe: {
+              blue: '#0044cc',
+              darkblue: '#06173a',
+              gold: '#f5b800',
+              goldHover: '#e0a700',
+              red: '#d32f2f',
+              green: '#00a859',
+              dark: '#080b12',
+              card: '#0f1422',
+              cardBorder: '#1c253b',
+              accent: '#182238'
+            }
+          },
+          fontFamily: {
+            sans: ['Montserrat', 'sans-serif'],
+            oswald: ['Oswald', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #080b12;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e2840;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #f5b800;
+    }
+
+    /* Pernambuco Tricolor Header Line */
+    .pe-stripe-bar {
+      background: linear-gradient(90deg, #0044cc 0%, #0044cc 40%, #f5b800 40%, #f5b800 70%, #d32f2f 70%, #d32f2f 100%);
+    }
+
+    /* Print settings for high resolution credentials */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #athleteCredentialCard, #athleteCredentialCard * {
+        visibility: visible;
+      }
+      #athleteCredentialCard {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 100% !important;
+        max-width: 520px !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-pe-dark text-slate-100 min-h-screen flex flex-col font-sans selection:bg-pe-gold selection:text-pe-dark">
+
+  <!-- Header Oficial com Emblema de Pernambuco (100% Público, sem botões de admin) -->
+  <header class="bg-pe-dark/95 backdrop-blur border-b border-pe-cardBorder sticky top-0 z-40">
+    <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+      
+      <!-- Brand + Logo Oficial da Federação -->
+      <a href="#home" class="flex items-center gap-3 group shrink-0">
+        <div class="rounded-full bg-pe-darkblue border-2 border-pe-gold shadow-[0_0_15px_rgba(245,184,0,0.35)] flex items-center justify-center p-0.5 overflow-hidden group-hover:scale-105 transition shrink-0" style="width: 46px; height: 46px; min-width: 46px; min-height: 46px;">
+          <img src="assets/images/logo-federacao.png" alt="Federação Pernambucana Foot Table" class="w-full h-full object-contain rounded-full block select-none pointer-events-none" draggable="false" style="max-width: 100%; max-height: 100%;" onerror="if(!this.dataset.retry){this.dataset.retry=1;this.src='/assets/images/logo-federacao.png';}else if(this.dataset.retry==1){this.dataset.retry=2;this.src='assets/logo.png';}" />
+        </div>
+        <div class="flex flex-col justify-center">
+          <span class="font-oswald text-lg sm:text-xl uppercase font-bold tracking-wider text-white flex items-center gap-1.5 leading-none mb-1">
+            Pernambuco <span class="text-pe-gold">FutMesa</span>
+          </span>
+          <span class="block text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none">
+            Federação Pernambucana de Foot Table
+          </span>
+        </div>
+      </a>
+
+      <!-- Navegação Pública Limpa -->
+      <nav class="hidden md:flex items-center gap-6">
+        <a href="#home" class="text-xs uppercase font-bold text-slate-300 hover:text-pe-gold transition tracking-wider">Início</a>
+        <a href="noticias.php" class="text-xs uppercase font-bold text-slate-300 hover:text-pe-gold transition tracking-wider">Notícias & Torneios</a>
+        <a href="#galeria" class="text-xs uppercase font-bold text-slate-300 hover:text-pe-gold transition tracking-wider">Fotos & Arenas</a>
+        <a href="#regulamento" class="text-xs uppercase font-bold text-slate-300 hover:text-pe-gold transition tracking-wider">Regulamento</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section Oficial -->
+  <section id="home" class="relative py-16 sm:py-24 px-4 overflow-hidden bg-radial-gradient text-center">
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(0,68,204,0.32),transparent_70%)] pointer-events-none"></div>
+    
+    <div class="relative max-w-4xl mx-auto">
+      <div class="inline-flex items-center gap-2 border border-pe-gold/40 bg-pe-gold/10 px-4 py-1.5 rounded-full text-pe-gold text-xs font-bold uppercase tracking-widest mb-6 shadow-sm">
+        <span>☀️</span> Federação Oficial de Foot Table e Futebol de Mesa de PE
+      </div>
+
+      <h1 class="font-oswald text-4xl sm:text-6xl uppercase font-black text-white leading-tight mb-4 tracking-wide">
+        Junte-se ao Movimento.<br />
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-pe-gold via-yellow-200 to-pe-gold">
+          Jogue Foot Table PE.
+        </span>
+      </h1>
+
+      <p class="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto mb-8 leading-relaxed">
+        Portal oficial de homologação de eventos, notícias dos circuitos estaduais e validação da carteira digital dos atletas federados de Pernambuco.
+      </p>
+
+      <div class="flex flex-wrap items-center justify-center gap-4">
+        <a href="#consulta" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase tracking-wider px-7 py-3.5 rounded-xl shadow-[0_0_20px_rgba(245,184,0,0.35)] transition transform hover:-translate-y-0.5 flex items-center gap-2">
+          <span>🔍</span> Consultar Carteira (6 Dígitos)
+        </a>
+        <a href="noticias.php" class="bg-pe-card border border-pe-cardBorder hover:border-pe-gold/60 text-slate-300 font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl transition">
+          Ver Notícias & Torneios
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Seção de Consulta Pública (Exclusiva pelos 6 Dígitos) -->
+  <section id="consulta" class="py-12 px-4 max-w-5xl mx-auto w-full">
+    <div class="bg-pe-card border border-pe-cardBorder rounded-2xl p-6 sm:p-8 relative shadow-2xl overflow-hidden">
+      <div class="pe-stripe-bar h-1.5 w-full absolute top-0 left-0"></div>
+
+      <div class="max-w-2xl">
+        <div class="flex items-center gap-2 text-pe-gold text-xs font-bold uppercase tracking-wider mb-2">
+          <span>🔒</span> Portal da Transparência & Registros
+        </div>
+        <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white mb-2">
+          Buscar Atleta & Registro Oficial <span class="text-pe-gold">(6 Dígitos)</span>
+        </h2>
+        <p class="text-slate-400 text-xs sm:text-sm leading-relaxed mb-6">
+          O atleta pode consultar sua situação cadastral e exibir sua credencial digital digitando o <strong class="text-pe-gold">código de 6 dígitos</strong> fornecido no ato da filiação federativa.
+        </p>
+      </div>
+
+      <!-- Barra de Busca -->
+      <div class="flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-1">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-mono font-bold text-lg">#</span>
+          <input 
+            type="text" 
+            id="publicCodeSearchInput" 
+            placeholder="Digite o código (ex: 742918)..." 
+            maxlength="6" 
+            inputmode="numeric" 
+            class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl pl-10 pr-4 py-3.5 text-pe-gold font-mono font-bold tracking-widest text-lg outline-none placeholder:text-slate-600 placeholder:font-sans placeholder:tracking-normal transition"
+          />
+        </div>
+        <button id="btnSearchPublicCode" 
+                class="bg-pe-blue hover:bg-blue-600 text-white font-extrabold text-xs uppercase tracking-wider px-8 py-3.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+          <span>🔎</span> Consultar Atleta
+        </button>
+      </div>
+
+      <!-- Mensagens de Feedback -->
+      <div id="publicSearchFeedback" class="mt-4 hidden"></div>
+
+      <!-- Render da Carteirinha Oficial Encontrada -->
+      <div id="publicBadgeResultArea" class="mt-8 pt-8 border-t border-pe-cardBorder/70 hidden">
+        
+        <!-- Painel Oficial de Validação e Autenticidade Digital do Federado (QR Code Check) -->
+        <div id="qrVerificationSummaryCard" class="max-w-[560px] mx-auto mb-6 bg-[#080d1a] border-2 border-pe-gold/60 rounded-2xl p-5 sm:p-6 relative shadow-[0_15px_35px_rgba(0,0,0,0.8)] overflow-hidden">
+          <div class="pe-stripe-bar h-1.5 w-full absolute top-0 left-0"></div>
+          
+          <div class="flex items-center justify-between border-b border-pe-cardBorder/80 pb-3 mb-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-pe-darkblue border border-pe-gold flex items-center justify-center p-0.5 shrink-0 shadow-md overflow-hidden">
+                <img src="assets/images/logo-federacao.png" alt="Logo Federação" class="w-full h-full object-contain rounded-full select-none pointer-events-none" draggable="false" onerror="if(!this.dataset.retry){this.dataset.retry=1;this.src='/assets/images/logo-federacao.png';}else if(this.dataset.retry==1){this.dataset.retry=2;this.src='assets/logo.png';}">
+              </div>
+              <div>
+                <span class="text-[10px] font-bold text-pe-gold uppercase tracking-widest block leading-tight">Validação e Autenticidade Digital</span>
+                <h3 class="font-oswald text-sm sm:text-base uppercase font-bold text-white leading-tight">Federação Pernambucana de Foot Table</h3>
+              </div>
+            </div>
+            <div id="qrStatusBadgeMain" class="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider flex items-center gap-1.5 bg-emerald-950/90 border border-emerald-500 text-emerald-300 shadow-md">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span id="qrStatusBadgeText">REGULAR</span>
+            </div>
+          </div>
+
+          <!-- Informações de Validação Completa -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs mb-3.5">
+            <div class="bg-[#040813] border border-pe-cardBorder/80 p-3 rounded-xl">
+              <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Atleta Federado</span>
+              <strong class="text-white font-oswald text-sm uppercase block truncate" id="qrAthleteFullName">---</strong>
+            </div>
+
+            <div class="bg-[#040813] border border-pe-cardBorder/80 p-3 rounded-xl flex items-center justify-between">
+              <div>
+                <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Nº Federado / ID</span>
+                <span class="text-pe-gold font-mono font-bold text-sm tracking-wider" id="qrFederatedNumText">#000000</span>
+              </div>
+              <div class="text-right">
+                <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">CPF</span>
+                <span class="text-slate-300 font-mono text-xs" id="qrCpfText">***.***.***-**</span>
+              </div>
+            </div>
+
+            <div class="bg-[#040813] border border-pe-cardBorder/80 p-3 rounded-xl flex items-center justify-between">
+              <div>
+                <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Modalidade</span>
+                <span class="text-slate-200 font-bold uppercase text-[11px]" id="qrModalityText">SOLO (INDIVIDUAL)</span>
+              </div>
+              <div class="text-right">
+                <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Categoria</span>
+                <span class="text-amber-300 font-bold uppercase text-[11px]" id="qrCategoryText">ASPIRANTE</span>
+              </div>
+            </div>
+
+            <div class="bg-[#040813] border border-pe-cardBorder/80 p-3 rounded-xl flex items-center justify-between">
+              <div>
+                <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Município</span>
+                <span class="text-slate-200 font-semibold text-xs" id="qrCityText">---</span>
+              </div>
+              <div class="text-right">
+                <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Validade Oficial</span>
+                <span class="text-emerald-400 font-mono font-bold text-xs" id="qrValidityText">31/12/2026</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Caixa Informativa de Situação Cadastral -->
+          <div id="qrSituationBox" class="p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-500/50 text-emerald-300 text-xs flex items-center gap-3">
+            <span class="text-xl shrink-0" id="qrSituationIcon">✅</span>
+            <div class="flex-1 text-[11px] leading-tight">
+              <strong id="qrSituationTitle" class="block font-bold text-white text-xs mb-0.5">REGISTRO OFICIAL HOMOLOGADO E REGULAR</strong>
+              <span id="qrSituationDesc" class="text-slate-300">Este atleta está devidamente ativo, registrado e homologado perante a Federação Pernambucana de Foot Table.</span>
+            </div>
+          </div>
+
+          <!-- Rodapé do Selo Digital com Hash & Timestamp -->
+          <div class="mt-3.5 pt-3 border-t border-pe-cardBorder/60 flex flex-wrap items-center justify-between gap-2 text-[10px] text-slate-400 font-mono">
+            <div class="flex items-center gap-1.5">
+              <span>🛡️ Autenticado digitalmente em:</span>
+              <span class="text-slate-200 font-bold" id="qrTimestampText">--/--/---- --:--:--</span>
+            </div>
+            <div class="text-pe-gold font-bold flex items-center gap-1" id="qrVerificationHash">
+              <span>🔒 HASH:</span> <span id="qrHashVal">FPEFT-000000-OK</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center justify-center gap-2">
+          <span>💳</span> Carteira Digital Oficial do Atleta
+        </div>
+
+        <!-- Credencial Oficial -->
+        <div id="athleteCredentialCard" class="max-w-[560px] mx-auto bg-gradient-to-br from-[#06173a] to-[#040813] border-2 border-pe-gold rounded-2xl p-6 relative overflow-hidden shadow-[0_15px_35px_rgba(0,0,0,0.8)]">
+          <!-- Marca d'água -->
+          <div class="absolute -right-6 -bottom-6 text-white/[0.03] font-oswald font-black text-7xl select-none pointer-events-none">
+            PERNAMBUCO
+          </div>
+
+          <!-- Topo da Carteira -->
+          <div class="flex items-center justify-between border-b border-pe-gold/25 pb-4 mb-4">
+            <div class="flex items-center gap-3">
+              <div class="rounded-full border border-pe-gold overflow-hidden bg-pe-darkblue p-0.5 flex items-center justify-center shrink-0" style="width: 40px; height: 40px; min-width: 40px; min-height: 40px;">
+                <img src="assets/images/logo-federacao.png" alt="Federação Pernambucana Foot Table" class="w-full h-full object-contain rounded-full block select-none pointer-events-none" draggable="false" style="max-width: 100%; max-height: 100%;" onerror="if(!this.dataset.retry){this.dataset.retry=1;this.src='/assets/images/logo-federacao.png';}else if(this.dataset.retry==1){this.dataset.retry=2;this.src='assets/logo.png';}" />
+              </div>
+              <div>
+                <h4 class="font-oswald text-sm uppercase font-bold text-pe-gold tracking-wide leading-tight">Pernambuco FutMesa</h4>
+                <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest block">Foot Table Federation</span>
+              </div>
+            </div>
+            
+            <div class="bg-pe-red text-white text-xs font-mono font-bold px-3 py-1 rounded shadow-md tracking-wider" id="cardBadgeCode">
+              ID: #000000
+            </div>
+          </div>
+
+          <!-- Conteúdo: Foto e Dados -->
+          <div class="grid grid-cols-[100px_1fr] gap-5 items-center my-4">
+            <div class="w-[100px] h-[125px] rounded-lg border-2 border-pe-gold overflow-hidden bg-slate-900 shadow-inner flex items-center justify-center">
+              <img id="cardBadgePhoto" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2364748b'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="Foto Atleta" class="w-full h-full object-cover" loading="lazy" decoding="async" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%2364748b\'%3E%3Cpath d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/%3E%3C/svg%3E'" />
+            </div>
+            <div class="space-y-1.5 text-xs">
+              <div>
+                <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Nome do Atleta</span>
+                <strong class="text-white text-sm font-bold font-oswald uppercase tracking-wide block" id="cardBadgeName">---</strong>
+              </div>
+              <div class="grid grid-cols-2 gap-2 pt-1">
+                <div>
+                  <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">CPF</span>
+                  <span class="text-slate-200 font-mono" id="cardBadgeCPF">---</span>
+                </div>
+                <div>
+                  <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Nascimento</span>
+                  <span class="text-slate-200 font-mono" id="cardBadgeBirth">---</span>
+                </div>
+              </div>
+              <div class="pt-1">
+                <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Município</span>
+                <span class="text-slate-200 font-semibold" id="cardBadgeCity">---</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Textos e Áreas Customizadas do Estúdio -->
+          <div id="cardCustomTextsContainer" class="space-y-1 my-2"></div>
+
+          <!-- Rodapé da Carteira -->
+          <div class="bg-black/40 border-l-4 border-pe-gold p-3 rounded-lg flex items-center justify-between mt-4">
+            <div>
+              <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">Modalidade Homologada</span>
+              <span class="text-xs font-extrabold uppercase text-pe-gold tracking-wide" id="cardBadgeModality">SOLO (INDIVIDUAL)</span>
+            </div>
+            <div>
+              <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">Categoria</span>
+              <span class="text-xs font-extrabold uppercase text-amber-300 tracking-wide" id="cardBadgeCategory">ASPIRANTE</span>
+            </div>
+            <div class="text-right">
+              <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">Status Federado</span>
+              <span id="cardBadgeStatus" class="text-[10px] font-bold uppercase text-emerald-400 flex items-center justify-end gap-1">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> REGULAR
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Aviso de Homologação Pendente (Dinâmico) -->
+        <div id="cardPendingWarning" class="hidden max-w-[560px] mx-auto mt-4 p-4 rounded-xl bg-amber-950/80 border border-amber-500/50 text-amber-200 text-xs shadow-lg space-y-1.5">
+          <div class="flex items-center gap-2 font-extrabold text-amber-400">
+            <span class="text-base">⏳</span> <span>HOMOLOGAÇÃO PENDENTE</span>
+          </div>
+          <p class="text-slate-300 text-[11px] leading-relaxed">
+            Este cadastro foi registrado e está aguardando a homologação oficial da Federação. <strong>A impressão e o download em PDF/PNG da carteira digital estão temporariamente bloqueados</strong> até a conclusão da validação.
+          </p>
+        </div>
+
+        <!-- Ações de Extração da Carteira -->
+        <div class="max-w-[560px] mx-auto mt-4 grid grid-cols-2 gap-3">
+          <button id="btnDownloadCardPng" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase tracking-wider py-3 rounded-xl transition shadow flex items-center justify-center gap-2 cursor-pointer">
+            <span>💾</span> Baixar PNG
+          </button>
+          <button id="btnPrintCard" class="bg-pe-accent hover:bg-slate-700 text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer">
+            <span>🖨️</span> Imprimir / PDF
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Seção de Notícias Dinâmicas -->
+  <section id="noticias" class="py-12 px-4 max-w-5xl mx-auto w-full flex-1">
+    <div class="mb-6">
+      <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block mb-1">
+        <i class="fa-solid fa-bullhorn text-[11px] mr-1"></i> Boletim Informativo Oficial
+      </span>
+      <h2 class="font-oswald text-3xl sm:text-4xl uppercase font-bold text-white">Notícias &amp; Torneios</h2>
+      <p class="text-xs text-slate-400 mt-1 max-w-xl">
+        Resultados oficiais, cobertura dos campeonatos, notas da federação e regulamentos homologados.
+      </p>
+    </div>
+
+    <!-- Container de Notícias (Atualizado em tempo real caso venha de um CMS externo) -->
+    <div id="publicNewsContainer" class="space-y-4">
+      <!-- Inserido dinamicamente via JS -->
+    </div>
+  </section>
+
+  <!-- Seção de Galeria Oficial de Fotos & Arenas -->
+  <section id="galeria" class="py-12 px-4 max-w-5xl mx-auto w-full">
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Acervo Fotográfico</span>
+        <h2 class="font-oswald text-3xl uppercase font-bold text-white">Galeria de Arenas & Foot Table</h2>
+      </div>
+      <div class="text-xs text-slate-400 font-mono flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-pe-gold"></span>
+        Imagens Oficiais
+      </div>
+    </div>
+
+    <!-- Grid de Imagens Oficiais Dinâmico -->
+    <div id="publicGalleryContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <!-- As fotos e textos oficiais são gerenciados pelo painel administrativo e renderizados dinamicamente -->
+      <!-- Fallback estático inicial caso JS ainda esteja carregando -->
+      <div class="group relative rounded-2xl overflow-hidden border border-pe-cardBorder bg-pe-card shadow-lg hover:border-pe-gold/60 transition">
+        <div class="aspect-[4/3] w-full overflow-hidden bg-slate-900">
+          <img src="assets/images/quadra 2.jpg" alt="Quadra Oficial Foot Table" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" decoding="async" onerror="this.src='assets/images/quadra 2.jpg'" />
+        </div>
+        <div class="p-4 bg-gradient-to-t from-pe-dark via-pe-card to-transparent">
+          <span class="text-[10px] font-bold text-pe-gold uppercase tracking-wider block mb-1">Arena Homologada</span>
+          <h4 class="font-oswald text-base uppercase font-bold text-white leading-tight">Estrutura de Quadra Oficial</h4>
+          <p class="text-slate-400 text-xs mt-1">Espaço padronizado para circuitos da Federação Pernambucana.</p>
+        </div>
+      </div>
+      <div class="group relative rounded-2xl overflow-hidden border border-pe-cardBorder bg-pe-card shadow-lg hover:border-pe-gold/60 transition">
+        <div class="aspect-[4/3] w-full overflow-hidden bg-slate-900">
+          <img src="assets/images/futmesa 2.jpg" alt="Mesa Oficial Foot Table" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" decoding="async" onerror="this.src='assets/images/futmesa 2.jpg'" />
+        </div>
+        <div class="p-4 bg-gradient-to-t from-pe-dark via-pe-card to-transparent">
+          <span class="text-[10px] font-bold text-pe-gold uppercase tracking-wider block mb-1">Equipamento Chancelado</span>
+          <h4 class="font-oswald text-base uppercase font-bold text-white leading-tight">Mesa Curva Oficial</h4>
+          <p class="text-slate-400 text-xs mt-1">Dimensões regulamentares e curvatura para alta performance.</p>
+        </div>
+      </div>
+      <div class="group relative rounded-2xl overflow-hidden border border-pe-cardBorder bg-pe-card shadow-lg hover:border-pe-gold/60 transition">
+        <div class="aspect-[4/3] w-full overflow-hidden bg-slate-900">
+          <img src="assets/images/fut 6 3.jpg" alt="Circuito Foot Table" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" decoding="async" onerror="this.src='assets/images/fut 6 3.jpg'" />
+        </div>
+        <div class="p-4 bg-gradient-to-t from-pe-dark via-pe-card to-transparent">
+          <span class="text-[10px] font-bold text-pe-gold uppercase tracking-wider block mb-1">Competições Oficiais</span>
+          <h4 class="font-oswald text-base uppercase font-bold text-white leading-tight">Etapa Pernambucana</h4>
+          <p class="text-slate-400 text-xs mt-1">Disputas intensas entre os melhores atletas do estado.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Seção Informativa de Regulamento -->
+  <section id="regulamento" class="py-10 px-4 max-w-5xl mx-auto w-full">
+    <div class="bg-pe-card/70 border border-pe-cardBorder rounded-2xl p-6 sm:p-8">
+      <div class="flex items-center gap-2 text-pe-gold text-xs font-bold uppercase tracking-wider mb-2">
+        <span>📖</span> Diretrizes Oficiais
+      </div>
+      <h3 class="font-oswald text-xl uppercase font-bold text-white mb-3">Normas e Especificações Técnicas</h3>
+      <p class="text-slate-400 text-xs sm:text-sm leading-relaxed mb-4">
+        As competições chanceladas pela Federação Pernambucana de Foot Table seguem as diretrizes técnicas internacionais de curvatura de mesa, dimensões do octógono de proteção e sistema de pontuação set a set em duplas e solos.
+      </p>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+        <div class="bg-[#080b12] p-3.5 rounded-xl border border-pe-cardBorder">
+          <strong class="text-pe-gold block mb-1">Mesa Homologada</strong>
+          <span class="text-slate-400">Superfície curva em acrílico/resina reforçada com altura central regulamentar.</span>
+        </div>
+        <div class="bg-[#080b12] p-3.5 rounded-xl border border-pe-cardBorder">
+          <strong class="text-pe-gold block mb-1">Modalidade Solo</strong>
+          <span class="text-slate-400">Máximo de 3 toques por jogada, sem toques consecutivos com as mãos ou braços.</span>
+        </div>
+        <div class="bg-[#080b12] p-3.5 rounded-xl border border-pe-cardBorder">
+          <strong class="text-pe-gold block mb-1">Modalidade Duplas</strong>
+          <span class="text-slate-400">Alternância obrigatória de toques entre os parceiros antes do envio à mesa oposta.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- Rodapé Institucional com Links de Segurança, LGPD e Acesso -->
+  <footer class="bg-[#05070c] border-t border-pe-cardBorder pt-12 pb-8 px-4 text-xs text-slate-400 mt-12">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 pb-8 border-b border-pe-cardBorder/70 text-left">
+      <!-- Coluna 1: Federação -->
+      <div class="space-y-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-full bg-pe-darkblue border border-pe-gold/40 flex items-center justify-center p-0.5 overflow-hidden shrink-0 shadow">
+            <img src="assets/images/logo-federacao.png" alt="FPEFT" class="w-full h-full object-contain rounded-full select-none pointer-events-none" draggable="false" onerror="if(!this.dataset.retry){this.dataset.retry=1;this.src='/assets/images/logo-federacao.png';}else if(this.dataset.retry==1){this.dataset.retry=2;this.src='assets/logo.png';}" />
+          </div>
+          <span class="font-oswald text-sm font-bold uppercase text-white tracking-wider">
+            Federação Pernambucana de Foot Table
+          </span>
+        </div>
+        <p class="text-slate-400 text-xs leading-relaxed">
+          Entidade oficial de administração e homologação de competições de FutMesa e Foot Table no Estado de Pernambuco. Compromisso rigoroso com ética, transparência e proteção integral dos atletas federados.
+        </p>
+        <div class="text-[11px] text-slate-500 font-mono">
+          Recife / PE • Brasil • Temporada Oficial 2026
+        </div>
+      </div>
+
+      <!-- Coluna 2: Segurança e Privacidade (LGPD) -->
+      <div class="space-y-3">
+        <h4 class="font-oswald text-xs uppercase font-bold text-pe-gold tracking-widest flex items-center gap-2">
+          <i class="fa-solid fa-shield-halved"></i> Segurança & Proteção de Dados
+        </h4>
+        <ul class="space-y-2 text-xs">
+          <li>
+            <a href="seguranca.html" class="hover:text-pe-gold transition flex items-center gap-1.5">
+              <i class="fa-solid fa-file-shield text-slate-500 text-[10px]"></i>
+              Política de Segurança da Informação
+            </a>
+          </li>
+          <li>
+            <a href="seguranca.html#lgpd" class="hover:text-pe-gold transition flex items-center gap-1.5">
+              <i class="fa-solid fa-user-shield text-slate-500 text-[10px]"></i>
+              Termos de Privacidade e LGPD
+            </a>
+          </li>
+          <li>
+            <a href="seguranca.html#direitos" class="hover:text-pe-gold transition flex items-center gap-1.5">
+              <i class="fa-solid fa-scale-balanced text-slate-500 text-[10px]"></i>
+              Direitos do Titular (Art. 18 LGPD)
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Coluna 3: Serviços & Acesso -->
+      <div class="space-y-3">
+        <h4 class="font-oswald text-xs uppercase font-bold text-pe-gold tracking-widest flex items-center gap-2">
+          <i class="fa-solid fa-compass"></i> Navegação & Sistemas
+        </h4>
+        <ul class="space-y-2 text-xs">
+          <li>
+            <a href="#consulta" class="hover:text-pe-gold transition flex items-center gap-1.5">
+              <i class="fa-solid fa-magnifying-glass text-slate-500 text-[10px]"></i>
+              Validação Pública de Carteira Digital
+            </a>
+          </li>
+          <li>
+            <a href="noticias.php" class="hover:text-pe-gold transition flex items-center gap-1.5">
+              <i class="fa-solid fa-newspaper text-slate-500 text-[10px]"></i>
+              Notícias, Calendário e Torneios
+            </a>
+          </li>
+          <li>
+            <a href="#regulamento" class="hover:text-pe-gold transition flex items-center gap-1.5">
+              <i class="fa-solid fa-book text-slate-500 text-[10px]"></i>
+              Normas e Diretrizes Técnicas
+            </a>
+          </li>
+
+        </ul>
+      </div>
+    </div>
+
+    <!-- Linha Inferior com Copyright e Termos Clicáveis -->
+    <div class="max-w-6xl mx-auto pt-6 flex flex-col gap-4">
+      <!-- Barra Central de Botões e Termos Clicáveis para Análise Imediata -->
+      <div class="bg-[#080d1a] border border-pe-cardBorder/90 rounded-xl p-3 sm:p-4 flex flex-col md:flex-row items-center justify-between gap-3 shadow-lg">
+        <div class="flex items-center gap-2 text-center md:text-left">
+          <span class="w-3 h-3 rounded-full bg-pe-gold animate-pulse"></span>
+          <span class="font-bold text-white text-xs sm:text-sm">Termos Oficiais & Governança da Federação:</span>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          <a href="seguranca.html" target="_blank" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#0e1628] hover:bg-[#152038] border border-pe-cardBorder text-slate-300 hover:text-white font-bold text-xs transition shadow-sm">
+            <i class="fa-solid fa-file-shield text-pe-gold text-xs"></i>
+            <span>Política de Privacidade e LGPD</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Barra de Assinatura e Copyright Oficial -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left text-slate-500 text-xs pt-2">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-pe-gold"></span>
+          <span class="font-medium text-slate-300">Federação Pernambucana de FutMesa & Foot Table</span>
+        </div>
+        <div class="flex items-center gap-3 text-[11px] text-slate-400">
+          <span>© 2026 Todos os direitos reservados. Entidade estadual oficial de Foot Table em Pernambuco.</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Script de Comportamento e Sincronização em Tempo Real -->
+  <script>
+    /* =======================================================
+       CONFIGURAÇÃO SUPABASE
+       ======================================================= */
+    // URL oficial do projeto Supabase
+    const SUPABASE_PROJECT_URL = "https://qvnsahvdjhimlmtqrnif.supabase.co";
+    const DEFAULT_SUPABASE_ANON_KEY = "sb_publishable_vvqh9vB0Dr0EqR9JGhy4kA_XnJ-9h0z";
+    let SUPABASE_URL = localStorage.getItem('pe_supabase_url') || SUPABASE_PROJECT_URL;
+    let SUPABASE_ANON_KEY = localStorage.getItem('pe_supabase_anon_key');
+    if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.startsWith('http') || SUPABASE_ANON_KEY.length < 20) {
+      SUPABASE_ANON_KEY = DEFAULT_SUPABASE_ANON_KEY;
+      localStorage.setItem('pe_supabase_anon_key', SUPABASE_ANON_KEY);
+    }
+    let supabaseClient = null;
+
+    async function initSupabase() {
+      const dot = document.getElementById('supabaseStatusDot');
+      const text = document.getElementById('supabaseStatusText');
+
+      if ((!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.startsWith('http') || SUPABASE_ANON_KEY.length < 20) && typeof fetch === 'function') {
+        try {
+          const res = await fetch('/api/config');
+          if (res.ok) {
+            const data = await res.json();
+            if (data.supabaseAnonKey && data.hasValidKey) {
+              SUPABASE_URL = data.supabaseUrl || SUPABASE_URL;
+              SUPABASE_ANON_KEY = data.supabaseAnonKey;
+              localStorage.setItem('pe_supabase_url', SUPABASE_URL);
+              localStorage.setItem('pe_supabase_anon_key', SUPABASE_ANON_KEY);
+            }
+          }
+        } catch (e) {}
+      }
+
+      if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.startsWith('http') || SUPABASE_ANON_KEY.length < 20) {
+        SUPABASE_ANON_KEY = DEFAULT_SUPABASE_ANON_KEY;
+        localStorage.setItem('pe_supabase_anon_key', SUPABASE_ANON_KEY);
+      }
+
+      if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.startsWith('http')) {
+        try {
+          supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          if (dot) dot.className = "w-2 h-2 rounded-full bg-emerald-400";
+          if (text) text.textContent = "Sistema Conectado";
+          if (typeof renderPublicNews === 'function') renderPublicNews();
+          if (typeof initIndexCloudRealtime === 'function') initIndexCloudRealtime();
+          return true;
+        } catch (err) {
+          console.warn("Erro ao instanciar Supabase:", err);
+        }
+      }
+      if (dot) dot.className = "w-2 h-2 rounded-full bg-amber-400";
+      if (text) text.textContent = "Modo Local";
+      return false;
+    }
+
+    /* =======================================================
+       NOTÍCIAS E REGISTROS PADRÃO (FALLBACK ROBUSTO)
+       ======================================================= */
+    const DEFAULT_NEWS = [];
+
+    const isMockNewsItem = (item) => {
+      if (!item) return false;
+      const idStr = String(item.id || '');
+      const titleStr = (item.title || item.titulo || '').toLowerCase();
+      return idStr === '1' || idStr === '2' || idStr === '3' || idStr === '4' ||
+             idStr === 'news-1' || idStr === 'news-2' || idStr === 'news-3' || idStr === 'news-4' ||
+             titleStr.includes('roma aguarda seus novos campeões') ||
+             titleStr.includes('vitória fernandes chega a roma') ||
+             titleStr.includes('homologado o regulamento oficial de quadras') ||
+             titleStr.includes('abertas as inscrições para a 3ª etapa');
+    };
+
+    const DEFAULT_ATHLETES = [];
+
+    function getStoredNews() {
+      let list = JSON.parse(localStorage.getItem('pe_news_db')) || JSON.parse(localStorage.getItem('foot_table_news_db')) || JSON.parse(localStorage.getItem('pe_futmesa_news'));
+      if (!list || !Array.isArray(list)) {
+        list = [];
+      }
+      const deletedIds = new Set(JSON.parse(localStorage.getItem('pe_deleted_news_ids') || '[]').map(String));
+      return list
+        .filter(n => !deletedIds.has(String(n.id)) && !isMockNewsItem(n))
+        .map(item => ({
+          ...item,
+          title: item.title || item.titulo || '',
+          category: item.category || item.categoria || 'INFORMATIVO',
+          content: item.content || item.conteudo || item.summary || item.resumo || '',
+          date: item.date || item.data_publicacao || '',
+          image: item.imagem_url || item.image || item.imagem || ''
+        }));
+    }
+
+    function getStoredAthletes() {
+      return JSON.parse(localStorage.getItem('pe_athletes_db')) || [];
+    }
+
+    /* =======================================================
+       RENDERIZADOR DE NOTÍCIAS PÚBLICAS (SUPABASE + CACHE LOCAL)
+       ======================================================= */
+    let _lastNewsFetchTime = 0;
+    let currentPublicNewsFilter = 'TODAS';
+
+    function filterPublicNewsCategory(cat) {
+      currentPublicNewsFilter = cat;
+      const btns = document.querySelectorAll('.pub-filter-btn');
+      btns.forEach(b => {
+        if (b.innerText.trim() === cat) {
+          b.className = 'pub-filter-btn active-pub-filter px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide uppercase transition bg-pe-blue text-white shadow-sm';
+        } else {
+          b.className = 'pub-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide uppercase transition bg-pe-inputBg text-slate-400 hover:text-white border border-pe-cardBorder';
+        }
+      });
+      renderPublicNews();
+    }
+
+    function handlePublicNewsSearch() {
+      renderPublicNews();
+    }
+
+    function openPublicNewsModal(id) {
+      const newsList = getStoredNews();
+      const item = newsList.find(n => String(n.id) === String(id));
+      if (!item) return;
+
+      let dataFormatada = item.date || 'Recente';
+      if (item.date && item.date.includes('-')) {
+        const [ano, mes, dia] = item.date.split('-');
+        dataFormatada = `${dia}/${mes}/${ano}`;
+      }
+
+      const catEl = document.getElementById('pubModalCategory');
+      if (catEl) catEl.innerText = item.category || 'INFORMATIVO';
+      const dateEl = document.getElementById('pubModalDate');
+      if (dateEl) dateEl.innerText = dataFormatada;
+      const titleEl = document.getElementById('pubModalTitle');
+      if (titleEl) titleEl.innerText = item.title;
+      const excerptEl = document.getElementById('pubModalExcerpt');
+      if (excerptEl) excerptEl.innerText = item.excerpt ? `"${item.excerpt}"` : '';
+      const contentEl = document.getElementById('pubModalFullContent');
+      if (contentEl) contentEl.innerText = item.content || item.excerpt || '';
+
+      const imgContainer = document.getElementById('pubModalImageContainer');
+      const imgTag = document.getElementById('pubModalImage');
+      if (item.image) {
+        if (imgTag) imgTag.src = item.image;
+        if (imgContainer) imgContainer.classList.remove('hidden');
+      } else {
+        if (imgContainer) imgContainer.classList.add('hidden');
+      }
+
+      const pdfArea = document.getElementById('pubModalPdfArea');
+      const pdfLink = document.getElementById('pubModalPdfLink');
+      const link = item.pdfLink || item.link;
+      if (link) {
+        if (pdfLink) pdfLink.href = link;
+        if (pdfArea) pdfArea.classList.remove('hidden');
+      } else {
+        if (pdfArea) pdfArea.classList.add('hidden');
+      }
+
+      const modal = document.getElementById('publicNewsModal');
+      const card = document.getElementById('publicNewsModalCard');
+      if (modal && card) {
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+          modal.classList.remove('opacity-0');
+          card.classList.remove('scale-95');
+          card.classList.add('scale-100');
+        }, 10);
+      }
+    }
+
+    function closePublicNewsModal() {
+      const modal = document.getElementById('publicNewsModal');
+      const card = document.getElementById('publicNewsModalCard');
+      if (modal && card) {
+        modal.classList.add('opacity-0');
+        card.classList.remove('scale-100');
+        card.classList.add('scale-95');
+        setTimeout(() => {
+          modal.classList.add('hidden');
+        }, 300);
+      }
+    }
+
+    async function renderPublicNews(force = false) {
+      const container = document.getElementById('publicNewsContainer');
+      if (!container) return;
+      let newsList = getStoredNews();
+
+      const now = Date.now();
+      const shouldQuerySupabase = force || (now - _lastNewsFetchTime > 180000); // 3 minutos de cache
+
+      // Consulta Supabase com controle de taxa para economizar requisições e egress
+      if (supabaseClient && shouldQuerySupabase) {
+        try {
+          const { data, error } = await supabaseClient
+            .from('noticias')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (!error && data) {
+            const deletedIds = new Set(JSON.parse(localStorage.getItem('pe_deleted_news_ids') || '[]').map(String));
+            const validData = data.filter(item => !deletedIds.has(String(item.id)) && !isMockNewsItem(item));
+            newsList = validData.map(item => ({
+              id: item.id,
+              title: item.titulo || item.title || '',
+              category: item.categoria || item.category || 'INFORMATIVO',
+              content: item.conteudo || item.content || '',
+              date: item.data_publicacao || (item.created_at ? item.created_at.split('T')[0] : ''),
+              image: item.imagem_url || item.imagem || item.image || ''
+            }));
+            localStorage.setItem('pe_news_db', JSON.stringify(newsList));
+          }
+          _lastNewsFetchTime = now;
+        } catch (e) {
+          console.warn("Supabase indisponível para notícias, usando fallback:", e);
+        }
+      }
+
+      const searchInput = document.getElementById('publicSearchNews');
+      const searchTerm = (searchInput ? searchInput.value : '').toLowerCase().trim();
+
+      let filtered = newsList.filter(item => {
+        const matchesCategory = currentPublicNewsFilter === 'TODAS' || item.category === currentPublicNewsFilter;
+        const matchesSearch = !searchTerm || 
+                              (item.title && item.title.toLowerCase().includes(searchTerm)) || 
+                              (item.content && item.content.toLowerCase().includes(searchTerm)) ||
+                              (item.category && item.category.toLowerCase().includes(searchTerm));
+        return matchesCategory && matchesSearch;
+      });
+
+      container.innerHTML = "";
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="bg-pe-card border border-pe-cardBorder rounded-xl p-8 text-center text-slate-400 text-xs">
+            <i class="fa-regular fa-folder-open text-3xl text-slate-600 mb-2 block"></i>
+            Nenhuma notícia encontrada com os filtros selecionados.
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(item => {
+        let tagColor = "bg-pe-blue text-white";
+        if (item.category && item.category.includes('MUNDIAL')) tagColor = "bg-pe-gold text-pe-dark font-extrabold";
+        if (item.category && item.category.includes('REGULAMENTO')) tagColor = "bg-pe-red text-white";
+        if (item.category && item.category.includes('NOTAS')) tagColor = "bg-emerald-600 text-white font-bold";
+
+        const card = document.createElement('article');
+        card.className = "bg-pe-card border border-pe-cardBorder hover:border-pe-gold/60 transition p-4 sm:p-5 rounded-2xl flex flex-col md:flex-row items-stretch md:items-center gap-4 group backdrop-blur-md relative overflow-hidden";
+        
+        const imageHtml = item.image ? `
+          <div class="w-full md:w-52 h-44 md:h-32 rounded-xl overflow-hidden shrink-0 bg-[#070a13] border border-pe-cardBorder relative">
+            <img src="${item.image}" alt="${escapeHTML(item.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy" onerror="this.parentElement.style.display='none'">
+          </div>
+        ` : '';
+
+        const safeTitle = escapeHTML(item.title);
+        const safeContent = escapeHTML(item.content || item.summary || '');
+
+        card.innerHTML = `
+          ${imageHtml}
+          <div class="space-y-2 flex-1 min-w-0">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-md ${tagColor} uppercase tracking-wider">${escapeHTML(item.category || 'INFORMATIVO')}</span>
+                <span class="text-[11px] text-slate-400 font-mono flex items-center gap-1">
+                  <i class="fa-regular fa-calendar text-[10px]"></i> ${item.date || 'Recente'}
+                </span>
+              </div>
+              <button onclick="openPublicNewsModal('${item.id}')" class="text-xs font-bold text-pe-gold hover:text-amber-300 transition flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-eye text-xs"></i> <span>Ler Notícia Completa</span>
+              </button>
+            </div>
+            <h3 class="font-oswald text-lg sm:text-xl uppercase font-bold text-white leading-snug group-hover:text-pe-gold transition">${safeTitle}</h3>
+            <p class="text-xs text-slate-300 leading-relaxed line-clamp-3">${safeContent}</p>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function escapeHTML(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+      }[tag] || tag));
+    }
+
+    /* =======================================================
+       RENDERIZADOR DE GALERIA PÚBLICA (LOCALSTORAGE + FALLBACK)
+       ======================================================= */
+    const DEFAULT_PUBLIC_GALLERY = [
+      {
+        id: 'gal-1',
+        tag: 'Arena Homologada',
+        title: 'Estrutura de Quadra Oficial',
+        desc: 'Espaço padronizado para circuitos da Federação Pernambucana.',
+        image: 'assets/images/quadra 2.jpg'
+      },
+      {
+        id: 'gal-2',
+        tag: 'Equipamento Chancelado',
+        title: 'Mesa Curva Oficial',
+        desc: 'Dimensões regulamentares e curvatura para alta performance.',
+        image: 'assets/images/futmesa 2.jpg'
+      },
+      {
+        id: 'gal-3',
+        tag: 'Competições Oficiais',
+        title: 'Etapa Pernambucana',
+        desc: 'Disputas intensas entre os melhores atletas do estado.',
+        image: 'assets/images/fut 6 3.jpg'
+      },
+      {
+        id: 'gal-4',
+        tag: 'Formação & Treino',
+        title: 'Preparação Técnica',
+        desc: 'Centros de treinamento credenciados pela federação.',
+        image: 'assets/images/fut 7 editada.jpg'
+      },
+      {
+        id: 'gal-5',
+        tag: 'Litoral Pernambucano',
+        title: 'Foot Table Praiano',
+        desc: 'Etapas à beira-mar celebrando o esporte ao ar livre.',
+        image: 'assets/images/DA PRAIA.jpg'
+      },
+      {
+        id: 'gal-6',
+        tag: 'Premiação',
+        title: 'Pódio dos Campeões',
+        desc: 'Reconhecimento oficial dos atletas de destaque estadual.',
+        image: 'assets/images/Fut 5 editado (2).jpg'
+      }
+    ];
+
+    function getPublicGalleryItems() {
+      try {
+        const saved = localStorage.getItem('pe_gallery_db');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed;
+          }
+        }
+      } catch (e) {}
+      return DEFAULT_PUBLIC_GALLERY;
+    }
+
+    function renderPublicGallery() {
+      const container = document.getElementById('publicGalleryContainer');
+      if (!container) return;
+
+      const items = getPublicGalleryItems();
+      if (items.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full bg-pe-card border border-pe-cardBorder rounded-xl p-8 text-center text-slate-400 text-xs">
+            Nenhuma foto publicada na galeria no momento.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = items.map(item => `
+        <div class="group relative rounded-2xl overflow-hidden border border-pe-cardBorder bg-pe-card shadow-lg hover:border-pe-gold/60 transition flex flex-col justify-between">
+          <div class="aspect-[4/3] w-full overflow-hidden bg-slate-900 relative">
+            <img 
+              src="${item.image || 'assets/images/quadra 2.jpg'}" 
+              alt="${escapeHTML(item.title || 'Foto Oficial')}" 
+              class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
+              loading="lazy" 
+              decoding="async" 
+              onerror="this.src='assets/images/quadra 2.jpg'" 
+            />
+          </div>
+          <div class="p-4 bg-gradient-to-t from-pe-dark via-pe-card to-transparent flex-1 flex flex-col justify-between">
+            <div>
+              <span class="text-[10px] font-bold text-pe-gold uppercase tracking-wider block mb-1">
+                ${escapeHTML(item.tag || 'ARENA HOMOLOGADA')}
+              </span>
+              <h4 class="font-oswald text-base uppercase font-bold text-white leading-tight">
+                ${escapeHTML(item.title || 'Sem Título')}
+              </h4>
+              <p class="text-slate-400 text-xs mt-1 leading-relaxed">
+                ${escapeHTML(item.desc || '')}
+              </p>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    /* =======================================================
+       CONSULTA PÚBLICA EXCLUSIVA PELOS 6 DÍGITOS
+       ======================================================= */
+    const publicCodeInput = document.getElementById('publicCodeSearchInput');
+
+    publicCodeInput.addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
+    });
+
+    async function executePublicSearch() {
+      const code = publicCodeInput.value.trim();
+      const feedback = document.getElementById('publicSearchFeedback');
+      const badgeArea = document.getElementById('publicBadgeResultArea');
+
+      feedback.classList.remove('hidden');
+
+      if (!code || code.length !== 6) {
+        feedback.innerHTML = `
+          <div class="p-3 bg-amber-950/40 border border-pe-gold/40 rounded-xl text-xs text-yellow-300">
+            ⚠️ O código de consulta deve conter <strong>exatamente 6 dígitos numéricos</strong> (ex: 742918).
+          </div>
+        `;
+        badgeArea.classList.add('hidden');
+        return;
+      }
+
+      let athlete = null;
+
+      // 1. Tenta buscar no Supabase
+      if (supabaseClient) {
+        feedback.innerHTML = `
+          <div class="p-3 bg-blue-950/40 border border-pe-blue/40 rounded-xl text-xs text-blue-300 flex items-center gap-2">
+            <span class="animate-spin">⏳</span> Consultando base oficial da Federação...
+          </div>
+        `;
+        try {
+          const { data, error } = await supabaseClient
+            .from('atletas')
+            .select('*')
+            .eq('codigo', code)
+            .maybeSingle();
+
+          if (!error && data) {
+            athlete = {
+              codigo: data.codigo,
+              nome: data.nome,
+              cpf: data.cpf,
+              nascimento: data.nascimento,
+              municipio: data.municipio,
+              modalidade: data.modalidade || 'SOLO (INDIVIDUAL)',
+              categoria: data.categoria || 'ASPIRANTE',
+              status: data.status || 'PENDENTE',
+              foto: (data.foto_url && !data.foto_url.includes('unsplash.com')) ? data.foto_url : ''
+            };
+          }
+        } catch (e) {
+          console.warn("Falha na consulta remota do Supabase, buscando local:", e);
+        }
+      }
+
+      // 2. Se não encontrou no Supabase, consulta na base local
+      if (!athlete) {
+        const athletes = getStoredAthletes();
+        const found = athletes.find(a => String(a.codigo) === String(code));
+        if (found) {
+          athlete = {
+            codigo: found.codigo,
+            nome: found.nome,
+            cpf: found.cpf,
+            nascimento: found.nascimento,
+            municipio: found.municipio,
+            modalidade: found.modalidade || 'SOLO (INDIVIDUAL)',
+            categoria: found.categoria || 'ASPIRANTE',
+            status: found.status || 'PENDENTE',
+            foto: found.foto || found.foto_url
+          };
+        }
+      }
+
+      if (!athlete) {
+        feedback.innerHTML = `
+          <div class="p-3 bg-red-950/40 border border-pe-red/40 rounded-xl text-xs text-red-300">
+            ❌ Nenhum atleta federado encontrado com o código <strong>#${code}</strong>.
+          </div>
+        `;
+        badgeArea.classList.add('hidden');
+        return;
+      }
+
+      window._currentSearchedAthlete = athlete;
+
+      feedback.classList.add('hidden');
+      badgeArea.classList.remove('hidden');
+
+      // Mascaramento de Segurança LGPD (Art. 46 Lei nº 13.709/2018)
+      function maskCpf(cpf) {
+        if (!cpf) return '***.***.***-**';
+        const digits = String(cpf).replace(/\D/g, '');
+        if (digits.length === 11) {
+          return `***.${digits.slice(3, 6)}.${digits.slice(6, 9)}-**`;
+        }
+        return '***.***.***-**';
+      }
+
+      // Preenche os dados da carteira
+      document.getElementById('cardBadgeName').textContent = athlete.nome;
+      document.getElementById('cardBadgeCPF').textContent = maskCpf(athlete.cpf);
+      document.getElementById('cardBadgeBirth').textContent = athlete.nascimento;
+      document.getElementById('cardBadgeCity').textContent = athlete.municipio;
+      document.getElementById('cardBadgeModality').textContent = athlete.modalidade;
+      const catBadge = document.getElementById('cardBadgeCategory');
+      if (catBadge) catBadge.textContent = athlete.categoria || 'ASPIRANTE';
+      document.getElementById('cardBadgeCode').textContent = `ID: #${athlete.codigo}`;
+      const defaultAthletePhoto = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2364748b'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
+      const cardPhotoEl = document.getElementById('cardBadgePhoto');
+      if (cardPhotoEl) {
+        cardPhotoEl.onerror = function() { this.src = defaultAthletePhoto; };
+        const cleanPhoto = (athlete.foto && !athlete.foto.includes('unsplash.com')) ? athlete.foto : defaultAthletePhoto;
+        cardPhotoEl.src = cleanPhoto;
+      }
+
+      // Verifica status de homologação
+      const upperStatus = (athlete.status || 'PENDENTE').toUpperCase().trim();
+      const isHomologado = upperStatus === 'HOMOLOGADO' || upperStatus === 'REGULAR';
+      
+      // Atualiza Painel de Validação Digital do QR Code
+      const qrFullName = document.getElementById('qrAthleteFullName');
+      const qrFedNum = document.getElementById('qrFederatedNumText');
+      const qrCpf = document.getElementById('qrCpfText');
+      const qrModality = document.getElementById('qrModalityText');
+      const qrCategory = document.getElementById('qrCategoryText');
+      const qrCity = document.getElementById('qrCityText');
+      const qrValidity = document.getElementById('qrValidityText');
+      const qrTimestamp = document.getElementById('qrTimestampText');
+      const qrHash = document.getElementById('qrHashVal');
+      const qrStatusMain = document.getElementById('qrStatusBadgeMain');
+      const qrStatusText = document.getElementById('qrStatusBadgeText');
+      const qrSituationBox = document.getElementById('qrSituationBox');
+      const qrSituationIcon = document.getElementById('qrSituationIcon');
+      const qrSituationTitle = document.getElementById('qrSituationTitle');
+      const qrSituationDesc = document.getElementById('qrSituationDesc');
+
+      if (qrFullName) qrFullName.textContent = athlete.nome;
+      if (qrFedNum) qrFedNum.textContent = `#${athlete.codigo}`;
+      if (qrCpf) qrCpf.textContent = maskCpf(athlete.cpf);
+      if (qrModality) qrModality.textContent = athlete.modalidade;
+      if (qrCategory) qrCategory.textContent = athlete.categoria || 'ASPIRANTE';
+      if (qrCity) qrCity.textContent = athlete.municipio;
+      if (qrValidity) qrValidity.textContent = '31/12/2026 (Temporada Oficial)';
+      if (qrTimestamp) qrTimestamp.textContent = new Date().toLocaleString('pt-BR');
+      if (qrHash) qrHash.textContent = `FPEFT-${athlete.codigo}-${isHomologado ? 'AUTH-REGULAR' : 'PENDING'}`;
+
+      if (isHomologado) {
+        if (qrStatusMain) {
+          qrStatusMain.className = "px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider flex items-center gap-1.5 bg-emerald-950/90 border border-emerald-500 text-emerald-300 shadow-md";
+        }
+        if (qrStatusText) qrStatusText.textContent = "REGULAR (Ativo)";
+        if (qrSituationBox) {
+          qrSituationBox.className = "p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-500/50 text-emerald-300 text-xs flex items-center gap-3";
+        }
+        if (qrSituationIcon) qrSituationIcon.textContent = "✅";
+        if (qrSituationTitle) qrSituationTitle.textContent = "REGISTRO OFICIAL HOMOLOGADO E REGULAR";
+        if (qrSituationDesc) qrSituationDesc.textContent = "Este atleta está devidamente ativo, cadastrado e homologado perante a Federação Pernambucana de Foot Table.";
+      } else {
+        if (qrStatusMain) {
+          qrStatusMain.className = "px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider flex items-center gap-1.5 bg-amber-950/90 border border-amber-500 text-amber-300 shadow-md";
+        }
+        if (qrStatusText) qrStatusText.textContent = "HOMOLOGAÇÃO PENDENTE";
+        if (qrSituationBox) {
+          qrSituationBox.className = "p-3.5 rounded-xl bg-amber-950/40 border border-amber-500/50 text-amber-300 text-xs flex items-center gap-3";
+        }
+        if (qrSituationIcon) qrSituationIcon.textContent = "⏳";
+        if (qrSituationTitle) qrSituationTitle.textContent = "HOMOLOGAÇÃO EM ANDAMENTO (PENDENTE DE APROVAÇÃO)";
+        if (qrSituationDesc) qrSituationDesc.textContent = "O cadastro deste atleta foi registrado no sistema, mas aguarda a homologação da diretoria da Federação. A emissão de carteira física/PDF permanece restrita.";
+      }
+
+      const statusBadge = document.getElementById('cardBadgeStatus');
+      const pendingWarning = document.getElementById('cardPendingWarning');
+      const btnDownload = document.getElementById('btnDownloadCardPng');
+      const btnPrint = document.getElementById('btnPrintCard');
+
+      if (statusBadge) {
+        if (isHomologado) {
+          statusBadge.className = "text-[10px] font-bold uppercase text-emerald-400 flex items-center justify-end gap-1";
+          statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> REGULAR';
+        } else {
+          statusBadge.className = "text-[10px] font-bold uppercase text-amber-400 flex items-center justify-end gap-1 font-mono";
+          statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span> HOMOLOGAÇÃO PENDENTE';
+        }
+      }
+
+      if (pendingWarning) {
+        if (isHomologado) {
+          pendingWarning.classList.add('hidden');
+        } else {
+          pendingWarning.classList.remove('hidden');
+        }
+      }
+
+      if (btnDownload) {
+        if (isHomologado) {
+          btnDownload.disabled = false;
+          btnDownload.className = "bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase tracking-wider py-3 rounded-xl transition shadow flex items-center justify-center gap-2 cursor-pointer";
+          btnDownload.title = "Baixar Carteira em PNG";
+        } else {
+          btnDownload.disabled = true;
+          btnDownload.className = "bg-slate-800/80 border border-slate-700/60 text-slate-500 font-bold text-xs uppercase tracking-wider py-3 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed opacity-60";
+          btnDownload.title = "Download bloqueado: Homologação Pendente";
+        }
+      }
+
+      if (btnPrint) {
+        if (isHomologado) {
+          btnPrint.disabled = false;
+          btnPrint.className = "bg-pe-accent hover:bg-slate-700 text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer";
+          btnPrint.title = "Imprimir ou Salvar em PDF";
+        } else {
+          btnPrint.disabled = true;
+          btnPrint.className = "bg-slate-800/80 border border-slate-700/60 text-slate-500 font-bold text-xs uppercase tracking-wider py-3 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed opacity-60";
+          btnPrint.title = "Impressão bloqueada: Homologação Pendente";
+        }
+      }
+
+      badgeArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    document.getElementById('btnSearchPublicCode').addEventListener('click', executePublicSearch);
+    publicCodeInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') executePublicSearch();
+    });
+
+    /* =======================================================
+       EXPORTAR / BAIXAR CARTEIRA EM PNG E IMPRIMIR
+       ======================================================= */
+    document.getElementById('btnDownloadCardPng').addEventListener('click', () => {
+      const athlete = window._currentSearchedAthlete;
+      const upperStatus = (athlete && athlete.status ? athlete.status : 'PENDENTE').toUpperCase().trim();
+      if (upperStatus !== 'HOMOLOGADO' && upperStatus !== 'REGULAR') {
+        alert('⚠️ ATENÇÃO: Esta carteira digital está com HOMOLOGAÇÃO PENDENTE.\n\nA impressão e o download em PDF/PNG só são permitidos após a homologação oficial pela Federação.');
+        return;
+      }
+      const card = document.getElementById('athleteCredentialCard');
+      const athleteName = document.getElementById('cardBadgeName').textContent;
+      
+      html2canvas(card, {
+        scale: 3,
+        backgroundColor: null
+      }).then(canvas => {
+        const a = document.createElement('a');
+        a.download = `Carteira_FootTable_${athleteName.replace(/\s+/g, '_')}.png`;
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+      });
+    });
+
+    document.getElementById('btnPrintCard').addEventListener('click', () => {
+      const athlete = window._currentSearchedAthlete;
+      const upperStatus = (athlete && athlete.status ? athlete.status : 'PENDENTE').toUpperCase().trim();
+      if (upperStatus !== 'HOMOLOGADO' && upperStatus !== 'REGULAR') {
+        alert('⚠️ ATENÇÃO: Esta carteira digital está com HOMOLOGAÇÃO PENDENTE.\n\nA impressão da carteira em PDF é bloqueada até a validação e homologação oficial pela Federação.');
+        return;
+      }
+      window.print();
+    });
+
+    /* =======================================================
+       APLICAR PERSONALIZAÇÃO DE LAYOUT DA CARTEIRA (DO ADMIN)
+       ======================================================= */
+    async function applySavedBadgeLayout() {
+      let savedLayout = JSON.parse(localStorage.getItem('pe_badge_layout_config'));
+
+      if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+        try {
+          const { data } = await supabaseClient
+            .from('configuracoes')
+            .select('*')
+            .eq('chave', 'carteira_studio_layout')
+            .maybeSingle();
+          if (data && data.valor) {
+            const parsed = typeof data.valor === 'string' ? JSON.parse(data.valor) : data.valor;
+            if (parsed) {
+              localStorage.setItem('fpeft_studio_layout_data', JSON.stringify(parsed));
+            }
+          }
+        } catch (e) {}
+      }
+
+      if (!savedLayout) return;
+
+      const card = document.getElementById('athleteCredentialCard');
+      const photo = document.getElementById('cardBadgePhoto');
+      const photoContainer = photo ? photo.parentElement : null;
+
+      if (card) {
+        if (savedLayout.cardWidth) card.style.maxWidth = savedLayout.cardWidth + 'px';
+        if (savedLayout.cardMinHeight) card.style.minHeight = savedLayout.cardMinHeight + 'px';
+        if (savedLayout.cardBorderRadius) card.style.borderRadius = savedLayout.cardBorderRadius + 'px';
+        if (savedLayout.cardPadding) card.style.padding = savedLayout.cardPadding + 'px';
+        if (savedLayout.borderColor) card.style.borderColor = savedLayout.borderColor;
+      }
+
+      if (photoContainer) {
+        if (savedLayout.photoWidth) photoContainer.style.width = savedLayout.photoWidth + 'px';
+        if (savedLayout.photoHeight) photoContainer.style.height = savedLayout.photoHeight + 'px';
+        if (savedLayout.photoRadius) photoContainer.style.borderRadius = savedLayout.photoRadius + 'px';
+      }
+
+      // Adiciona textos adicionais customizados configurados pelo admin
+      const customContainer = document.getElementById('cardCustomTextsContainer');
+      if (customContainer) {
+        customContainer.innerHTML = '';
+        if (savedLayout.customTexts && Array.isArray(savedLayout.customTexts)) {
+          savedLayout.customTexts.forEach(t => {
+            const div = document.createElement('div');
+            div.style.fontSize = (t.fontSize || 11) + 'px';
+            div.style.color = t.color || '#f5b800';
+            div.style.textAlign = t.align || 'left';
+            div.style.marginTop = (t.marginTop || 4) + 'px';
+            div.style.fontWeight = 'bold';
+            div.textContent = t.text;
+            customContainer.appendChild(div);
+          });
+        }
+      }
+    }
+
+    /* =======================================================
+       SINCRONIZAÇÃO EM TEMPO REAL NA NUVEM (SUPABASE)
+       ======================================================= */
+    let _indexRealtimeChannel = null;
+    function initIndexCloudRealtime() {
+      // Economia de conexões do Supabase: portal público só ativa canal de estúdio se estiver em modo de teste/preview
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (!urlParams.get('live_preview')) return;
+      } catch (e) {
+        return;
+      }
+
+      if (!supabaseClient || _indexRealtimeChannel) return;
+      try {
+        _indexRealtimeChannel = supabaseClient.channel('carteira_cloud_live_design', {
+          config: { broadcast: { self: false } }
+        });
+        _indexRealtimeChannel
+          .on('broadcast', { event: 'live_design_update' }, (msg) => {
+            if (msg && msg.payload) {
+              applySavedBadgeLayout();
+            }
+          })
+          .subscribe();
+      } catch (e) {
+        console.warn('Realtime cloud error in index:', e);
+      }
+    }
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'pe_news_db' || e.key === 'pe_futmesa_news' || e.key === 'foot_table_news_db') {
+        renderPublicNews(true);
+      }
+      if (e.key === 'pe_gallery_db') {
+        renderPublicGallery();
+      }
+      if (e.key === 'pe_athletes_db' && !document.getElementById('publicBadgeResultArea').classList.contains('hidden')) {
+        executePublicSearch();
+      }
+      if (e.key === 'pe_badge_layout_config' || e.key === 'fpeft_live_design_ping' || e.key === 'fpeft_studio_custom_elements') {
+        applySavedBadgeLayout();
+      }
+    });
+    window.addEventListener('pe_gallery_updated', renderPublicGallery);
+    window.addEventListener('focus', () => {
+      renderPublicNews(true);
+      renderPublicGallery();
+    });
+
+    // Inicialização ao carregar página (com suporte a leitura automática de QR Code via URL)
+    async function initIndexApp() {
+      await initSupabase();
+      renderPublicNews(true);
+      renderPublicGallery();
+      applySavedBadgeLayout();
+
+      // Detecta leitura de QR Code via parâmetro de URL (?id=... / ?codigo=...)
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryId = urlParams.get('id') || urlParams.get('codigo') || urlParams.get('federado') || urlParams.get('atleta');
+        if (queryId) {
+          const sanitized = String(queryId).replace(/\D/g, '').slice(0, 6);
+          if (sanitized && sanitized.length === 6) {
+            publicCodeInput.value = sanitized;
+            await executePublicSearch();
+            const resultArea = document.getElementById('publicBadgeResultArea');
+            if (resultArea && !resultArea.classList.contains('hidden')) {
+              resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Erro ao processar parâmetro de URL:', err);
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initIndexApp);
+    } else {
+      initIndexApp();
+    }
+  </script>
+
+  <!-- Aviso Institucional de Cookies (LGPD) -->
+  <div id="cookieNoticeBanner" class="fixed bottom-4 left-4 right-4 max-w-2xl mx-auto z-50 bg-[#080c16]/95 border border-[#1c253b] rounded-2xl p-4 shadow-2xl backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-4 transition-all duration-300 hidden">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-pe-gold/10 border border-pe-gold/30 flex items-center justify-center text-pe-gold text-sm flex-shrink-0">
+        <i class="fa-solid fa-cookie-bite"></i>
+      </div>
+      <p class="text-xs text-slate-300 leading-relaxed">
+        Utilizamos cookies essenciais para garantir o funcionamento seguro deste portal institucional e a integridade de sua navegação, em estrita conformidade com a LGPD.
+      </p>
+    </div>
+    <div class="flex items-center gap-3 w-full sm:w-auto flex-shrink-0">
+      <a href="seguranca.html" class="text-xs text-slate-400 hover:text-pe-gold underline transition">Privacidade</a>
+      <button onclick="acceptCookieConsent()" class="w-full sm:w-auto bg-pe-gold hover:bg-pe-goldHover text-black font-bold text-xs uppercase px-4 py-2 rounded-xl transition cursor-pointer shadow-md">
+        Entendido
+      </button>
+    </div>
+  </div>
+
+  <script>
+    function checkCookieConsent() {
+      if (!localStorage.getItem('fpeft_cookie_consent')) {
+        const el = document.getElementById('cookieNoticeBanner');
+        if (el) el.classList.remove('hidden');
+      }
+    }
+    function acceptCookieConsent() {
+      localStorage.setItem('fpeft_cookie_consent', 'true');
+      const el = document.getElementById('cookieNoticeBanner');
+      if (el) el.classList.add('hidden');
+    }
+    document.addEventListener('DOMContentLoaded', checkCookieConsent);
+  </script>
+  <!-- Blindagem e Imutabilidade da Identidade Visual Oficial -->
+  <style>
+    img[src*="logo-federacao"], img[alt*="Federação"], img[alt*="FPEFT"] {
+      user-select: none !important;
+      -webkit-user-drag: none !important;
+      pointer-events: none !important;
+    }
+  </style>
+  <script>
+    (function() {
+      // Sanitização de cache de atletas contra fotos externas não autorizadas
+      try {
+        const rawAthletes = localStorage.getItem('pe_athletes_db');
+        if (rawAthletes && rawAthletes.includes('unsplash.com')) {
+          const parsed = JSON.parse(rawAthletes);
+          if (Array.isArray(parsed)) {
+            parsed.forEach(a => {
+              if (a.foto && a.foto.includes('unsplash.com')) a.foto = '';
+              if (a.foto_url && a.foto_url.includes('unsplash.com')) a.foto_url = '';
+            });
+            localStorage.setItem('pe_athletes_db', JSON.stringify(parsed));
+          }
+        }
+      } catch(e) {}
+
+      const VALID_LOGOS = ['assets/images/logo-federacao.png', '/assets/images/logo-federacao.png', 'assets/logo.png', '/assets/logo.png', 'assets/logo-federacao.png', '/assets/logo-federacao.png'];
+      const lockLogos = () => {
+        document.querySelectorAll('img[src*="logo-federacao"], img[alt*="Federação"], img[alt="FPEFT"]').forEach(img => {
+          img.setAttribute('draggable', 'false');
+          img.addEventListener('contextmenu', e => e.preventDefault());
+        });
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', lockLogos);
+      } else {
+        lockLogos();
+      }
+      if (window.MutationObserver) {
+        new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
+              const target = mutation.target;
+              if (target.tagName === 'IMG' && ((target.getAttribute('alt') || '').includes('Federação') || target.getAttribute('alt') === 'FPEFT')) {
+                const currentSrc = target.getAttribute('src') || '';
+                if (!VALID_LOGOS.some(v => currentSrc.endsWith(v))) {
+                  target.setAttribute('src', 'assets/images/logo-federacao.png');
+                }
+              }
+            }
+          });
+        }).observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ['src'] });
+      }
+    })();
+  </script>
+  <!-- MODAL: Leitura Completa da Matéria Oficial -->
+  <div id="publicNewsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+    <div class="bg-[#0b0f19] border border-white/15 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl transform scale-95 transition-transform duration-300" id="publicNewsModalCard">
+      <!-- Topo Modal -->
+      <div class="p-6 border-b border-white/10 flex items-start justify-between">
+        <div class="pr-4">
+          <div class="flex items-center gap-2 mb-2">
+            <span id="pubModalCategory" class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-blue-500/20 text-blue-400 border border-blue-500/30"></span>
+            <span id="pubModalDate" class="text-xs text-slate-400 font-mono"></span>
+          </div>
+          <h3 id="pubModalTitle" class="text-xl sm:text-2xl font-oswald uppercase font-bold text-white leading-tight"></h3>
+        </div>
+        <button onclick="closePublicNewsModal()" class="text-slate-400 hover:text-white p-2 rounded-lg bg-dark-800 transition shrink-0 cursor-pointer">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Conteúdo com Scroll -->
+      <div class="p-6 overflow-y-auto space-y-4 text-slate-300 text-sm leading-relaxed">
+        <div id="pubModalImageContainer" class="hidden rounded-xl overflow-hidden mb-4 border border-white/10 max-h-72">
+          <img id="pubModalImage" src="" alt="Capa" class="w-full h-full object-cover">
+        </div>
+
+        <p id="pubModalExcerpt" class="text-amber-200/90 font-medium text-base italic border-l-2 border-pe-gold pl-3 py-1 bg-amber-500/5 rounded-r-lg"></p>
+        
+        <div id="pubModalFullContent" class="space-y-3 whitespace-pre-line text-slate-300 text-sm leading-relaxed"></div>
+
+        <div id="pubModalPdfArea" class="hidden pt-4 border-t border-white/10">
+          <a id="pubModalPdfLink" href="#" target="_blank" class="inline-flex items-center gap-2 text-xs font-mono font-semibold px-4 py-2.5 rounded-xl bg-dark-800 hover:bg-dark-700 text-white border border-white/10 transition-colors">
+            <i class="fa-solid fa-file-pdf text-red-400"></i>
+            <span>Acessar Documento / PDF Oficial Anexo</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400 ml-1"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Rodapé Modal -->
+      <div class="p-4 bg-dark-950/60 border-t border-white/10 flex justify-end">
+        <button onclick="closePublicNewsModal()" class="px-5 py-2 rounded-xl text-xs font-bold text-slate-300 bg-dark-800 hover:bg-dark-700 transition-colors cursor-pointer">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

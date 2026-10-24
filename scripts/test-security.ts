@@ -166,6 +166,16 @@ async function runSecuritySuite() {
     });
     const resApiValid = middleware(reqApiValid);
     assert(suite3, 'Acesso liberado para sessão com cookie HMAC legítimo', resApiValid.status === 200);
+
+    // e) Bloqueio de varredura/ataque PHP (ex: /wp-login.php, /shell.php) -> HTTP 403 Forbidden
+    const reqPhpAttack = new Request('https://fpeft.vercel.app/wp-login.php');
+    const resPhpAttack = middleware(reqPhpAttack);
+    assert(suite3, 'Bloqueio imediato de tentativa de acesso a scripts PHP (HTTP 403)', resPhpAttack.status === 403);
+
+    // f) Bloqueio de injeção de código PHP via query string (eval, <?php) -> HTTP 403 Forbidden
+    const reqPhpInjection = new Request('https://fpeft.vercel.app/busca?q=%3C?php+eval(base64_decode());+?%3E');
+    const resPhpInjection = middleware(reqPhpInjection);
+    assert(suite3, 'Bloqueio de tentativa de injeção de código PHP via URL (HTTP 403)', resPhpInjection.status === 403);
   }
 
   // --------------------------------------------------------------------------
