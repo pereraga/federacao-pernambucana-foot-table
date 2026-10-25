@@ -106,16 +106,20 @@
       }
       #athleteCredentialCard, #athleteCredentialCard * {
         visibility: visible;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
       #athleteCredentialCard {
         position: fixed;
         left: 50%;
         top: 50%;
         transform: translate(-50%, -50%);
-        width: 100% !important;
-        max-width: 520px !important;
+        width: 85.6mm !important;
+        height: 53.98mm !important;
+        max-width: none !important;
         margin: 0 !important;
         box-shadow: none !important;
+        border: none !important;
       }
     }
   </style>
@@ -336,77 +340,100 @@
           <span>💳</span> Carteira Digital Oficial do Atleta
         </div>
 
-        <!-- Credencial Oficial -->
-        <div id="athleteCredentialCard" class="max-w-[560px] mx-auto bg-gradient-to-br from-[#06173a] to-[#040813] border-2 border-pe-gold rounded-2xl p-4 sm:p-6 relative overflow-hidden shadow-[0_15px_35px_rgba(0,0,0,0.8)]">
-          <!-- Marca d'água -->
-          <div class="absolute -right-6 -bottom-6 text-white/[0.03] font-oswald font-black text-6xl sm:text-7xl select-none pointer-events-none">
-            PERNAMBUCO
+        <!-- Credencial Oficial no Padrão FPEFT CR80 -->
+        <div id="athleteCredentialCard" class="max-w-[620px] w-full mx-auto aspect-[1050/662] rounded-2xl relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] border-2 border-pe-gold/60 select-none bg-[#030919] bg-cover bg-center" style="background-image: url('assets/Carteira_Atleta_HD.png');">
+          
+          <!-- Foto 3x4 do Atleta -->
+          <div class="absolute left-[4.2%] top-[44.5%] w-[19%] h-[35.6%] rounded-xl sm:rounded-2xl border-2 border-white overflow-hidden bg-[#09152e] shadow-md flex items-center justify-center">
+            <img id="cardBadgePhoto" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2364748b'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="Foto Atleta" class="w-full h-full object-cover" loading="lazy" decoding="async" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%2364748b\'%3E%3Cpath d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/%3E%3C/svg%3E'" />
           </div>
 
-          <!-- Topo da Carteira -->
-          <div class="flex items-center justify-between border-b border-pe-gold/25 pb-3 sm:pb-4 mb-3 sm:mb-4 gap-2">
-            <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
-              <div class="rounded-full border border-pe-gold overflow-hidden bg-pe-darkblue p-0.5 flex items-center justify-center shrink-0 w-8 h-8 sm:w-10 sm:h-10 min-w-[32px] min-h-[32px]">
-                <img src="assets/images/logo-federacao.png" alt="Federação Pernambucana Foot Table" class="w-full h-full object-contain rounded-full block select-none pointer-events-none" draggable="false" style="max-width: 100%; max-height: 100%;" onerror="if(!this.dataset.retry){this.dataset.retry=1;this.src='/assets/images/logo-federacao.png';}else if(this.dataset.retry==1){this.dataset.retry=2;this.src='assets/logo.png';}" />
-              </div>
-              <div class="min-w-0">
-                <h4 class="font-oswald text-xs sm:text-sm uppercase font-bold text-pe-gold tracking-wide leading-tight truncate">Pernambuco FutMesa</h4>
-                <span class="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider sm:tracking-widest block truncate">Foot Table Federation</span>
-              </div>
-            </div>
-            
-            <div class="bg-pe-red text-white text-[11px] sm:text-xs font-mono font-bold px-2.5 sm:px-3 py-1 rounded shadow-md tracking-wider shrink-0" id="cardBadgeCode">
+          <!-- Nº do Federado -->
+          <div class="absolute left-[4.2%] top-[81%] w-[19%] text-center">
+            <span class="block text-[7px] sm:text-[9px] font-extrabold uppercase text-white tracking-wider leading-none mb-0.5">Nº DO FEDERADO</span>
+            <div class="bg-white rounded-full py-0.5 sm:py-1 px-1 shadow text-[#00204a] font-extrabold font-mono text-[9px] sm:text-xs truncate tracking-wider" id="cardBadgeCode">
               ID: #000000
             </div>
           </div>
 
-          <!-- Conteúdo: Foto e Dados -->
-          <div class="grid grid-cols-[80px_1fr] sm:grid-cols-[100px_1fr] gap-3 sm:gap-5 items-center my-3 sm:my-4">
-            <div class="w-[80px] h-[105px] sm:w-[100px] sm:h-[125px] rounded-lg border-2 border-pe-gold overflow-hidden bg-slate-900 shadow-inner flex items-center justify-center shrink-0">
-              <img id="cardBadgePhoto" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2364748b'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="Foto Atleta" class="w-full h-full object-cover" loading="lazy" decoding="async" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%2364748b\'%3E%3Cpath d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/%3E%3C/svg%3E'" />
-            </div>
-            <div class="space-y-1.5 text-xs min-w-0">
-              <div>
-                <span class="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Nome do Atleta</span>
-                <strong class="text-white text-xs sm:text-sm font-bold font-oswald uppercase tracking-wide block truncate" id="cardBadgeName">---</strong>
-              </div>
-              <div class="flex items-center justify-between gap-1.5 sm:gap-2 pt-0.5">
-                <div class="min-w-0">
-                  <span class="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 tracking-wider block">CPF</span>
-                  <span class="text-slate-200 font-mono text-[11px] sm:text-xs whitespace-nowrap block" id="cardBadgeCPF">---</span>
-                </div>
-                <div class="shrink-0 text-right sm:text-left">
-                  <span class="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Ano Nasc.</span>
-                  <span class="text-slate-200 font-mono text-[11px] sm:text-xs font-bold block" id="cardBadgeBirth">---</span>
-                </div>
-              </div>
-              <div class="pt-0.5">
-                <span class="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Município</span>
-                <span class="text-slate-200 font-semibold text-[11px] sm:text-xs truncate block" id="cardBadgeCity">---</span>
-              </div>
+          <!-- Nome do Atleta (Linha 1) -->
+          <div class="absolute left-[25.5%] top-[43.5%] w-[70.3%]">
+            <span class="block text-[7px] sm:text-[9.5px] font-extrabold uppercase text-white tracking-wider leading-none mb-0.5">NOME DO ATLETA</span>
+            <div class="bg-white rounded-full py-0.5 sm:py-1 px-2.5 sm:px-3 shadow text-[#00204a] font-black font-oswald text-[10px] sm:text-sm uppercase tracking-wide truncate" id="cardBadgeName">
+              ---
             </div>
           </div>
 
-          <!-- Textos e Áreas Customizadas do Estúdio -->
-          <div id="cardCustomTextsContainer" class="space-y-1 my-2"></div>
-
-          <!-- Rodapé da Carteira -->
-          <div class="bg-black/40 border-l-4 border-pe-gold p-2 sm:p-3 rounded-lg grid grid-cols-3 gap-1 sm:gap-2 items-center mt-3 sm:mt-4">
-            <div class="min-w-0">
-              <span class="text-[7.5px] sm:text-[9px] uppercase font-bold text-slate-400 tracking-wider block truncate">Modalidade</span>
-              <span class="text-[10px] sm:text-xs font-extrabold uppercase text-pe-gold tracking-tight sm:tracking-wide block truncate" id="cardBadgeModality">SOLO (INDIVIDUAL)</span>
-            </div>
-            <div class="min-w-0 text-center">
-              <span class="text-[7.5px] sm:text-[9px] uppercase font-bold text-slate-400 tracking-wider block truncate">Categoria</span>
-              <span class="text-[10px] sm:text-xs font-extrabold uppercase text-amber-300 tracking-tight sm:tracking-wide block truncate" id="cardBadgeCategory">ASPIRANTE</span>
-            </div>
-            <div class="min-w-0 text-right">
-              <span class="text-[7.5px] sm:text-[9px] uppercase font-bold text-slate-400 tracking-wider block truncate">Status</span>
-              <span id="cardBadgeStatus" class="text-[9px] sm:text-[10px] font-bold uppercase text-emerald-400 inline-flex items-center justify-end gap-1 truncate">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span> REGULAR
-              </span>
+          <!-- Linha 2: CPF | Ano Nasc. | Município -->
+          <div class="absolute left-[25.5%] top-[52.5%] w-[21.5%] text-center">
+            <span class="block text-[6.5px] sm:text-[9px] font-extrabold uppercase text-white tracking-wider leading-none mb-0.5">CPF</span>
+            <div class="bg-white rounded-full py-0.5 sm:py-1 px-1 shadow text-[#00204a] font-extrabold font-mono text-[8.5px] sm:text-xs truncate" id="cardBadgeCPF">
+              ---
             </div>
           </div>
+
+          <div class="absolute left-[48.4%] top-[52.5%] w-[21.1%] text-center">
+            <span class="block text-[6.5px] sm:text-[9px] font-extrabold uppercase text-white tracking-wider leading-none mb-0.5">Ano Nasc.</span>
+            <div class="bg-white rounded-full py-0.5 sm:py-1 px-1 shadow text-[#00204a] font-extrabold font-mono text-[8.5px] sm:text-xs truncate" id="cardBadgeBirth">
+              ---
+            </div>
+          </div>
+
+          <div class="absolute left-[70.8%] top-[52.5%] w-[25%] text-center">
+            <span class="block text-[6.5px] sm:text-[9px] font-extrabold uppercase text-white tracking-wider leading-none mb-0.5">MUNICÍPIO</span>
+            <div class="bg-white rounded-full py-0.5 sm:py-1 px-1 shadow text-[#00204a] font-extrabold text-[8.5px] sm:text-xs truncate uppercase" id="cardBadgeCity">
+              ---
+            </div>
+          </div>
+
+          <!-- Linha 3: Telefone/WhatsApp | Modalidade | Categoria -->
+          <div class="absolute left-[25.5%] top-[62%] w-[17.1%] text-center">
+            <span class="block text-[6px] sm:text-[8px] font-extrabold uppercase text-white tracking-wider leading-none mb-0.5 truncate">TELEFONE / WHATSAPP</span>
+            <div class="bg-white rounded-full py-0.5 sm:py-1 px-0.5 shadow text-[#00204a] font-extrabold font-mono text-[7.5px] sm:text-[10px] truncate" id="cardBadgePhone">
+              (XX) XXXXX-XXXX
+            </div>
+          </div>
+
+          <div class="absolute left-[43.8%] top-[62%] w-[18.1%] text-center">
+            <span class="block text-[6px] sm:text-[8px] font-extrabold uppercase text-white tracking-wider leading-none mb-0.5 truncate">MODALIDADE</span>
+            <div class="bg-white rounded-full py-0.5 sm:py-1 px-0.5 shadow text-[#00204a] font-extrabold text-[7.5px] sm:text-[10px] uppercase truncate" id="cardBadgeModality">
+              SOLO (INDIVIDUAL)
+            </div>
+          </div>
+
+          <div class="absolute left-[63%] top-[62%] w-[17.6%] text-center">
+            <span class="block text-[6px] sm:text-[8px] font-extrabold uppercase text-white tracking-wider leading-none mb-0.5 truncate">CATEGORIA</span>
+            <div class="bg-white rounded-full py-0.5 sm:py-1 px-0.5 shadow text-[#00204a] font-extrabold text-[7.5px] sm:text-[10px] uppercase truncate" id="cardBadgeCategory">
+              AMADOR
+            </div>
+          </div>
+
+          <!-- QR Code (Direita) -->
+          <div class="absolute left-[82.3%] top-[61.5%] w-[13.5%] aspect-square bg-white rounded-lg sm:rounded-xl p-1 shadow-md flex items-center justify-center overflow-hidden">
+            <div id="cardBadgeQrBox" class="w-full h-full flex items-center justify-center">
+              <i class="fa-solid fa-qrcode text-black text-xl sm:text-2xl"></i>
+            </div>
+          </div>
+
+          <!-- Validade (Abaixo do QR Code) -->
+          <div class="absolute left-[82.3%] top-[86.5%] w-[13.5%] text-center">
+            <span class="block text-[6px] sm:text-[8px] font-extrabold uppercase text-white tracking-wider leading-none mb-0.5">VALIDADE</span>
+            <div class="bg-white rounded-full py-0.5 px-0.5 shadow text-[#00204a] font-extrabold font-mono text-[7.5px] sm:text-[10px] truncate" id="cardBadgeValidity">
+              12/2026
+            </div>
+          </div>
+
+          <!-- Assinatura da Diretoria FPEFT (Centro Rodapé) -->
+          <div class="absolute left-[28%] top-[84%] w-[48%] text-center">
+            <div class="w-full h-[1px] bg-white/80 mx-auto mb-0.5 sm:mb-1"></div>
+            <span class="text-[6px] sm:text-[8.5px] font-bold text-white uppercase tracking-wider block">
+              ASSINATURA DA DIRETORIA FPEFT
+            </span>
+          </div>
+
+          <!-- Elemento oculto para compatibilidade com os scripts de status e container customizado -->
+          <span id="cardBadgeStatus" class="hidden">REGULAR</span>
+          <div id="cardCustomTextsContainer" class="hidden"></div>
         </div>
 
         <!-- Aviso de Homologação Pendente (Dinâmico) -->
@@ -1268,6 +1295,24 @@
       const catBadge = document.getElementById('cardBadgeCategory');
       if (catBadge) catBadge.textContent = athlete.categoria || 'ASPIRANTE';
       document.getElementById('cardBadgeCode').textContent = `ID: #${athlete.codigo}`;
+      const phoneBadge = document.getElementById('cardBadgePhone');
+      if (phoneBadge) phoneBadge.textContent = athlete.telefone || '(XX) XXXXX-XXXX';
+      const valBadge = document.getElementById('cardBadgeValidity');
+      if (valBadge) valBadge.textContent = athlete.validade || '12/2026';
+
+      // Gera QR Code Oficial escaneável para a carteira
+      const qrBox = document.getElementById('cardBadgeQrBox');
+      if (qrBox && typeof qrcode !== 'undefined') {
+        try {
+          const qr = qrcode(0, 'M');
+          qr.addData(`https://fpeft.vercel.app/?id=${athlete.codigo || '000000'}`);
+          qr.make();
+          qrBox.innerHTML = qr.createSvgTag({ scalable: true, margin: 0 });
+        } catch (e) {
+          qrBox.innerHTML = '<i class="fa-solid fa-qrcode text-black text-2xl"></i>';
+        }
+      }
+
       const defaultAthletePhoto = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2364748b'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
       const cardPhotoEl = document.getElementById('cardBadgePhoto');
       if (cardPhotoEl) {

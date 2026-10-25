@@ -4196,7 +4196,7 @@
         labelTag: 'Nº DO FEDERADO',
         type: 'text-box',
         targetKey: 'federado',
-        text: '973321',
+        text: '529685',
         x: 44,
         y: 554,
         width: 200,
@@ -4221,7 +4221,7 @@
         targetKey: 'nome',
         text: '',
         x: 268,
-        y: 295,
+        y: 312,
         width: 738,
         height: 34,
         borderRadius: 17,
@@ -4244,7 +4244,7 @@
         targetKey: 'cpf',
         text: 'XXX.XXX.XXX-XX',
         x: 268,
-        y: 365,
+        y: 368,
         width: 226,
         height: 34,
         borderRadius: 17,
@@ -4261,14 +4261,37 @@
       },
       {
         id: 'field-nasc',
-        label: 'Ano de Nascimento',
-        labelTag: 'ANO NASC.',
+        label: 'Data de Nascimento',
+        labelTag: 'DATA DE NASCIMENTO',
         type: 'text-box',
         targetKey: 'nasc',
-        text: 'XXXX',
+        text: 'XX/XX/XXXX',
         x: 508,
-        y: 365,
+        y: 368,
         width: 222,
+        height: 34,
+        borderRadius: 17,
+        backgroundColor: '#ffffff',
+        textColor: '#00204a',
+        fontSize: 14,
+        fontWeight: '800',
+        fontFamily: 'Montserrat',
+        textAlign: 'center',
+        labelAlign: 'center',
+        paddingLeft: 10,
+        paddingRight: 10,
+        locked: false
+      },
+      {
+        id: 'field-municipio',
+        label: 'Município',
+        labelTag: 'MUNICÍPIO',
+        type: 'text-box',
+        targetKey: 'municipio',
+        text: '• PE',
+        x: 744,
+        y: 368,
+        width: 262,
         height: 34,
         borderRadius: 17,
         backgroundColor: '#ffffff',
@@ -4289,32 +4312,9 @@
         type: 'text-box',
         targetKey: 'fone',
         text: '(XX) XXXXX-XXXX',
-        x: 744,
-        y: 365,
-        width: 262,
-        height: 34,
-        borderRadius: 17,
-        backgroundColor: '#ffffff',
-        textColor: '#00204a',
-        fontSize: 14,
-        fontWeight: '800',
-        fontFamily: 'Montserrat',
-        textAlign: 'center',
-        labelAlign: 'center',
-        paddingLeft: 10,
-        paddingRight: 10,
-        locked: false
-      },
-      {
-        id: 'field-modalidade',
-        label: 'Modalidade',
-        labelTag: 'MODALIDADE',
-        type: 'text-box',
-        targetKey: 'modalidade',
-        text: 'SOLO (INDIVIDUAL)',
         x: 268,
-        y: 440,
-        width: 195,
+        y: 432,
+        width: 180,
         height: 34,
         borderRadius: 17,
         backgroundColor: '#ffffff',
@@ -4324,20 +4324,20 @@
         fontFamily: 'Montserrat',
         textAlign: 'center',
         labelAlign: 'center',
-        paddingLeft: 10,
-        paddingRight: 10,
+        paddingLeft: 8,
+        paddingRight: 8,
         locked: false
       },
       {
-        id: 'field-municipio',
-        label: 'Município',
-        labelTag: 'MUNICÍPIO',
+        id: 'field-modalidade',
+        label: 'Modalidade',
+        labelTag: 'MODALIDADE',
         type: 'text-box',
-        targetKey: 'municipio',
-        text: '- PE',
-        x: 476,
-        y: 440,
-        width: 165,
+        targetKey: 'modalidade',
+        text: 'SOLO (INDIVIDUAL)',
+        x: 460,
+        y: 432,
+        width: 190,
         height: 34,
         borderRadius: 17,
         backgroundColor: '#ffffff',
@@ -4358,9 +4358,9 @@
         type: 'text-box',
         targetKey: 'categoria',
         text: 'AMADOR',
-        x: 654,
-        y: 440,
-        width: 190,
+        x: 662,
+        y: 432,
+        width: 185,
         height: 34,
         borderRadius: 17,
         backgroundColor: '#ffffff',
@@ -4370,20 +4370,20 @@
         fontFamily: 'Montserrat',
         textAlign: 'center',
         labelAlign: 'center',
-        paddingLeft: 10,
-        paddingRight: 10,
+        paddingLeft: 8,
+        paddingRight: 8,
         locked: false
       },
       {
         id: 'field-qrcode',
         label: 'QR Code de Autenticidade',
-        labelTag: 'VERIFICAÇÃO DE AUTENTICIDADE',
+        labelTag: '',
         type: 'qrcode',
         targetKey: 'qr',
         x: 864,
-        y: 416,
+        y: 420,
         width: 142,
-        height: 136,
+        height: 142,
         borderRadius: 16,
         backgroundColor: '#ffffff',
         locked: false
@@ -4396,7 +4396,7 @@
         targetKey: 'validade',
         text: '12/2026',
         x: 864,
-        y: 594,
+        y: 588,
         width: 142,
         height: 32,
         borderRadius: 16,
@@ -4419,7 +4419,7 @@
         targetKey: 'assinatura',
         text: 'ASSINATURA DA DIRETORIA FPEFT',
         x: 310,
-        y: 590,
+        y: 586,
         width: 440,
         height: 28,
         textColor: '#ffffff',
@@ -4430,7 +4430,7 @@
       }
     ];
 
-    const STUDIO_LAYOUT_VERSION = 'v2026_cr80_padrao_oficial_v7_limpo_sem_duplicata';
+    const STUDIO_LAYOUT_VERSION = 'v2026_cr80_padrao_oficial_v8_preview_alinhado';
 
     const studioState = {
       zoom: 0.8,
@@ -5017,12 +5017,19 @@
       if (savedGuides !== null) {
         studioState.showGuides = savedGuides === 'true';
       }
-      const savedCustomElements = localStorage.getItem('fpeft_studio_custom_elements');
-      if (savedCustomElements) {
-        const parsed = JSON.parse(savedCustomElements);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          studioState.elements = sanitizeStudioElements(parsed);
-          localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(studioState.elements));
+      const savedVersion = localStorage.getItem('fpeft_studio_layout_version');
+      if (savedVersion !== STUDIO_LAYOUT_VERSION) {
+        studioState.elements = JSON.parse(JSON.stringify(OFFICIAL_DEFAULT_ELEMENTS));
+        localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(studioState.elements));
+        localStorage.setItem('fpeft_studio_layout_version', STUDIO_LAYOUT_VERSION);
+      } else {
+        const savedCustomElements = localStorage.getItem('fpeft_studio_custom_elements');
+        if (savedCustomElements) {
+          const parsed = JSON.parse(savedCustomElements);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            studioState.elements = sanitizeStudioElements(parsed);
+            localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(studioState.elements));
+          }
         }
       }
       const savedBgTransform = localStorage.getItem('fpeft_studio_bg_transform');
