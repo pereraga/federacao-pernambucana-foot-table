@@ -17,8 +17,8 @@ export default async function handler(req, res) {
     supabaseKey = "sb_publishable_vvqh9vB0Dr0EqR9JGhy4kA_XnJ-9h0z";
   }
 
-  const supabaseSecondaryUrl = process.env.SUPABASE_SECONDARY_URL || process.env.NEXT_PUBLIC_SUPABASE_SECONDARY_URL || "";
-  let supabaseSecondaryKey = process.env.SUPABASE_SECONDARY_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_SECONDARY_ANON_KEY || "";
+  const supabaseSecondaryUrl = process.env.SUPABASE_SECONDARY_URL || process.env.NEXT_PUBLIC_SUPABASE_SECONDARY_URL || "https://xvqsysfqbkfsogkwtbal.supabase.co";
+  let supabaseSecondaryKey = process.env.SUPABASE_SECONDARY_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_SECONDARY_ANON_KEY || "sb_publishable_2T1UD0EYvVBlIqCvnX5VHw_K6mmAn3M";
 
   return res.status(200).json({
     supabaseUrl,

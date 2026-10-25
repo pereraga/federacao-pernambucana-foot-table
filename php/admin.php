@@ -2866,11 +2866,11 @@
               <div class="space-y-3 text-xs">
                 <div>
                   <label class="block text-slate-300 font-bold mb-1">Project URL do Banco 2</label>
-                  <input type="text" id="adminCfgSecondaryUrl" placeholder="https://seu-segundo-projeto.supabase.co" oninput="autoSaveIntermediaryDatabases()" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-4 py-2.5 text-slate-200 font-mono outline-none" />
+                  <input type="text" id="adminCfgSecondaryUrl" value="https://xvqsysfqbkfsogkwtbal.supabase.co" placeholder="https://xvqsysfqbkfsogkwtbal.supabase.co" oninput="autoSaveIntermediaryDatabases()" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-4 py-2.5 text-slate-200 font-mono outline-none" />
                 </div>
                 <div>
                   <label class="block text-slate-300 font-bold mb-1">Anon Key do Banco 2</label>
-                  <input type="password" id="adminCfgSecondaryKey" placeholder="Cole a anon key do segundo banco..." oninput="autoSaveIntermediaryDatabases()" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-4 py-2.5 text-slate-200 font-mono outline-none" />
+                  <input type="password" id="adminCfgSecondaryKey" value="sb_publishable_2T1UD0EYvVBlIqCvnX5VHw_K6mmAn3M" placeholder="Cole a anon key do segundo banco..." oninput="autoSaveIntermediaryDatabases()" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-4 py-2.5 text-slate-200 font-mono outline-none" />
                 </div>
               </div>
             </div>
@@ -2979,8 +2979,10 @@
     let supabaseClient = null;
 
     // Configurações do Banco Reserva / Failover (Segundo Supabase)
-    let SUPABASE_SECONDARY_URL = localStorage.getItem('pe_supabase_secondary_url') || '';
-    let SUPABASE_SECONDARY_ANON_KEY = localStorage.getItem('pe_supabase_secondary_anon_key') || '';
+    const DEFAULT_SUPABASE_SECONDARY_URL = "https://xvqsysfqbkfsogkwtbal.supabase.co";
+    const DEFAULT_SUPABASE_SECONDARY_ANON_KEY = "sb_publishable_2T1UD0EYvVBlIqCvnX5VHw_K6mmAn3M";
+    let SUPABASE_SECONDARY_URL = localStorage.getItem('pe_supabase_secondary_url') || DEFAULT_SUPABASE_SECONDARY_URL;
+    let SUPABASE_SECONDARY_ANON_KEY = localStorage.getItem('pe_supabase_secondary_anon_key') || DEFAULT_SUPABASE_SECONDARY_ANON_KEY;
     let IS_DUAL_WRITE_ENABLED = localStorage.getItem('pe_supabase_dual_write') !== 'false';
     let IS_AUTO_FAILOVER_ENABLED = localStorage.getItem('pe_supabase_auto_failover') !== 'false';
     let supabaseSecondaryClient = null;
@@ -12947,8 +12949,8 @@ WITH CHECK (true);
 
     /* INICIALIZAÇÃO DO BANCO RESERVA */
     async function initSecondarySupabase() {
-      SUPABASE_SECONDARY_URL = (localStorage.getItem('pe_supabase_secondary_url') || '').trim();
-      SUPABASE_SECONDARY_ANON_KEY = (localStorage.getItem('pe_supabase_secondary_anon_key') || '').trim();
+      SUPABASE_SECONDARY_URL = (localStorage.getItem('pe_supabase_secondary_url') || DEFAULT_SUPABASE_SECONDARY_URL).trim();
+      SUPABASE_SECONDARY_ANON_KEY = (localStorage.getItem('pe_supabase_secondary_anon_key') || DEFAULT_SUPABASE_SECONDARY_ANON_KEY).trim();
       IS_DUAL_WRITE_ENABLED = localStorage.getItem('pe_supabase_dual_write') !== 'false';
       IS_AUTO_FAILOVER_ENABLED = localStorage.getItem('pe_supabase_auto_failover') !== 'false';
 
@@ -12975,7 +12977,8 @@ WITH CHECK (true);
       }
 
       try {
-        supabaseSecondaryClient = window.supabase.createClient(SUPABASE_SECONDARY_URL, SUPABASE_SECONDARY_ANON_KEY);
+        const cleanSecUrl = SUPABASE_SECONDARY_URL.replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '');
+        supabaseSecondaryClient = window.supabase.createClient(cleanSecUrl, SUPABASE_SECONDARY_ANON_KEY);
         const ping = await safeSupabaseCall(
           supabaseSecondaryClient.from('atletas').select('count', { count: 'exact', head: true }),
           2500
@@ -15056,9 +15059,9 @@ WITH CHECK (true);
         if (keyInput) keyInput.value = localStorage.getItem('pe_supabase_anon_key') || DEFAULT_SUPABASE_ANON_KEY;
 
         const secUrlInput = document.getElementById('adminCfgSecondaryUrl');
-        if (secUrlInput) secUrlInput.value = localStorage.getItem('pe_supabase_secondary_url') || '';
+        if (secUrlInput) secUrlInput.value = localStorage.getItem('pe_supabase_secondary_url') || DEFAULT_SUPABASE_SECONDARY_URL;
         const secKeyInput = document.getElementById('adminCfgSecondaryKey');
-        if (secKeyInput) secKeyInput.value = localStorage.getItem('pe_supabase_secondary_anon_key') || '';
+        if (secKeyInput) secKeyInput.value = localStorage.getItem('pe_supabase_secondary_anon_key') || DEFAULT_SUPABASE_SECONDARY_ANON_KEY;
         const secDualWrite = document.getElementById('adminCfgDualWrite');
         if (secDualWrite) secDualWrite.checked = localStorage.getItem('pe_supabase_dual_write') !== 'false';
         const secFailover = document.getElementById('adminCfgAutoFailover');

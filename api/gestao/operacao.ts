@@ -128,8 +128,8 @@ export default async function handler(req: ExtendedRequest, res: ServerResponse)
   }
 
   // Espelhamento assíncrono no banco de dados secundário/reserva (se configurado)
-  const secUrl = (process.env.SUPABASE_SECONDARY_URL || '').replace(/\/+$/, '');
-  const secKey = process.env.SUPABASE_SECONDARY_SERVICE_ROLE_KEY || process.env.SUPABASE_SECONDARY_ANON_KEY;
+  const secUrl = (process.env.SUPABASE_SECONDARY_URL || 'https://xvqsysfqbkfsogkwtbal.supabase.co').replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '');
+  const secKey = process.env.SUPABASE_SECONDARY_SERVICE_ROLE_KEY || process.env.SUPABASE_SECONDARY_ANON_KEY || 'sb_publishable_2T1UD0EYvVBlIqCvnX5VHw_K6mmAn3M';
   if (secUrl && secKey) {
     (async () => {
       try {

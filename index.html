@@ -721,8 +721,10 @@
     let supabaseClient = null;
 
     // Configurações do Banco Reserva (Failover Automático)
-    let SUPABASE_SECONDARY_URL = localStorage.getItem('pe_supabase_secondary_url') || '';
-    let SUPABASE_SECONDARY_ANON_KEY = localStorage.getItem('pe_supabase_secondary_anon_key') || '';
+    const DEFAULT_SUPABASE_SECONDARY_URL = "https://xvqsysfqbkfsogkwtbal.supabase.co";
+    const DEFAULT_SUPABASE_SECONDARY_ANON_KEY = "sb_publishable_2T1UD0EYvVBlIqCvnX5VHw_K6mmAn3M";
+    let SUPABASE_SECONDARY_URL = localStorage.getItem('pe_supabase_secondary_url') || DEFAULT_SUPABASE_SECONDARY_URL;
+    let SUPABASE_SECONDARY_ANON_KEY = localStorage.getItem('pe_supabase_secondary_anon_key') || DEFAULT_SUPABASE_SECONDARY_ANON_KEY;
     let supabaseSecondaryClient = null;
 
     function safeSupabaseCall(promise, timeoutMs = 2500) {
@@ -747,6 +749,12 @@
               localStorage.setItem('pe_supabase_url', SUPABASE_URL);
               localStorage.setItem('pe_supabase_anon_key', SUPABASE_ANON_KEY);
             }
+            if (data.supabaseSecondaryUrl && data.supabaseSecondaryAnonKey) {
+              SUPABASE_SECONDARY_URL = data.supabaseSecondaryUrl;
+              SUPABASE_SECONDARY_ANON_KEY = data.supabaseSecondaryAnonKey;
+              localStorage.setItem('pe_supabase_secondary_url', SUPABASE_SECONDARY_URL);
+              localStorage.setItem('pe_supabase_secondary_anon_key', SUPABASE_SECONDARY_ANON_KEY);
+            }
           }
         } catch (e) {}
       }
@@ -759,7 +767,8 @@
       // Inicializa cliente secundário / reserva se configurado
       if (window.supabase && SUPABASE_SECONDARY_URL && SUPABASE_SECONDARY_ANON_KEY && !SUPABASE_SECONDARY_ANON_KEY.startsWith('http')) {
         try {
-          supabaseSecondaryClient = window.supabase.createClient(SUPABASE_SECONDARY_URL, SUPABASE_SECONDARY_ANON_KEY);
+          const cleanSecUrl = SUPABASE_SECONDARY_URL.replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '');
+          supabaseSecondaryClient = window.supabase.createClient(cleanSecUrl, SUPABASE_SECONDARY_ANON_KEY);
         } catch (eSec) {
           console.warn("Aviso ao conectar banco reserva:", eSec);
         }

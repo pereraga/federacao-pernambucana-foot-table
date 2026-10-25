@@ -138,8 +138,8 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     }
   } catch (err) {
     // Falha de rede ou timeout no Supabase primário: tenta failover no banco de dados reserva
-    const secUrl = (process.env.SUPABASE_SECONDARY_URL || '').replace(/\/+$/, '');
-    const secKey = process.env.SUPABASE_SECONDARY_ANON_KEY || '';
+    const secUrl = (process.env.SUPABASE_SECONDARY_URL || 'https://xvqsysfqbkfsogkwtbal.supabase.co').replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '');
+    const secKey = process.env.SUPABASE_SECONDARY_ANON_KEY || 'sb_publishable_2T1UD0EYvVBlIqCvnX5VHw_K6mmAn3M';
 
     if (secUrl && secKey) {
       try {
