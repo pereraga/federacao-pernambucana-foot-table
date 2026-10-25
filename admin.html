@@ -7876,103 +7876,296 @@
       }
       window.resetAthletePhoto = resetAthletePhoto;
 
+      // 0. Compilação Otimizada e Divisão em Frações (Chunks) para Economia do Banco
+      function compileAthletePhotoBundle(sourceDataUrl, callback) {
+        if (!sourceDataUrl) return;
+        const img = new Image();
+        img.onload = () => {
+          // A) Versão Alta Resolução Oficial (420x560, qualidade 0.84)
+          const maxW = 420;
+          const maxH = 560;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxW || h > maxH) {
+            const ratio = Math.min(maxW / w, maxH / h);
+            w = Math.round(w * ratio);
+            h = Math.round(h * ratio);
+          }
+          const canvasFull = document.createElement('canvas');
+          canvasFull.width = w;
+          canvasFull.height = h;
+          const ctxFull = canvasFull.getContext('2d');
+          ctxFull.imageSmoothingEnabled = true;
+          ctxFull.imageSmoothingQuality = 'high';
+          ctxFull.drawImage(img, 0, 0, w, h);
+          const fullUrl = canvasFull.toDataURL('image/jpeg', 0.84);
+
+          // B) Versão Compacta Ultra-Leve (150x200, qualidade 0.68) para a coluna foto_url do banco
+          const canvasCompact = document.createElement('canvas');
+          canvasCompact.width = 150;
+          canvasCompact.height = 200;
+          const ctxCompact = canvasCompact.getContext('2d');
+          ctxCompact.imageSmoothingEnabled = true;
+          ctxCompact.imageSmoothingQuality = 'medium';
+          ctxCompact.drawImage(img, 0, 0, 150, 200);
+          const compactUrl = canvasCompact.toDataURL('image/jpeg', 0.68);
+
+          // C) Fracionamento (Chunks de 12.000 caracteres)
+          const CHUNK_SIZE = 12000;
+          const chunks = [];
+          for (let i = 0; i < fullUrl.length; i += CHUNK_SIZE) {
+            chunks.push(fullUrl.substring(i, i + CHUNK_SIZE));
+          }
+
+          const bundle = {
+            fullUrl: fullUrl,
+            compactUrl: compactUrl,
+            chunks: chunks,
+            totalChunks: chunks.length,
+            fullLength: fullUrl.length,
+            width: w,
+            height: h
+          };
+
+          if (typeof callback === 'function') callback(bundle);
+        };
+        img.onerror = () => {
+          if (typeof callback === 'function') callback({ fullUrl: sourceDataUrl, compactUrl: sourceDataUrl, chunks: [sourceDataUrl], totalChunks: 1, fullLength: sourceDataUrl.length });
+        };
+        img.src = sourceDataUrl;
+      }
+      window.compileAthletePhotoBundle = compileAthletePhotoBundle;
+
+      // Sincronização das frações (chunks) da foto nos dois bancos de dados (DB1 e DB2)
+      async function syncAthletePhotoChunksToBothDatabases(cleanCode, photoBundle) {
+        if (!cleanCode) return;
+        const code = String(cleanCode).trim();
+        const chunks = (photoBundle && Array.isArray(photoBundle.chunks)) ? photoBundle.chunks : [];
+        const total = chunks.length;
+
+        // 1. Grava no cache local
+        try {
+          if (total > 0) {
+            localStorage.setItem('pe_photo_chunks_' + code, JSON.stringify(chunks));
+            if (photoBundle.fullUrl) localStorage.setItem('pe_photo_full_' + code, photoBundle.fullUrl);
+          } else {
+            localStorage.removeItem('pe_photo_chunks_' + code);
+            localStorage.removeItem('pe_photo_full_' + code);
+          }
+        } catch (eStor) {}
+
+        const chunkRows = chunks.map((c, idx) => ({
+          source: `athlete_photo_chunk:${code}:${idx}:${total}`,
+          status: c,
+          pinged_at: new Date().toISOString()
+        }));
+
+        const metaRow = {
+          source: `athlete_photo_meta:${code}`,
+          status: JSON.stringify({
+            codigo: code,
+            totalChunks: total,
+            fullLength: photoBundle.fullLength || 0,
+            updatedAt: new Date().toISOString()
+          }),
+          pinged_at: new Date().toISOString()
+        };
+
+        const tasks = [];
+
+        // Banco 2 (Secundário/Ingestão)
+        if (typeof supabaseSecondaryClient !== 'undefined' && supabaseSecondaryClient) {
+          tasks.push((async () => {
+            try {
+              await safeSupabaseCall(supabaseSecondaryClient.from('keep_alive_logs').delete().like('source', `athlete_photo_chunk:${code}:%`), 3000);
+              await safeSupabaseCall(supabaseSecondaryClient.from('keep_alive_logs').delete().eq('source', `athlete_photo_meta:${code}`), 3000);
+              if (chunkRows.length > 0) {
+                await safeSupabaseCall(supabaseSecondaryClient.from('keep_alive_logs').insert([...chunkRows, metaRow]), 4000);
+              }
+            } catch (eSec) {}
+          })());
+        }
+
+        // Banco 1 (Principal/Exibição)
+        if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+          tasks.push((async () => {
+            try {
+              await safeSupabaseCall(supabaseClient.from('keep_alive_logs').delete().like('source', `athlete_photo_chunk:${code}:%`), 3000);
+              await safeSupabaseCall(supabaseClient.from('keep_alive_logs').delete().eq('source', `athlete_photo_meta:${code}`), 3000);
+              if (chunkRows.length > 0) {
+                await safeSupabaseCall(supabaseClient.from('keep_alive_logs').insert([...chunkRows, metaRow]), 4000);
+              }
+            } catch (ePrim) {}
+          })());
+        }
+
+        await Promise.allSettled(tasks);
+      }
+      window.syncAthletePhotoChunksToBothDatabases = syncAthletePhotoChunksToBothDatabases;
+
+      // Montagem da foto por completo a partir das frações (chunks)
+      async function montarFotoCompletaFederado(cleanCode, fallbackCompactUrl) {
+        if (!cleanCode) return fallbackCompactUrl || '';
+        const code = String(cleanCode).trim();
+
+        // 1. Tenta recuperar do cache local imediato
+        try {
+          const cachedFull = localStorage.getItem('pe_photo_full_' + code);
+          if (cachedFull && cachedFull.startsWith('data:image/')) {
+            return cachedFull;
+          }
+          const cachedChunks = JSON.parse(localStorage.getItem('pe_photo_chunks_' + code) || '[]');
+          if (Array.isArray(cachedChunks) && cachedChunks.length > 0) {
+            const assembled = cachedChunks.join('');
+            if (assembled.startsWith('data:image/')) return assembled;
+          }
+        } catch (eCache) {}
+
+        let chunks = [];
+
+        // 2. Consulta no Banco 1 (Principal)
+        if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+          try {
+            const { data: db1Chunks } = await safeSupabaseCall(
+              supabaseClient
+                .from('keep_alive_logs')
+                .select('source, status')
+                .like('source', `athlete_photo_chunk:${code}:%`)
+                .order('source', { ascending: true }),
+              2500
+            );
+            if (db1Chunks && Array.isArray(db1Chunks) && db1Chunks.length > 0) {
+              chunks = db1Chunks;
+            }
+          } catch (e1) {}
+        }
+
+        // 3. Failover: consulta no Banco 2
+        if (chunks.length === 0 && typeof supabaseSecondaryClient !== 'undefined' && supabaseSecondaryClient) {
+          try {
+            const { data: db2Chunks } = await safeSupabaseCall(
+              supabaseSecondaryClient
+                .from('keep_alive_logs')
+                .select('source, status')
+                .like('source', `athlete_photo_chunk:${code}:%`)
+                .order('source', { ascending: true }),
+              2500
+            );
+            if (db2Chunks && Array.isArray(db2Chunks) && db2Chunks.length > 0) {
+              chunks = db2Chunks;
+            }
+          } catch (e2) {}
+        }
+
+        // 4. Montagem das frações em ordem
+        if (chunks.length > 0) {
+          try {
+            chunks.sort((a, b) => {
+              const partsA = a.source.split(':');
+              const partsB = b.source.split(':');
+              const idxA = parseInt(partsA[2] || '0', 10);
+              const idxB = parseInt(partsB[2] || '0', 10);
+              return idxA - idxB;
+            });
+            const assembledFullPhoto = chunks.map(c => c.status).join('');
+            if (assembledFullPhoto.startsWith('data:image/')) {
+              try {
+                localStorage.setItem('pe_photo_full_' + code, assembledFullPhoto);
+                localStorage.setItem('pe_photo_chunks_' + code, JSON.stringify(chunks.map(c => c.status)));
+              } catch (eStor) {}
+              return assembledFullPhoto;
+            }
+          } catch (eMontagem) {
+            console.warn('Erro ao montar foto completa a partir das frações:', eMontagem);
+          }
+        }
+
+        return fallbackCompactUrl || '';
+      }
+      window.montarFotoCompletaFederado = montarFotoCompletaFederado;
+
+
       // 1. Aplicação e Sobreposição de Foto Oficial do Atleta (Atualiza Formulário, Studio e Banco)
       window.applyAthletePhotoDataUrl = function(compressedDataUrl, info = '') {
         if (!compressedDataUrl) return;
 
-        // 1. Armazena foto ativa em memória e no input persistente
-        window._currentAthletePhoto = compressedDataUrl;
-        const photoInput = document.getElementById('athletePhotoVal');
-        if (photoInput) photoInput.value = compressedDataUrl;
+        compileAthletePhotoBundle(compressedDataUrl, (bundle) => {
+          // 1. Armazena foto compacta em memória e no input persistente para economizar espaço
+          window._currentAthletePhoto = bundle.compactUrl;
+          window._currentAthletePhotoFull = bundle.fullUrl;
+          window._currentAthletePhotoChunks = bundle.chunks;
 
-        // 2. Atualiza miniatura visual no formulário com status e botões de ação
-        updateAthleteFormPhotoPreview(compressedDataUrl, info || 'Sobreposta com sucesso');
+          const photoInput = document.getElementById('athletePhotoVal');
+          if (photoInput) photoInput.value = bundle.compactUrl;
 
-        // 3. Atualiza o elemento no Studio CR80 (canvas de prévia interativa)
-        const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
-        if (photoTarget) {
-          photoTarget.photoUrl = compressedDataUrl;
-        }
+          // 2. Atualiza miniatura visual no formulário
+          updateAthleteFormPhotoPreview(bundle.compactUrl, info || `Otimizada (${bundle.totalChunks} frações)`);
 
-        // 4. Se houver um atleta em edição/ativo na sessão, sincroniza seus dados
-        if (window._lastActiveAthlete) {
-          window._lastActiveAthlete.foto = compressedDataUrl;
-          window._lastActiveAthlete.foto_url = compressedDataUrl;
-        }
-
-        // 5. Renderiza a tela de prévia imediatamente com a nova foto sobreposta
-        renderInteractiveElements();
-
-        // 6. Substituição imediata no banco de dados local e Supabase (se atleta já possui código registrado)
-        const currentCode = (document.getElementById('athleteCode')?.value || window._lastActiveAthlete?.codigo || '').trim();
-        if (currentCode) {
-          // A) Atualiza no banco de dados local (localStorage)
-          try {
-            const localList = JSON.parse(localStorage.getItem('pe_athletes_db') || '[]');
-            const idx = localList.findIndex(a => a.codigo === currentCode);
-            if (idx >= 0) {
-              localList[idx].foto = compressedDataUrl;
-              localList[idx].foto_url = compressedDataUrl;
-              localStorage.setItem('pe_athletes_db', JSON.stringify(localList));
-            }
-          } catch (e) {
-            console.warn('Erro ao atualizar foto no localStorage:', e);
+          // 3. Atualiza elemento no Studio CR80 com resolução HD
+          const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
+          if (photoTarget) {
+            photoTarget.photoUrl = bundle.fullUrl || bundle.compactUrl;
           }
 
-          // B) Sincronização da foto em ambos os bancos (Banco 1 Principal e Banco 2 Ingestão/Reserva)
-          const syncPhotoToDb = async () => {
-            const photoPayload = { foto_url: compressedDataUrl, foto: compressedDataUrl };
-            const recordKey = 'athlete_record:' + currentCode;
+          if (window._lastActiveAthlete) {
+            window._lastActiveAthlete.foto = bundle.compactUrl;
+            window._lastActiveAthlete.foto_url = bundle.compactUrl;
+          }
 
-            // 1. Atualiza no Banco 2 (Secundário/Ingestão)
-            if (typeof supabaseSecondaryClient !== 'undefined' && supabaseSecondaryClient) {
-              try {
-                let r2 = await supabaseSecondaryClient.from('atletas').update(photoPayload).eq('codigo', currentCode);
-                if (r2.error) {
-                  await supabaseSecondaryClient.from('atletas').update({ foto_url: compressedDataUrl }).eq('codigo', currentCode);
-                }
-                // Atualiza também keep_alive_logs no Banco 2
+          renderInteractiveElements();
+
+          // 4. Substituição imediata no banco local e nuvem
+          const currentCode = (document.getElementById('athleteCode')?.value || window._lastActiveAthlete?.codigo || '').trim();
+          if (currentCode) {
+            try {
+              const localList = JSON.parse(localStorage.getItem('pe_athletes_db') || '[]');
+              const idx = localList.findIndex(a => a.codigo === currentCode);
+              if (idx >= 0) {
+                localList[idx].foto = bundle.compactUrl;
+                localList[idx].foto_url = bundle.compactUrl;
+                localStorage.setItem('pe_athletes_db', JSON.stringify(localList));
+              }
+            } catch (e) {}
+
+            const syncPhotoToDb = async () => {
+              const photoPayload = { foto_url: bundle.compactUrl, foto: bundle.compactUrl };
+              const recordKey = 'athlete_record:' + currentCode;
+
+              if (typeof supabaseSecondaryClient !== 'undefined' && supabaseSecondaryClient) {
                 try {
+                  await supabaseSecondaryClient.from('atletas').update(photoPayload).eq('codigo', currentCode);
                   const { data: rec2 } = await supabaseSecondaryClient.from('keep_alive_logs').select('status').eq('source', recordKey).limit(1).maybeSingle();
                   if (rec2 && rec2.status) {
                     const parsed = JSON.parse(rec2.status);
-                    parsed.foto = compressedDataUrl;
-                    parsed.foto_url = compressedDataUrl;
+                    parsed.foto = bundle.compactUrl;
+                    parsed.foto_url = bundle.compactUrl;
                     await supabaseSecondaryClient.from('keep_alive_logs').update({ status: JSON.stringify(parsed), pinged_at: new Date().toISOString() }).eq('source', recordKey);
                   }
-                } catch (eLog2) {}
-              } catch (e2) {
-                console.warn('[Dual-DB] Foto Banco 2:', e2);
+                } catch (e2) {}
               }
-            }
 
-            // 2. Atualiza no Banco 1 (Principal/Exibição)
-            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
-              try {
-                let r1 = await supabaseClient.from('atletas').update(photoPayload).eq('codigo', currentCode);
-                if (r1.error) {
-                  await supabaseClient.from('atletas').update({ foto_url: compressedDataUrl }).eq('codigo', currentCode);
-                }
-                // Atualiza também keep_alive_logs no Banco 1
+              if (typeof supabaseClient !== 'undefined' && supabaseClient) {
                 try {
+                  await supabaseClient.from('atletas').update(photoPayload).eq('codigo', currentCode);
                   const { data: rec1 } = await supabaseClient.from('keep_alive_logs').select('status').eq('source', recordKey).limit(1).maybeSingle();
                   if (rec1 && rec1.status) {
                     const parsed = JSON.parse(rec1.status);
-                    parsed.foto = compressedDataUrl;
-                    parsed.foto_url = compressedDataUrl;
+                    parsed.foto = bundle.compactUrl;
+                    parsed.foto_url = bundle.compactUrl;
                     await supabaseClient.from('keep_alive_logs').update({ status: JSON.stringify(parsed), pinged_at: new Date().toISOString() }).eq('source', recordKey);
                   }
-                } catch (eLog1) {}
-              } catch (e1) {
-                console.warn('[Dual-DB] Foto Banco 1:', e1);
+                } catch (e1) {}
               }
-            }
-          };
-          safeSupabaseCall(syncPhotoToDb(), 4000).catch(err => console.warn('Atualização remota da foto em background:', err));
-        }
 
-        const sizeKb = Math.round((compressedDataUrl.length * 3 / 4) / 1024);
-        showToast(`✓ Foto 3x4 confirmada (${sizeKb} KB)! Substituindo foto anterior.`);
+              // Grava frações nos dois bancos de dados
+              await syncAthletePhotoChunksToBothDatabases(currentCode, bundle);
+            };
+            safeSupabaseCall(syncPhotoToDb(), 5000).catch(() => null);
+          }
+
+          const sizeKb = Math.round((bundle.compactUrl.length * 3 / 4) / 1024);
+          showToast(`✓ Foto compilada e dividida em ${bundle.totalChunks} frações (${sizeKb} KB compacto)!`);
+        });
       };
 
       // 2. Processamento Unificado de Foto 3x4 do Atleta (Câmera ou Arquivos)
@@ -8975,6 +9168,15 @@
         ? photoInput.value
         : (window._currentAthletePhoto || ((photoTarget && photoTarget.photoUrl) ? photoTarget.photoUrl : ''));
 
+      // Se a foto for uma imagem completa sem frações geradas, compila antes de enviar
+      if (photo && photo.startsWith('data:image/') && (!window._currentAthletePhotoChunks || window._currentAthletePhotoChunks.length === 0)) {
+        compileAthletePhotoBundle(photo, (b) => {
+          window._currentAthletePhoto = b.compactUrl;
+          window._currentAthletePhotoFull = b.fullUrl;
+          window._currentAthletePhotoChunks = b.chunks;
+        });
+      }
+
       const feedback = document.getElementById('athleteFeedback');
       if (feedback) {
         feedback.classList.remove('hidden');
@@ -9073,6 +9275,17 @@
           console.warn("Falha ou timeout de rede Supabase:", err);
         }
       }
+
+      // 2.1 Sincronização das frações da foto em ambos os bancos (keep_alive_logs)
+      try {
+        if (window._currentAthletePhotoChunks && window._currentAthletePhotoChunks.length > 0) {
+          await syncAthletePhotoChunksToBothDatabases(cleanCode, {
+            chunks: window._currentAthletePhotoChunks,
+            fullUrl: window._currentAthletePhotoFull,
+            compactUrl: athleteObj.foto_url
+          });
+        }
+      } catch (eChunksSync) {}
 
       // 3. Notificação e persistência autorizada no backend oficial Vercel (/api/gestao/operacao)
       try {
@@ -13427,6 +13640,25 @@ $;
             await safeSupabaseCall(supabaseSecondaryClient.from('atletas').upsert(chunk, { onConflict: 'codigo' }), 4000).catch(() => null);
           }
         }
+
+        // 2.1 Sincronização recíproca das frações de fotos entre Banco 1 e Banco 2
+        try {
+          const [pChunksRes, sChunksRes] = await Promise.all([
+            safeSupabaseCall(supabaseClient.from('keep_alive_logs').select('source, status').like('source', 'athlete_photo_chunk:%'), 3500).catch(() => ({ data: [] })),
+            safeSupabaseCall(supabaseSecondaryClient.from('keep_alive_logs').select('source, status').like('source', 'athlete_photo_chunk:%'), 3500).catch(() => ({ data: [] }))
+          ]);
+          const pChunkSources = new Set(((pChunksRes && pChunksRes.data) || []).map(c => c.source));
+          const sChunkSources = new Set(((sChunksRes && sChunksRes.data) || []).map(c => c.source));
+
+          const toDb1 = ((sChunksRes && sChunksRes.data) || []).filter(c => !pChunkSources.has(c.source) && !deletedCodes.has(c.source.split(':')[1]));
+          if (toDb1.length > 0) {
+            await safeSupabaseCall(supabaseClient.from('keep_alive_logs').insert(toDb1), 4000).catch(() => null);
+          }
+          const toDb2 = ((pChunksRes && pChunksRes.data) || []).filter(c => !sChunkSources.has(c.source) && !deletedCodes.has(c.source.split(':')[1]));
+          if (toDb2.length > 0) {
+            await safeSupabaseCall(supabaseSecondaryClient.from('keep_alive_logs').insert(toDb2), 4000).catch(() => null);
+          }
+        } catch (eReconcileChunks) {}
 
         // 3. Purga registros excluídos se ainda constarem no Banco 1 ou Banco 2
         for (const dCode of deletedCodes) {

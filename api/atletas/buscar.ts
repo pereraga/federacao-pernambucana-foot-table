@@ -11,6 +11,32 @@ function maskCpfFirst3(cpf?: string | null): string {
   return '***.***.***-**';
 }
 
+
+// Função auxiliar para montagem de foto por completo a partir das frações (chunks) gravadas no banco
+async function assemblePhotoFromChunks(supabaseClient: any, code: string, fallbackUrl: string): Promise<string> {
+  if (!supabaseClient || !code) return fallbackUrl || '';
+  try {
+    const { data: chunks } = await supabaseClient
+      .from('keep_alive_logs')
+      .select('source, status')
+      .like('source', `athlete_photo_chunk:${code}:%`)
+      .order('source', { ascending: true });
+
+    if (chunks && Array.isArray(chunks) && chunks.length > 0) {
+      chunks.sort((a: any, b: any) => {
+        const idxA = parseInt((a.source || '').split(':')[2] || '0', 10);
+        const idxB = parseInt((b.source || '').split(':')[2] || '0', 10);
+        return idxA - idxB;
+      });
+      const assembled = chunks.map((c: any) => c.status).join('');
+      if (assembled.startsWith('data:image/')) {
+        return assembled;
+      }
+    }
+  } catch (err) {}
+  return fallbackUrl || '';
+}
+
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
   res.removeHeader('X-Powered-By');
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -98,6 +124,8 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       }
 
       const cpfMascarado = maskCpfFirst3(data.cpf);
+      const rawFoto = (data.foto_url && !data.foto_url.includes('unsplash.com')) ? data.foto_url : '';
+      const assembledFoto = await assemblePhotoFromChunks(supabase, cleanCode, rawFoto);
 
       res.statusCode = 200;
       res.setHeader('Content-Type', 'application/json');
@@ -110,7 +138,8 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
           modalidade: data.modalidade || 'SOLO (INDIVIDUAL)',
           municipio: data.municipio || 'RECIFE - PE',
           status: finalStatus,
-          foto_url: (data.foto_url && !data.foto_url.includes('unsplash.com')) ? data.foto_url : '',
+          foto_url: assembledFoto,
+          foto_compacta: rawFoto,
           cpf_mascarado: cpfMascarado
         }
       }));

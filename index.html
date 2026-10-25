@@ -749,6 +749,92 @@
       ]);
     }
 
+    /* =======================================================
+       MONTAGEM DE FOTO POR COMPLETO A PARTIR DE FRAÇÕES (DUAL-DB)
+       Recupera as frações gravadas (chunks) e remonta a foto original em HD
+       ======================================================= */
+    async function montarFotoCompletaFederado(cleanCode, fallbackCompactUrl) {
+      if (!cleanCode) return fallbackCompactUrl || '';
+      const code = String(cleanCode).trim();
+
+      // 1. Tenta recuperar do cache local imediato
+      try {
+        const cachedFull = localStorage.getItem('pe_photo_full_' + code);
+        if (cachedFull && cachedFull.startsWith('data:image/')) {
+          return cachedFull;
+        }
+        const cachedChunks = JSON.parse(localStorage.getItem('pe_photo_chunks_' + code) || '[]');
+        if (Array.isArray(cachedChunks) && cachedChunks.length > 0) {
+          const assembled = cachedChunks.join('');
+          if (assembled.startsWith('data:image/')) return assembled;
+        }
+      } catch (eCache) {}
+
+      let chunks = [];
+
+      // 2. Consulta frações no Banco 1 (Principal)
+      if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+        try {
+          const { data: db1Chunks } = await safeSupabaseCall(
+            supabaseClient
+              .from('keep_alive_logs')
+              .select('source, status')
+              .like('source', `athlete_photo_chunk:${code}:%`)
+              .order('source', { ascending: true }),
+            2500
+          );
+          if (db1Chunks && Array.isArray(db1Chunks) && db1Chunks.length > 0) {
+            chunks = db1Chunks;
+          }
+        } catch (e1) {}
+      }
+
+      // 3. Failover automático: se o Banco 1 não retornou frações, consulta no Banco 2
+      if (chunks.length === 0 && typeof supabaseSecondaryClient !== 'undefined' && supabaseSecondaryClient) {
+        try {
+          const { data: db2Chunks } = await safeSupabaseCall(
+            supabaseSecondaryClient
+              .from('keep_alive_logs')
+              .select('source, status')
+              .like('source', `athlete_photo_chunk:${code}:%`)
+              .order('source', { ascending: true }),
+            2500
+          );
+          if (db2Chunks && Array.isArray(db2Chunks) && db2Chunks.length > 0) {
+            chunks = db2Chunks;
+          }
+        } catch (e2) {}
+      }
+
+      // 4. Se encontrou frações (chunks), remonta a foto completa em ordem
+      if (chunks.length > 0) {
+        try {
+          chunks.sort((a, b) => {
+            const partsA = a.source.split(':');
+            const partsB = b.source.split(':');
+            const idxA = parseInt(partsA[2] || '0', 10);
+            const idxB = parseInt(partsB[2] || '0', 10);
+            return idxA - idxB;
+          });
+
+          const assembledFullPhoto = chunks.map(c => c.status).join('');
+          if (assembledFullPhoto.startsWith('data:image/')) {
+            try {
+              localStorage.setItem('pe_photo_full_' + code, assembledFullPhoto);
+              localStorage.setItem('pe_photo_chunks_' + code, JSON.stringify(chunks.map(c => c.status)));
+            } catch (eStor) {}
+            return assembledFullPhoto;
+          }
+        } catch (eAssemble) {
+          console.warn('Erro ao montar foto completa a partir das frações:', eAssemble);
+        }
+      }
+
+      return fallbackCompactUrl || '';
+    }
+    window.montarFotoCompletaFederado = montarFotoCompletaFederado;
+
+
     async function initSupabase() {
       const dot = document.getElementById('supabaseStatusDot');
       const text = document.getElementById('supabaseStatusText');
@@ -1512,6 +1598,25 @@
         qrPhotoThumb.src = cleanPhoto;
       }
 
+      // MONTAGEM DA FOTO POR COMPLETO A PARTIR DAS FRAÇÕES GRAVADAS NOS DOIS BANCOS DE DADOS
+      montarFotoCompletaFederado(athlete.codigo, cleanPhoto).then(assembledPhoto => {
+        if (assembledPhoto && assembledPhoto !== cleanPhoto && assembledPhoto.startsWith('data:image/')) {
+          athlete.foto = assembledPhoto;
+          athlete.foto_completa = assembledPhoto;
+          if (window._currentSearchedAthlete) {
+            window._currentSearchedAthlete.foto = assembledPhoto;
+            window._currentSearchedAthlete.foto_completa = assembledPhoto;
+          }
+          if (cardPhotoEl) cardPhotoEl.src = assembledPhoto;
+          if (qrPhotoThumb) qrPhotoThumb.src = assembledPhoto;
+          const realImg = document.getElementById('fotoTamanhoRealPublicaImg');
+          const realModal = document.getElementById('modalFotoTamanhoRealPublica');
+          if (realModal && !realModal.classList.contains('hidden') && realImg) {
+            realImg.src = assembledPhoto;
+          }
+        }
+      }).catch(err => console.warn('Montagem da foto fracionada:', err));
+
       // Verifica status de homologação
       const upperStatus = (athlete.status || 'PENDENTE').toUpperCase().trim();
       const isHomologado = upperStatus === 'HOMOLOGADO' || upperStatus === 'REGULAR';
@@ -1937,7 +2042,8 @@
       if (!modal || !img) return;
 
       const cardImg = document.getElementById('cardBadgePhoto');
-      const targetUrl = (cardImg && cardImg.src) ? cardImg.src : '';
+      const targetUrl = (window._currentSearchedAthlete && (window._currentSearchedAthlete.foto_completa || window._currentSearchedAthlete.foto))
+        || (cardImg && cardImg.src ? cardImg.src : '');
       if (!targetUrl || targetUrl.includes('data:image/svg+xml')) {
         return;
       }

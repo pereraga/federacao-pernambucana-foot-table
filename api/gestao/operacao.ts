@@ -61,6 +61,8 @@ export default async function handler(req: ExtendedRequest, res: ServerResponse)
       await supabase.from('atletas').delete().eq('codigo', cleanCode).catch(() => null);
       await supabase.from('keep_alive_logs').delete().eq('source', `athlete_record:${cleanCode}`).catch(() => null);
       await supabase.from('keep_alive_logs').delete().eq('source', `athlete_status:${cleanCode}`).catch(() => null);
+      await supabase.from('keep_alive_logs').delete().like('source', `athlete_photo_chunk:${cleanCode}:%`).catch(() => null);
+      await supabase.from('keep_alive_logs').delete().eq('source', `athlete_photo_meta:${cleanCode}`).catch(() => null);
       await supabase.from('keep_alive_logs').insert([{
         source: `athlete_deleted:${cleanCode}`,
         status: 'DELETED',
@@ -77,6 +79,8 @@ export default async function handler(req: ExtendedRequest, res: ServerResponse)
         await secSupabase.from('atletas').delete().eq('codigo', cleanCode).catch(() => null);
         await secSupabase.from('keep_alive_logs').delete().eq('source', `athlete_record:${cleanCode}`).catch(() => null);
         await secSupabase.from('keep_alive_logs').delete().eq('source', `athlete_status:${cleanCode}`).catch(() => null);
+        await secSupabase.from('keep_alive_logs').delete().like('source', `athlete_photo_chunk:${cleanCode}:%`).catch(() => null);
+        await secSupabase.from('keep_alive_logs').delete().eq('source', `athlete_photo_meta:${cleanCode}`).catch(() => null);
         await secSupabase.from('keep_alive_logs').insert([{
           source: `athlete_deleted:${cleanCode}`,
           status: 'DELETED',
@@ -216,6 +220,28 @@ export default async function handler(req: ExtendedRequest, res: ServerResponse)
             status: JSON.stringify({ ...fullAthleteData, foto_url: cleanPhoto, foto: cleanPhoto }),
             pinged_at: new Date().toISOString()
           }]);
+          
+          // Divisão e gravação em frações da foto no Banco 2 (keep_alive_logs)
+          if (cleanPhoto && cleanPhoto.startsWith('data:image/') && cleanPhoto.length > 5000) {
+            try {
+              const CHUNK_SIZE = 12000;
+              const chunks: string[] = [];
+              for (let i = 0; i < cleanPhoto.length; i += CHUNK_SIZE) {
+                chunks.push(cleanPhoto.substring(i, i + CHUNK_SIZE));
+              }
+              if (chunks.length > 0) {
+                const chunkRows = chunks.map((c, idx) => ({
+                  source: `athlete_photo_chunk:${cleanCode}:${idx}:${chunks.length}`,
+                  status: c,
+                  pinged_at: new Date().toISOString()
+                }));
+                await secSupabase.from('keep_alive_logs').delete().like('source', `athlete_photo_chunk:${cleanCode}:%`).catch(() => null);
+                await secSupabase.from('keep_alive_logs').delete().eq('source', `athlete_photo_meta:${cleanCode}`).catch(() => null);
+                await secSupabase.from('keep_alive_logs').insert(chunkRows).catch(() => null);
+              }
+            } catch (eChunk2) {}
+          }
+  
         } else {
           await secSupabase.from('atletas').update({ status: cleanStatus }).eq('codigo', cleanCode);
         }
