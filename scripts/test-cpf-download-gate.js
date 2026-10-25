@@ -38,8 +38,8 @@ assert(indexHtml.includes("if (!isDownloadUnlockedForCurrentAthlete()) {\n      
 // 4. Verificação de re-bloqueio em nova busca
 assert(indexHtml.includes('_isAthleteDownloadUnlocked = false;') && indexHtml.includes('_unlockedAthleteCode = null;'), 'Busca pública reseta o desbloqueio para novos atletas');
 
-// 5. Verificação da blindagem de exibição do CPF público (100% mascarado)
-assert(indexHtml.includes("maskCpf(cpf) {\n        return '***.***.***-**';"), 'Função maskCpf retorna estritamente ***.***.***-**');
+// 5. Verificação da blindagem de exibição do CPF público (apenas os 3 primeiros dígitos visíveis)
+assert(indexHtml.includes("digits.slice(0, 3)}.***.***-**"), 'Função maskCpf exibe apenas os 3 primeiros dígitos do CPF');
 
 // 6. Verificação da ocultação da data de nascimento (exibição apenas do ano de nascimento)
 assert(indexHtml.includes('function extractBirthYear(dateStr)'), 'Função extractBirthYear implementada em index.html');

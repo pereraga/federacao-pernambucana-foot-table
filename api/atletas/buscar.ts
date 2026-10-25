@@ -3,6 +3,14 @@ import { createClient } from '@supabase/supabase-js';
 import { safeValidate, AtletaBuscaSchema } from '../lib/validation.js';
 import { checkRateLimit, getClientIp } from '../lib/rate-limiter.js';
 
+function maskCpfFirst3(cpf?: string | null): string {
+  const digits = String(cpf || '').replace(/\D/g, '');
+  if (digits.length >= 3) {
+    return `${digits.slice(0, 3)}.***.***-**`;
+  }
+  return '***.***.***-**';
+}
+
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
   res.removeHeader('X-Powered-By');
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -65,7 +73,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         } catch {}
       }
 
-      const cpfMascarado = '***.***.***-**';
+      const cpfMascarado = maskCpfFirst3(data.cpf);
 
       res.statusCode = 200;
       res.setHeader('Content-Type', 'application/json');
@@ -109,7 +117,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
           recStatus = String(statusLog.status).toUpperCase().trim();
         }
 
-        const cpfMascarado = '***.***.***-**';
+        const cpfMascarado = maskCpfFirst3(parsed.cpf);
 
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
