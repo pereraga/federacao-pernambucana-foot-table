@@ -421,6 +421,12 @@
             <span>🖨️</span> Imprimir / PDF
           </button>
         </div>
+        <div id="cardDownloadLockNotice" class="max-w-[560px] mx-auto mt-2 text-center">
+          <span class="text-[11px] text-slate-400 inline-flex items-center justify-center gap-1.5 font-medium bg-dark-900/60 px-3 py-1 rounded-full border border-white/5">
+            <i class="fa-solid fa-lock text-pe-gold text-[10px]"></i>
+            <span>Download protegido por autenticação de CPF (LGPD)</span>
+          </span>
+        </div>
       </div>
 
     </div>
@@ -1214,6 +1220,12 @@
       }
 
       window._currentSearchedAthlete = athlete;
+      _isAthleteDownloadUnlocked = false;
+      _unlockedAthleteCode = null;
+      _pendingDownloadAction = null;
+      if (typeof resetDownloadLockNotice === 'function') {
+        resetDownloadLockNotice();
+      }
 
       feedback.classList.add('hidden');
       badgeArea.classList.remove('hidden');
@@ -1386,8 +1398,199 @@
     });
 
     /* =======================================================
-       EXPORTAR / BAIXAR CARTEIRA EM PNG E IMPRIMIR
+       EXPORTAR / BAIXAR CARTEIRA COM BLOQUEIO DE SEGURANÇA (CPF COMPLETO)
        ======================================================= */
+    let _isAthleteDownloadUnlocked = false;
+    let _unlockedAthleteCode = null;
+    let _pendingDownloadAction = null;
+
+    function resetDownloadLockNotice() {
+      const notice = document.getElementById('cardDownloadLockNotice');
+      if (notice) {
+        notice.innerHTML = `
+          <span class="text-[11px] text-slate-400 inline-flex items-center justify-center gap-1.5 font-medium bg-dark-900/60 px-3 py-1 rounded-full border border-white/5">
+            <i class="fa-solid fa-lock text-pe-gold text-[10px]"></i>
+            <span>Download protegido por autenticação de CPF (LGPD)</span>
+          </span>
+        `;
+      }
+    }
+
+    function setDownloadUnlockedNotice() {
+      const notice = document.getElementById('cardDownloadLockNotice');
+      if (notice) {
+        notice.innerHTML = `
+          <span class="text-[11px] text-emerald-400 inline-flex items-center justify-center gap-1.5 font-medium bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-500/30">
+            <i class="fa-solid fa-lock-open text-emerald-400 text-[10px]"></i>
+            <span>Identidade confirmada • Download liberado</span>
+          </span>
+        `;
+      }
+    }
+
+    function isDownloadUnlockedForCurrentAthlete() {
+      const athlete = window._currentSearchedAthlete;
+      if (!athlete) return false;
+      return _isAthleteDownloadUnlocked && String(_unlockedAthleteCode) === String(athlete.codigo);
+    }
+
+    function openCpfDownloadGateModal(action) {
+      _pendingDownloadAction = action;
+      const athlete = window._currentSearchedAthlete;
+      if (!athlete) return;
+
+      const nameEl = document.getElementById('cpfGateAthleteName');
+      const codeEl = document.getElementById('cpfGateAthleteCode');
+      const inputEl = document.getElementById('inputCpfDownloadGate');
+      const feedbackEl = document.getElementById('cpfGateFeedback');
+      const btnConfirm = document.getElementById('btnConfirmCpfDownload');
+      const modal = document.getElementById('modalCpfDownloadGate');
+      const card = document.getElementById('modalCpfDownloadGateCard');
+
+      if (nameEl) nameEl.textContent = athlete.nome || 'Atleta';
+      if (codeEl) codeEl.textContent = `#${athlete.codigo || '000000'}`;
+      if (inputEl) {
+        inputEl.value = '';
+        inputEl.classList.remove('border-red-500');
+        inputEl.classList.remove('border-emerald-500');
+      }
+      if (feedbackEl) {
+        feedbackEl.className = 'hidden';
+        feedbackEl.innerHTML = '';
+      }
+      if (btnConfirm) btnConfirm.disabled = false;
+
+      if (modal && card) {
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+          modal.classList.remove('opacity-0');
+          card.classList.remove('scale-95');
+          card.classList.add('scale-100');
+          if (inputEl) inputEl.focus();
+        }, 10);
+      }
+    }
+
+    function closeCpfDownloadGateModal() {
+      const modal = document.getElementById('modalCpfDownloadGate');
+      const card = document.getElementById('modalCpfDownloadGateCard');
+      if (modal && card) {
+        modal.classList.add('opacity-0');
+        card.classList.remove('scale-100');
+        card.classList.add('scale-95');
+        setTimeout(() => {
+          modal.classList.add('hidden');
+        }, 300);
+      }
+    }
+    window.closeCpfDownloadGateModal = closeCpfDownloadGateModal;
+
+    function formatCpfMask(val) {
+      let v = String(val || '').replace(/\D/g, '').slice(0, 11);
+      if (v.length > 9) {
+        return v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
+      } else if (v.length > 6) {
+        return v.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+      } else if (v.length > 3) {
+        return v.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+      }
+      return v;
+    }
+
+    function validateCpfChecksum(cpf) {
+      const s = String(cpf || '').replace(/\D/g, '');
+      if (s.length !== 11 || /^(\d)\1{10}$/.test(s)) return false;
+      let sum = 0, rest;
+      for (let i = 1; i <= 9; i++) sum += parseInt(s.substring(i - 1, i)) * (11 - i);
+      rest = (sum * 10) % 11;
+      if (rest === 10 || rest === 11) rest = 0;
+      if (rest !== parseInt(s.substring(9, 10))) return false;
+      sum = 0;
+      for (let i = 1; i <= 10; i++) sum += parseInt(s.substring(i - 1, i)) * (12 - i);
+      rest = (sum * 10) % 11;
+      if (rest === 10 || rest === 11) rest = 0;
+      if (rest !== parseInt(s.substring(10, 11))) return false;
+      return true;
+    }
+
+    function confirmCpfAndUnlockDownload() {
+      const athlete = window._currentSearchedAthlete;
+      if (!athlete) return;
+
+      const inputEl = document.getElementById('inputCpfDownloadGate');
+      const feedbackEl = document.getElementById('cpfGateFeedback');
+      const btnConfirm = document.getElementById('btnConfirmCpfDownload');
+
+      const enteredDigits = (inputEl ? inputEl.value : '').replace(/\D/g, '');
+
+      if (!enteredDigits || enteredDigits.length !== 11) {
+        if (feedbackEl) {
+          feedbackEl.className = 'p-3 bg-red-950/60 border border-pe-red/40 rounded-xl text-xs text-red-300';
+          feedbackEl.innerHTML = '⚠️ Por favor, digite o CPF completo com os <strong>11 dígitos</strong>.';
+        }
+        if (inputEl) {
+          inputEl.classList.add('border-red-500');
+          inputEl.focus();
+        }
+        return;
+      }
+
+      const registeredDigits = String(athlete.cpf || '').replace(/\D/g, '');
+      let isMatch = false;
+
+      if (registeredDigits && registeredDigits.length === 11) {
+        isMatch = (enteredDigits === registeredDigits);
+      } else {
+        // Contingência para cadastros legados com máscara textual incompleta: validação estrutural do CPF
+        isMatch = validateCpfChecksum(enteredDigits);
+      }
+
+      if (!isMatch) {
+        if (feedbackEl) {
+          feedbackEl.className = 'p-3 bg-red-950/80 border border-pe-red/60 rounded-xl text-xs text-red-300 flex items-start gap-2';
+          feedbackEl.innerHTML = '<span>❌</span> <div><strong>CPF incorreto!</strong> O CPF digitado não confere com o cadastro deste atleta. Por segurança e proteção de dados (LGPD), apenas o titular ou responsável pode baixar a carteira.</div>';
+        }
+        if (inputEl) {
+          inputEl.classList.add('border-red-500');
+          inputEl.focus();
+          inputEl.select();
+        }
+        return;
+      }
+
+      // Autenticação aprovada
+      _isAthleteDownloadUnlocked = true;
+      _unlockedAthleteCode = athlete.codigo;
+      setDownloadUnlockedNotice();
+
+      if (inputEl) {
+        inputEl.classList.remove('border-red-500');
+        inputEl.classList.add('border-emerald-500');
+      }
+
+      if (feedbackEl) {
+        feedbackEl.className = 'p-3 bg-emerald-950/80 border border-emerald-500/60 rounded-xl text-xs text-emerald-300 flex items-center gap-2';
+        feedbackEl.innerHTML = '<span>✅</span> <div><strong>Identidade autenticada com sucesso!</strong> Liberando emissão oficial da carteira...</div>';
+      }
+
+      if (btnConfirm) btnConfirm.disabled = true;
+
+      setTimeout(() => {
+        closeCpfDownloadGateModal();
+        if (btnConfirm) btnConfirm.disabled = false;
+
+        const action = _pendingDownloadAction;
+        _pendingDownloadAction = null;
+
+        if (action === 'png') {
+          executeDownloadCardPng();
+        } else if (action === 'print') {
+          executePrintCard();
+        }
+      }, 500);
+    }
+    window.confirmCpfAndUnlockDownload = confirmCpfAndUnlockDownload;
+
     document.getElementById('btnDownloadCardPng').addEventListener('click', () => {
       const athlete = window._currentSearchedAthlete;
       const upperStatus = (athlete && athlete.status ? athlete.status : 'PENDENTE').toUpperCase().trim();
@@ -1395,18 +1598,13 @@
         alert('⚠️ ATENÇÃO: Esta carteira digital está com HOMOLOGAÇÃO PENDENTE.\n\nA impressão e o download em PDF/PNG só são permitidos após a homologação oficial pela Federação.');
         return;
       }
-      const card = document.getElementById('athleteCredentialCard');
-      const athleteName = document.getElementById('cardBadgeName').textContent;
-      
-      html2canvas(card, {
-        scale: 3,
-        backgroundColor: null
-      }).then(canvas => {
-        const a = document.createElement('a');
-        a.download = `Carteira_FootTable_${athleteName.replace(/\s+/g, '_')}.png`;
-        a.href = canvas.toDataURL('image/png');
-        a.click();
-      });
+
+      if (!isDownloadUnlockedForCurrentAthlete()) {
+        openCpfDownloadGateModal('png');
+        return;
+      }
+
+      executeDownloadCardPng();
     });
 
     document.getElementById('btnPrintCard').addEventListener('click', () => {
@@ -1416,7 +1614,69 @@
         alert('⚠️ ATENÇÃO: Esta carteira digital está com HOMOLOGAÇÃO PENDENTE.\n\nA impressão da carteira em PDF é bloqueada até a validação e homologação oficial pela Federação.');
         return;
       }
+
+      if (!isDownloadUnlockedForCurrentAthlete()) {
+        openCpfDownloadGateModal('print');
+        return;
+      }
+
+      executePrintCard();
+    });
+
+    function executeDownloadCardPng() {
+      const card = document.getElementById('athleteCredentialCard');
+      const athleteName = document.getElementById('cardBadgeName').textContent || 'Atleta';
+      if (typeof html2canvas === 'undefined') {
+        alert('Falha ao inicializar o motor de geração gráfica (html2canvas).');
+        return;
+      }
+      html2canvas(card, {
+        scale: 3,
+        backgroundColor: null
+      }).then(canvas => {
+        const a = document.createElement('a');
+        a.download = `Carteira_FootTable_${athleteName.replace(/\s+/g, '_')}.png`;
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+      });
+    }
+
+    function executePrintCard() {
       window.print();
+    }
+
+    // Configuração de Eventos do Input de CPF do Modal
+    document.addEventListener('DOMContentLoaded', () => {
+      const inputCpfGate = document.getElementById('inputCpfDownloadGate');
+      if (inputCpfGate) {
+        inputCpfGate.addEventListener('input', (e) => {
+          e.target.value = formatCpfMask(e.target.value);
+        });
+        inputCpfGate.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            confirmCpfAndUnlockDownload();
+          }
+        });
+      }
+
+      const modalGate = document.getElementById('modalCpfDownloadGate');
+      if (modalGate) {
+        modalGate.addEventListener('click', (e) => {
+          if (e.target === modalGate) {
+            closeCpfDownloadGateModal();
+          }
+        });
+      }
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          const m = document.getElementById('modalCpfDownloadGate');
+          if (m && !m.classList.contains('hidden')) {
+            closeCpfDownloadGateModal();
+          }
+        }
+      });
     });
 
     /* =======================================================
@@ -1705,6 +1965,76 @@
       <div class="p-4 bg-dark-950/60 border-t border-white/10 flex justify-end">
         <button onclick="closePublicNewsModal()" class="px-5 py-2 rounded-xl text-xs font-bold text-slate-300 bg-dark-800 hover:bg-dark-700 transition-colors cursor-pointer">
           Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Bloqueio de Segurança para Download da Carteira (Autenticação por CPF Completo) -->
+  <div id="modalCpfDownloadGate" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+    <div id="modalCpfDownloadGateCard" class="bg-[#0b0f19] border border-pe-gold/40 rounded-2xl max-w-md w-full overflow-hidden flex flex-col shadow-2xl transform scale-95 transition-transform duration-300 relative text-white">
+      <!-- Topo Modal -->
+      <div class="p-6 border-b border-white/10 flex items-start justify-between bg-dark-950/40">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-pe-gold/10 border border-pe-gold/40 flex items-center justify-center text-pe-gold text-lg shrink-0">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div>
+            <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-pe-gold block">Autenticação de Segurança (LGPD)</span>
+            <h3 class="text-lg font-oswald uppercase font-bold text-white leading-tight">Liberar Emissão da Carteira</h3>
+          </div>
+        </div>
+        <button type="button" onclick="closeCpfDownloadGateModal()" class="text-slate-400 hover:text-white p-2 rounded-lg bg-dark-800 transition shrink-0 cursor-pointer" aria-label="Fechar modal">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Conteúdo do Modal -->
+      <div class="p-6 space-y-4">
+        <!-- Caixa de Informação do Atleta -->
+        <div class="p-3 bg-dark-900/80 border border-white/10 rounded-xl flex items-center justify-between text-xs">
+          <div>
+            <span class="text-slate-400 text-[11px] block">Atleta Selecionado:</span>
+            <strong id="cpfGateAthleteName" class="text-white font-semibold text-sm">---</strong>
+          </div>
+          <span id="cpfGateAthleteCode" class="px-2.5 py-1 bg-pe-gold/20 text-pe-gold border border-pe-gold/30 rounded-lg font-mono font-bold text-xs">#000000</span>
+        </div>
+
+        <p class="text-slate-300 text-xs leading-relaxed">
+          Para proteger a privacidade do atleta e cumprir as diretrizes da LGPD, informe o <strong>CPF completo cadastrado</strong> para desbloquear o download e a impressão oficial da carteira digital.
+        </p>
+
+        <!-- Campo de Input do CPF com máscara -->
+        <div class="space-y-1.5">
+          <label for="inputCpfDownloadGate" class="text-xs font-semibold text-slate-300 flex items-center justify-between">
+            <span>CPF Completo do Atleta:</span>
+            <span class="text-[10px] text-slate-400 font-mono">11 dígitos</span>
+          </label>
+          <div class="relative">
+            <input 
+              id="inputCpfDownloadGate" 
+              type="text" 
+              inputmode="numeric" 
+              maxlength="14" 
+              placeholder="000.000.000-00" 
+              autocomplete="off"
+              class="w-full bg-[#070a13] border border-slate-700 focus:border-pe-gold rounded-xl px-4 py-3 text-center text-lg font-mono tracking-widest text-pe-gold font-bold outline-none transition focus:ring-2 focus:ring-pe-gold/20"
+            />
+          </div>
+        </div>
+
+        <!-- Mensagem de Feedback / Erro -->
+        <div id="cpfGateFeedback" class="hidden p-3 rounded-xl text-xs transition"></div>
+      </div>
+
+      <!-- Rodapé do Modal -->
+      <div class="p-4 bg-dark-950/80 border-t border-white/10 flex items-center justify-end gap-3">
+        <button type="button" onclick="closeCpfDownloadGateModal()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white bg-dark-800 hover:bg-dark-700 transition cursor-pointer">
+          Cancelar
+        </button>
+        <button type="button" id="btnConfirmCpfDownload" onclick="confirmCpfAndUnlockDownload()" class="px-5 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider bg-pe-gold hover:bg-pe-goldHover text-pe-dark transition shadow flex items-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-lock-open text-xs"></i>
+          <span>Confirmar e Liberar</span>
         </button>
       </div>
     </div>
