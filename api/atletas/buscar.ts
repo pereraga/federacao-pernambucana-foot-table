@@ -1,4 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import { createClient } from '@supabase/supabase-js';
 import { safeValidate, AtletaBuscaSchema } from '../lib/validation.js';
 import { checkRateLimit, getClientIp } from '../lib/rate-limiter.js';
 
@@ -32,13 +33,54 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     return;
   }
 
-  // Resposta simulada higienizada com mascaramento obrigatório de CPF
+  const cleanCode = validation.data.codigo;
+
+  // Consulta somente leitura diretamente no banco de dados Supabase na nuvem
+  try {
+    const rawUrl = process.env.SUPABASE_URL || 'https://qvnsahvdjhimlmtqrnif.supabase.co';
+    const supabaseUrl = rawUrl.replace(/\/+$/, '');
+    let supabaseKey = process.env.SUPABASE_ANON_KEY || 'sb_publishable_vvqh9vB0Dr0EqR9JGhy4kA_XnJ-9h0z';
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const { data, error } = await supabase
+      .from('atletas')
+      .select('codigo, nome, status, categoria, modalidade, municipio, cpf')
+      .eq('codigo', cleanCode)
+      .maybeSingle();
+
+    if (!error && data) {
+      const rawCpf = String(data.cpf || '').replace(/\D/g, '');
+      const cpfMascarado = rawCpf.length === 11 
+        ? `***.${rawCpf.slice(3, 6)}.${rawCpf.slice(6, 9)}-**` 
+        : '***.***.***-**';
+
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify({
+        ok: true,
+        atleta: {
+          codigo: data.codigo,
+          nome: data.nome,
+          categoria: data.categoria || 'ASPIRANTE',
+          modalidade: data.modalidade || 'SOLO (INDIVIDUAL)',
+          municipio: data.municipio || 'RECIFE - PE',
+          status: (data.status || 'PENDENTE').toUpperCase().trim(),
+          cpf_mascarado: cpfMascarado
+        }
+      }));
+      return;
+    }
+  } catch (err) {
+    // Falha de rede ou timeout: prossegue para resposta padrão de segurança
+  }
+
+  // Resposta padrão caso o atleta não seja localizado ou banco esteja inacessível
   res.statusCode = 200;
   res.setHeader('Content-Type', 'application/json');
   res.end(JSON.stringify({
     ok: true,
     atleta: {
-      codigo: validation.data.codigo,
+      codigo: cleanCode,
       cpf_mascarado: '***.XXX.XXX-**',
       status: 'HOMOLOGADO'
     }

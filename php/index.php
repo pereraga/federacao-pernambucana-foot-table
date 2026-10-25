@@ -1092,13 +1092,16 @@
               municipio: data.municipio,
               modalidade: data.modalidade || 'SOLO (INDIVIDUAL)',
               categoria: data.categoria || 'ASPIRANTE',
-              status: data.status || 'PENDENTE',
+              status: (data.status || 'PENDENTE').toUpperCase().trim(),
               foto: (data.foto_url && !data.foto_url.includes('unsplash.com')) ? data.foto_url : ''
             };
-            const localAthletes = getStoredAthletes();
-            const localMatch = localAthletes.find(a => String(a.codigo) === String(code));
-            if (localMatch && localMatch.status && (localMatch.status !== 'PENDENTE' || !data.status)) {
-              athlete.status = localMatch.status;
+            // O status oficial vem diretamente do banco de dados na nuvem Supabase
+            if (!data.status) {
+              const localAthletes = getStoredAthletes();
+              const localMatch = localAthletes.find(a => String(a.codigo) === String(code));
+              if (localMatch && localMatch.status) {
+                athlete.status = localMatch.status;
+              }
             }
           }
         } catch (e) {

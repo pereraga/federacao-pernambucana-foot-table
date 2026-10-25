@@ -8945,14 +8945,10 @@
                 const cCode = String(d.codigo);
                 cloudCodes.add(cCode);
                 const localMatch = localMap.get(cCode);
-                let effectiveStatus = (d.status && String(d.status).trim()) ? d.status : 'HOMOLOGADO';
-                if (localMatch && localMatch.status) {
-                  // Prioriza o status definido pelo administrador (HOMOLOGADO, DESABILITADO, etc.)
-                  if (localMatch.status_updated_at || localMatch.status !== 'PENDENTE') {
-                    effectiveStatus = localMatch.status;
-                  } else if (!d.status) {
-                    effectiveStatus = localMatch.status;
-                  }
+                let effectiveStatus = (d.status && String(d.status).trim()) ? d.status.trim().toUpperCase() : 'PENDENTE';
+                // O banco de dados oficial Supabase tem autoridade primária sobre o status do atleta
+                if (localMatch && localMatch.status_updated_at && localMatch.status_updated_at > (_lastAthletesFetchTime || 0)) {
+                  effectiveStatus = localMatch.status;
                 }
                 const photoVal = d.foto_url || d.foto || (localMatch ? (localMatch.foto_url || localMatch.foto) : '');
                 return {
@@ -9402,13 +9398,15 @@
 
       if (supabaseClient) {
         try {
+          const cleanCode = String(codigo).trim();
           const updateTask = async () => {
-            let res = await supabaseClient.from('atletas').update({ status: normStatus }).eq('codigo', codigo);
-            if (res.error) {
-              await supabaseClient.from('atletas').update({ status: normStatus }).eq('federado', codigo);
+            let res = await supabaseClient.from('atletas').update({ status: normStatus }).eq('codigo', cleanCode);
+            if (res.error || !res.data) {
+              await supabaseClient.from('atletas').update({ status: normStatus }).eq('federado', cleanCode);
             }
+            return res;
           };
-          safeSupabaseCall(updateTask(), 3500).catch(e => console.warn("Supabase update notice:", e));
+          await safeSupabaseCall(updateTask(), 4500).catch(e => console.warn("Supabase update notice:", e));
         } catch (e) {
           console.warn("Supabase update status error:", e);
         }
@@ -9507,7 +9505,18 @@
 
       if (supabaseClient) {
         try {
-          supabaseClient.from('atletas').update({ status: 'HOMOLOGADO' }).neq('status', 'HOMOLOGADO').catch(() => null);
+          const pendentes = localAthletes
+            .filter(a => {
+              const s = (a.status || 'PENDENTE').toUpperCase().trim();
+              return s === 'HOMOLOGADO' && a.status_updated_at;
+            })
+            .map(a => String(a.codigo).trim());
+          if (pendentes.length > 0) {
+            await safeSupabaseCall(
+              supabaseClient.from('atletas').update({ status: 'HOMOLOGADO' }).in('codigo', pendentes),
+              4500
+            ).catch(() => null);
+          }
         } catch (e) {
           console.warn("Supabase update all pendentes error:", e);
         }
@@ -9547,26 +9556,9 @@
     }
 
     async function clearAllAthletes() {
-      if (!hasPermission('atletas_excluir')) {
-        showToast('⚠️ Seu cargo não possui permissão para excluir atletas.', true);
-        return;
-      }
-      if (!confirm('Deseja realmente remover TODOS os jogadores do sistema e banco de dados? Esta ação não pode ser desfeita.')) return;
-
-      if (supabaseClient) {
-        try {
-          await supabaseClient.from('atletas').delete().neq('codigo', '0000000000');
-        } catch (e) {
-          console.warn("Erro ao remover no Supabase:", e);
-        }
-      }
-
-      localStorage.setItem('pe_athletes_db', JSON.stringify([]));
-      currentCachedAthletes = [];
-
-      await renderJogadoresCadastradosTable();
-      updateDashboardData();
-      showToast('Todos os jogadores foram removidos do sistema.');
+      showToast('🔒 Proteção Ativa: A exclusão em massa de atletas está desativada para proteger a integridade do banco de dados oficial.', true);
+      alert('Ação Bloqueada: O banco de dados oficial está blindado contra exclusão em massa de atletas. Os dados cadastrados não podem ser apagados em lote.');
+      return;
     }
 
     async function fillFormWithAthlete(codigo) {
