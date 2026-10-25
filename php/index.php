@@ -377,65 +377,71 @@
         <!-- Credencial Oficial no Padrão FPEFT CR80 -->
         <div id="athleteCredentialCard" class="max-w-[620px] w-full mx-auto aspect-[1050/662] rounded-2xl relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] border-2 border-pe-gold/60 select-none bg-[#030919] bg-cover bg-center" style="background-image: url('assets/Carteira_Atleta_HD.png');">
           
+          <!-- Status Oficial no Canto Superior Direito da Carteira (Padrão Studio) -->
+          <div id="cardBadgeStatusContainer" class="absolute right-[2.5%] top-[3.5%] z-20 flex items-center gap-1.5 select-none pointer-events-none">
+            <span id="cardBadgeStatusDot" class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400"></span>
+            <span id="cardBadgeStatus" class="font-extrabold text-[8px] sm:text-[10px] uppercase tracking-wider text-emerald-400 font-mono">REGULAR</span>
+          </div>
+
           <!-- Foto 3x4 do Atleta -->
-          <div id="cardBadgePhotoBox" class="absolute left-[4.19%] top-[44.56%] w-[19.05%] h-[35.65%] rounded-xl sm:rounded-2xl border-2 sm:border-[3px] border-white overflow-hidden bg-[#09152e] shadow-md flex items-center justify-center">
+          <div id="cardBadgePhotoBox" class="absolute left-[7.62%] top-[47.13%] w-[18.76%] h-[34.89%] rounded-xl sm:rounded-2xl border-2 sm:border-[3px] border-white overflow-hidden bg-[#09152e] shadow-md flex items-center justify-center">
             <img id="cardBadgePhoto" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2364748b'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="Foto Atleta" class="w-full h-full object-cover" loading="lazy" decoding="async" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%2364748b\'%3E%3Cpath d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/%3E%3C/svg%3E'" />
           </div>
 
           <!-- Nº do Federado -->
-          <div id="cardBadgeCodeBox" class="absolute left-[4.19%] top-[83.69%] w-[19.05%] h-[4.83%] bg-white rounded-full shadow flex items-center justify-center px-1">
+          <div id="cardBadgeCodeBox" class="absolute left-[7.62%] top-[83.69%] w-[18.00%] h-[4.68%] bg-white rounded-full shadow flex items-center justify-center px-1">
             <span class="field-top-label label-align-center select-none pointer-events-none">Nº DO FEDERADO</span>
             <div class="w-full h-full flex items-center justify-center font-extrabold font-mono text-[8px] sm:text-[11px] text-[#00204a] truncate tracking-wider px-1" id="cardBadgeCode">
-              ID: #000000
+              ID: #548608
             </div>
           </div>
 
           <!-- Nome do Atleta (Linha 1) -->
-          <div id="cardBadgeNameBox" class="absolute left-[25.52%] top-[47.13%] w-[70.29%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-start px-2.5 sm:px-3">
+          <div id="cardBadgeNameBox" class="absolute left-[27.71%] top-[47.89%] w-[65.90%] h-[5.74%] bg-white rounded-full shadow flex items-center justify-start px-2.5 sm:px-3">
             <span class="field-top-label label-align-left select-none pointer-events-none">NOME DO ATLETA</span>
             <div class="w-full h-full flex items-center justify-start font-black font-oswald text-[10px] sm:text-[14px] uppercase tracking-wide truncate text-[#00204a]" id="cardBadgeName">
-              ---
+              GABRIEL PEREIRA ALVES
             </div>
           </div>
 
           <!-- Linha 2: CPF | Ano Nasc. | Município -->
-          <div id="cardBadgeCPFBox" class="absolute left-[25.52%] top-[55.59%] w-[21.52%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-1">
+          <div id="cardBadgeCPFBox" class="absolute left-[27.71%] top-[55.74%] w-[20.10%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-1">
             <span class="field-top-label label-align-center select-none pointer-events-none">CPF</span>
             <div class="w-full h-full flex items-center justify-center font-extrabold font-mono text-[8px] sm:text-[11px] text-[#00204a] truncate px-1" id="cardBadgeCPF">
-              ---
+              714.***.***-**
             </div>
           </div>
 
-          <div id="cardBadgeBirthBox" class="absolute left-[48.38%] top-[55.59%] w-[21.14%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-1">
+          <div id="cardBadgeBirthBox" class="absolute left-[49.33%] top-[55.74%] w-[19.62%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-1">
             <span class="field-top-label label-align-center select-none pointer-events-none">Ano Nasc.</span>
             <div class="w-full h-full flex items-center justify-center font-extrabold font-mono text-[8px] sm:text-[11px] text-[#00204a] truncate px-1" id="cardBadgeBirth">
-              ---
+              2003
             </div>
           </div>
 
-          <div id="cardBadgeCityBox" class="absolute left-[70.86%] top-[55.59%] w-[24.95%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-1">
+          <div id="cardBadgeCityBox" class="absolute left-[71.05%] top-[55.74%] w-[22.10%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-1">
             <span class="field-top-label label-align-center select-none pointer-events-none">MUNICÍPIO</span>
             <div class="w-full h-full flex items-center justify-center font-extrabold text-[8px] sm:text-[11px] text-[#00204a] uppercase truncate px-1" id="cardBadgeCity">
-              ---
+              RECIFE - PE
             </div>
           </div>
 
           <!-- Linha 3: Telefone/WhatsApp | Modalidade | Categoria -->
-          <div id="cardBadgePhoneBox" class="absolute left-[25.52%] top-[65.26%] w-[17.14%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-0.5">
+          <div id="cardBadgePhoneBox" class="absolute left-[28.19%] top-[64.80%] w-[15.05%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-0.5">
             <span class="field-top-label label-align-center select-none pointer-events-none">TELEFONE / WHATSAPP</span>
             <div class="w-full h-full flex items-center justify-center font-extrabold font-mono text-[7px] sm:text-[9.5px] text-[#00204a] truncate px-0.5" id="cardBadgePhone">
               (XX) XXXXX-XXXX
             </div>
           </div>
 
-          <div id="cardBadgeModalityBox" class="absolute left-[43.81%] top-[65.26%] w-[18.10%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-0.5">
+          <div id="cardBadgeModalityBox" class="absolute left-[44.29%] top-[64.80%] w-[17.33%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-0.5">
             <span class="field-top-label label-align-center select-none pointer-events-none">MODALIDADE</span>
             <div class="w-full h-full flex items-center justify-center font-extrabold text-[7px] sm:text-[9.5px] text-[#00204a] uppercase truncate px-0.5" id="cardBadgeModality">
               SOLO (INDIVIDUAL)
             </div>
           </div>
 
-          <div id="cardBadgeCategoryBox" class="absolute left-[63.33%] top-[65.26%] w-[18.10%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-0.5">
+          <div id="cardBadgeCategoryBox" class="absolute left-[63.14%] top-[64.80%] w-[16.86%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-0.5">
             <span class="field-top-label label-align-center select-none pointer-events-none">CATEGORIA</span>
             <div class="w-full h-full flex items-center justify-center font-extrabold text-[7px] sm:text-[9.5px] text-[#00204a] uppercase truncate px-0.5" id="cardBadgeCategory">
               AMADOR
@@ -443,14 +449,14 @@
           </div>
 
           <!-- QR Code (Direita) -->
-          <div id="cardBadgeQrContainer" class="absolute left-[82.19%] top-[63.44%] w-[13.90%] h-[21.45%] bg-white rounded-lg sm:rounded-xl p-1 shadow-md flex items-center justify-center overflow-hidden">
+          <div id="cardBadgeQrContainer" class="absolute left-[80.86%] top-[64.80%] w-[12.95%] h-[20.54%] bg-white rounded-lg sm:rounded-xl p-1 shadow-md flex items-center justify-center overflow-hidden">
             <div id="cardBadgeQrBox" class="w-full h-full flex items-center justify-center">
               <i class="fa-solid fa-qrcode text-black text-xl sm:text-2xl"></i>
             </div>
           </div>
 
           <!-- Validade (Abaixo do QR Code) -->
-          <div id="cardBadgeValidityBox" class="absolute left-[82.19%] top-[88.82%] w-[13.90%] h-[4.83%] bg-white rounded-full shadow flex items-center justify-center px-0.5">
+          <div id="cardBadgeValidityBox" class="absolute left-[81.71%] top-[88.97%] w-[11.71%] h-[4.68%] bg-white rounded-full shadow flex items-center justify-center px-0.5">
             <span class="field-top-label label-align-center select-none pointer-events-none">VALIDADE</span>
             <div class="w-full h-full flex items-center justify-center font-extrabold font-mono text-[7.5px] sm:text-[10px] text-[#00204a] truncate px-0.5" id="cardBadgeValidity">
               12/2026
@@ -458,15 +464,13 @@
           </div>
 
           <!-- Assinatura da Diretoria FPEFT (Centro Rodapé) -->
-          <div id="cardBadgeSignatureBox" class="absolute left-[29.52%] top-[88.52%] w-[41.90%] h-[4.23%] text-center">
+          <div id="cardBadgeSignatureBox" class="absolute left-[32.95%] top-[88.37%] w-[37.62%] h-[4.23%] text-center">
             <div class="w-full h-[1px] sm:h-[1.5px] bg-white/90 mx-auto mb-0.5"></div>
             <span class="text-[6px] sm:text-[8.5px] font-bold text-white uppercase tracking-wider block">
               ASSINATURA DA DIRETORIA FPEFT
             </span>
           </div>
 
-          <!-- Elemento oculto para compatibilidade com os scripts de status e container customizado -->
-          <span id="cardBadgeStatus" class="hidden">REGULAR</span>
           <div id="cardCustomTextsContainer" class="hidden"></div>
         </div>
 
@@ -1409,7 +1413,26 @@
       if (valBadge) valBadge.textContent = athlete.validade || '12/2026';
 
       // Sincroniza e aplica o layout oficial registrado no banco de dados
-      applySavedBadgeLayout();
+      await applySavedBadgeLayout();
+
+      // Atualiza o selo visual de status no canto superior direito do cartão
+      const cardStDot = document.getElementById('cardBadgeStatusDot');
+      const cardStText = document.getElementById('cardBadgeStatus');
+      if (cardStText) {
+        if (isHomologado) {
+          cardStText.textContent = 'REGULAR';
+          cardStText.className = 'font-extrabold text-[8px] sm:text-[10px] uppercase tracking-wider text-emerald-400 font-mono';
+          if (cardStDot) cardStDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400';
+        } else if (isDesabilitado) {
+          cardStText.textContent = 'DESABILITADO';
+          cardStText.className = 'font-extrabold text-[8px] sm:text-[10px] uppercase tracking-wider text-rose-400 font-mono';
+          if (cardStDot) cardStDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-rose-500';
+        } else {
+          cardStText.textContent = 'PENDENTE';
+          cardStText.className = 'font-extrabold text-[8px] sm:text-[10px] uppercase tracking-wider text-amber-400 font-mono';
+          if (cardStDot) cardStDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-400 animate-pulse';
+        }
+      }
 
       // Gera QR Code Oficial escaneável para a carteira
       const qrBox = document.getElementById('cardBadgeQrBox');
@@ -2006,11 +2029,18 @@
 
       try {
         if (window.BroadcastChannel) {
-          const bc = new BroadcastChannel('fpeft_studio_sync');
-          bc.onmessage = (ev) => {
-            if (ev.data && (ev.data.type === 'STUDIO_LAYOUT_UPDATED' || ev.data.elements)) {
+          const bc1 = new BroadcastChannel('fpeft_studio_design_channel');
+          bc1.onmessage = (ev) => {
+            if (ev.data && (ev.data.type === 'STUDIO_DESIGN_UPDATED' || ev.data.payload)) {
+              if (ev.data.payload) {
+                localStorage.setItem('fpeft_studio_layout_data', JSON.stringify(ev.data.payload));
+              }
               applySavedBadgeLayout();
             }
+          };
+          const bc2 = new BroadcastChannel('fpeft_studio_sync');
+          bc2.onmessage = (ev) => {
+            if (ev.data) applySavedBadgeLayout();
           };
         }
       } catch (e) {}
