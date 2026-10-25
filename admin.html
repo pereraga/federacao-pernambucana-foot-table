@@ -10173,6 +10173,22 @@
           console.warn("Supabase keep_alive_logs notice:", e2);
         }
 
+        if (supabaseSecondaryClient) {
+          try {
+            const cloudKey = 'athlete_status:' + cleanCode;
+            try {
+              await supabaseSecondaryClient.from('keep_alive_logs').delete().eq('source', cloudKey);
+            } catch (se1) {}
+            await supabaseSecondaryClient.from('keep_alive_logs').insert([{
+              source: cloudKey,
+              status: normStatus,
+              pinged_at: new Date().toISOString()
+            }]);
+          } catch (se2) {
+            console.warn("Secondary keep_alive_logs notice:", se2);
+          }
+        }
+
         // 2. Atualização direta na tabela atletas
         try {
           const updateTask = async () => {

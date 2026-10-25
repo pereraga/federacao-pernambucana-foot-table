@@ -344,7 +344,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     atleta: {
       codigo: cleanCode,
       cpf_mascarado: '***.***.***-**',
-      status: 'HOMOLOGADO'
+      status: 'PENDENTE'
     }
   }));
 }

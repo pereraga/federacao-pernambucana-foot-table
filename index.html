@@ -1739,13 +1739,13 @@
         if (qrStatusMain) {
           qrStatusMain.className = "px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider flex items-center gap-1.5 bg-amber-950/90 border border-amber-500 text-amber-300 shadow-md";
         }
-        if (qrStatusText) qrStatusText.textContent = "HOMOLOGAÇÃO PENDENTE";
+        if (qrStatusText) qrStatusText.textContent = "NÃO REGULAR (Pendente)";
         if (qrSituationBox) {
           qrSituationBox.className = "p-3.5 rounded-xl bg-amber-950/40 border border-amber-500/50 text-amber-300 text-xs flex items-center gap-3";
         }
         if (qrSituationIcon) qrSituationIcon.textContent = "⏳";
-        if (qrSituationTitle) qrSituationTitle.textContent = "HOMOLOGAÇÃO EM ANDAMENTO (PENDENTE DE APROVAÇÃO)";
-        if (qrSituationDesc) qrSituationDesc.textContent = "O cadastro deste atleta foi registrado no sistema, mas aguarda a homologação da diretoria da Federação. A emissão de carteira física/PDF permanece restrita.";
+        if (qrSituationTitle) qrSituationTitle.textContent = "CADASTRO REALIZADO - NÃO REGULAR (AGUARDANDO HOMOLOGAÇÃO)";
+        if (qrSituationDesc) qrSituationDesc.textContent = "O cadastro deste atleta foi registrado no sistema, mas a carteira ainda NÃO está regularizada. O uso oficial em competições e a emissão em PDF/PNG permanecem bloqueados até a homologação da diretoria da Federação.";
       }
 
       // 2. PREENCHIMENTO IMEDIATO DOS DADOS DA CARTEIRINHA OFICIAL
@@ -1798,7 +1798,7 @@
           cardStText.className = 'font-extrabold text-[8px] sm:text-[10px] uppercase tracking-wider text-rose-400 font-mono';
           if (cardStDot) cardStDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-rose-500';
         } else {
-          cardStText.textContent = 'PENDENTE';
+          cardStText.textContent = 'NÃO REGULAR';
           cardStText.className = 'font-extrabold text-[8px] sm:text-[10px] uppercase tracking-wider text-amber-400 font-mono';
           if (cardStDot) cardStDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-400 animate-pulse';
         }
@@ -1844,10 +1844,10 @@
           pendingWarning.className = "max-w-[560px] mx-auto mt-4 p-4 rounded-xl bg-amber-950/80 border border-amber-500/50 text-amber-200 text-xs shadow-lg space-y-1.5";
           pendingWarning.innerHTML = `
             <div class="flex items-center gap-2 font-extrabold text-amber-400">
-              <span class="text-base">⏳</span> <span>HOMOLOGAÇÃO PENDENTE</span>
+              <span class="text-base">⏳</span> <span>CARTEIRA NÃO REGULAR (HOMOLOGAÇÃO PENDENTE)</span>
             </div>
             <p class="text-slate-300 text-[11px] leading-relaxed">
-              Este cadastro foi registrado e está aguardando a homologação oficial da Federação. <strong>A impressão e o download em PDF/PNG da carteira digital estão temporariamente bloqueados</strong> até a conclusão da validação.
+              O cadastro deste atleta foi registrado no sistema, mas a carteira ainda <strong>NÃO está regularizada</strong>. O uso oficial em competições e a emissão em PDF/PNG permanecem bloqueados até a homologação da diretoria da Federação.
             </p>
           `;
         }
@@ -2105,7 +2105,7 @@
       const athlete = window._currentSearchedAthlete;
       const upperStatus = (athlete && athlete.status ? athlete.status : 'PENDENTE').toUpperCase().trim();
       if (upperStatus !== 'HOMOLOGADO' && upperStatus !== 'REGULAR') {
-        alert('⚠️ ATENÇÃO: Esta carteira digital está com HOMOLOGAÇÃO PENDENTE.\n\nA impressão e o download em PDF/PNG só são permitidos após a homologação oficial pela Federação.');
+        alert('⚠️ ATENÇÃO: Esta carteira digital está como NÃO REGULAR (Homologação Pendente).\n\nA impressão e o download em PDF/PNG só são permitidos após a homologação oficial pela Federação.');
         return;
       }
 
@@ -2121,7 +2121,7 @@
       const athlete = window._currentSearchedAthlete;
       const upperStatus = (athlete && athlete.status ? athlete.status : 'PENDENTE').toUpperCase().trim();
       if (upperStatus !== 'HOMOLOGADO' && upperStatus !== 'REGULAR') {
-        alert('⚠️ ATENÇÃO: Esta carteira digital está com HOMOLOGAÇÃO PENDENTE.\n\nA impressão da carteira em PDF é bloqueada até a validação e homologação oficial pela Federação.');
+        alert('⚠️ ATENÇÃO: Esta carteira digital está como NÃO REGULAR (Homologação Pendente).\n\nA impressão da carteira em PDF é bloqueada até a validação e homologação oficial pela Federação.');
         return;
       }
 
