@@ -1663,7 +1663,6 @@
       const isDesabilitado = upperStatus === 'DESABILITADO' || upperStatus === 'SUSPENSO' || upperStatus === 'INATIVO';
 
       feedback.classList.add('hidden');
-      badgeArea.classList.remove('hidden');
 
       // Mascaramento de Segurança LGPD (Art. 46 Lei nº 13.709/2018 - Exibe apenas os 3 primeiros dígitos)
       function maskCpf(cpf) {
@@ -1687,91 +1686,7 @@
         return str;
       }
 
-      // Preenche os dados da carteira
-      document.getElementById('cardBadgeName').textContent = athlete.nome;
-      document.getElementById('cardBadgeCPF').textContent = maskCpf(athlete.cpf);
-      document.getElementById('cardBadgeBirth').textContent = extractBirthYear(athlete.nascimento);
-      document.getElementById('cardBadgeCity').textContent = athlete.municipio;
-      document.getElementById('cardBadgeModality').textContent = athlete.modalidade;
-      const catBadge = document.getElementById('cardBadgeCategory');
-      if (catBadge) catBadge.textContent = athlete.categoria || 'ASPIRANTE';
-      const fedNum = (athlete.federado && String(athlete.federado).trim())
-        ? (String(athlete.federado).startsWith('PE-') || String(athlete.federado).startsWith('ID:') ? athlete.federado : `ID: #${athlete.federado}`)
-        : `ID: #${athlete.codigo || '000000'}`;
-      document.getElementById('cardBadgeCode').textContent = fedNum;
-      const phoneBadge = document.getElementById('cardBadgePhone');
-      if (phoneBadge) phoneBadge.textContent = athlete.telefone || '(XX) XXXXX-XXXX';
-      const valBadge = document.getElementById('cardBadgeValidity');
-      if (valBadge) valBadge.textContent = athlete.validade || '12/2026';
-
-      // Sincroniza e aplica o layout oficial registrado no banco de dados
-      await applySavedBadgeLayout();
-
-      // Atualiza o selo visual de status no canto superior direito do cartão
-      const cardStDot = document.getElementById('cardBadgeStatusDot');
-      const cardStText = document.getElementById('cardBadgeStatus');
-      if (cardStText) {
-        if (isHomologado) {
-          cardStText.textContent = 'REGULAR';
-          cardStText.className = 'font-extrabold text-[8px] sm:text-[10px] uppercase tracking-wider text-emerald-400 font-mono';
-          if (cardStDot) cardStDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400';
-        } else if (isDesabilitado) {
-          cardStText.textContent = 'DESABILITADO';
-          cardStText.className = 'font-extrabold text-[8px] sm:text-[10px] uppercase tracking-wider text-rose-400 font-mono';
-          if (cardStDot) cardStDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-rose-500';
-        } else {
-          cardStText.textContent = 'PENDENTE';
-          cardStText.className = 'font-extrabold text-[8px] sm:text-[10px] uppercase tracking-wider text-amber-400 font-mono';
-          if (cardStDot) cardStDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-400 animate-pulse';
-        }
-      }
-
-      // Gera QR Code Oficial escaneável para a carteira
-      const qrBox = document.getElementById('cardBadgeQrBox');
-      if (qrBox && typeof qrcode !== 'undefined') {
-        try {
-          const qr = qrcode(0, 'M');
-          qr.addData(`https://fpeft.vercel.app/?id=${athlete.codigo || '000000'}`);
-          qr.make();
-          qrBox.innerHTML = qr.createSvgTag({ scalable: true, margin: 0 });
-        } catch (e) {
-          qrBox.innerHTML = '<i class="fa-solid fa-qrcode text-black text-2xl"></i>';
-        }
-      }
-
-      const defaultAthletePhoto = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2364748b'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
-      const cleanPhoto = (athlete.foto && !athlete.foto.includes('unsplash.com')) ? athlete.foto : defaultAthletePhoto;
-      const cardPhotoEl = document.getElementById('cardBadgePhoto');
-      if (cardPhotoEl) {
-        cardPhotoEl.onerror = function() { this.src = defaultAthletePhoto; };
-        cardPhotoEl.src = cleanPhoto;
-      }
-      const qrPhotoThumb = document.getElementById('qrAthletePhotoThumb');
-      if (qrPhotoThumb) {
-        qrPhotoThumb.onerror = function() { this.src = defaultAthletePhoto; };
-        qrPhotoThumb.src = cleanPhoto;
-      }
-
-      // MONTAGEM DA FOTO POR COMPLETO A PARTIR DAS FRAÇÕES GRAVADAS NOS DOIS BANCOS DE DADOS
-      montarFotoCompletaFederado(athlete.codigo, cleanPhoto).then(assembledPhoto => {
-        if (assembledPhoto && assembledPhoto.startsWith('data:image/')) {
-          athlete.foto = assembledPhoto;
-          athlete.foto_completa = assembledPhoto;
-          if (window._currentSearchedAthlete) {
-            window._currentSearchedAthlete.foto = assembledPhoto;
-            window._currentSearchedAthlete.foto_completa = assembledPhoto;
-          }
-          if (cardPhotoEl) cardPhotoEl.src = assembledPhoto;
-          if (qrPhotoThumb) qrPhotoThumb.src = assembledPhoto;
-          const realImg = document.getElementById('fotoTamanhoRealPublicaImg');
-          const realModal = document.getElementById('modalFotoTamanhoRealPublica');
-          if (realModal && !realModal.classList.contains('hidden') && realImg) {
-            realImg.src = assembledPhoto;
-          }
-        }
-      }).catch(err => console.warn('Montagem da foto fracionada:', err));
-
-      // Atualiza Painel de Validação Digital do QR Code
+      // 1. PREENCHIMENTO IMEDIATO DO PAINEL OFICIAL DE VALIDAÇÃO E AUTENTICIDADE DIGITAL (QR CHECK)
       const qrFullName = document.getElementById('qrAthleteFullName');
       const qrFedNum = document.getElementById('qrFederatedNumText');
       const qrCpf = document.getElementById('qrCpfText');
@@ -1788,15 +1703,15 @@
       const qrSituationTitle = document.getElementById('qrSituationTitle');
       const qrSituationDesc = document.getElementById('qrSituationDesc');
 
-      if (qrFullName) qrFullName.textContent = athlete.nome;
-      if (qrFedNum) qrFedNum.textContent = `#${athlete.codigo}`;
+      if (qrFullName) qrFullName.textContent = athlete.nome || 'Atleta Oficial';
+      if (qrFedNum) qrFedNum.textContent = athlete.codigo ? `#${athlete.codigo}` : '#000000';
       if (qrCpf) qrCpf.textContent = maskCpf(athlete.cpf);
-      if (qrModality) qrModality.textContent = athlete.modalidade;
+      if (qrModality) qrModality.textContent = athlete.modalidade || 'SOLO (INDIVIDUAL)';
       if (qrCategory) qrCategory.textContent = athlete.categoria || 'ASPIRANTE';
-      if (qrCity) qrCity.textContent = athlete.municipio;
-      if (qrValidity) qrValidity.textContent = '31/12/2026 (Temporada Oficial)';
+      if (qrCity) qrCity.textContent = athlete.municipio || 'RECIFE - PE';
+      if (qrValidity) qrValidity.textContent = athlete.validade ? `${athlete.validade} (Temporada Oficial)` : '31/12/2026 (Temporada Oficial)';
       if (qrTimestamp) qrTimestamp.textContent = new Date().toLocaleString('pt-BR');
-      if (qrHash) qrHash.textContent = `FPEFT-${athlete.codigo}-${isHomologado ? 'AUTH-REGULAR' : (isDesabilitado ? 'DISABLED' : 'PENDING')}`;
+      if (qrHash) qrHash.textContent = `FPEFT-${athlete.codigo || '000000'}-${isHomologado ? 'AUTH-REGULAR' : (isDesabilitado ? 'DISABLED' : 'PENDING')}`;
 
       if (isHomologado) {
         if (qrStatusMain) {
@@ -1833,23 +1748,82 @@
         if (qrSituationDesc) qrSituationDesc.textContent = "O cadastro deste atleta foi registrado no sistema, mas aguarda a homologação da diretoria da Federação. A emissão de carteira física/PDF permanece restrita.";
       }
 
-      const statusBadge = document.getElementById('cardBadgeStatus');
+      // 2. PREENCHIMENTO IMEDIATO DOS DADOS DA CARTEIRINHA OFICIAL
+      const cardNameEl = document.getElementById('cardBadgeName');
+      if (cardNameEl) cardNameEl.textContent = athlete.nome || 'Atleta Oficial';
+      const cardCpfEl = document.getElementById('cardBadgeCPF');
+      if (cardCpfEl) cardCpfEl.textContent = maskCpf(athlete.cpf);
+      const cardBirthEl = document.getElementById('cardBadgeBirth');
+      if (cardBirthEl) document.getElementById('cardBadgeBirth').textContent = extractBirthYear(athlete.nascimento);
+      const cardCityEl = document.getElementById('cardBadgeCity');
+      if (cardCityEl) cardCityEl.textContent = athlete.municipio || 'RECIFE - PE';
+      const cardModEl = document.getElementById('cardBadgeModality');
+      if (cardModEl) cardModEl.textContent = athlete.modalidade || 'SOLO (INDIVIDUAL)';
+      const catBadge = document.getElementById('cardBadgeCategory');
+      if (catBadge) catBadge.textContent = athlete.categoria || 'ASPIRANTE';
+      const fedNum = (athlete.federado && String(athlete.federado).trim())
+        ? (String(athlete.federado).startsWith('PE-') || String(athlete.federado).startsWith('ID:') ? athlete.federado : `ID: #${athlete.federado}`)
+        : `ID: #${athlete.codigo || '000000'}`;
+      const cardCodeEl = document.getElementById('cardBadgeCode');
+      if (cardCodeEl) cardCodeEl.textContent = fedNum;
+      const phoneBadge = document.getElementById('cardBadgePhone');
+      if (phoneBadge) phoneBadge.textContent = athlete.telefone || '(XX) XXXXX-XXXX';
+      const valBadge = document.getElementById('cardBadgeValidity');
+      if (valBadge) valBadge.textContent = athlete.validade || '12/2026';
+
+      // 3. FOTO LIMPA IMEDIATA NO PAINEL E NA CARTEIRA
+      const defaultAthletePhoto = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2364748b'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
+      const cleanPhoto = (athlete.foto && !athlete.foto.includes('unsplash.com')) ? athlete.foto : defaultAthletePhoto;
+      const cardPhotoEl = document.getElementById('cardBadgePhoto');
+      if (cardPhotoEl) {
+        cardPhotoEl.onerror = function() { this.src = defaultAthletePhoto; };
+        cardPhotoEl.src = cleanPhoto;
+      }
+      const qrPhotoThumb = document.getElementById('qrAthletePhotoThumb');
+      if (qrPhotoThumb) {
+        qrPhotoThumb.onerror = function() { this.src = defaultAthletePhoto; };
+        qrPhotoThumb.src = cleanPhoto;
+      }
+
+      // 4. ATUALIZA SELO DE STATUS DA CARTEIRA
+      const cardStDot = document.getElementById('cardBadgeStatusDot');
+      const cardStText = document.getElementById('cardBadgeStatus');
+      if (cardStText) {
+        if (isHomologado) {
+          cardStText.textContent = 'REGULAR';
+          cardStText.className = 'font-extrabold text-[8px] sm:text-[10px] uppercase tracking-wider text-emerald-400 font-mono';
+          if (cardStDot) cardStDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400';
+        } else if (isDesabilitado) {
+          cardStText.textContent = 'DESABILITADO';
+          cardStText.className = 'font-extrabold text-[8px] sm:text-[10px] uppercase tracking-wider text-rose-400 font-mono';
+          if (cardStDot) cardStDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-rose-500';
+        } else {
+          cardStText.textContent = 'PENDENTE';
+          cardStText.className = 'font-extrabold text-[8px] sm:text-[10px] uppercase tracking-wider text-amber-400 font-mono';
+          if (cardStDot) cardStDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-400 animate-pulse';
+        }
+      }
+
+      // 5. EXIBE A ÁREA DO RESULTADO COM TODOS OS DADOS PREENCHIDOS
+      badgeArea.classList.remove('hidden');
+
+      // 6. GERA O QR CODE OFICIAL ESCANEÁVEL
+      const qrBox = document.getElementById('cardBadgeQrBox');
+      if (qrBox && typeof qrcode !== 'undefined') {
+        try {
+          const qr = qrcode(0, 'M');
+          qr.addData(`https://fpeft.vercel.app/?id=${athlete.codigo || '000000'}`);
+          qr.make();
+          qrBox.innerHTML = qr.createSvgTag({ scalable: true, margin: 0 });
+        } catch (e) {
+          qrBox.innerHTML = '<i class="fa-solid fa-qrcode text-black text-2xl"></i>';
+        }
+      }
+
+      // 7. AVISOS DE PENDÊNCIA E CONTROLE DOS BOTÕES DE DOWNLOAD
       const pendingWarning = document.getElementById('cardPendingWarning');
       const btnDownload = document.getElementById('btnDownloadCardPng');
       const btnPrint = document.getElementById('btnPrintCard');
-
-      if (statusBadge) {
-        if (isHomologado) {
-          statusBadge.className = "text-[10px] font-bold uppercase text-emerald-400 flex items-center justify-end gap-1";
-          statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> REGULAR';
-        } else if (isDesabilitado) {
-          statusBadge.className = "text-[10px] font-bold uppercase text-rose-400 flex items-center justify-end gap-1 font-mono";
-          statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-rose-500"></span> 🚫 CARTEIRA DESABILITADA';
-        } else {
-          statusBadge.className = "text-[10px] font-bold uppercase text-amber-400 flex items-center justify-end gap-1 font-mono";
-          statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span> HOMOLOGAÇÃO PENDENTE';
-        }
-      }
 
       if (pendingWarning) {
         if (isHomologado) {
@@ -1902,6 +1876,28 @@
           btnPrint.title = isDesabilitado ? "Impressão bloqueada: Carteira Desabilitada" : "Impressão bloqueada: Homologação Pendente";
         }
       }
+
+      // 8. SINCRONIZAÇÃO EM BACKGROUND DO LAYOUT PERSONALIZADO E MONTAGEM DA FOTO DAS FRAÇÕES
+      applySavedBadgeLayout().catch(e => console.warn('Layout studio background:', e));
+
+      // MONTAGEM DA FOTO POR COMPLETO A PARTIR DAS FRAÇÕES GRAVADAS NOS DOIS BANCOS DE DADOS
+      montarFotoCompletaFederado(athlete.codigo, cleanPhoto).then(assembledPhoto => {
+        if (assembledPhoto && assembledPhoto.startsWith('data:image/')) {
+          athlete.foto = assembledPhoto;
+          athlete.foto_completa = assembledPhoto;
+          if (window._currentSearchedAthlete) {
+            window._currentSearchedAthlete.foto = assembledPhoto;
+            window._currentSearchedAthlete.foto_completa = assembledPhoto;
+          }
+          if (cardPhotoEl) cardPhotoEl.src = assembledPhoto;
+          if (qrPhotoThumb) qrPhotoThumb.src = assembledPhoto;
+          const realImg = document.getElementById('fotoTamanhoRealPublicaImg');
+          const realModal = document.getElementById('modalFotoTamanhoRealPublica');
+          if (realModal && !realModal.classList.contains('hidden') && realImg) {
+            realImg.src = assembledPhoto;
+          }
+        }
+      }).catch(err => console.warn('Montagem da foto fracionada:', err));
 
       badgeArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
