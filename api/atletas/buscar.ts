@@ -52,7 +52,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
 
     const { data, error } = await supabase
       .from('atletas')
-      .select('codigo, nome, status, categoria, modalidade, municipio, cpf')
+      .select('codigo, nome, status, categoria, modalidade, municipio, cpf, foto_url')
       .eq('codigo', cleanCode)
       .maybeSingle();
 
@@ -102,6 +102,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
           modalidade: data.modalidade || 'SOLO (INDIVIDUAL)',
           municipio: data.municipio || 'RECIFE - PE',
           status: finalStatus,
+          foto_url: (data.foto_url && !data.foto_url.includes('unsplash.com')) ? data.foto_url : '',
           cpf_mascarado: cpfMascarado
         }
       }));
@@ -146,6 +147,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
             modalidade: parsed.modalidade || 'SOLO (INDIVIDUAL)',
             municipio: parsed.municipio || 'RECIFE - PE',
             status: recStatus,
+            foto_url: (parsed.foto_url && !parsed.foto_url.includes('unsplash.com')) ? parsed.foto_url : (parsed.foto || ''),
             cpf_mascarado: cpfMascarado
           }
         }));
@@ -162,7 +164,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         const secSupabase = createClient(secUrl, secKey);
         const { data: secData, error: secError } = await secSupabase
           .from('atletas')
-          .select('codigo, nome, status, categoria, modalidade, municipio, cpf')
+          .select('codigo, nome, status, categoria, modalidade, municipio, cpf, foto_url')
           .eq('codigo', cleanCode)
           .maybeSingle();
 
@@ -180,6 +182,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
               categoria: secData.categoria || 'AMADOR',
               modalidade: secData.modalidade || 'SOLO (INDIVIDUAL)',
               municipio: secData.municipio || 'RECIFE / PE',
+              foto_url: (secData.foto_url && !secData.foto_url.includes('unsplash.com')) ? secData.foto_url : '',
               cpf_mascarado: maskCpfFirst3(secData.cpf)
             }
           }));

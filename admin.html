@@ -4274,7 +4274,11 @@
       return str;
     }
 
-    const OFFICIAL_DEFAULT_PHOTO_SVG = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="236" viewBox="0 0 200 236"><rect width="200" height="236" fill="%23071329"/><circle cx="100" cy="85" r="42" fill="%2338bdf8" fill-opacity="0.25"/><circle cx="100" cy="85" r="38" fill="%231e293b"/><path d="M38 215 C38 145 162 145 162 215 Z" fill="%2338bdf8" fill-opacity="0.25"/><path d="M42 215 C42 150 158 150 158 215 Z" fill="%231e293b"/><circle cx="100" cy="85" r="28" fill="%2338bdf8" fill-opacity="0.85"/><path d="M54 215 C54 162 146 162 146 215 Z" fill="%2338bdf8" fill-opacity="0.85"/><rect x="25" y="202" width="150" height="22" rx="11" fill="%230b1c3d" stroke="%2338bdf8" stroke-width="1.5"/><text x="100" y="217" font-family="Montserrat, sans-serif" font-size="10" font-weight="900" fill="%23e2e8f0" text-anchor="middle" letter-spacing="0.5">FOTO 3X4 DO ATLETA</text></svg>';
+    const RAW_OFFICIAL_DEFAULT_PHOTO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="236" viewBox="0 0 200 236"><rect width="200" height="236" fill="#071329"/><circle cx="100" cy="85" r="42" fill="#38bdf8" fill-opacity="0.25"/><circle cx="100" cy="85" r="38" fill="#1e293b"/><path d="M38 215 C38 145 162 145 162 215 Z" fill="#38bdf8" fill-opacity="0.25"/><path d="M42 215 C42 150 158 150 158 215 Z" fill="#1e293b"/><circle cx="100" cy="85" r="28" fill="#38bdf8" fill-opacity="0.85"/><path d="M54 215 C54 162 146 162 146 215 Z" fill="#38bdf8" fill-opacity="0.85"/><rect x="25" y="202" width="150" height="22" rx="11" fill="#0b1c3d" stroke="#38bdf8" stroke-width="1.5"/><text x="100" y="217" font-family="Montserrat, sans-serif" font-size="10" font-weight="900" fill="#e2e8f0" text-anchor="middle" letter-spacing="0.5">FOTO 3X4 DO ATLETA</text></svg>';
+    const OFFICIAL_DEFAULT_PHOTO_SVG = (typeof window !== 'undefined' && window.btoa)
+      ? 'data:image/svg+xml;base64,' + window.btoa(unescape(encodeURIComponent(RAW_OFFICIAL_DEFAULT_PHOTO_SVG)))
+      : 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(RAW_OFFICIAL_DEFAULT_PHOTO_SVG);
+    window.OFFICIAL_DEFAULT_PHOTO_SVG = OFFICIAL_DEFAULT_PHOTO_SVG;
 
     const OFFICIAL_DEFAULT_ELEMENTS = [
   {
@@ -6751,7 +6755,18 @@
               ctx.save();
               drawRoundedRectPath(ctx, item.x * scale, item.y * scale, item.width * scale, item.height * scale, (item.borderRadius || 20) * scale);
               ctx.clip();
-              ctx.drawImage(photoImg, item.x * scale, item.y * scale, item.width * scale, item.height * scale);
+              // Proporção real e enquadramento centralizado (object-fit: cover) sem distorção
+              const imgRatio = photoImg.width / photoImg.height;
+              const targetRatio = item.width / item.height;
+              let sX = 0, sY = 0, sW = photoImg.width, sH = photoImg.height;
+              if (imgRatio > targetRatio) {
+                sW = photoImg.height * targetRatio;
+                sX = (photoImg.width - sW) / 2;
+              } else {
+                sH = photoImg.width / targetRatio;
+                sY = (photoImg.height - sH) / 2;
+              }
+              ctx.drawImage(photoImg, sX, sY, sW, sH, item.x * scale, item.y * scale, item.width * scale, item.height * scale);
               ctx.restore();
             } else {
               drawDefaultAthleteAvatar(ctx, item.x * scale, item.y * scale, item.width * scale, item.height * scale, (item.borderRadius || 20) * scale);
@@ -7904,24 +7919,56 @@
             console.warn('Erro ao atualizar foto no localStorage:', e);
           }
 
-          // B) Se Supabase estiver conectado e disponível, atualiza imediatamente no banco de dados na nuvem com timeout seguro
-          if (typeof supabaseClient !== 'undefined' && supabaseClient) {
-            try {
-              const photoUpdateTask = (async () => {
-                let res = await supabaseClient
-                  .from('atletas')
-                  .update({ foto_url: compressedDataUrl, foto: compressedDataUrl })
-                  .eq('codigo', currentCode);
-                if (res.error) {
-                  res = await supabaseClient.from('atletas').update({ foto_url: compressedDataUrl }).eq('codigo', currentCode);
+          // B) Sincronização da foto em ambos os bancos (Banco 1 Principal e Banco 2 Ingestão/Reserva)
+          const syncPhotoToDb = async () => {
+            const photoPayload = { foto_url: compressedDataUrl, foto: compressedDataUrl };
+            const recordKey = 'athlete_record:' + currentCode;
+
+            // 1. Atualiza no Banco 2 (Secundário/Ingestão)
+            if (typeof supabaseSecondaryClient !== 'undefined' && supabaseSecondaryClient) {
+              try {
+                let r2 = await supabaseSecondaryClient.from('atletas').update(photoPayload).eq('codigo', currentCode);
+                if (r2.error) {
+                  await supabaseSecondaryClient.from('atletas').update({ foto_url: compressedDataUrl }).eq('codigo', currentCode);
                 }
-                return res;
-              })();
-              safeSupabaseCall(photoUpdateTask, 3000).catch(err => console.warn('Atualização remota da foto em background:', err));
-            } catch (err) {
-              console.warn('Erro ao sincronizar foto com o Supabase:', err);
+                // Atualiza também keep_alive_logs no Banco 2
+                try {
+                  const { data: rec2 } = await supabaseSecondaryClient.from('keep_alive_logs').select('status').eq('source', recordKey).limit(1).maybeSingle();
+                  if (rec2 && rec2.status) {
+                    const parsed = JSON.parse(rec2.status);
+                    parsed.foto = compressedDataUrl;
+                    parsed.foto_url = compressedDataUrl;
+                    await supabaseSecondaryClient.from('keep_alive_logs').update({ status: JSON.stringify(parsed), pinged_at: new Date().toISOString() }).eq('source', recordKey);
+                  }
+                } catch (eLog2) {}
+              } catch (e2) {
+                console.warn('[Dual-DB] Foto Banco 2:', e2);
+              }
             }
-          }
+
+            // 2. Atualiza no Banco 1 (Principal/Exibição)
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+              try {
+                let r1 = await supabaseClient.from('atletas').update(photoPayload).eq('codigo', currentCode);
+                if (r1.error) {
+                  await supabaseClient.from('atletas').update({ foto_url: compressedDataUrl }).eq('codigo', currentCode);
+                }
+                // Atualiza também keep_alive_logs no Banco 1
+                try {
+                  const { data: rec1 } = await supabaseClient.from('keep_alive_logs').select('status').eq('source', recordKey).limit(1).maybeSingle();
+                  if (rec1 && rec1.status) {
+                    const parsed = JSON.parse(rec1.status);
+                    parsed.foto = compressedDataUrl;
+                    parsed.foto_url = compressedDataUrl;
+                    await supabaseClient.from('keep_alive_logs').update({ status: JSON.stringify(parsed), pinged_at: new Date().toISOString() }).eq('source', recordKey);
+                  }
+                } catch (eLog1) {}
+              } catch (e1) {
+                console.warn('[Dual-DB] Foto Banco 1:', e1);
+              }
+            }
+          };
+          safeSupabaseCall(syncPhotoToDb(), 4000).catch(err => console.warn('Atualização remota da foto em background:', err));
         }
 
         const sizeKb = Math.round((compressedDataUrl.length * 3 / 4) / 1024);
@@ -9040,7 +9087,13 @@
             categoria: athleteObj.categoria || 'ASPIRANTE',
             clube: athleteObj.clube || 'FEDERAÇÃO PERNAMBUCANA',
             municipio: athleteObj.municipio || 'RECIFE / PE',
-            status: athleteObj.status || 'PENDENTE'
+            status: athleteObj.status || 'PENDENTE',
+            foto_url: photo || athleteObj.foto_url || '',
+            foto: photo || athleteObj.foto || '',
+            nascimento: athleteObj.nascimento || '',
+            telefone: athleteObj.telefone || '',
+            federado: athleteObj.federado || '',
+            validade: athleteObj.validade || '12/2026'
           })
         }).catch(e => console.warn("API gestao sync notice:", e));
       } catch (e) {}
@@ -9283,8 +9336,19 @@
               }
             });
             db2Data.forEach(item => {
-              if (item && item.codigo && !deletedCodes.has(String(item.codigo)) && !mergedMap.has(String(item.codigo))) {
-                mergedMap.set(String(item.codigo), item);
+              if (item && item.codigo && !deletedCodes.has(String(item.codigo))) {
+                const cCode = String(item.codigo);
+                if (!mergedMap.has(cCode)) {
+                  mergedMap.set(cCode, { ...item });
+                } else {
+                  const existing = mergedMap.get(cCode);
+                  if ((!existing.foto_url || existing.foto_url.includes('unsplash.com')) && item.foto_url) {
+                    existing.foto_url = item.foto_url;
+                  }
+                  if ((!existing.foto || existing.foto.includes('unsplash.com')) && item.foto) {
+                    existing.foto = item.foto;
+                  }
+                }
               }
             });
 
@@ -9693,12 +9757,23 @@
             }
           }
 
+          const rawPhoto = a.foto || a.foto_url || '';
+          const photoUrl = (rawPhoto && !rawPhoto.includes('unsplash.com')) ? rawPhoto : (window.OFFICIAL_DEFAULT_PHOTO_SVG || OFFICIAL_DEFAULT_PHOTO_SVG);
+
           tr.innerHTML = `
-            <td class="py-3 px-3.5 font-mono font-bold text-pe-gold text-xs">${escapeHtml(fedDisplay)}</td>
-            <td class="py-3 px-3.5 font-bold text-white uppercase text-xs">
-              <div class="flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full ${isPending ? 'bg-amber-400 animate-pulse' : (isDesabilitado ? 'bg-rose-400' : 'bg-emerald-400')}"></span>
-                <span class="hover:text-pe-gold transition">${escapeHtml(a.nome)}</span>
+            <td class="py-2.5 px-3.5 font-mono font-bold text-pe-gold text-xs">${escapeHtml(fedDisplay)}</td>
+            <td class="py-2.5 px-3.5 font-bold text-white uppercase text-xs">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-11 rounded-lg overflow-hidden border border-pe-gold/60 shrink-0 bg-[#0c1424] shadow flex items-center justify-center cursor-pointer hover:border-pe-gold hover:scale-105 transition" onclick="event.stopPropagation(); abrirModalVerCarteira('${a.codigo}')" title="Clique para ver carteira e foto ampliada">
+                  <img src="${photoUrl}" alt="${escapeHtml(a.nome)}" class="w-full h-full object-cover" onerror="this.onerror=null;this.src=window.OFFICIAL_DEFAULT_PHOTO_SVG" loading="lazy" />
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full ${isPending ? 'bg-amber-400 animate-pulse' : (isDesabilitado ? 'bg-rose-400' : 'bg-emerald-400')}"></span>
+                    <span class="hover:text-pe-gold transition truncate font-bold text-white text-xs">${escapeHtml(a.nome)}</span>
+                  </div>
+                  <span class="text-[9px] font-mono text-slate-400 block mt-0.5">ID: #${escapeHtml(a.codigo)}</span>
+                </div>
               </div>
             </td>
             <td class="py-3 px-3.5">${statusBadgeHtml}</td>
@@ -10243,7 +10318,7 @@
       container.innerHTML = `
         <div class="flex items-start gap-3 border-b border-[#1c253b] pb-3">
           <div class="w-16 h-20 rounded-xl overflow-hidden border-2 border-pe-gold shrink-0 bg-[#0c1424] shadow">
-            <img src="${photoUrl}" class="w-full h-full object-cover" onerror="this.src=OFFICIAL_DEFAULT_PHOTO_SVG" />
+            <img src="${photoUrl}" class="w-full h-full object-cover" onerror="this.onerror=null;this.src=window.OFFICIAL_DEFAULT_PHOTO_SVG" />
           </div>
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between gap-1 mb-1">
@@ -10436,8 +10511,12 @@
         <!-- Selo de Status e Identificação Principal -->
         <div class="bg-[#05080e] border border-[#1c253b] rounded-2xl p-4 sm:p-5 space-y-4 shadow-xl">
           <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4">
-            <div class="w-20 h-24 sm:w-22 sm:h-28 rounded-2xl overflow-hidden border-2 border-pe-gold shrink-0 bg-[#0c1424] shadow-xl relative">
-              <img src="${photoUrl}" alt="${escapeHtml(a.nome)}" class="w-full h-full object-cover" onerror="this.src=OFFICIAL_DEFAULT_PHOTO_SVG" />
+            <div class="w-20 h-24 sm:w-24 sm:h-32 rounded-2xl overflow-hidden border-2 border-pe-gold shrink-0 bg-[#0c1424] shadow-xl relative group cursor-pointer" onclick="abrirFotoTamanhoReal('${escapeJsString(photoUrl)}', '${escapeJsString(a.nome)}')" title="Clique para visualizar a foto no tamanho real original">
+              <img src="${photoUrl}" alt="${escapeHtml(a.nome)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.onerror=null;this.src=window.OFFICIAL_DEFAULT_PHOTO_SVG" />
+              <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center text-white text-xs font-bold gap-1 pointer-events-none p-1 text-center">
+                <i class="fa-solid fa-expand text-sm text-pe-gold"></i>
+                <span class="text-[8px] uppercase tracking-wider text-pe-gold font-mono">Tamanho Real</span>
+              </div>
               <div class="absolute bottom-1 right-1 w-3.5 h-3.5 rounded-full border-2 border-[#0c1424] ${statusDotClass}"></div>
             </div>
             <div class="flex-1 min-w-0 text-center sm:text-left space-y-1.5">
@@ -10587,6 +10666,34 @@
       }, 30);
     }
 
+    function abrirFotoTamanhoReal(photoUrl, nome) {
+      const modal = document.getElementById('modalFotoTamanhoReal');
+      const img = document.getElementById('fotoTamanhoRealImg');
+      const title = document.getElementById('fotoTamanhoRealTitle');
+      const dims = document.getElementById('fotoTamanhoRealDims');
+      const downloadBtn = document.getElementById('btnBaixarFotoReal');
+      if (!modal || !img) return;
+
+      const targetUrl = (photoUrl && photoUrl !== window.OFFICIAL_DEFAULT_PHOTO_SVG && !photoUrl.startsWith('data:image/svg+xml'))
+        ? photoUrl
+        : (window.OFFICIAL_DEFAULT_PHOTO_SVG || OFFICIAL_DEFAULT_PHOTO_SVG);
+
+      img.src = targetUrl;
+      if (downloadBtn) downloadBtn.href = targetUrl;
+      if (title) title.textContent = `Foto Oficial: ${nome || 'Atleta'}`;
+      img.onload = () => {
+        if (dims) dims.textContent = `Resolução: ${img.naturalWidth} x ${img.naturalHeight} px (Proporção Original)`;
+      };
+      modal.classList.remove('hidden');
+    }
+
+    function fecharFotoTamanhoReal() {
+      const modal = document.getElementById('modalFotoTamanhoReal');
+      if (modal) modal.classList.add('hidden');
+    }
+    window.abrirFotoTamanhoReal = abrirFotoTamanhoReal;
+    window.fecharFotoTamanhoReal = fecharFotoTamanhoReal;
+
     window.abrirModalVerCarteira = abrirModalVerCarteira;
     window.fecharModalVerCarteira = fecharModalVerCarteira;
     window.homologarAthleteModal = homologarAthleteModal;
@@ -10594,6 +10701,7 @@
 
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
+        fecharFotoTamanhoReal();
         fecharModalVerCarteira();
         if (typeof closePreviewModal === 'function') closePreviewModal();
         if (typeof closeDeleteModal === 'function') closeDeleteModal();
@@ -15489,6 +15597,42 @@ $;
     <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0 rounded-t-2xl"></div>
     <div id="athleteHoverCardContent" class="space-y-3 pt-1">
       <!-- Injetado dinamicamente -->
+    </div>
+  </div>
+
+  <!-- MODAL LIGHTBOX: FOTO OFICIAL DO ATLETA EM TAMANHO REAL -->
+  <div id="modalFotoTamanhoReal" class="fixed inset-0 z-[10001] hidden bg-black/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-6" onclick="fecharFotoTamanhoReal()">
+    <div class="relative max-w-3xl max-h-[92vh] w-full bg-[#070e1d] border-2 border-pe-gold/80 rounded-3xl p-4 sm:p-6 shadow-[0_25px_60px_rgba(0,0,0,0.95)] flex flex-col items-center my-auto" onclick="event.stopPropagation()">
+      <div class="w-full flex items-center justify-between pb-3 border-b border-[#1c253b] mb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-7 h-7 rounded-lg bg-pe-gold/20 border border-pe-gold/50 flex items-center justify-center text-pe-gold text-xs">
+            <i class="fa-solid fa-expand"></i>
+          </div>
+          <div>
+            <h3 id="fotoTamanhoRealTitle" class="text-white font-oswald text-base sm:text-lg uppercase font-bold tracking-wide leading-tight">Foto Oficial do Atleta</h3>
+            <span class="text-[9px] text-slate-400 font-mono">Visualização em alta resolução no tamanho real</span>
+          </div>
+        </div>
+        <button type="button" onclick="fecharFotoTamanhoReal()" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition cursor-pointer text-base">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="w-full flex-1 min-h-[220px] max-h-[65vh] overflow-auto flex items-center justify-center rounded-2xl bg-[#030712] p-2 sm:p-4 border border-pe-gold/30 shadow-inner">
+        <img id="fotoTamanhoRealImg" src="" alt="Foto Tamanho Real" class="max-w-full max-h-[62vh] object-contain rounded-xl shadow-2xl transition" />
+      </div>
+
+      <div class="w-full pt-3 mt-3 border-t border-[#1c253b] flex flex-wrap items-center justify-between gap-2 text-xs">
+        <span id="fotoTamanhoRealDims" class="font-mono text-[10px] text-pe-gold font-bold bg-pe-gold/10 px-2.5 py-1 rounded-lg border border-pe-gold/30">Dimensões Originais</span>
+        <div class="flex items-center gap-2">
+          <a id="btnBaixarFotoReal" href="#" download="foto_atleta.jpg" target="_blank" class="px-3 py-1.5 bg-[#121d33] hover:bg-[#1a2948] text-pe-gold border border-pe-gold/40 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+            <i class="fa-solid fa-download"></i> <span>Baixar Foto</span>
+          </a>
+          <button type="button" onclick="fecharFotoTamanhoReal()" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition cursor-pointer">
+            Fechar
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 

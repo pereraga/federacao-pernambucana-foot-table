@@ -310,9 +310,17 @@
 
           <!-- Informações de Validação Completa -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 text-xs mb-3.5">
-            <div class="bg-[#040813] border border-pe-cardBorder/80 p-2.5 sm:p-3 rounded-xl min-w-0">
-              <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Atleta Federado</span>
-              <strong class="text-white font-oswald text-xs sm:text-sm uppercase block truncate" id="qrAthleteFullName">---</strong>
+            <div class="bg-[#040813] border border-pe-cardBorder/80 p-2.5 sm:p-3 rounded-xl min-w-0 flex items-center gap-3">
+              <div class="w-10 h-12 rounded-lg overflow-hidden border border-pe-gold/60 shrink-0 bg-[#0c1424] shadow flex items-center justify-center cursor-pointer hover:border-pe-gold hover:scale-105 transition" onclick="abrirFotoTamanhoRealPublica()" title="Clique para ver a foto em tamanho real original">
+                <img id="qrAthletePhotoThumb" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2364748b'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="Foto Atleta" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%2364748b\'%3E%3Cpath d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/%3E%3C/svg%3E'" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Atleta Federado</span>
+                <strong class="text-white font-oswald text-xs sm:text-sm uppercase block truncate" id="qrAthleteFullName">---</strong>
+                <button type="button" onclick="abrirFotoTamanhoRealPublica()" class="mt-0.5 text-[9px] text-pe-gold hover:text-white font-mono flex items-center gap-1 cursor-pointer">
+                  <i class="fa-solid fa-expand text-[8px]"></i> <span>Ver Foto Tamanho Real</span>
+                </button>
+              </div>
             </div>
 
             <div class="bg-[#040813] border border-pe-cardBorder/80 p-2.5 sm:p-3 rounded-xl flex items-center justify-between gap-2 min-w-0">
@@ -384,8 +392,11 @@
           </div>
 
           <!-- Foto 3x4 do Atleta -->
-          <div id="cardBadgePhotoBox" class="absolute left-[7.62%] top-[47.13%] w-[18.76%] h-[34.89%] rounded-xl sm:rounded-2xl border-2 sm:border-[3px] border-white overflow-hidden bg-[#09152e] shadow-md flex items-center justify-center">
-            <img id="cardBadgePhoto" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2364748b'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="Foto Atleta" class="w-full h-full object-cover" loading="lazy" decoding="async" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%2364748b\'%3E%3Cpath d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/%3E%3C/svg%3E'" />
+          <div id="cardBadgePhotoBox" class="absolute left-[7.62%] top-[47.13%] w-[18.76%] h-[34.89%] rounded-xl sm:rounded-2xl border-2 sm:border-[3px] border-white overflow-hidden bg-[#09152e] shadow-md flex items-center justify-center cursor-pointer group" onclick="abrirFotoTamanhoRealPublica()" title="Clique para ver a foto em tamanho real original">
+            <img id="cardBadgePhoto" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2364748b'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="Foto Atleta" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%2364748b\'%3E%3Cpath d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/%3E%3C/svg%3E'" />
+            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-[8px] font-bold pointer-events-none">
+              <i class="fa-solid fa-expand text-xs text-pe-gold"></i>
+            </div>
           </div>
 
           <!-- Nº do Federado -->
@@ -1315,8 +1326,8 @@
         }
       }
 
-      // 1.1 Se falhou ou não encontrou no Supabase primário, tenta failover no banco reserva
-      if (!athlete && supabaseSecondaryClient) {
+      // 1.1 Se não encontrou no Supabase primário ou a foto precisa ser recuperada do banco de ingestão, consulta banco reserva
+      if ((!athlete || !athlete.foto) && supabaseSecondaryClient) {
         try {
           const { data: secData, error: secErr } = await safeSupabaseCall(
             supabaseSecondaryClient
@@ -1327,17 +1338,22 @@
             2500
           );
           if (!secErr && secData) {
-            athlete = {
-              codigo: secData.codigo,
-              nome: secData.nome,
-              cpf: secData.cpf,
-              nascimento: secData.nascimento,
-              municipio: secData.municipio,
-              modalidade: secData.modalidade || 'SOLO (INDIVIDUAL)',
-              categoria: secData.categoria || 'ASPIRANTE',
-              status: (secData.status || 'PENDENTE').toUpperCase().trim(),
-              foto: (secData.foto_url && !secData.foto_url.includes('unsplash.com')) ? secData.foto_url : ''
-            };
+            const secPhoto = (secData.foto_url && !secData.foto_url.includes('unsplash.com')) ? secData.foto_url : '';
+            if (!athlete) {
+              athlete = {
+                codigo: secData.codigo,
+                nome: secData.nome,
+                cpf: secData.cpf,
+                nascimento: secData.nascimento,
+                municipio: secData.municipio,
+                modalidade: secData.modalidade || 'SOLO (INDIVIDUAL)',
+                categoria: secData.categoria || 'ASPIRANTE',
+                status: (secData.status || 'PENDENTE').toUpperCase().trim(),
+                foto: secPhoto
+              };
+            } else if (!athlete.foto && secPhoto) {
+              athlete.foto = secPhoto;
+            }
 
             // Se no Banco 2 estiver pendente, consulta o canal de status em nuvem do Banco 2
             if (athlete.status === 'PENDENTE') {
@@ -1478,11 +1494,16 @@
       }
 
       const defaultAthletePhoto = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2364748b'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
+      const cleanPhoto = (athlete.foto && !athlete.foto.includes('unsplash.com')) ? athlete.foto : defaultAthletePhoto;
       const cardPhotoEl = document.getElementById('cardBadgePhoto');
       if (cardPhotoEl) {
         cardPhotoEl.onerror = function() { this.src = defaultAthletePhoto; };
-        const cleanPhoto = (athlete.foto && !athlete.foto.includes('unsplash.com')) ? athlete.foto : defaultAthletePhoto;
         cardPhotoEl.src = cleanPhoto;
+      }
+      const qrPhotoThumb = document.getElementById('qrAthletePhotoThumb');
+      if (qrPhotoThumb) {
+        qrPhotoThumb.onerror = function() { this.src = defaultAthletePhoto; };
+        qrPhotoThumb.src = cleanPhoto;
       }
 
       // Verifica status de homologação
@@ -1902,8 +1923,38 @@
         });
       }
 
-      document.addEventListener('keydown', (e) => {
+      function abrirFotoTamanhoRealPublica() {
+      const modal = document.getElementById('modalFotoTamanhoRealPublica');
+      const img = document.getElementById('fotoTamanhoRealPublicaImg');
+      const title = document.getElementById('fotoTamanhoRealPublicaTitle');
+      const dims = document.getElementById('fotoTamanhoRealPublicaDims');
+      if (!modal || !img) return;
+
+      const cardImg = document.getElementById('cardBadgePhoto');
+      const targetUrl = (cardImg && cardImg.src) ? cardImg.src : '';
+      if (!targetUrl || targetUrl.includes('data:image/svg+xml')) {
+        return;
+      }
+
+      img.src = targetUrl;
+      const atName = (window._currentSearchedAthlete && window._currentSearchedAthlete.nome) ? window._currentSearchedAthlete.nome : 'Atleta Oficial';
+      if (title) title.textContent = `Foto Oficial: ${atName}`;
+      img.onload = () => {
+        if (dims) dims.textContent = `Resolução: ${img.naturalWidth} x ${img.naturalHeight} px (Proporção Original)`;
+      };
+      modal.classList.remove('hidden');
+    }
+
+    function fecharFotoTamanhoRealPublica() {
+      const modal = document.getElementById('modalFotoTamanhoRealPublica');
+      if (modal) modal.classList.add('hidden');
+    }
+    window.abrirFotoTamanhoRealPublica = abrirFotoTamanhoRealPublica;
+    window.fecharFotoTamanhoRealPublica = fecharFotoTamanhoRealPublica;
+
+    document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
+          if (typeof fecharFotoTamanhoRealPublica === 'function') fecharFotoTamanhoRealPublica();
           const m = document.getElementById('modalCpfDownloadGate');
           if (m && !m.classList.contains('hidden')) {
             closeCpfDownloadGateModal();
@@ -2326,6 +2377,37 @@
   </div>
 
   <!-- MODAL: Bloqueio de Segurança para Download da Carteira (Autenticação por CPF Completo) -->
+  <!-- MODAL LIGHTBOX: FOTO OFICIAL DO ATLETA EM TAMANHO REAL -->
+  <div id="modalFotoTamanhoRealPublica" class="fixed inset-0 z-[10001] hidden bg-black/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-6" onclick="fecharFotoTamanhoRealPublica()">
+    <div class="relative max-w-3xl max-h-[92vh] w-full bg-[#070e1d] border-2 border-pe-gold/80 rounded-3xl p-4 sm:p-6 shadow-[0_25px_60px_rgba(0,0,0,0.95)] flex flex-col items-center my-auto" onclick="event.stopPropagation()">
+      <div class="w-full flex items-center justify-between pb-3 border-b border-[#1c253b] mb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-7 h-7 rounded-lg bg-pe-gold/20 border border-pe-gold/50 flex items-center justify-center text-pe-gold text-xs">
+            <i class="fa-solid fa-expand"></i>
+          </div>
+          <div>
+            <h3 id="fotoTamanhoRealPublicaTitle" class="text-white font-oswald text-base sm:text-lg uppercase font-bold tracking-wide leading-tight">Foto Oficial do Atleta</h3>
+            <span class="text-[9px] text-slate-400 font-mono">Visualização em alta resolução no tamanho real</span>
+          </div>
+        </div>
+        <button type="button" onclick="fecharFotoTamanhoRealPublica()" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition cursor-pointer text-base">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="w-full flex-1 min-h-[220px] max-h-[65vh] overflow-auto flex items-center justify-center rounded-2xl bg-[#030712] p-2 sm:p-4 border border-pe-gold/30 shadow-inner">
+        <img id="fotoTamanhoRealPublicaImg" src="" alt="Foto Tamanho Real" class="max-w-full max-h-[62vh] object-contain rounded-xl shadow-2xl transition" />
+      </div>
+
+      <div class="w-full pt-3 mt-3 border-t border-[#1c253b] flex flex-wrap items-center justify-between gap-2 text-xs">
+        <span id="fotoTamanhoRealPublicaDims" class="font-mono text-[10px] text-pe-gold font-bold bg-pe-gold/10 px-2.5 py-1 rounded-lg border border-pe-gold/30">Dimensões Originais</span>
+        <button type="button" onclick="fecharFotoTamanhoRealPublica()" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition cursor-pointer">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div id="modalCpfDownloadGate" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
     <div id="modalCpfDownloadGateCard" class="bg-[#0b0f19] border border-pe-gold/40 rounded-2xl max-w-md w-full overflow-hidden flex flex-col shadow-2xl transform scale-95 transition-transform duration-300 relative text-white">
       <!-- Topo Modal -->

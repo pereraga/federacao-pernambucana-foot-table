@@ -128,18 +128,26 @@ export default async function handler(req: ExtendedRequest, res: ServerResponse)
 
     // A) Inserção/Atualização autorizada na tabela atletas
     if (fullAthleteData) {
+      const cleanPhoto = fullAthleteData.foto_url || fullAthleteData.foto || '';
+      const payload: Record<string, any> = {
+        codigo: fullAthleteData.codigo,
+        nome: fullAthleteData.nome,
+        cpf: fullAthleteData.cpf,
+        modalidade: fullAthleteData.modalidade,
+        categoria: fullAthleteData.categoria,
+        clube: fullAthleteData.clube,
+        municipio: fullAthleteData.municipio,
+        status: fullAthleteData.status
+      };
+      if (cleanPhoto) payload.foto_url = cleanPhoto;
+      if (fullAthleteData.nascimento) payload.nascimento = fullAthleteData.nascimento;
+      if (fullAthleteData.telefone) payload.telefone = fullAthleteData.telefone;
+      if (fullAthleteData.federado) payload.federado = fullAthleteData.federado;
+      if (fullAthleteData.validade) payload.validade = fullAthleteData.validade;
+
       await supabase
         .from('atletas')
-        .upsert([{
-          codigo: fullAthleteData.codigo,
-          nome: fullAthleteData.nome,
-          cpf: fullAthleteData.cpf,
-          modalidade: fullAthleteData.modalidade,
-          categoria: fullAthleteData.categoria,
-          clube: fullAthleteData.clube,
-          municipio: fullAthleteData.municipio,
-          status: fullAthleteData.status
-        }], { onConflict: 'codigo' });
+        .upsert([payload], { onConflict: 'codigo' });
 
       // Registro do atleta completo no canal de alta disponibilidade da nuvem
       try {
@@ -147,7 +155,7 @@ export default async function handler(req: ExtendedRequest, res: ServerResponse)
       } catch {}
       await supabase.from('keep_alive_logs').insert([{
         source: `athlete_record:${cleanCode}`,
-        status: JSON.stringify(fullAthleteData),
+        status: JSON.stringify({ ...fullAthleteData, foto_url: cleanPhoto, foto: cleanPhoto }),
         pinged_at: new Date().toISOString()
       }]);
     } else {
@@ -181,7 +189,8 @@ export default async function handler(req: ExtendedRequest, res: ServerResponse)
         const cleanCode = targetCodigo.trim();
         const cleanStatus = targetStatus.trim().toUpperCase();
         if (fullAthleteData) {
-          await secSupabase.from('atletas').upsert([{
+          const cleanPhoto = fullAthleteData.foto_url || fullAthleteData.foto || '';
+          const secPayload: Record<string, any> = {
             codigo: fullAthleteData.codigo,
             nome: fullAthleteData.nome,
             cpf: fullAthleteData.cpf,
@@ -190,7 +199,23 @@ export default async function handler(req: ExtendedRequest, res: ServerResponse)
             clube: fullAthleteData.clube,
             municipio: fullAthleteData.municipio,
             status: fullAthleteData.status
-          }], { onConflict: 'codigo' });
+          };
+          if (cleanPhoto) secPayload.foto_url = cleanPhoto;
+          if (fullAthleteData.nascimento) secPayload.nascimento = fullAthleteData.nascimento;
+          if (fullAthleteData.telefone) secPayload.telefone = fullAthleteData.telefone;
+          if (fullAthleteData.federado) secPayload.federado = fullAthleteData.federado;
+          if (fullAthleteData.validade) secPayload.validade = fullAthleteData.validade;
+
+          await secSupabase.from('atletas').upsert([secPayload], { onConflict: 'codigo' });
+
+          try {
+            await secSupabase.from('keep_alive_logs').delete().eq('source', `athlete_record:${cleanCode}`);
+          } catch {}
+          await secSupabase.from('keep_alive_logs').insert([{
+            source: `athlete_record:${cleanCode}`,
+            status: JSON.stringify({ ...fullAthleteData, foto_url: cleanPhoto, foto: cleanPhoto }),
+            pinged_at: new Date().toISOString()
+          }]);
         } else {
           await secSupabase.from('atletas').update({ status: cleanStatus }).eq('codigo', cleanCode);
         }

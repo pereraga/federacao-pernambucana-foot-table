@@ -31,7 +31,13 @@ export const GestaoAtletaSchema = z.object({
   categoria: z.string().trim().max(50).default('ASPIRANTE'),
   clube: z.string().trim().max(100).default('FEDERAÇÃO PERNAMBUCANA'),
   municipio: z.string().trim().max(80).default('RECIFE / PE'),
-  status: z.enum(['HOMOLOGADO', 'REGULAR', 'PENDENTE', 'SUSPENSO', 'DESABILITADO']).default('PENDENTE')
+  status: z.enum(['HOMOLOGADO', 'REGULAR', 'PENDENTE', 'SUSPENSO', 'DESABILITADO']).default('PENDENTE'),
+  foto_url: z.string().max(350000).optional(),
+  foto: z.string().max(350000).optional(),
+  nascimento: z.string().trim().max(30).optional(),
+  telefone: z.string().trim().max(30).optional(),
+  federado: z.string().trim().max(50).optional(),
+  validade: z.string().trim().max(20).optional()
 }).strict();
 
 export type GestaoAtletaInput = z.infer<typeof GestaoAtletaSchema>;
