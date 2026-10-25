@@ -1215,71 +1215,55 @@
             <div class="flex flex-col space-y-4 min-w-0">
               
               <!-- Toolbar Superior do Canvas (Zoom e Padrão CR80) -->
-              <div class="flex items-center justify-between bg-[#0b101d] border border-[#1c253b] px-4 py-2.5 rounded-2xl shadow flex-wrap gap-2.5">
-                <div class="flex items-center gap-3 flex-wrap">
+              <div class="flex items-center justify-between bg-[#0b101d] border border-[#1c253b] px-3 sm:px-4 py-2.5 rounded-2xl shadow flex-wrap gap-2.5">
+                <!-- Lado Esquerdo: Identificação & Seletor de Modo -->
+                <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
                   <div class="flex items-center gap-2 text-xs">
                     <span class="w-2.5 h-2.5 rounded-full bg-pe-gold animate-pulse"></span>
-                    <span class="font-bold text-white uppercase tracking-wide">Padrão CR80 Oficial</span>
-                    <span class="text-slate-400 hidden sm:inline">(85.6mm × 53.98mm • 1050 × 662 px)</span>
+                    <span class="font-bold text-white uppercase tracking-wide text-[11px] sm:text-xs">Padrão CR80 Oficial</span>
+                    <span class="text-slate-400 hidden xl:inline text-[11px]">(85.6mm × 53.98mm • 1050 × 662 px)</span>
                   </div>
 
                   <!-- SELETOR DE MODO: FIXO vs DESIGN -->
                   <div class="inline-flex items-center bg-[#05080e] p-1 rounded-xl border border-[#1c253b] shadow-inner">
-                    <button type="button" id="btnModeFixed" onclick="toggleDesignLock(true)" title="Modo Fixo: Layout travado para emissão rápida sem risco de mover campos" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-extrabold bg-emerald-600 text-white shadow transition cursor-pointer">
-                      <i class="fa-solid fa-lock"></i>
+                    <button type="button" id="btnModeFixed" onclick="toggleDesignLock(true)" title="Modo Fixo: Layout travado para emissão rápida sem risco de mover campos" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-extrabold bg-emerald-600 text-white shadow transition cursor-pointer">
+                      <i class="fa-solid fa-lock text-[11px]"></i>
                       <span>Modo Fixo</span>
                     </button>
-                    <button type="button" id="btnModeDesign" onclick="toggleDesignLock(false)" title="Modo Design: Desbloqueia arrastar, redimensionar e editar posições livremente" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition cursor-pointer">
-                      <i class="fa-solid fa-pen-ruler"></i>
+                    <button type="button" id="btnModeDesign" onclick="toggleDesignLock(false)" title="Modo Design: Desbloqueia arrastar, redimensionar e editar posições livremente" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition cursor-pointer">
+                      <i class="fa-solid fa-pen-ruler text-[11px]"></i>
                       <span>Modo Design</span>
                     </button>
                   </div>
                 </div>
 
+                <!-- Lado Direito: Ações & Zoom -->
                 <div class="flex items-center gap-2 flex-wrap">
-                  <!-- Indicador de Status da Nuvem do Banco de Dados -->
-                  <div id="cloudSyncStatusBadge" class="px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 shadow-sm" title="Status da sincronização com o banco de dados oficial Supabase">
-                    <i id="cloudSyncStatusIcon" class="fa-solid fa-cloud-check text-emerald-400"></i>
-                    <span id="cloudSyncStatusText" class="hidden xl:inline">Nuvem Sincronizada</span>
-                  </div>
-
                   <!-- Botão Linhas Guia Inteligentes de Alinhamento -->
-                  <button type="button" id="btnToggleGuides" onclick="toggleAlignmentGuides()" title="Ativar/Desativar Linhas Guia e Limites de Alinhamento" class="px-2.5 py-1.5 bg-[#05080e] hover:bg-[#121c32] text-slate-300 hover:text-pe-gold border border-[#1c253b] rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer">
+                  <button type="button" id="btnToggleGuides" onclick="toggleAlignmentGuides()" title="Ativar/Desativar Linhas Guia e Limites de Alinhamento" class="px-2.5 sm:px-3 py-1.5 bg-[#05080e] hover:bg-[#121c32] text-slate-300 hover:text-pe-gold border border-[#1c253b] rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer min-h-[36px]">
                     <i class="fa-solid fa-ruler-combined text-pe-gold"></i>
-                    <span class="hidden sm:inline">Linhas Guia</span>
+                    <span>Linhas Guia</span>
                     <span id="guidesStateBadge" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">ON</span>
                   </button>
 
-                  <!-- Botão Gravar Padrão Fixo Oficial na Nuvem -->
-                  <button type="button" id="btnSaveOfficialCloud" onclick="saveOfficialLayoutToCloud()" title="Gravar este design como Padrão Fixo Oficial no banco de dados na nuvem para todos os computadores" class="px-3 py-1.5 bg-gradient-to-r from-amber-500 via-pe-gold to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer shadow-lg hover:scale-[1.02]">
-                    <i class="fa-solid fa-cloud-arrow-up text-slate-950"></i>
-                    <span>Gravar Padrão Fixo</span>
-                  </button>
-
-                  <!-- Botão Atualizar da Nuvem -->
-                  <button type="button" onclick="fetchStudioDesignFromSupabase(true)" title="Baixar e aplicar o design oficial mais recente salvo no banco de dados da nuvem" class="px-2.5 py-1.5 bg-[#05080e] hover:bg-[#121c32] text-slate-300 hover:text-pe-gold border border-[#1c253b] rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer">
-                    <i class="fa-solid fa-cloud-arrow-down text-sky-400"></i>
-                    <span class="hidden md:inline">Baixar da Nuvem</span>
-                  </button>
-
-                  <!-- Botão Restaurar Posições Oficiais -->
-                  <button type="button" onclick="restoreOfficialElementPositions()" title="Restaurar posições exatas do design oficial da Federação" class="px-2.5 py-1.5 bg-[#05080e] hover:bg-[#121c32] text-slate-300 hover:text-white border border-[#1c253b] rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer">
-                    <i class="fa-solid fa-arrows-rotate text-amber-400"></i>
-                    <span class="hidden md:inline">Restaurar Padrão</span>
+                  <!-- Botão Salvar Carteira em Tempo Real -->
+                  <button type="button" id="btnSaveOfficialCloud" onclick="saveOfficialLayoutToCloud()" title="Salvar alterações da carteira em tempo real no banco de dados para novos cadastros" class="px-3 sm:px-3.5 py-1.5 bg-gradient-to-r from-amber-500 via-pe-gold to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black rounded-xl text-xs flex items-center gap-1.5 sm:gap-2 transition cursor-pointer shadow-lg hover:scale-[1.02] active:scale-[0.98] min-h-[36px]">
+                    <i class="fa-solid fa-floppy-disk text-slate-950 text-xs sm:text-sm"></i>
+                    <span>Salvar Carteira</span>
                   </button>
 
                   <!-- Zoom Controls -->
-                  <div class="flex items-center space-x-1.5 bg-[#05080e] px-2 py-1 rounded-xl border border-[#1c253b]">
-                    <button type="button" id="zoomOutBtn" title="Reduzir Visualização" class="w-7 h-7 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition text-xs cursor-pointer">
-                      <i class="fa-solid fa-minus"></i>
+                  <div class="flex items-center space-x-1 sm:space-x-1.5 bg-[#05080e] px-2 py-1 rounded-xl border border-[#1c253b] min-h-[36px]">
+                    <button type="button" id="zoomOutBtn" title="Reduzir Visualização" class="w-6 sm:w-7 h-6 sm:h-7 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition text-xs cursor-pointer">
+                      <i class="fa-solid fa-minus text-[11px]"></i>
                     </button>
-                    <span id="zoomDisplay" class="text-xs font-mono font-medium text-pe-gold w-12 text-center">80%</span>
-                    <button type="button" id="zoomInBtn" title="Aumentar Visualização" class="w-7 h-7 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition text-xs cursor-pointer">
-                      <i class="fa-solid fa-plus"></i>
+                    <span id="zoomDisplay" class="text-xs font-mono font-bold text-pe-gold w-10 sm:w-11 text-center">80%</span>
+                    <button type="button" id="zoomInBtn" title="Aumentar Visualização" class="w-6 sm:w-7 h-6 sm:h-7 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition text-xs cursor-pointer">
+                      <i class="fa-solid fa-plus text-[11px]"></i>
                     </button>
-                    <div class="w-[1px] h-4 bg-slate-700 mx-1"></div>
-                    <button type="button" id="zoomFitBtn" title="Enquadrar à Tela" class="px-2 py-1 text-xs text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition flex items-center gap-1.5 cursor-pointer">
-                      <i class="fa-solid fa-expand text-[10px]"></i> <span>Enquadrar</span>
+                    <div class="w-[1px] h-4 bg-slate-700 mx-0.5 sm:mx-1"></div>
+                    <button type="button" id="zoomFitBtn" title="Enquadrar à Tela" class="px-1.5 sm:px-2 py-1 text-xs text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition flex items-center gap-1 sm:gap-1.5 cursor-pointer">
+                      <i class="fa-solid fa-expand text-[10px]"></i> <span class="hidden sm:inline">Enquadrar</span>
                     </button>
                   </div>
                 </div>
@@ -4727,40 +4711,46 @@
       }
     }
 
-    /* Grava explicitamente o design atual como Padrão Fixo Oficial no Banco de Dados */
+    /* Grava explicitamente o design atual da carteira no Banco de Dados em tempo real */
     async function saveOfficialLayoutToCloud() {
-      if (!hasPermission('gestao_supabase') && !hasPermission('*')) {
-        showToast('⚠️ Acesso Controlado: Você não possui permissão para alterar o Padrão Fixo Oficial na nuvem.', true);
+      const isMaster = (typeof isMasterAdminUser === 'function' && isMasterAdminUser()) || hasPermission('*');
+      if (!hasPermission('gestao_supabase') && !isMaster) {
+        showToast('⚠️ Acesso Controlado: Você não possui permissão para alterar o Padrão da Carteira no banco de dados.', true);
         return;
       }
       try {
         const btn = document.getElementById('btnSaveOfficialCloud');
         if (btn) {
-          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-slate-950"></i><span>Gravando na Nuvem...</span>';
+          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-slate-950"></i><span>Salvando...</span>';
           btn.disabled = true;
         }
 
-        // Persiste localmente
+        // Persiste localmente com a versão do layout
         localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(studioState.elements));
         localStorage.setItem('fpeft_studio_layout_version', STUDIO_LAYOUT_VERSION);
         if (studioState.bgTransform) {
           localStorage.setItem('fpeft_studio_bg_transform', JSON.stringify(studioState.bgTransform));
         }
 
-        // Envia imediatamente para o banco de dados na nuvem
+        // Envia imediatamente para o banco de dados na nuvem (tabela configuracoes + keep_alive_logs)
         await syncStudioDesignToSupabase(true);
 
-        showToast('⭐ Padrão Fixo Oficial gravado com sucesso no Banco de Dados! Todos os computadores e o site público receberão este layout idêntico.');
+        showToast('✅ Carteira salva com sucesso! Layout atualizado em tempo real no banco de dados para todos os novos cadastros.');
 
         setTimeout(() => {
           if (btn) {
-            btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up text-slate-950"></i><span>Gravar Padrão Fixo</span>';
+            btn.innerHTML = '<i class="fa-solid fa-floppy-disk text-slate-950 text-xs sm:text-sm"></i><span>Salvar Carteira</span>';
             btn.disabled = false;
           }
-        }, 1200);
+        }, 1000);
       } catch (err) {
         console.error('Erro ao gravar padrão oficial:', err);
-        showToast('Erro ao sincronizar padrão na nuvem.');
+        showToast('Erro ao salvar carteira no banco de dados.');
+        const btn = document.getElementById('btnSaveOfficialCloud');
+        if (btn) {
+          btn.innerHTML = '<i class="fa-solid fa-floppy-disk text-slate-950 text-xs sm:text-sm"></i><span>Salvar Carteira</span>';
+          btn.disabled = false;
+        }
       }
     }
 
@@ -5848,7 +5838,8 @@
 
     /* Alterna entre Modo Fixo (Bloqueado) e Modo Design (Livre) */
     function toggleDesignLock(locked) {
-      if (!locked && !hasPermission('gestao_supabase') && !hasPermission('*')) {
+      const isMaster = (typeof isMasterAdminUser === 'function' && isMasterAdminUser()) || hasPermission('*');
+      if (!locked && !hasPermission('gestao_supabase') && !isMaster) {
         showToast('⚠️ Acesso Controlado: A alteração de layout no Modo Design é restrita à Diretoria. Layout mantido no Modo Fixo.', true);
         studioState.isDesignLocked = true;
         updateModeButtonsUI();
@@ -14575,8 +14566,41 @@
 
         // Ao atualizar o site (F5 ou abertura), gera automaticamente um novo código de federado único
         generateFederatedNumber(true);
+
+        // Inicializa listener em tempo real para sincronização do layout da carteira
+        initStudioRealtimeSync();
       } catch (e) {
         console.warn("Aviso na inicialização do painel:", e);
+      }
+    }
+
+    // Sincronização em tempo real via Supabase Realtime entre computadores e dispositivos
+    function initStudioRealtimeSync() {
+      if (typeof supabaseClient !== 'undefined' && supabaseClient && typeof supabaseClient.channel === 'function') {
+        try {
+          supabaseClient.channel('realtime_carteira_studio_layout')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'configuracoes', filter: 'chave=eq.carteira_studio_layout' }, (payload) => {
+              if (payload && payload.new && payload.new.valor) {
+                try {
+                  const data = typeof payload.new.valor === 'string' ? JSON.parse(payload.new.valor) : payload.new.valor;
+                  if (data && data.elements && Array.isArray(data.elements)) {
+                    const curPhoto = (document.getElementById('athletePhotoVal')?.value || window._currentAthletePhoto || '');
+                    studioState.elements = sanitizeStudioElements(data.elements);
+                    if (curPhoto) {
+                      const pEl = studioState.elements.find(i => i.id === 'field-foto');
+                      if (pEl) pEl.photoUrl = curPhoto;
+                    }
+                    if (data.bgTransform) studioState.bgTransform = data.bgTransform;
+                    localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(studioState.elements));
+                    renderInteractiveElements();
+                    applyCurrentSvgBackground();
+                    if (typeof syncInspectorWithSelected === 'function') syncInspectorWithSelected();
+                  }
+                } catch(e) {}
+              }
+            })
+            .subscribe();
+        } catch (e) {}
       }
     }
 
