@@ -369,7 +369,7 @@
                   <span class="text-slate-200 font-mono" id="cardBadgeCPF">---</span>
                 </div>
                 <div>
-                  <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Nascimento</span>
+                  <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Ano Nasc.</span>
                   <span class="text-slate-200 font-mono" id="cardBadgeBirth">---</span>
                 </div>
               </div>
@@ -1235,10 +1235,23 @@
         return '***.***.***-**';
       }
 
+      // Extração Exclusiva do Ano de Nascimento na Carteira Oficial (Proteção de Privacidade / LGPD)
+      function extractBirthYear(dateStr) {
+        if (!dateStr) return '----';
+        const str = String(dateStr).trim();
+        const match = str.match(/\b(19\d{2}|20\d{2})\b/);
+        if (match) return match[1];
+        const digits = str.replace(/\D/g, '');
+        if (digits.length === 4) return digits;
+        if (digits.length === 8) return digits.slice(-4);
+        if (str.toUpperCase().includes('XXXX')) return 'XXXX';
+        return str;
+      }
+
       // Preenche os dados da carteira
       document.getElementById('cardBadgeName').textContent = athlete.nome;
       document.getElementById('cardBadgeCPF').textContent = maskCpf(athlete.cpf);
-      document.getElementById('cardBadgeBirth').textContent = athlete.nascimento;
+      document.getElementById('cardBadgeBirth').textContent = extractBirthYear(athlete.nascimento);
       document.getElementById('cardBadgeCity').textContent = athlete.municipio;
       document.getElementById('cardBadgeModality').textContent = athlete.modalidade;
       const catBadge = document.getElementById('cardBadgeCategory');

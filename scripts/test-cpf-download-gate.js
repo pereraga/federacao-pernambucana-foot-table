@@ -41,4 +41,9 @@ assert(indexHtml.includes('_isAthleteDownloadUnlocked = false;') && indexHtml.in
 // 5. Verificação da blindagem de exibição do CPF público (100% mascarado)
 assert(indexHtml.includes("maskCpf(cpf) {\n        return '***.***.***-**';"), 'Função maskCpf retorna estritamente ***.***.***-**');
 
-console.log('=== TODOS OS 13 TESTES DO BLOQUEIO DE CPF FORAM APROVADOS COM SUCESSO! ===');
+// 6. Verificação da ocultação da data de nascimento (exibição apenas do ano de nascimento)
+assert(indexHtml.includes('function extractBirthYear(dateStr)'), 'Função extractBirthYear implementada em index.html');
+assert(indexHtml.includes("document.getElementById('cardBadgeBirth').textContent = extractBirthYear(athlete.nascimento);"), 'Carteira exibe apenas o ano de nascimento do atleta');
+assert(indexHtml.includes('>Ano Nasc.</span>'), 'Label da carteira atualizado para Ano Nasc.');
+
+console.log('=== TODOS OS 16 TESTES DO BLOQUEIO DE CPF E PRIVACIDADE FORAM APROVADOS COM SUCESSO! ===');

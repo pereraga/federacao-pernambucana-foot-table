@@ -4132,6 +4132,18 @@
        Tamanho CR80: 85.60 mm x 53.98 mm | Resolução: 1050px x 662px
        Baseado no vetor fiel oficial: Carteira Atleta.pdf (Alta Resolução 300 DPI)
        ========================================================= */
+    function extractBirthYear(dateStr) {
+      if (!dateStr) return '----';
+      const str = String(dateStr).trim();
+      const match = str.match(/\b(19\d{2}|20\d{2})\b/);
+      if (match) return match[1];
+      const digits = str.replace(/\D/g, '');
+      if (digits.length === 4) return digits;
+      if (digits.length === 8) return digits.slice(-4);
+      if (str.toUpperCase().includes('XXXX')) return 'XXXX';
+      return str;
+    }
+
     const OFFICIAL_DEFAULT_PHOTO_SVG = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="236" viewBox="0 0 200 236"><rect width="200" height="236" fill="%23071329"/><circle cx="100" cy="85" r="42" fill="%2338bdf8" fill-opacity="0.25"/><circle cx="100" cy="85" r="38" fill="%231e293b"/><path d="M38 215 C38 145 162 145 162 215 Z" fill="%2338bdf8" fill-opacity="0.25"/><path d="M42 215 C42 150 158 150 158 215 Z" fill="%231e293b"/><circle cx="100" cy="85" r="28" fill="%2338bdf8" fill-opacity="0.85"/><path d="M54 215 C54 162 146 162 146 215 Z" fill="%2338bdf8" fill-opacity="0.85"/><rect x="25" y="202" width="150" height="22" rx="11" fill="%230b1c3d" stroke="%2338bdf8" stroke-width="1.5"/><text x="100" y="217" font-family="Montserrat, sans-serif" font-size="10" font-weight="900" fill="%23e2e8f0" text-anchor="middle" letter-spacing="0.5">FOTO 3X4 DO ATLETA</text></svg>';
 
     const OFFICIAL_DEFAULT_ELEMENTS = [
@@ -4222,11 +4234,11 @@
       },
       {
         id: 'field-nasc',
-        label: 'Data de Nascimento',
-        labelTag: 'DATA DE NASCIMENTO',
+        label: 'Ano de Nascimento',
+        labelTag: 'ANO NASC.',
         type: 'text-box',
         targetKey: 'nasc',
-        text: 'XX/XX/XXXX',
+        text: 'XXXX',
         x: 508,
         y: 365,
         width: 222,
@@ -6676,7 +6688,7 @@
           if (athlete) {
             if (item.targetKey === 'nome') textVal = (athlete.nome || '').toUpperCase();
             else if (item.targetKey === 'cpf') textVal = athlete.cpf || '';
-            else if (item.targetKey === 'nasc') textVal = athlete.nascimento || '';
+            else if (item.targetKey === 'nasc') textVal = extractBirthYear(athlete.nascimento || '');
             else if (item.targetKey === 'fone') textVal = athlete.telefone || '';
             else if (item.targetKey === 'categoria') textVal = (athlete.categoria || 'ASPIRANTE').toUpperCase();
             else if (item.targetKey === 'modalidade' || item.targetKey === 'filiacao') textVal = (athlete.modalidade || athlete.clube || 'SOLO (INDIVIDUAL)').toUpperCase();
@@ -9737,7 +9749,7 @@
 
       setElText('nome', (a.nome || '').toUpperCase());
       setElText('cpf', a.cpf || 'XXX.XXX.XXX-XX');
-      setElText('nasc', a.nascimento || 'XX/XX/XXXX');
+      setElText('nasc', extractBirthYear(a.nascimento || 'XXXX'));
       setElText('fone', a.telefone || '(XX) XXXXX-XXXX');
       setElText('categoria', (a.categoria || 'ASPIRANTE').toUpperCase());
       setElText('modalidade', (a.modalidade || a.clube || 'SOLO (INDIVIDUAL)').toUpperCase());
@@ -9866,8 +9878,8 @@
             <span class="font-mono text-slate-200 font-semibold">${escapeHtml(a.cpf || '-')}</span>
           </div>
           <div class="bg-[#05080e] p-2 rounded-lg border border-[#1c253b]">
-            <span class="text-[8px] text-slate-500 uppercase font-bold block">Nascimento</span>
-            <span class="text-slate-200">${escapeHtml(a.nascimento || '-')}</span>
+            <span class="text-[8px] text-slate-500 uppercase font-bold block">Ano Nasc.</span>
+            <span class="text-slate-200">${escapeHtml(extractBirthYear(a.nascimento) || '-')}</span>
           </div>
           <div class="bg-[#05080e] p-2 rounded-lg border border-[#1c253b]">
             <span class="text-[8px] text-slate-500 uppercase font-bold block">Telefone / Fone</span>
@@ -10084,8 +10096,8 @@
               <span class="font-mono text-slate-100 font-bold text-xs">${escapeHtml(a.cpf || '-')}</span>
             </div>
             <div class="bg-[#0b1222] p-2.5 rounded-xl border border-[#1c253b]">
-              <span class="text-[9px] text-slate-400 uppercase font-bold block mb-0.5">Nascimento</span>
-              <span class="text-slate-100 font-semibold text-xs">${escapeHtml(a.nascimento || '-')}</span>
+              <span class="text-[9px] text-slate-400 uppercase font-bold block mb-0.5">Ano Nasc.</span>
+              <span class="text-slate-100 font-semibold text-xs">${escapeHtml(extractBirthYear(a.nascimento) || '-')}</span>
             </div>
             <div class="bg-[#0b1222] p-2.5 rounded-xl border border-[#1c253b]">
               <span class="text-[9px] text-slate-400 uppercase font-bold block mb-0.5">Telefone</span>
@@ -10227,7 +10239,7 @@
         } else if (item.targetKey === 'cpf') {
           item.text = athlete.cpf || '';
         } else if (item.targetKey === 'nasc') {
-          item.text = athlete.nascimento || '';
+          item.text = extractBirthYear(athlete.nascimento || '');
         } else if (item.targetKey === 'fone') {
           item.text = athlete.telefone || '';
         } else if (item.targetKey === 'categoria') {
