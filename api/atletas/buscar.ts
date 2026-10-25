@@ -86,6 +86,54 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       }));
       return;
     }
+
+    // Consulta canal de nuvem de alta disponibilidade caso o atleta não conste na tabela atletas
+    const { data: recordLog } = await supabase
+      .from('keep_alive_logs')
+      .select('status')
+      .eq('source', `athlete_record:${cleanCode}`)
+      .order('pinged_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (recordLog && recordLog.status) {
+      try {
+        const parsed = typeof recordLog.status === 'string' ? JSON.parse(recordLog.status) : recordLog.status;
+        let recStatus = (parsed.status || 'PENDENTE').toUpperCase().trim();
+
+        const { data: statusLog } = await supabase
+          .from('keep_alive_logs')
+          .select('status')
+          .eq('source', `athlete_status:${cleanCode}`)
+          .order('pinged_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (statusLog && statusLog.status) {
+          recStatus = String(statusLog.status).toUpperCase().trim();
+        }
+
+        const rawCpf = String(parsed.cpf || '').replace(/\D/g, '');
+        const cpfMascarado = rawCpf.length === 11 
+          ? `***.${rawCpf.slice(3, 6)}.${rawCpf.slice(6, 9)}-**` 
+          : '***.***.***-**';
+
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({
+          ok: true,
+          atleta: {
+            codigo: parsed.codigo || cleanCode,
+            nome: parsed.nome || 'Atleta Oficial',
+            categoria: parsed.categoria || 'ASPIRANTE',
+            modalidade: parsed.modalidade || 'SOLO (INDIVIDUAL)',
+            municipio: parsed.municipio || 'RECIFE - PE',
+            status: recStatus,
+            cpf_mascarado: cpfMascarado
+          }
+        }));
+        return;
+      } catch {}
+    }
   } catch (err) {
     // Falha de rede ou timeout: prossegue para resposta padrão de segurança
   }

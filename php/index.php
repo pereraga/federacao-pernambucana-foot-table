@@ -684,6 +684,7 @@
           if (text) text.textContent = "Sistema Conectado";
           if (typeof renderPublicNews === 'function') renderPublicNews();
           if (typeof initIndexCloudRealtime === 'function') initIndexCloudRealtime();
+          if (typeof loadPublicGalleryFromCloud === 'function') loadPublicGalleryFromCloud();
           return true;
         } catch (err) {
           console.warn("Erro ao instanciar Supabase:", err);
@@ -853,6 +854,24 @@
             }));
             localStorage.setItem('pe_news_db', JSON.stringify(newsList));
           }
+
+          if (newsList.length === 0) {
+            try {
+              const { data: log } = await safeSupabaseCall(
+                supabaseClient.from('keep_alive_logs').select('status').eq('source', 'fpeft_news_items').order('pinged_at', { ascending: false }).limit(1).maybeSingle(),
+                2500
+              ).catch(() => ({ data: null }));
+
+              if (log && log.status) {
+                const parsed = typeof log.status === 'string' ? JSON.parse(log.status) : log.status;
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                  newsList = parsed;
+                  localStorage.setItem('pe_news_db', JSON.stringify(parsed));
+                }
+              }
+            } catch (e2) {}
+          }
+
           _lastNewsFetchTime = now;
         } catch (e) {
           console.warn("Supabase indisponível para notícias, usando fallback:", e);
@@ -993,6 +1012,42 @@
         }
       } catch (e) {}
       return DEFAULT_PUBLIC_GALLERY;
+    }
+
+    async function loadPublicGalleryFromCloud() {
+      if (supabaseClient) {
+        try {
+          // 1. Canal de alta disponibilidade na nuvem
+          const { data: log } = await safeSupabaseCall(
+            supabaseClient.from('keep_alive_logs').select('status').eq('source', 'fpeft_gallery_items').order('pinged_at', { ascending: false }).limit(1).maybeSingle(),
+            2500
+          ).catch(() => ({ data: null }));
+
+          if (log && log.status) {
+            const parsed = typeof log.status === 'string' ? JSON.parse(log.status) : log.status;
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              localStorage.setItem('pe_gallery_db', JSON.stringify(parsed));
+              renderPublicGallery();
+              return;
+            }
+          }
+
+          // 2. Tabela configuracoes
+          const { data: cfg } = await safeSupabaseCall(
+            supabaseClient.from('configuracoes').select('valor').eq('chave', 'fpeft_gallery_items').maybeSingle(),
+            2500
+          ).catch(() => ({ data: null }));
+
+          if (cfg && cfg.valor) {
+            const parsed = typeof cfg.valor === 'string' ? JSON.parse(cfg.valor) : cfg.valor;
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              localStorage.setItem('pe_gallery_db', JSON.stringify(parsed));
+              renderPublicGallery();
+              return;
+            }
+          }
+        } catch (e) {}
+      }
     }
 
     function renderPublicGallery() {

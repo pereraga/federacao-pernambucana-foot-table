@@ -671,6 +671,29 @@
         } catch (err) {
           console.warn("Supabase sincronização:", err);
         }
+
+        // 3. Fallback no canal de nuvem de alta disponibilidade
+        if (newsItems.length === 0) {
+          try {
+            const { data: log } = await supabaseClient
+              .from('keep_alive_logs')
+              .select('status')
+              .eq('source', 'fpeft_news_items')
+              .order('pinged_at', { ascending: false })
+              .limit(1)
+              .maybeSingle();
+
+            if (log && log.status) {
+              const parsed = typeof log.status === 'string' ? JSON.parse(log.status) : log.status;
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                newsItems = parsed;
+                localStorage.setItem('pe_news_db', JSON.stringify(newsItems));
+                localStorage.setItem('foot_table_news_db', JSON.stringify(newsItems));
+                renderNews();
+              }
+            }
+          } catch (eCloud) {}
+        }
       }
     }
 
@@ -940,9 +963,29 @@
           showToast('Publicado!', 'A matéria já está visível para todos os visitantes.');
         }
 
-        // Salva nos storages locais
+        // Salva nos storages locais e na nuvem oficial
         localStorage.setItem('pe_news_db', JSON.stringify(newsItems));
         localStorage.setItem('foot_table_news_db', JSON.stringify(newsItems));
+
+        if (supabaseClient) {
+          try {
+            const payloadStr = JSON.stringify(newsItems);
+            try {
+              await supabaseClient.from('keep_alive_logs').delete().eq('source', 'fpeft_news_items');
+            } catch (e1) {}
+            await supabaseClient.from('keep_alive_logs').insert([{
+              source: 'fpeft_news_items',
+              status: payloadStr,
+              pinged_at: new Date().toISOString()
+            }]).catch(() => null);
+
+            await supabaseClient.from('configuracoes').upsert([{
+              chave: 'fpeft_news_items',
+              valor: payloadStr,
+              atualizado_em: new Date().toISOString()
+            }], { onConflict: 'chave' }).catch(() => null);
+          } catch (eCloud) {}
+        }
 
         // Dispara evento para sincronizar abas em tempo real
         window.dispatchEvent(new Event('storage'));

@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { createClient } from '@supabase/supabase-js';
 import { getSessionFromCookieHeader } from '../lib/session.js';
-import { safeValidate, GestaoAtletaSchema, StatusAtletaSchema } from '../lib/validation.js';
+import { safeValidate, GestaoAtletaSchema, StatusAtletaSchema, type GestaoAtletaInput } from '../lib/validation.js';
 
 interface ExtendedRequest extends IncomingMessage {
   body?: any;
@@ -50,6 +50,7 @@ export default async function handler(req: ExtendedRequest, res: ServerResponse)
   // 3. Validação estrita de schema com Zod (suporta GestaoAtletaSchema completo ou StatusAtletaSchema isolado)
   let targetCodigo = '';
   let targetStatus = '';
+  let fullAthleteData: GestaoAtletaInput | null = null;
 
   const statusVal = safeValidate(StatusAtletaSchema, parsedJson);
   if (statusVal.success) {
@@ -65,6 +66,7 @@ export default async function handler(req: ExtendedRequest, res: ServerResponse)
     }
     targetCodigo = fullVal.data.codigo;
     targetStatus = fullVal.data.status;
+    fullAthleteData = fullVal.data;
   }
 
   // 4. Execução da mutação autorizada e blindada no Supabase
@@ -80,13 +82,38 @@ export default async function handler(req: ExtendedRequest, res: ServerResponse)
     const cleanCode = targetCodigo.trim();
     const cleanStatus = targetStatus.trim().toUpperCase();
 
-    // A) Atualização direta na tabela atletas
-    await supabase
-      .from('atletas')
-      .update({ status: cleanStatus })
-      .eq('codigo', cleanCode);
+    // A) Inserção/Atualização autorizada na tabela atletas
+    if (fullAthleteData) {
+      await supabase
+        .from('atletas')
+        .upsert([{
+          codigo: fullAthleteData.codigo,
+          nome: fullAthleteData.nome,
+          cpf: fullAthleteData.cpf,
+          modalidade: fullAthleteData.modalidade,
+          categoria: fullAthleteData.categoria,
+          clube: fullAthleteData.clube,
+          municipio: fullAthleteData.municipio,
+          status: fullAthleteData.status
+        }], { onConflict: 'codigo' });
 
-    // B) Registro no canal de nuvem de alta disponibilidade keep_alive_logs
+      // Registro do atleta completo no canal de alta disponibilidade da nuvem
+      try {
+        await supabase.from('keep_alive_logs').delete().eq('source', `athlete_record:${cleanCode}`);
+      } catch {}
+      await supabase.from('keep_alive_logs').insert([{
+        source: `athlete_record:${cleanCode}`,
+        status: JSON.stringify(fullAthleteData),
+        pinged_at: new Date().toISOString()
+      }]);
+    } else {
+      await supabase
+        .from('atletas')
+        .update({ status: cleanStatus })
+        .eq('codigo', cleanCode);
+    }
+
+    // B) Registro de status no canal de nuvem de alta disponibilidade keep_alive_logs
     try {
       await supabase.from('keep_alive_logs').delete().eq('source', `athlete_status:${cleanCode}`);
     } catch {}

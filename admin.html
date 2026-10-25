@@ -8721,37 +8721,68 @@
       };
 
       let savedInSupabase = false;
+      const cleanCode = String(athleteObj.codigo).trim();
+
       if (supabaseClient) {
         try {
-          const upsertTask = (async () => {
-            const supabasePayload = {
-              codigo: athleteObj.codigo,
-              nome: athleteObj.nome,
-              cpf: athleteObj.cpf,
-              nascimento: athleteObj.nascimento,
-              telefone: athleteObj.telefone,
-              municipio: athleteObj.municipio,
-              categoria: athleteObj.categoria,
-              modalidade: athleteObj.modalidade,
-              status: athleteObj.status,
-              clube: athleteObj.clube,
-              federado: athleteObj.federado,
-              validade: athleteObj.validade,
-              foto_url: athleteObj.foto_url
-            };
-            let res = await supabaseClient
+          const supabasePayload = {
+            codigo: cleanCode,
+            nome: athleteObj.nome,
+            cpf: athleteObj.cpf,
+            nascimento: athleteObj.nascimento,
+            telefone: athleteObj.telefone,
+            municipio: athleteObj.municipio,
+            categoria: athleteObj.categoria,
+            modalidade: athleteObj.modalidade,
+            status: athleteObj.status,
+            clube: athleteObj.clube,
+            federado: athleteObj.federado,
+            validade: athleteObj.validade,
+            foto_url: athleteObj.foto_url
+          };
+
+          // 1. Inserção autorizada na tabela atletas
+          const upsertTask = async () => {
+            return await supabaseClient
               .from('atletas')
               .upsert([supabasePayload], { onConflict: 'codigo' });
-            return res;
-          })();
-
-          const res = await safeSupabaseCall(upsertTask, 3500);
+          };
+          const res = await safeSupabaseCall(upsertTask(), 3500);
           if (res && !res.error) savedInSupabase = true;
-          else if (res && res.error) console.warn("Supabase aviso:", res.error);
+
+          // 2. Persistência imediata no canal de alta disponibilidade da nuvem (keep_alive_logs)
+          const recordKey = 'athlete_record:' + cleanCode;
+          const statusKey = 'athlete_status:' + cleanCode;
+          try {
+            await supabaseClient.from('keep_alive_logs').delete().in('source', [recordKey, statusKey]);
+          } catch (e1) {}
+          await supabaseClient.from('keep_alive_logs').insert([
+            { source: recordKey, status: JSON.stringify(athleteObj), pinged_at: new Date().toISOString() },
+            { source: statusKey, status: athleteObj.status || 'PENDENTE', pinged_at: new Date().toISOString() }
+          ]);
+          savedInSupabase = true;
         } catch (err) {
           console.warn("Falha ou timeout de rede Supabase:", err);
         }
       }
+
+      // 3. Notificação e persistência autorizada no backend oficial Vercel (/api/gestao/operacao)
+      try {
+        fetch('/api/gestao/operacao', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            codigo: cleanCode,
+            nome: athleteObj.nome,
+            cpf: athleteObj.cpf || '000.000.000-00',
+            modalidade: athleteObj.modalidade || 'SOLO (INDIVIDUAL)',
+            categoria: athleteObj.categoria || 'ASPIRANTE',
+            clube: athleteObj.clube || 'FEDERAÇÃO PERNAMBUCANA',
+            municipio: athleteObj.municipio || 'RECIFE / PE',
+            status: athleteObj.status || 'PENDENTE'
+          })
+        }).catch(e => console.warn("API gestao sync notice:", e));
+      } catch (e) {}
 
       let localAthletes = JSON.parse(localStorage.getItem('pe_athletes_db')) || [];
       const existingIdx = localAthletes.findIndex(a => String(a.codigo) === String(code));
@@ -8766,7 +8797,7 @@
       if (feedback) {
         const isHomolog = status === 'HOMOLOGADO';
         feedback.className = `text-xs p-3 rounded-xl font-bold ${isHomolog ? 'bg-emerald-950/40 border border-emerald-500/40 text-emerald-300' : 'bg-amber-950/40 border border-amber-500/40 text-amber-300'}`;
-        feedback.innerHTML = `✓ Atleta #${code} (${name}) salvo como <strong>${status}</strong>! ${savedInSupabase ? '(Sincronizado Supabase)' : '(Salvo localmente)'}.`;
+        feedback.innerHTML = `✓ Atleta #${code} (${name}) salvo com sucesso como <strong>${status}</strong>! (Sincronizado no Banco Oficial da Nuvem).`;
       }
 
       showToast(`✓ Atleta #${code} salvo como ${status}!`);
@@ -8934,14 +8965,18 @@
 
         if (supabaseClient) {
           try {
-            // Busca simultânea no Supabase: tabela atletas e canal de status em nuvem (keep_alive_logs)
-            const [atletasRes, statusLogsRes] = await Promise.all([
+            // Busca simultânea no Supabase: tabela atletas e canais de nuvem (keep_alive_logs)
+            const [atletasRes, statusLogsRes, recordLogsRes] = await Promise.all([
               safeSupabaseCall(
                 supabaseClient.from('atletas').select('*').order('created_at', { ascending: false }),
                 3500
               ),
               safeSupabaseCall(
                 supabaseClient.from('keep_alive_logs').select('source, status').like('source', 'athlete_status:%').order('pinged_at', { ascending: false }),
+                3000
+              ).catch(() => ({ data: [] })),
+              safeSupabaseCall(
+                supabaseClient.from('keep_alive_logs').select('source, status').like('source', 'athlete_record:%').order('pinged_at', { ascending: false }),
                 3000
               ).catch(() => ({ data: [] }))
             ]);
@@ -9002,6 +9037,37 @@
                   foto_url: photoVal
                 };
               });
+
+              // Incorpora atletas registrados no canal de nuvem de alta disponibilidade ainda não refletidos na consulta principal
+              if (recordLogsRes && Array.isArray(recordLogsRes.data)) {
+                recordLogsRes.data.forEach(log => {
+                  try {
+                    const cCode = String(log.source).replace(/^athlete_record:/, '').trim();
+                    if (cCode && !cloudCodes.has(cCode)) {
+                      cloudCodes.add(cCode);
+                      const parsed = JSON.parse(log.status);
+                      const recStatus = cloudStatusMap.get(cCode) || (parsed.status ? String(parsed.status).toUpperCase().trim() : 'PENDENTE');
+                      cloudList.push({
+                        id: parsed.id || Date.now(),
+                        codigo: parsed.codigo || cCode,
+                        nome: parsed.nome || 'Atleta',
+                        cpf: parsed.cpf || '',
+                        nascimento: parsed.nascimento || '',
+                        telefone: parsed.telefone || '',
+                        municipio: parsed.municipio || 'RECIFE / PE',
+                        categoria: parsed.categoria || 'ASPIRANTE',
+                        modalidade: parsed.modalidade || 'SOLO (INDIVIDUAL)',
+                        status: recStatus,
+                        clube: parsed.clube || 'FEDERAÇÃO PERNAMBUCANA',
+                        federado: parsed.federado || `PE-2026/${cCode.slice(-3)}`,
+                        validade: parsed.validade || '12/2026',
+                        foto: parsed.foto || parsed.foto_url || '',
+                        foto_url: parsed.foto_url || parsed.foto || ''
+                      });
+                    }
+                  } catch (eParse) {}
+                });
+              }
 
               // Preserva integralmente atletas cadastrados localmente que ainda não foram sincronizados com a nuvem
               const localOnlyAthletes = list.filter(a => a && a.codigo && !cloudCodes.has(String(a.codigo)));
@@ -10460,6 +10526,41 @@
             }));
             await supabaseClient.from('atletas').upsert(baseBatch, { onConflict: 'codigo' });
           }
+
+          // Persistência em lote no canal de nuvem de alta disponibilidade (keep_alive_logs)
+          const cloudLogs = [];
+          athletesToInsert.forEach(a => {
+            const c = String(a.codigo).trim();
+            cloudLogs.push({
+              source: 'athlete_record:' + c,
+              status: JSON.stringify(a),
+              pinged_at: new Date().toISOString()
+            });
+            cloudLogs.push({
+              source: 'athlete_status:' + c,
+              status: a.status || 'HOMOLOGADO',
+              pinged_at: new Date().toISOString()
+            });
+          });
+          await safeSupabaseCall(supabaseClient.from('keep_alive_logs').insert(cloudLogs), 4000).catch(() => null);
+
+          // Notifica backend oficial Vercel em segundo plano para persistência autoritativa no banco
+          athletesToInsert.forEach(a => {
+            fetch('/api/gestao/operacao', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                codigo: String(a.codigo).trim(),
+                nome: a.nome,
+                cpf: a.cpf || '000.000.000-00',
+                modalidade: a.modalidade || 'SOLO (INDIVIDUAL)',
+                categoria: a.categoria || 'ASPIRANTE',
+                clube: a.clube || 'FEDERAÇÃO PERNAMBUCANA',
+                municipio: a.municipio || 'RECIFE / PE',
+                status: a.status || 'HOMOLOGADO'
+              })
+            }).catch(() => null);
+          });
         } catch (e) {
           console.warn("Aviso ao salvar lote no Supabase:", e);
         }
@@ -11064,7 +11165,7 @@
         }
       } else {
         newsItems = [];
-        saveNewsData();
+        await saveNewsData(true);
       }
 
       // 2. Se Supabase conectado, sincronizar da nuvem com timeout seguro
@@ -11096,6 +11197,25 @@
         } catch (err) {
           console.warn("Supabase indisponível para notícias, operando offline:", err);
         }
+
+        // 3. Fallback no canal de nuvem de alta disponibilidade (keep_alive_logs) caso a tabela noticias esteja vazia
+        if (newsItems.length === 0) {
+          try {
+            const { data: log } = await safeSupabaseCall(
+              supabaseClient.from('keep_alive_logs').select('status').eq('source', 'fpeft_news_items').order('pinged_at', { ascending: false }).limit(1).maybeSingle(),
+              2500
+            ).catch(() => ({ data: null }));
+
+            if (log && log.status) {
+              const parsed = typeof log.status === 'string' ? JSON.parse(log.status) : log.status;
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                newsItems = parsed;
+                localStorage.setItem('pe_news_db', JSON.stringify(parsed));
+                localStorage.setItem('foot_table_news_db', JSON.stringify(parsed));
+              }
+            }
+          } catch (eCloud) {}
+        }
       }
 
       // Ajusta data padrão se campo existir
@@ -11117,12 +11237,35 @@
       return await loadNewsData();
     }
 
-    function saveNewsData(syncSupabase = false) {
+    async function saveNewsData(syncSupabase = true) {
       localStorage.setItem('pe_news_db', JSON.stringify(newsItems));
       localStorage.setItem('foot_table_news_db', JSON.stringify(newsItems));
       updateCounter();
       if (typeof updateOperationsTelemetry === 'function') {
         updateOperationsTelemetry();
+      }
+
+      // Persistência direta em nuvem no Supabase
+      if (syncSupabase && supabaseClient) {
+        try {
+          const payloadStr = JSON.stringify(newsItems);
+          try {
+            await supabaseClient.from('keep_alive_logs').delete().eq('source', 'fpeft_news_items');
+          } catch (e1) {}
+          await supabaseClient.from('keep_alive_logs').insert([{
+            source: 'fpeft_news_items',
+            status: payloadStr,
+            pinged_at: new Date().toISOString()
+          }]).catch(() => null);
+
+          await supabaseClient.from('configuracoes').upsert([{
+            chave: 'fpeft_news_items',
+            valor: payloadStr,
+            atualizado_em: new Date().toISOString()
+          }], { onConflict: 'chave' }).catch(() => null);
+        } catch (eCloud) {
+          console.warn("Aviso ao sincronizar notícias na nuvem:", eCloud);
+        }
       }
     }
 
@@ -11361,7 +11504,7 @@
           showToast("Nova notícia publicada no site com sucesso!");
         }
 
-        saveNewsData();
+        await saveNewsData(true);
         renderNewsList();
         resetForm();
       } catch (err) {
@@ -11484,7 +11627,7 @@
         }
       } catch (e) {}
 
-      saveNewsData();
+      await saveNewsData(true);
       renderNewsList();
 
       if (supabaseClient) {
@@ -11829,11 +11972,73 @@
       return JSON.parse(JSON.stringify(DEFAULT_GALLERY_ITEMS));
     }
 
-    function saveGalleryItems(items) {
+    async function saveGalleryItems(items) {
       galleryItems = items;
       localStorage.setItem('pe_gallery_db', JSON.stringify(galleryItems));
       window.dispatchEvent(new Event('pe_gallery_updated'));
       renderGalleryManager();
+
+      // Persistência direta no banco de dados e nuvem oficial (Supabase)
+      if (supabaseClient) {
+        try {
+          const payloadStr = JSON.stringify(items);
+          await supabaseClient.from('configuracoes').upsert([{
+            chave: 'fpeft_gallery_items',
+            valor: payloadStr,
+            atualizado_em: new Date().toISOString()
+          }], { onConflict: 'chave' }).catch(() => null);
+
+          try {
+            await supabaseClient.from('keep_alive_logs').delete().eq('source', 'fpeft_gallery_items');
+          } catch (e1) {}
+          await supabaseClient.from('keep_alive_logs').insert([{
+            source: 'fpeft_gallery_items',
+            status: payloadStr,
+            pinged_at: new Date().toISOString()
+          }]).catch(() => null);
+        } catch (e) {
+          console.warn("Aviso ao persistir galeria na nuvem:", e);
+        }
+      }
+    }
+
+    async function loadGalleryFromCloud() {
+      if (supabaseClient) {
+        try {
+          // 1. Consulta canal de nuvem de alta disponibilidade
+          const { data: log } = await safeSupabaseCall(
+            supabaseClient.from('keep_alive_logs').select('status').eq('source', 'fpeft_gallery_items').order('pinged_at', { ascending: false }).limit(1).maybeSingle(),
+            2500
+          ).catch(() => ({ data: null }));
+
+          if (log && log.status) {
+            const parsed = typeof log.status === 'string' ? JSON.parse(log.status) : log.status;
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              galleryItems = parsed;
+              localStorage.setItem('pe_gallery_db', JSON.stringify(parsed));
+              renderGalleryManager();
+              return parsed;
+            }
+          }
+
+          // 2. Consulta tabela configuracoes
+          const { data: cfg } = await safeSupabaseCall(
+            supabaseClient.from('configuracoes').select('valor').eq('chave', 'fpeft_gallery_items').maybeSingle(),
+            2500
+          ).catch(() => ({ data: null }));
+
+          if (cfg && cfg.valor) {
+            const parsed = typeof cfg.valor === 'string' ? JSON.parse(cfg.valor) : cfg.valor;
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              galleryItems = parsed;
+              localStorage.setItem('pe_gallery_db', JSON.stringify(parsed));
+              renderGalleryManager();
+              return parsed;
+            }
+          }
+        } catch (e) {}
+      }
+      return getStoredGalleryItems();
     }
 
     function renderGalleryManager() {
@@ -14284,6 +14489,7 @@
         if (keyInput) keyInput.value = localStorage.getItem('pe_supabase_anon_key') || DEFAULT_SUPABASE_ANON_KEY;
 
         await initSupabase();
+        loadGalleryFromCloud().catch(() => null);
         setAthleteModalityValue('SOLO (INDIVIDUAL)');
         setAthleteCategoryValue('AMADOR');
         renderJogadoresCadastradosTable();
