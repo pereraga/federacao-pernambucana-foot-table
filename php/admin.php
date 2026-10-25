@@ -4782,36 +4782,49 @@
       const payload = buildStudioPayload();
       const payloadStr = JSON.stringify(payload);
 
-      try {
-        // 1. Tenta gravar na tabela de configurações chave-valor com timeout seguro
-        try {
-          await safeSupabaseCall(
-            supabaseClient.from('configuracoes').upsert([{
-              chave: 'carteira_studio_layout',
-              valor: payloadStr,
-              updated_at: payload.updated_at
-            }], { onConflict: 'chave' }),
-            3000
-          );
-        } catch (e1) {}
+            try {
+        // 1. GRAVA NO BANCO 2 (SECUNDÁRIO - ARMAZENAMENTO & INGESTÃO SEGURA)
+        // O Banco 2 supre qualquer falha, lentidão ou limite de cota do Banco 1
+        if (supabaseSecondaryClient) {
+          try {
+            await safeSupabaseCall(
+              supabaseSecondaryClient.from('configuracoes').upsert([{
+                chave: 'carteira_studio_layout',
+                valor: payloadStr,
+                updated_at: payload.updated_at
+              }], { onConflict: 'chave' }),
+              3000
+            );
+            supabaseSecondaryClient.from('keep_alive_logs').insert([{
+              source: 'studio_layout_sync',
+              status: payloadStr,
+              pinged_at: new Date().toISOString()
+            }]).catch(() => null);
+          } catch (errSec) {
+            console.warn('[Studio Sync] Inserção Banco 2:', errSec);
+          }
+        }
 
-        // 2. Grava também no log central para persistência e histórico com timeout seguro
-        try {
-          await safeSupabaseCall(
+        // 2. ATUALIZA NO BANCO 1 (PRINCIPAL - EXIBIÇÃO CONTÍNUA)
+        if (supabaseClient) {
+          try {
+            await safeSupabaseCall(
+              supabaseClient.from('configuracoes').upsert([{
+                chave: 'carteira_studio_layout',
+                valor: payloadStr,
+                updated_at: payload.updated_at
+              }], { onConflict: 'chave' }),
+              3000
+            );
             supabaseClient.from('keep_alive_logs').insert([{
               source: 'studio_layout_sync',
-              status: payloadStr
-            }]),
-            3000
-          );
-        } catch (e2) {}
-
-        // Espelhamento no banco reserva (Dual-Write)
-        replicateToSecondary('configuracoes', 'upsert', [{
-          chave: 'carteira_studio_layout',
-          valor: payloadStr,
-          updated_at: payload.updated_at
-        }], 'chave');
+              status: payloadStr,
+              pinged_at: new Date().toISOString()
+            }]).catch(() => null);
+          } catch (errPrim) {
+            console.warn('[Studio Sync] Banco 1 ocupado/cheio; layout protegido no Banco 2:', errPrim);
+          }
+        }
 
         // 3. Persiste localmente com carimbo de tempo
         localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(studioState.elements));
@@ -4945,7 +4958,7 @@
         } catch (e1) {}
 
         // 2. Se não encontrou, busca do log central mais recente com timeout seguro
-        if (!cloudData) {
+        if (!cloudData && supabaseClient) {
           try {
             const { data, error } = await safeSupabaseCall(
               supabaseClient
@@ -4960,6 +4973,40 @@
               cloudData = typeof data[0].status === 'string' ? JSON.parse(data[0].status) : data[0].status;
             }
           } catch (e2) {}
+        }
+
+        // 3. SE O BANCO 1 FALHOU OU NÃO RESPONDEU, O BANCO 2 SUPRE O LAYOUT IMEDIATAMENTE
+        if (!cloudData && supabaseSecondaryClient) {
+          try {
+            const { data: secData, error: secErr } = await safeSupabaseCall(
+              supabaseSecondaryClient
+                .from('configuracoes')
+                .select('*')
+                .eq('chave', 'carteira_studio_layout')
+                .maybeSingle(),
+              2500
+            );
+            if (!secErr && secData && secData.valor) {
+              cloudData = typeof secData.valor === 'string' ? JSON.parse(secData.valor) : secData.valor;
+            }
+          } catch (eSecCfg) {}
+
+          if (!cloudData) {
+            try {
+              const { data: secLog } = await safeSupabaseCall(
+                supabaseSecondaryClient
+                  .from('keep_alive_logs')
+                  .select('*')
+                  .eq('source', 'studio_layout_sync')
+                  .order('pinged_at', { ascending: false })
+                  .limit(1),
+                2000
+              );
+              if (secLog && secLog.length > 0 && secLog[0].status) {
+                cloudData = typeof secLog[0].status === 'string' ? JSON.parse(secLog[0].status) : secLog[0].status;
+              }
+            } catch (eSecLog) {}
+          }
         }
 
         if (cloudData) {
@@ -8912,6 +8959,17 @@
                 3500
               );
               savedInSupabase = true;
+
+              // Keep-alive logs de resiliência também no Banco 2 (caso Banco 1 fique cheio ou fora do ar)
+              const recordKey = 'athlete_record:' + cleanCode;
+              const statusKey = 'athlete_status:' + cleanCode;
+              try {
+                await supabaseSecondaryClient.from('keep_alive_logs').delete().in('source', [recordKey, statusKey]);
+              } catch (eSecDel) {}
+              await supabaseSecondaryClient.from('keep_alive_logs').insert([
+                { source: recordKey, status: JSON.stringify(athleteObj), pinged_at: new Date().toISOString() },
+                { source: statusKey, status: athleteObj.status || 'PENDENTE', pinged_at: new Date().toISOString() }
+              ]).catch(() => null);
             } catch (errSec) {
               console.warn("[Intermediário] Inserção no Banco 2:", errSec);
             }

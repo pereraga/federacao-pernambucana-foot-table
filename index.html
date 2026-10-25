@@ -1304,6 +1304,25 @@
               status: (secData.status || 'PENDENTE').toUpperCase().trim(),
               foto: (secData.foto_url && !secData.foto_url.includes('unsplash.com')) ? secData.foto_url : ''
             };
+
+            // Se no Banco 2 estiver pendente, consulta o canal de status em nuvem do Banco 2
+            if (athlete.status === 'PENDENTE') {
+              try {
+                const { data: statusLog } = await safeSupabaseCall(
+                  supabaseSecondaryClient
+                    .from('keep_alive_logs')
+                    .select('status')
+                    .eq('source', 'athlete_status:' + code)
+                    .order('pinged_at', { ascending: false })
+                    .limit(1)
+                    .maybeSingle(),
+                  1500
+                );
+                if (statusLog && statusLog.status) {
+                  athlete.status = String(statusLog.status).toUpperCase().trim();
+                }
+              } catch (eCloudSec) {}
+            }
           }
         } catch (eSec) {
           console.warn("Falha na consulta ao banco reserva:", eSec);
