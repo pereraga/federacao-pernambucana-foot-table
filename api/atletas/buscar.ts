@@ -57,6 +57,22 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       .maybeSingle();
 
     if (!error && data) {
+      // Verifica se o atleta foi marcado como excluído
+      try {
+        const { data: delLog } = await supabase
+          .from('keep_alive_logs')
+          .select('status')
+          .eq('source', `athlete_deleted:${cleanCode}`)
+          .limit(1)
+          .maybeSingle();
+        if (delLog && delLog.status === 'DELETED') {
+          res.statusCode = 404;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: 'Atleta não encontrado' }));
+          return;
+        }
+      } catch {}
+
       let finalStatus = (data.status || 'PENDENTE').toUpperCase().trim();
       if (finalStatus === 'PENDENTE') {
         try {

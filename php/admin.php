@@ -9248,26 +9248,42 @@
               queryTasks.push(Promise.resolve({ data: null }));
             }
 
-            // Tarefa 3 e 4: Logs de Status e Resiliência
+            // Tarefa 3, 4 e 5: Logs de Status, Resiliência e Exclusões Confirmadas
             if (supabaseClient) {
               queryTasks.push(
                 safeSupabaseCall(supabaseClient.from('keep_alive_logs').select('source, status').like('source', 'athlete_status:%').order('pinged_at', { ascending: false }), 3000).catch(() => ({ data: [] })),
-                safeSupabaseCall(supabaseClient.from('keep_alive_logs').select('source, status').like('source', 'athlete_record:%').order('pinged_at', { ascending: false }), 3000).catch(() => ({ data: [] }))
+                safeSupabaseCall(supabaseClient.from('keep_alive_logs').select('source, status').like('source', 'athlete_record:%').order('pinged_at', { ascending: false }), 3000).catch(() => ({ data: [] })),
+                safeSupabaseCall(supabaseClient.from('keep_alive_logs').select('source, status').like('source', 'athlete_deleted:%').order('pinged_at', { ascending: false }), 3000).catch(() => ({ data: [] }))
               );
             } else {
-              queryTasks.push(Promise.resolve({ data: [] }), Promise.resolve({ data: [] }));
+              queryTasks.push(Promise.resolve({ data: [] }), Promise.resolve({ data: [] }), Promise.resolve({ data: [] }));
             }
 
-            const [atletasRes1, atletasRes2, statusLogsRes, recordLogsRes] = await Promise.all(queryTasks);
+            const [atletasRes1, atletasRes2, statusLogsRes, recordLogsRes, deletedLogsRes] = await Promise.all(queryTasks);
 
-            // Fusão intermediária de atletas: une Banco 1 e Banco 2
+            // Carrega códigos excluídos locais e da nuvem para isolar e impedir ressurgimento
+            const deletedCodes = new Set(JSON.parse(localStorage.getItem('pe_deleted_athlete_codes') || '[]').map(String));
+            if (deletedLogsRes && Array.isArray(deletedLogsRes.data)) {
+              deletedLogsRes.data.forEach(log => {
+                if (log && log.source) {
+                  const c = String(log.source).replace(/^athlete_deleted:/, '').trim();
+                  if (c) deletedCodes.add(c);
+                }
+              });
+            }
+
+            // Fusão intermediária de atletas: une Banco 1 e Banco 2 filtrando qualquer código excluído
             const db1Data = (atletasRes1 && Array.isArray(atletasRes1.data)) ? atletasRes1.data : [];
             const db2Data = (atletasRes2 && Array.isArray(atletasRes2.data)) ? atletasRes2.data : [];
 
             const mergedMap = new Map();
-            db1Data.forEach(item => { if (item && item.codigo) mergedMap.set(String(item.codigo), item); });
+            db1Data.forEach(item => {
+              if (item && item.codigo && !deletedCodes.has(String(item.codigo))) {
+                mergedMap.set(String(item.codigo), item);
+              }
+            });
             db2Data.forEach(item => {
-              if (item && item.codigo && !mergedMap.has(String(item.codigo))) {
+              if (item && item.codigo && !deletedCodes.has(String(item.codigo)) && !mergedMap.has(String(item.codigo))) {
                 mergedMap.set(String(item.codigo), item);
               }
             });
@@ -10016,28 +10032,70 @@
         showToast('⚠️ Seu cargo não possui permissão para excluir atletas.', true);
         return;
       }
-      if (!confirm(`Deseja realmente remover o atleta código #${codigo}?`)) return;
+      if (!confirm(`Deseja realmente remover o atleta código #${codigo} do sistema e de todos os bancos de dados?`)) return;
 
-      if (supabaseClient) {
-        try {
-          await supabaseClient.from('atletas').delete().eq('codigo', codigo);
-        } catch (e) {
-          console.warn("Erro ao remover no Supabase:", e);
-        }
-        // Espelhamento de exclusão no banco reserva (Dual-Write)
-        replicateToSecondary('atletas', 'delete', null, 'codigo', codigo);
-      }
+      const cleanCode = String(codigo).trim();
 
-      logAuditEvent('DELETE_ATHLETE', 'atletas', { codigo });
+      // 1. Marca no registro permanente de atletas excluídos (evita ressurgimento em cache ou reconciliação)
+      const deletedCodes = new Set(JSON.parse(localStorage.getItem('pe_deleted_athlete_codes') || '[]').map(String));
+      deletedCodes.add(cleanCode);
+      localStorage.setItem('pe_deleted_athlete_codes', JSON.stringify(Array.from(deletedCodes)));
 
+      // 2. Remove do cache local e da lista ativa
       let localAthletes = JSON.parse(localStorage.getItem('pe_athletes_db')) || [];
-      localAthletes = localAthletes.filter(a => String(a.codigo) !== String(codigo));
+      localAthletes = localAthletes.filter(a => String(a.codigo) !== cleanCode);
       localStorage.setItem('pe_athletes_db', JSON.stringify(localAthletes));
       currentCachedAthletes = localAthletes;
 
-      renderJogadoresCadastradosTable();
+      // 3. Renderiza imediatamente a tabela e o dashboard (resposta visual instantânea)
+      await renderJogadoresCadastradosTable();
       updateDashboardData();
-      showToast(`Atleta #${codigo} excluído.`);
+
+      // 4. Exclusão física no Banco 2 (Secundário/Reserva)
+      if (supabaseSecondaryClient) {
+        try {
+          await supabaseSecondaryClient.from('atletas').delete().eq('codigo', cleanCode);
+          await supabaseSecondaryClient.from('keep_alive_logs').delete().eq('source', `athlete_record:${cleanCode}`);
+          await supabaseSecondaryClient.from('keep_alive_logs').delete().eq('source', `athlete_status:${cleanCode}`);
+          await supabaseSecondaryClient.from('keep_alive_logs').insert([{
+            source: `athlete_deleted:${cleanCode}`,
+            status: 'DELETED',
+            pinged_at: new Date().toISOString()
+          }]).catch(() => null);
+        } catch (eSec) {
+          console.warn("[Dual-Write] Erro ao remover atleta no Banco 2:", eSec);
+        }
+      }
+
+      // 5. Exclusão e Tombstone no Banco 1 (Principal)
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from('atletas').delete().eq('codigo', cleanCode).catch(() => null);
+          await supabaseClient.from('keep_alive_logs').delete().eq('source', `athlete_record:${cleanCode}`).catch(() => null);
+          await supabaseClient.from('keep_alive_logs').delete().eq('source', `athlete_status:${cleanCode}`).catch(() => null);
+          // Registra no keep_alive_logs para propagar a exclusão e impedir ressurgimento
+          await supabaseClient.from('keep_alive_logs').insert([{
+            source: `athlete_deleted:${cleanCode}`,
+            status: 'DELETED',
+            pinged_at: new Date().toISOString()
+          }]).catch(() => null);
+        } catch (e) {
+          console.warn("Erro ao registrar exclusão no Banco 1:", e);
+        }
+        replicateToSecondary('atletas', 'delete', null, 'codigo', cleanCode);
+      }
+
+      // 6. Chamada autenticada ao backend Vercel (/api/gestao/operacao) para persistência autorizada
+      try {
+        fetch('/api/gestao/operacao', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ codigo: cleanCode, action: 'delete' })
+        }).catch(() => null);
+      } catch (eApi) {}
+
+      logAuditEvent('DELETE_ATHLETE', 'atletas', { codigo: cleanCode });
+      showToast(`V Atleta #${cleanCode} excluído com sucesso do sistema e dos bancos de dados!`);
     }
 
     async function clearAllAthletes() {
@@ -13218,8 +13276,10 @@ $;
         const pCodes = new Set(pAthletes.map(a => String(a.codigo)));
         const sCodes = new Set(sAthletes.map(a => String(a.codigo)));
 
-        // 1. Dados no Banco 2 (Inserção) que ainda não estão no Banco 1 (Exibição) -> Envia ao Banco 1
-        const toSyncToPrimary = sAthletes.filter(a => !pCodes.has(String(a.codigo)));
+        const deletedCodes = new Set(JSON.parse(localStorage.getItem('pe_deleted_athlete_codes') || '[]').map(String));
+
+        // 1. Dados no Banco 2 (Inserção) que ainda não estão no Banco 1 (Exibição) e NÃO estão excluídos
+        const toSyncToPrimary = sAthletes.filter(a => !pCodes.has(String(a.codigo)) && !deletedCodes.has(String(a.codigo)));
         if (toSyncToPrimary.length > 0) {
           for (let i = 0; i < toSyncToPrimary.length; i += 30) {
             const chunk = toSyncToPrimary.slice(i, i + 30);
@@ -13227,12 +13287,19 @@ $;
           }
         }
 
-        // 2. Dados no Banco 1 que faltam no Banco 2 -> Guarda no Banco 2 para segurança
-        const toSyncToSecondary = pAthletes.filter(a => !sCodes.has(String(a.codigo)));
+        // 2. Dados no Banco 1 que faltam no Banco 2 e NÃO estão excluídos -> Guarda no Banco 2
+        const toSyncToSecondary = pAthletes.filter(a => !sCodes.has(String(a.codigo)) && !deletedCodes.has(String(a.codigo)));
         if (toSyncToSecondary.length > 0) {
           for (let i = 0; i < toSyncToSecondary.length; i += 30) {
             const chunk = toSyncToSecondary.slice(i, i + 30);
             await safeSupabaseCall(supabaseSecondaryClient.from('atletas').upsert(chunk, { onConflict: 'codigo' }), 4000).catch(() => null);
+          }
+        }
+
+        // 3. Purga registros excluídos se ainda constarem no Banco 2
+        for (const dCode of deletedCodes) {
+          if (sCodes.has(dCode)) {
+            await safeSupabaseCall(supabaseSecondaryClient.from('atletas').delete().eq('codigo', dCode), 2500).catch(() => null);
           }
         }
       } catch (err) {

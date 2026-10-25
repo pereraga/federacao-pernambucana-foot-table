@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { createClient } from '@supabase/supabase-js';
 import { getSessionFromCookieHeader } from '../lib/session.js';
-import { safeValidate, GestaoAtletaSchema, StatusAtletaSchema, type GestaoAtletaInput } from '../lib/validation.js';
+import { safeValidate, GestaoAtletaSchema, StatusAtletaSchema, ExcluirAtletaSchema, type GestaoAtletaInput } from '../lib/validation.js';
 
 interface ExtendedRequest extends IncomingMessage {
   body?: any;
@@ -44,6 +44,50 @@ export default async function handler(req: ExtendedRequest, res: ServerResponse)
     res.statusCode = 400;
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify({ error: 'Requisição inválida' }));
+    return;
+  }
+
+  // 2.1 Suporte a exclusão de atleta
+  const delVal = safeValidate(ExcluirAtletaSchema, parsedJson);
+  if (delVal.success) {
+    const cleanCode = delVal.data.codigo.trim();
+
+    // Executa no Banco 1
+    try {
+      const rawUrl = process.env.SUPABASE_URL || 'https://qvnsahvdjhimlmtqrnif.supabase.co';
+      const supabaseUrl = rawUrl.replace(/\/+$/, '');
+      let supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'sb_publishable_vvqh9vB0Dr0EqR9JGhy4kA_XnJ-9h0z';
+      const supabase = createClient(supabaseUrl, supabaseKey);
+      await supabase.from('atletas').delete().eq('codigo', cleanCode).catch(() => null);
+      await supabase.from('keep_alive_logs').delete().eq('source', `athlete_record:${cleanCode}`).catch(() => null);
+      await supabase.from('keep_alive_logs').delete().eq('source', `athlete_status:${cleanCode}`).catch(() => null);
+      await supabase.from('keep_alive_logs').insert([{
+        source: `athlete_deleted:${cleanCode}`,
+        status: 'DELETED',
+        pinged_at: new Date().toISOString()
+      }]).catch(() => null);
+    } catch (e1) {}
+
+    // Executa no Banco 2
+    try {
+      const secUrl = (process.env.SUPABASE_SECONDARY_URL || 'https://xvqsysfqbkfsogkwtbal.supabase.co').replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '');
+      const secKey = process.env.SUPABASE_SECONDARY_SERVICE_ROLE_KEY || process.env.SUPABASE_SECONDARY_ANON_KEY || 'sb_publishable_2T1UD0EYvVBlIqCvnX5VHw_K6mmAn3M';
+      if (secUrl && secKey) {
+        const secSupabase = createClient(secUrl, secKey);
+        await secSupabase.from('atletas').delete().eq('codigo', cleanCode).catch(() => null);
+        await secSupabase.from('keep_alive_logs').delete().eq('source', `athlete_record:${cleanCode}`).catch(() => null);
+        await secSupabase.from('keep_alive_logs').delete().eq('source', `athlete_status:${cleanCode}`).catch(() => null);
+        await secSupabase.from('keep_alive_logs').insert([{
+          source: `athlete_deleted:${cleanCode}`,
+          status: 'DELETED',
+          pinged_at: new Date().toISOString()
+        }]).catch(() => null);
+      }
+    } catch (e2) {}
+
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ success: true, codigo: cleanCode, deleted: true }));
     return;
   }
 

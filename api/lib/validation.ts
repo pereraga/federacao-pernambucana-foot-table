@@ -47,6 +47,16 @@ export const StatusAtletaSchema = z.object({
 export type StatusAtletaInput = z.infer<typeof StatusAtletaSchema>;
 
 /**
+ * Schema para exclusão segura de atleta no painel administrativo
+ */
+export const ExcluirAtletaSchema = z.object({
+  codigo: z.string().trim().regex(/^\d{1,10}$/),
+  action: z.literal('delete')
+}).strict();
+
+export type ExcluirAtletaInput = z.infer<typeof ExcluirAtletaSchema>;
+
+/**
  * Utilitário seguro para validar entrada com Zod retornando mensagem genérica
  */
 export function safeValidate<T>(schema: z.ZodSchema<T>, data: unknown): { success: true; data: T } | { success: false; error: string } {

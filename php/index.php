@@ -1222,6 +1222,17 @@
 
       let athlete = null;
 
+      const deletedCodes = new Set(JSON.parse(localStorage.getItem('pe_deleted_athlete_codes') || '[]').map(String));
+      if (deletedCodes.has(code)) {
+        feedback.innerHTML = `
+          <div class="p-3 bg-red-950/40 border border-pe-red/40 rounded-xl text-xs text-red-300">
+            ❌ Nenhum atleta federado encontrado com o código <strong>#${code}</strong>.
+          </div>
+        `;
+        badgeArea.classList.add('hidden');
+        return;
+      }
+
       // 1. Tenta buscar no Supabase
       if (supabaseClient) {
         feedback.innerHTML = `
@@ -1240,6 +1251,25 @@
           );
 
           if (!error && data) {
+            // Verifica se o atleta foi marcado como excluído na nuvem
+            try {
+              const { data: delLog } = await safeSupabaseCall(
+                supabaseClient.from('keep_alive_logs').select('status').eq('source', 'athlete_deleted:' + code).limit(1).maybeSingle(),
+                1500
+              );
+              if (delLog && delLog.status === 'DELETED') {
+                deletedCodes.add(code);
+                localStorage.setItem('pe_deleted_athlete_codes', JSON.stringify(Array.from(deletedCodes)));
+                feedback.innerHTML = `
+                  <div class="p-3 bg-red-950/40 border border-pe-red/40 rounded-xl text-xs text-red-300">
+                    ❌ Nenhum atleta federado encontrado com o código <strong>#${code}</strong>.
+                  </div>
+                `;
+                badgeArea.classList.add('hidden');
+                return;
+              }
+            } catch (eDel) {}
+
             athlete = {
               codigo: data.codigo,
               nome: data.nome,
@@ -1335,7 +1365,7 @@
 
       // 2. Se não encontrou no Supabase, consulta na base local
       if (!athlete) {
-        const athletes = getStoredAthletes();
+        const athletes = getStoredAthletes().filter(a => !deletedCodes.has(String(a.codigo)));
         const found = athletes.find(a => String(a.codigo) === String(code));
         if (found) {
           athlete = {
