@@ -57,6 +57,12 @@
           return aEmail === rawUser || aEmail === user || aPrefix === uPrefix || aPrefix === rawUser;
         });
 
+        const isAdriano = rawUser.includes('adriano') || (current && (
+          (current.email && current.email.toLowerCase().includes('adriano')) ||
+          (current.cargo && current.cargo.toLowerCase().includes('presidente')) ||
+          (current.nome && current.nome.toLowerCase().includes('adriano'))
+        ));
+
         const PRESIDENTE_FPEFT_PERMISSIONS = [
           'carteira_studio', 'carteira_pdf', 'carteira_png', 'carteira_imprimir',
           'atletas_visualizar', 'atletas_homologar', 'atletas_editar', 'atletas_excluir', 'atletas_exportar',
@@ -78,15 +84,27 @@
             current.isMaster = true;
             current.permissions = ['*'];
           }
-        } else if (current && (current.cargo === 'Presidente FPEFT' || (current.email && current.email.includes('adrianomello')))) {
-          current.isMaster = false;
-          if (!current.permissions || current.permissions.includes('*')) {
+        } else if (isAdriano) {
+          if (!current) {
+            current = {
+              nome: "Adriano Mello",
+              cargo: "Presidente FPEFT",
+              email: "adrianomello@foot-table.pe.org",
+              isMaster: false,
+              permissions: [...PRESIDENTE_FPEFT_PERMISSIONS]
+            };
+            admins.push(current);
+          } else {
+            current.nome = "Adriano Mello";
+            current.cargo = "Presidente FPEFT";
+            current.email = "adrianomello@foot-table.pe.org";
+            current.isMaster = false;
             current.permissions = [...PRESIDENTE_FPEFT_PERMISSIONS];
-            localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
           }
+          localStorage.setItem('pe_institutional_admins', JSON.stringify(admins));
         }
 
-        if (!current && !isAdminMaster && !isGabrielMaster) {
+        if (!current && !isAdminMaster && !isGabrielMaster && !isAdriano) {
           window.location.replace('login.html');
           return;
         }
@@ -94,6 +112,8 @@
         let perms = [];
         if (isGabrielMaster || isAdminMaster) {
           perms = ['*'];
+        } else if (isAdriano) {
+          perms = [...PRESIDENTE_FPEFT_PERMISSIONS];
         } else if (current) {
           if (Array.isArray(current.permissions) && current.permissions.length > 0) {
             perms = current.permissions;
@@ -104,7 +124,7 @@
             else if (current.cargo === 'Diretor Adjunto') perms = ['*'];
           }
         }
-        if (perms.includes('*') || (current && current.isMaster) || isGabrielMaster || isAdminMaster) return;
+        if (!isAdriano && (perms.includes('*') || (current && current.isMaster) || isGabrielMaster || isAdminMaster)) return;
 
         const hideSelectors = [];
         // Abas da barra lateral
@@ -680,7 +700,7 @@
         </button>
 
         <!-- 5. Aba E-mails Institucionais & Gestão -->
-        <button onclick="switchTab('emails')" id="navBtn-emails" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group" title="E-mail Institucional">
+        <button onclick="switchTab('emails')" id="navBtn-emails" class="nav-item hidden w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group" style="display: none;" title="E-mail Institucional">
           <div class="flex items-center gap-3.5">
             <!-- Ícone Envelope / E-mail Institucional -->
             <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -692,7 +712,7 @@
         </button>
 
         <!-- 6. Aba Banco de Dados & Ajustes (Keep-Alive) -->
-        <button onclick="switchTab('config')" id="navBtn-config" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group" title="Banco & Ajustes">
+        <button onclick="switchTab('config')" id="navBtn-config" class="nav-item hidden w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:text-white hover:bg-white/5 transition-all cursor-pointer group" style="display: none;" title="Banco & Ajustes">
           <div class="flex items-center gap-3.5">
             <!-- Ícone Engrenagem / Banco -->
             <svg class="w-5 h-5 flex-shrink-0 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -3129,11 +3149,40 @@
     // Inicialização síncrona imediata das listas
     loadSystemOperationGroups();
 
+    function isCurrentAdriano() {
+      const rawUser = (sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user') || '').toLowerCase().trim();
+      if (rawUser.includes('adriano')) return true;
+      const user = rawUser.includes('@') ? rawUser : `${rawUser}@foot-table.pe.org`;
+      let admins = [];
+      try { admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || []; } catch(e) {}
+      const current = admins.find(a => {
+        const aEmail = (a.email || '').toLowerCase().trim();
+        return aEmail === rawUser || aEmail === user || aEmail.replace(/@foot-table\.pe\.(org|gov\.br)$/i, '') === rawUser;
+      });
+      if (current) {
+        if ((current.email && current.email.toLowerCase().includes('adriano')) ||
+            (current.cargo && current.cargo.toLowerCase().includes('presidente')) ||
+            (current.nome && current.nome.toLowerCase().includes('adriano'))) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     function getCurrentUserPermissions() {
       const rawUser = (sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user') || '').toLowerCase().trim();
       const user = rawUser.includes('@') ? rawUser : `${rawUser}@foot-table.pe.org`;
       // Superusuário de emergência para recuperação técnica
       if (rawUser === 'admin') return ['*'];
+
+      // Se for a conta do Presidente FPEFT (Adriano Mello), tem permissões operacionais fixas e nunca herda master (*) nem abas restritas (emails/config)
+      if (isCurrentAdriano()) {
+        return [
+          'carteira_studio', 'carteira_pdf', 'carteira_png', 'carteira_imprimir',
+          'atletas_visualizar', 'atletas_homologar', 'atletas_editar', 'atletas_excluir', 'atletas_exportar',
+          'noticias_publicar', 'noticias_upload', 'noticias_editar', 'noticias_excluir'
+        ];
+      }
 
       const admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || [];
       const current = admins.find(a => {
@@ -3164,6 +3213,9 @@
     }
 
     function isTabAllowed(tabName) {
+      if (isCurrentAdriano() && (tabName === 'emails' || tabName === 'config')) {
+        return false;
+      }
       const perms = getCurrentUserPermissions();
       if (perms.includes('*')) return true;
       if (tabName === 'inicio' || tabName === 'guia') return true;
@@ -3187,7 +3239,7 @@
       if (!container) return;
 
       const perms = getCurrentUserPermissions();
-      const isMaster = perms.includes('*');
+      const isMaster = !isCurrentAdriano() && perms.includes('*');
       const rawUser = (sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user') || '').toLowerCase().trim();
       const user = rawUser.includes('@') ? rawUser : `${rawUser}@foot-table.pe.org`;
       const admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || [];
@@ -3591,7 +3643,7 @@
 
     function applyPermissionsToUI() {
       const perms = getCurrentUserPermissions();
-      const isMaster = perms.includes('*');
+      const isMaster = !isCurrentAdriano() && perms.includes('*');
       const rawUser = (sessionStorage.getItem('pe_admin_user') || localStorage.getItem('pe_admin_user') || '').toLowerCase().trim();
       const user = rawUser.includes('@') ? rawUser : `${rawUser}@foot-table.pe.org`;
       const admins = JSON.parse(localStorage.getItem('pe_institutional_admins')) || [];
@@ -11716,7 +11768,7 @@
     function renderGalleryManager() {
       galleryItems = getStoredGalleryItems();
       const perms = getCurrentUserPermissions();
-      const isMaster = perms.includes('*');
+      const isMaster = !isCurrentAdriano() && perms.includes('*');
       const canEditGaleria = hasPermission('noticias_editar') || hasPermission('noticias_publicar') || isMaster;
       const canDeleteGaleria = hasPermission('noticias_excluir') || isMaster;
 
@@ -13445,8 +13497,18 @@
             a.permissions = ['*'];
           }
         }
-        const isMasterPerm = (a.permissions && a.permissions.includes('*')) || (a.cargo === 'Diretor Adjunto');
-        a.isMaster = !!isMasterPerm;
+        const isAdrianoAdmin = (a.email && a.email.toLowerCase().includes('adriano')) || (a.cargo && a.cargo.toLowerCase().includes('presidente'));
+        if (isAdrianoAdmin) {
+          a.isMaster = false;
+          a.permissions = [
+            'carteira_studio', 'carteira_pdf', 'carteira_png', 'carteira_imprimir',
+            'atletas_visualizar', 'atletas_homologar', 'atletas_editar', 'atletas_excluir', 'atletas_exportar',
+            'noticias_publicar', 'noticias_upload', 'noticias_editar', 'noticias_excluir'
+          ];
+        } else {
+          const isMasterPerm = (a.permissions && a.permissions.includes('*')) || (a.cargo === 'Diretor Adjunto');
+          a.isMaster = !!isMasterPerm;
+        }
       });
 
       localStorage.setItem('pe_institutional_admins', JSON.stringify(list));

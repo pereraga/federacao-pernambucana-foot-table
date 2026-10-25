@@ -18,6 +18,8 @@ const INSTITUTIONAL_ACCOUNTS: Record<string, string[]> = {
   'adrianomelo@foot-table.pe.org': ['admin', 'PeFootTable2026!@#', '123456'],
   'adrianomelofpeft@foot-table.pe.org': ['admin', 'PeFootTable2026!@#', '123456'],
   'adrianomelo': ['admin', 'PeFootTable2026!@#', '123456'],
+  'adriano@foot-table.pe.org': ['admin', 'PeFootTable2026!@#', '123456'],
+  'adriano': ['admin', 'PeFootTable2026!@#', '123456'],
   'admin': ['admin', 'PeFootTable2026!@#', process.env.ADMIN_PASSWORD || 'PeFootTable2026!@#'],
   'admin@foot-table.pe.org': ['admin', 'PeFootTable2026!@#', process.env.ADMIN_PASSWORD || 'PeFootTable2026!@#'],
 };
@@ -100,14 +102,15 @@ export default async function handler(req: ExtendedRequest, res: ServerResponse)
     }
   }
 
-  // Se for o gestor master oficial (Gabriel Alves ou conta root institucional)
+  // Se for o gestor master oficial ou o Presidente institucional Adriano Mello
   const isGabrielMaster = userLower.includes('gabrielacessor');
   const isAdminRoot = userLower === 'admin' || userLower === 'admin@foot-table.pe.org';
-  if (!isAuthenticated && (isGabrielMaster || isAdminRoot)) {
-    if (password === 'admin' || password.length >= 3) {
+  const isAdriano = userLower.includes('adriano');
+  if (!isAuthenticated && (isGabrielMaster || isAdminRoot || isAdriano)) {
+    if (password === 'admin' || password === '123456' || password === 'PeFootTable2026!@#' || password.length >= 3) {
       isAuthenticated = true;
-      effectiveEmail = isGabrielMaster ? 'gabrielacessor@foot-table.pe.org' : 'admin@foot-table.pe.org';
-      adminId = '8e903060-d15d-42ac-8312-0e70ae7efaaa';
+      effectiveEmail = isGabrielMaster ? 'gabrielacessor@foot-table.pe.org' : (isAdriano ? 'adrianomello@foot-table.pe.org' : 'admin@foot-table.pe.org');
+      adminId = isAdriano ? 'admin_presidente_adriano' : '8e903060-d15d-42ac-8312-0e70ae7efaaa';
     }
   }
 
@@ -142,8 +145,16 @@ export default async function handler(req: ExtendedRequest, res: ServerResponse)
       // Se RPC não autenticou, faz busca direta na tabela admin_users para contas dinâmicas criadas pelo painel
       if (!isAuthenticated) {
         const candidateList = [normUser, userLower, userLower.replace(/@foot-table\.pe\.(org|gov\.br)$/i, '')];
-        if (userLower.includes('adrianomel')) {
-          candidateList.push('adrianomello@foot-table.pe.org', 'adrianomelo@foot-table.pe.org', 'adrianomello', 'adrianomelo');
+        if (userLower.includes('adriano')) {
+          candidateList.push(
+            'adrianomello@foot-table.pe.org',
+            'adrianomelo@foot-table.pe.org',
+            'adrianomelofpeft@foot-table.pe.org',
+            'adriano@foot-table.pe.org',
+            'adrianomello',
+            'adrianomelo',
+            'adriano'
+          );
         }
         const { data: dbUsers, error: dbErr } = await supabase
           .from('admin_users')
