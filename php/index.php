@@ -71,6 +71,13 @@
   </script>
 
   <style>
+    /* Prevenção de Overflow Horizontal no Mobile */
+    html, body {
+      max-width: 100%;
+      overflow-x: hidden;
+      position: relative;
+    }
+
     /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 7px;
@@ -113,23 +120,23 @@
     }
   </style>
 </head>
-<body class="bg-pe-dark text-slate-100 min-h-screen flex flex-col font-sans selection:bg-pe-gold selection:text-pe-dark">
+<body class="bg-pe-dark text-slate-100 min-h-screen flex flex-col font-sans selection:bg-pe-gold selection:text-pe-dark overflow-x-hidden max-w-full">
 
   <!-- Header Oficial com Emblema de Pernambuco (100% Público, sem botões de admin) -->
   <header class="bg-pe-dark/95 backdrop-blur border-b border-pe-cardBorder sticky top-0 z-40">
     <div class="pe-stripe-bar h-1 w-full absolute top-0 left-0"></div>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+    <div class="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-2.5 sm:py-3.5 flex items-center justify-between gap-2">
       
       <!-- Brand + Logo Oficial da Federação -->
-      <a href="#home" class="flex items-center gap-3 group shrink-0">
-        <div class="rounded-full bg-pe-darkblue border-2 border-pe-gold shadow-[0_0_15px_rgba(245,184,0,0.35)] flex items-center justify-center p-0.5 overflow-hidden group-hover:scale-105 transition shrink-0" style="width: 46px; height: 46px; min-width: 46px; min-height: 46px;">
+      <a href="#home" class="flex items-center gap-2 sm:gap-3 group min-w-0 flex-1 sm:flex-initial">
+        <div class="rounded-full bg-pe-darkblue border-2 border-pe-gold shadow-[0_0_15px_rgba(245,184,0,0.35)] flex items-center justify-center p-0.5 overflow-hidden group-hover:scale-105 transition shrink-0 w-9 h-9 sm:w-11 sm:h-11 min-w-[36px] min-h-[36px]">
           <img src="assets/images/logo-federacao.png" alt="Federação Pernambucana Foot Table" class="w-full h-full object-contain rounded-full block select-none pointer-events-none" draggable="false" style="max-width: 100%; max-height: 100%;" onerror="if(!this.dataset.retry){this.dataset.retry=1;this.src='/assets/images/logo-federacao.png';}else if(this.dataset.retry==1){this.dataset.retry=2;this.src='assets/logo.png';}" />
         </div>
-        <div class="flex flex-col justify-center">
-          <span class="font-oswald text-lg sm:text-xl uppercase font-bold tracking-wider text-white flex items-center gap-1.5 leading-none mb-1">
+        <div class="flex flex-col justify-center min-w-0">
+          <span class="font-oswald text-base sm:text-xl uppercase font-bold tracking-wider text-white flex items-center gap-1.5 leading-none mb-0.5 sm:mb-1">
             Pernambuco <span class="text-pe-gold">FutMesa</span>
           </span>
-          <span class="block text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none">
+          <span class="block text-[8.5px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-normal sm:tracking-widest leading-none truncate max-w-[190px] sm:max-w-none">
             Federação Pernambucana de Foot Table
           </span>
         </div>
@@ -144,7 +151,7 @@
       </nav>
 
       <!-- Botão Menu Mobile & Tablet -->
-      <button type="button" id="btnTogglePublicMobileMenu" onclick="togglePublicMobileMenu()" class="md:hidden p-2 rounded-xl bg-pe-card border border-pe-cardBorder text-pe-gold hover:text-white transition flex items-center justify-center cursor-pointer shadow min-h-[40px] px-3 gap-1.5" aria-label="Abrir Menu">
+      <button type="button" id="btnTogglePublicMobileMenu" onclick="togglePublicMobileMenu()" class="md:hidden p-1.5 sm:p-2 px-2.5 sm:px-3 rounded-xl bg-pe-card border border-pe-cardBorder text-pe-gold hover:text-white transition flex items-center justify-center cursor-pointer shadow min-h-[36px] sm:min-h-[40px] gap-1.5 shrink-0" aria-label="Abrir Menu">
         <i id="publicMobileMenuIcon" class="fa-solid fa-bars text-sm"></i>
         <span class="text-xs uppercase font-bold tracking-wider">Menu</span>
       </button>
@@ -171,30 +178,30 @@
   </header>
 
   <!-- Hero Section Oficial -->
-  <section id="home" class="relative py-16 sm:py-24 px-4 overflow-hidden bg-radial-gradient text-center">
+  <section id="home" class="relative py-10 sm:py-20 px-3 sm:px-4 overflow-hidden bg-radial-gradient text-center">
     <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(0,68,204,0.32),transparent_70%)] pointer-events-none"></div>
     
     <div class="relative max-w-4xl mx-auto">
-      <div class="inline-flex items-center gap-2 border border-pe-gold/40 bg-pe-gold/10 px-4 py-1.5 rounded-full text-pe-gold text-xs font-bold uppercase tracking-widest mb-6 shadow-sm">
+      <div class="inline-flex items-center gap-1.5 border border-pe-gold/40 bg-pe-gold/10 px-3 sm:px-4 py-1.5 rounded-full text-pe-gold text-[10px] sm:text-xs font-bold uppercase tracking-normal sm:tracking-widest mb-5 sm:mb-6 shadow-sm max-w-full text-center leading-normal break-words">
         <span>☀️</span> Federação Oficial de Foot Table e Futebol de Mesa de PE
       </div>
 
-      <h1 class="font-oswald text-4xl sm:text-6xl uppercase font-black text-white leading-tight mb-4 tracking-wide">
+      <h1 class="font-oswald text-3xl sm:text-5xl md:text-6xl uppercase font-black text-white leading-tight mb-3 sm:mb-4 tracking-normal sm:tracking-wide break-words">
         Junte-se ao Movimento.<br />
         <span class="text-transparent bg-clip-text bg-gradient-to-r from-pe-gold via-yellow-200 to-pe-gold">
           Jogue Foot Table PE.
         </span>
       </h1>
 
-      <p class="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto mb-8 leading-relaxed">
+      <p class="text-slate-400 text-xs sm:text-base max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed px-1 sm:px-0">
         Portal oficial de homologação de eventos, notícias dos circuitos estaduais e validação da carteira digital dos atletas federados de Pernambuco.
       </p>
 
-      <div class="flex flex-wrap items-center justify-center gap-4">
-        <a href="#consulta" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase tracking-wider px-7 py-3.5 rounded-xl shadow-[0_0_20px_rgba(245,184,0,0.35)] transition transform hover:-translate-y-0.5 flex items-center gap-2">
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 sm:gap-4 w-full max-w-xs sm:max-w-none mx-auto">
+        <a href="#consulta" class="w-full sm:w-auto bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase tracking-wider px-6 sm:px-7 py-3 sm:py-3.5 rounded-xl shadow-[0_0_20px_rgba(245,184,0,0.35)] transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
           <span>🔍</span> Consultar Carteira (6 Dígitos)
         </a>
-        <a href="noticias.html" class="bg-pe-card border border-pe-cardBorder hover:border-pe-gold/60 text-slate-300 font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl transition">
+        <a href="noticias.html" class="w-full sm:w-auto bg-pe-card border border-pe-cardBorder hover:border-pe-gold/60 text-slate-300 font-bold text-xs uppercase tracking-wider px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl transition text-center justify-center flex items-center">
           Ver Notícias & Torneios
         </a>
       </div>
@@ -202,15 +209,15 @@
   </section>
 
   <!-- Seção de Consulta Pública (Exclusiva pelos 6 Dígitos) -->
-  <section id="consulta" class="py-12 px-4 max-w-5xl mx-auto w-full">
-    <div class="bg-pe-card border border-pe-cardBorder rounded-2xl p-6 sm:p-8 relative shadow-2xl overflow-hidden">
+  <section id="consulta" class="py-8 sm:py-12 px-3 sm:px-4 max-w-5xl mx-auto w-full">
+    <div class="bg-pe-card border border-pe-cardBorder rounded-2xl p-4 sm:p-8 relative shadow-2xl overflow-hidden">
       <div class="pe-stripe-bar h-1.5 w-full absolute top-0 left-0"></div>
 
       <div class="max-w-2xl">
         <div class="flex items-center gap-2 text-pe-gold text-xs font-bold uppercase tracking-wider mb-2">
           <span>🔒</span> Portal da Transparência & Registros
         </div>
-        <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white mb-2">
+        <h2 class="font-oswald text-xl sm:text-3xl uppercase font-bold text-white mb-2">
           Buscar Atleta & Registro Oficial <span class="text-pe-gold">(6 Dígitos)</span>
         </h2>
         <p class="text-slate-400 text-xs sm:text-sm leading-relaxed mb-6">
@@ -228,11 +235,11 @@
             placeholder="Digite o código (ex: 742918)..." 
             maxlength="6" 
             inputmode="numeric" 
-            class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl pl-10 pr-4 py-3.5 text-pe-gold font-mono font-bold tracking-widest text-lg outline-none placeholder:text-slate-600 placeholder:font-sans placeholder:tracking-normal transition"
+            class="w-full bg-[#080b12] border border-pe-cardBorder focus:border-pe-gold rounded-xl pl-10 pr-4 py-3.5 text-pe-gold font-mono font-bold tracking-widest text-base sm:text-lg outline-none placeholder:text-slate-600 placeholder:font-sans placeholder:tracking-normal transition"
           />
         </div>
         <button id="btnSearchPublicCode" 
-                class="bg-pe-blue hover:bg-blue-600 text-white font-extrabold text-xs uppercase tracking-wider px-8 py-3.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                class="bg-pe-blue hover:bg-blue-600 text-white font-extrabold text-xs uppercase tracking-wider px-6 sm:px-8 py-3.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2 w-full sm:w-auto">
           <span>🔎</span> Consultar Atleta
         </button>
       </div>
@@ -244,77 +251,77 @@
       <div id="publicBadgeResultArea" class="mt-8 pt-8 border-t border-pe-cardBorder/70 hidden">
         
         <!-- Painel Oficial de Validação e Autenticidade Digital do Federado (QR Code Check) -->
-        <div id="qrVerificationSummaryCard" class="max-w-[560px] mx-auto mb-6 bg-[#080d1a] border-2 border-pe-gold/60 rounded-2xl p-5 sm:p-6 relative shadow-[0_15px_35px_rgba(0,0,0,0.8)] overflow-hidden">
+        <div id="qrVerificationSummaryCard" class="max-w-[560px] mx-auto mb-6 bg-[#080d1a] border-2 border-pe-gold/60 rounded-2xl p-4 sm:p-6 relative shadow-[0_15px_35px_rgba(0,0,0,0.8)] overflow-hidden">
           <div class="pe-stripe-bar h-1.5 w-full absolute top-0 left-0"></div>
           
-          <div class="flex items-center justify-between border-b border-pe-cardBorder/80 pb-3 mb-4">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-pe-darkblue border border-pe-gold flex items-center justify-center p-0.5 shrink-0 shadow-md overflow-hidden">
+          <div class="flex items-center justify-between border-b border-pe-cardBorder/80 pb-3 mb-3.5 gap-2">
+            <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-pe-darkblue border border-pe-gold flex items-center justify-center p-0.5 shrink-0 shadow-md overflow-hidden">
                 <img src="assets/images/logo-federacao.png" alt="Logo Federação" class="w-full h-full object-contain rounded-full select-none pointer-events-none" draggable="false" onerror="if(!this.dataset.retry){this.dataset.retry=1;this.src='/assets/images/logo-federacao.png';}else if(this.dataset.retry==1){this.dataset.retry=2;this.src='assets/logo.png';}">
               </div>
-              <div>
-                <span class="text-[10px] font-bold text-pe-gold uppercase tracking-widest block leading-tight">Validação e Autenticidade Digital</span>
-                <h3 class="font-oswald text-sm sm:text-base uppercase font-bold text-white leading-tight">Federação Pernambucana de Foot Table</h3>
+              <div class="min-w-0">
+                <span class="text-[9px] sm:text-[10px] font-bold text-pe-gold uppercase tracking-wider sm:tracking-widest block leading-tight truncate">Validação e Autenticidade Digital</span>
+                <h3 class="font-oswald text-xs sm:text-base uppercase font-bold text-white leading-tight truncate">Federação Pernambucana de Foot Table</h3>
               </div>
             </div>
-            <div id="qrStatusBadgeMain" class="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider flex items-center gap-1.5 bg-emerald-950/90 border border-emerald-500 text-emerald-300 shadow-md">
+            <div id="qrStatusBadgeMain" class="px-2.5 sm:px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider flex items-center gap-1.5 bg-emerald-950/90 border border-emerald-500 text-emerald-300 shadow-md shrink-0">
               <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
               <span id="qrStatusBadgeText">REGULAR</span>
             </div>
           </div>
 
           <!-- Informações de Validação Completa -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs mb-3.5">
-            <div class="bg-[#040813] border border-pe-cardBorder/80 p-3 rounded-xl">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 text-xs mb-3.5">
+            <div class="bg-[#040813] border border-pe-cardBorder/80 p-2.5 sm:p-3 rounded-xl min-w-0">
               <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Atleta Federado</span>
-              <strong class="text-white font-oswald text-sm uppercase block truncate" id="qrAthleteFullName">---</strong>
+              <strong class="text-white font-oswald text-xs sm:text-sm uppercase block truncate" id="qrAthleteFullName">---</strong>
             </div>
 
-            <div class="bg-[#040813] border border-pe-cardBorder/80 p-3 rounded-xl flex items-center justify-between">
-              <div>
+            <div class="bg-[#040813] border border-pe-cardBorder/80 p-2.5 sm:p-3 rounded-xl flex items-center justify-between gap-2 min-w-0">
+              <div class="min-w-0">
                 <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Nº Federado / ID</span>
-                <span class="text-pe-gold font-mono font-bold text-sm tracking-wider" id="qrFederatedNumText">#000000</span>
+                <span class="text-pe-gold font-mono font-bold text-xs sm:text-sm tracking-wider" id="qrFederatedNumText">#000000</span>
               </div>
-              <div class="text-right">
+              <div class="text-right shrink-0">
                 <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">CPF</span>
-                <span class="text-slate-300 font-mono text-xs" id="qrCpfText">***.***.***-**</span>
+                <span class="text-slate-300 font-mono text-xs whitespace-nowrap" id="qrCpfText">***.***.***-**</span>
               </div>
             </div>
 
-            <div class="bg-[#040813] border border-pe-cardBorder/80 p-3 rounded-xl flex items-center justify-between">
-              <div>
+            <div class="bg-[#040813] border border-pe-cardBorder/80 p-2.5 sm:p-3 rounded-xl flex items-center justify-between gap-2 min-w-0">
+              <div class="min-w-0">
                 <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Modalidade</span>
-                <span class="text-slate-200 font-bold uppercase text-[11px]" id="qrModalityText">SOLO (INDIVIDUAL)</span>
+                <span class="text-slate-200 font-bold uppercase text-[10px] sm:text-[11px] truncate block" id="qrModalityText">SOLO (INDIVIDUAL)</span>
               </div>
-              <div class="text-right">
+              <div class="text-right shrink-0">
                 <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Categoria</span>
-                <span class="text-amber-300 font-bold uppercase text-[11px]" id="qrCategoryText">ASPIRANTE</span>
+                <span class="text-amber-300 font-bold uppercase text-[10px] sm:text-[11px] truncate block" id="qrCategoryText">ASPIRANTE</span>
               </div>
             </div>
 
-            <div class="bg-[#040813] border border-pe-cardBorder/80 p-3 rounded-xl flex items-center justify-between">
-              <div>
+            <div class="bg-[#040813] border border-pe-cardBorder/80 p-2.5 sm:p-3 rounded-xl flex items-center justify-between gap-2 min-w-0">
+              <div class="min-w-0">
                 <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Município</span>
-                <span class="text-slate-200 font-semibold text-xs" id="qrCityText">---</span>
+                <span class="text-slate-200 font-semibold text-[11px] sm:text-xs truncate block" id="qrCityText">---</span>
               </div>
-              <div class="text-right">
+              <div class="text-right shrink-0">
                 <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Validade Oficial</span>
-                <span class="text-emerald-400 font-mono font-bold text-xs" id="qrValidityText">31/12/2026</span>
+                <span class="text-emerald-400 font-mono font-bold text-[11px] sm:text-xs whitespace-nowrap" id="qrValidityText">31/12/2026</span>
               </div>
             </div>
           </div>
 
           <!-- Caixa Informativa de Situação Cadastral -->
-          <div id="qrSituationBox" class="p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-500/50 text-emerald-300 text-xs flex items-center gap-3">
-            <span class="text-xl shrink-0" id="qrSituationIcon">✅</span>
-            <div class="flex-1 text-[11px] leading-tight">
-              <strong id="qrSituationTitle" class="block font-bold text-white text-xs mb-0.5">REGISTRO OFICIAL HOMOLOGADO E REGULAR</strong>
-              <span id="qrSituationDesc" class="text-slate-300">Este atleta está devidamente ativo, registrado e homologado perante a Federação Pernambucana de Foot Table.</span>
+          <div id="qrSituationBox" class="p-3 sm:p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-500/50 text-emerald-300 text-xs flex items-center gap-2.5 sm:gap-3">
+            <span class="text-lg sm:text-xl shrink-0" id="qrSituationIcon">✅</span>
+            <div class="flex-1 text-[10.5px] sm:text-[11px] leading-tight min-w-0">
+              <strong id="qrSituationTitle" class="block font-bold text-white text-xs mb-0.5 truncate">REGISTRO OFICIAL HOMOLOGADO E REGULAR</strong>
+              <span id="qrSituationDesc" class="text-slate-300 text-[10px] sm:text-[11px] leading-snug block">Este atleta está devidamente ativo, registrado e homologado perante a Federação Pernambucana de Foot Table.</span>
             </div>
           </div>
 
           <!-- Rodapé do Selo Digital com Hash & Timestamp -->
-          <div class="mt-3.5 pt-3 border-t border-pe-cardBorder/60 flex flex-wrap items-center justify-between gap-2 text-[10px] text-slate-400 font-mono">
+          <div class="mt-3 pt-2.5 border-t border-pe-cardBorder/60 flex flex-wrap items-center justify-between gap-2 text-[9px] sm:text-[10px] text-slate-400 font-mono">
             <div class="flex items-center gap-1.5">
               <span>🛡️ Autenticado digitalmente em:</span>
               <span class="text-slate-200 font-bold" id="qrTimestampText">--/--/---- --:--:--</span>
@@ -330,52 +337,52 @@
         </div>
 
         <!-- Credencial Oficial -->
-        <div id="athleteCredentialCard" class="max-w-[560px] mx-auto bg-gradient-to-br from-[#06173a] to-[#040813] border-2 border-pe-gold rounded-2xl p-6 relative overflow-hidden shadow-[0_15px_35px_rgba(0,0,0,0.8)]">
+        <div id="athleteCredentialCard" class="max-w-[560px] mx-auto bg-gradient-to-br from-[#06173a] to-[#040813] border-2 border-pe-gold rounded-2xl p-4 sm:p-6 relative overflow-hidden shadow-[0_15px_35px_rgba(0,0,0,0.8)]">
           <!-- Marca d'água -->
-          <div class="absolute -right-6 -bottom-6 text-white/[0.03] font-oswald font-black text-7xl select-none pointer-events-none">
+          <div class="absolute -right-6 -bottom-6 text-white/[0.03] font-oswald font-black text-6xl sm:text-7xl select-none pointer-events-none">
             PERNAMBUCO
           </div>
 
           <!-- Topo da Carteira -->
-          <div class="flex items-center justify-between border-b border-pe-gold/25 pb-4 mb-4">
-            <div class="flex items-center gap-3">
-              <div class="rounded-full border border-pe-gold overflow-hidden bg-pe-darkblue p-0.5 flex items-center justify-center shrink-0" style="width: 40px; height: 40px; min-width: 40px; min-height: 40px;">
+          <div class="flex items-center justify-between border-b border-pe-gold/25 pb-3 sm:pb-4 mb-3 sm:mb-4 gap-2">
+            <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div class="rounded-full border border-pe-gold overflow-hidden bg-pe-darkblue p-0.5 flex items-center justify-center shrink-0 w-8 h-8 sm:w-10 sm:h-10 min-w-[32px] min-h-[32px]">
                 <img src="assets/images/logo-federacao.png" alt="Federação Pernambucana Foot Table" class="w-full h-full object-contain rounded-full block select-none pointer-events-none" draggable="false" style="max-width: 100%; max-height: 100%;" onerror="if(!this.dataset.retry){this.dataset.retry=1;this.src='/assets/images/logo-federacao.png';}else if(this.dataset.retry==1){this.dataset.retry=2;this.src='assets/logo.png';}" />
               </div>
-              <div>
-                <h4 class="font-oswald text-sm uppercase font-bold text-pe-gold tracking-wide leading-tight">Pernambuco FutMesa</h4>
-                <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest block">Foot Table Federation</span>
+              <div class="min-w-0">
+                <h4 class="font-oswald text-xs sm:text-sm uppercase font-bold text-pe-gold tracking-wide leading-tight truncate">Pernambuco FutMesa</h4>
+                <span class="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider sm:tracking-widest block truncate">Foot Table Federation</span>
               </div>
             </div>
             
-            <div class="bg-pe-red text-white text-xs font-mono font-bold px-3 py-1 rounded shadow-md tracking-wider" id="cardBadgeCode">
+            <div class="bg-pe-red text-white text-[11px] sm:text-xs font-mono font-bold px-2.5 sm:px-3 py-1 rounded shadow-md tracking-wider shrink-0" id="cardBadgeCode">
               ID: #000000
             </div>
           </div>
 
           <!-- Conteúdo: Foto e Dados -->
-          <div class="grid grid-cols-[100px_1fr] gap-5 items-center my-4">
-            <div class="w-[100px] h-[125px] rounded-lg border-2 border-pe-gold overflow-hidden bg-slate-900 shadow-inner flex items-center justify-center">
+          <div class="grid grid-cols-[80px_1fr] sm:grid-cols-[100px_1fr] gap-3 sm:gap-5 items-center my-3 sm:my-4">
+            <div class="w-[80px] h-[105px] sm:w-[100px] sm:h-[125px] rounded-lg border-2 border-pe-gold overflow-hidden bg-slate-900 shadow-inner flex items-center justify-center shrink-0">
               <img id="cardBadgePhoto" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2364748b'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="Foto Atleta" class="w-full h-full object-cover" loading="lazy" decoding="async" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%2364748b\'%3E%3Cpath d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/%3E%3C/svg%3E'" />
             </div>
-            <div class="space-y-1.5 text-xs">
+            <div class="space-y-1.5 text-xs min-w-0">
               <div>
-                <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Nome do Atleta</span>
-                <strong class="text-white text-sm font-bold font-oswald uppercase tracking-wide block" id="cardBadgeName">---</strong>
+                <span class="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Nome do Atleta</span>
+                <strong class="text-white text-xs sm:text-sm font-bold font-oswald uppercase tracking-wide block truncate" id="cardBadgeName">---</strong>
               </div>
-              <div class="grid grid-cols-2 gap-2 pt-1">
-                <div>
-                  <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">CPF</span>
-                  <span class="text-slate-200 font-mono" id="cardBadgeCPF">---</span>
+              <div class="flex items-center justify-between gap-1.5 sm:gap-2 pt-0.5">
+                <div class="min-w-0">
+                  <span class="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 tracking-wider block">CPF</span>
+                  <span class="text-slate-200 font-mono text-[11px] sm:text-xs whitespace-nowrap block" id="cardBadgeCPF">---</span>
                 </div>
-                <div>
-                  <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Ano Nasc.</span>
-                  <span class="text-slate-200 font-mono" id="cardBadgeBirth">---</span>
+                <div class="shrink-0 text-right sm:text-left">
+                  <span class="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Ano Nasc.</span>
+                  <span class="text-slate-200 font-mono text-[11px] sm:text-xs font-bold block" id="cardBadgeBirth">---</span>
                 </div>
               </div>
-              <div class="pt-1">
-                <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Município</span>
-                <span class="text-slate-200 font-semibold" id="cardBadgeCity">---</span>
+              <div class="pt-0.5">
+                <span class="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Município</span>
+                <span class="text-slate-200 font-semibold text-[11px] sm:text-xs truncate block" id="cardBadgeCity">---</span>
               </div>
             </div>
           </div>
@@ -384,19 +391,19 @@
           <div id="cardCustomTextsContainer" class="space-y-1 my-2"></div>
 
           <!-- Rodapé da Carteira -->
-          <div class="bg-black/40 border-l-4 border-pe-gold p-3 rounded-lg flex items-center justify-between mt-4">
-            <div>
-              <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">Modalidade Homologada</span>
-              <span class="text-xs font-extrabold uppercase text-pe-gold tracking-wide" id="cardBadgeModality">SOLO (INDIVIDUAL)</span>
+          <div class="bg-black/40 border-l-4 border-pe-gold p-2 sm:p-3 rounded-lg grid grid-cols-3 gap-1 sm:gap-2 items-center mt-3 sm:mt-4">
+            <div class="min-w-0">
+              <span class="text-[7.5px] sm:text-[9px] uppercase font-bold text-slate-400 tracking-wider block truncate">Modalidade</span>
+              <span class="text-[10px] sm:text-xs font-extrabold uppercase text-pe-gold tracking-tight sm:tracking-wide block truncate" id="cardBadgeModality">SOLO (INDIVIDUAL)</span>
             </div>
-            <div>
-              <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">Categoria</span>
-              <span class="text-xs font-extrabold uppercase text-amber-300 tracking-wide" id="cardBadgeCategory">ASPIRANTE</span>
+            <div class="min-w-0 text-center">
+              <span class="text-[7.5px] sm:text-[9px] uppercase font-bold text-slate-400 tracking-wider block truncate">Categoria</span>
+              <span class="text-[10px] sm:text-xs font-extrabold uppercase text-amber-300 tracking-tight sm:tracking-wide block truncate" id="cardBadgeCategory">ASPIRANTE</span>
             </div>
-            <div class="text-right">
-              <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">Status Federado</span>
-              <span id="cardBadgeStatus" class="text-[10px] font-bold uppercase text-emerald-400 flex items-center justify-end gap-1">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> REGULAR
+            <div class="min-w-0 text-right">
+              <span class="text-[7.5px] sm:text-[9px] uppercase font-bold text-slate-400 tracking-wider block truncate">Status</span>
+              <span id="cardBadgeStatus" class="text-[9px] sm:text-[10px] font-bold uppercase text-emerald-400 inline-flex items-center justify-end gap-1 truncate">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span> REGULAR
               </span>
             </div>
           </div>
@@ -413,18 +420,18 @@
         </div>
 
         <!-- Ações de Extração da Carteira -->
-        <div class="max-w-[560px] mx-auto mt-4 grid grid-cols-2 gap-3">
-          <button id="btnDownloadCardPng" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase tracking-wider py-3 rounded-xl transition shadow flex items-center justify-center gap-2 cursor-pointer">
+        <div class="max-w-[560px] mx-auto mt-3.5 sm:mt-4 grid grid-cols-2 gap-2.5 sm:gap-3">
+          <button id="btnDownloadCardPng" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-[11px] sm:text-xs uppercase tracking-wider py-2.5 sm:py-3 rounded-xl transition shadow flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer">
             <span>💾</span> Baixar PNG
           </button>
-          <button id="btnPrintCard" class="bg-pe-accent hover:bg-slate-700 text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer">
+          <button id="btnPrintCard" class="bg-pe-accent hover:bg-slate-700 text-white font-bold text-[11px] sm:text-xs uppercase tracking-wider py-2.5 sm:py-3 rounded-xl transition flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer">
             <span>🖨️</span> Imprimir / PDF
           </button>
         </div>
-        <div id="cardDownloadLockNotice" class="max-w-[560px] mx-auto mt-2 text-center">
-          <span class="text-[11px] text-slate-400 inline-flex items-center justify-center gap-1.5 font-medium bg-dark-900/60 px-3 py-1 rounded-full border border-white/5">
+        <div id="cardDownloadLockNotice" class="max-w-[560px] mx-auto mt-2 text-center px-1">
+          <span class="text-[10px] sm:text-[11px] text-slate-400 inline-flex items-center justify-center gap-1.5 font-medium bg-dark-900/60 px-3 py-1 rounded-full border border-white/5 max-w-full truncate">
             <i class="fa-solid fa-lock text-pe-gold text-[10px]"></i>
-            <span>Download protegido por autenticação de CPF (LGPD)</span>
+            <span class="truncate">Download protegido por autenticação de CPF (LGPD)</span>
           </span>
         </div>
       </div>
@@ -1725,16 +1732,20 @@
       const photoContainer = photo ? photo.parentElement : null;
 
       if (card) {
-        if (savedLayout.cardWidth) card.style.maxWidth = savedLayout.cardWidth + 'px';
-        if (savedLayout.cardMinHeight) card.style.minHeight = savedLayout.cardMinHeight + 'px';
+        const isMobileScreen = window.innerWidth < 640;
+        if (savedLayout.cardWidth) {
+          card.style.maxWidth = isMobileScreen ? '100%' : (savedLayout.cardWidth + 'px');
+        }
+        if (savedLayout.cardMinHeight && !isMobileScreen) card.style.minHeight = savedLayout.cardMinHeight + 'px';
         if (savedLayout.cardBorderRadius) card.style.borderRadius = savedLayout.cardBorderRadius + 'px';
-        if (savedLayout.cardPadding) card.style.padding = savedLayout.cardPadding + 'px';
+        if (savedLayout.cardPadding && !isMobileScreen) card.style.padding = savedLayout.cardPadding + 'px';
         if (savedLayout.borderColor) card.style.borderColor = savedLayout.borderColor;
       }
 
       if (photoContainer) {
-        if (savedLayout.photoWidth) photoContainer.style.width = savedLayout.photoWidth + 'px';
-        if (savedLayout.photoHeight) photoContainer.style.height = savedLayout.photoHeight + 'px';
+        const isMobileScreen = window.innerWidth < 640;
+        if (savedLayout.photoWidth && !isMobileScreen) photoContainer.style.width = savedLayout.photoWidth + 'px';
+        if (savedLayout.photoHeight && !isMobileScreen) photoContainer.style.height = savedLayout.photoHeight + 'px';
         if (savedLayout.photoRadius) photoContainer.style.borderRadius = savedLayout.photoRadius + 'px';
       }
 
