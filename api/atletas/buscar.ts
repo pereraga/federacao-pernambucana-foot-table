@@ -65,10 +65,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         } catch {}
       }
 
-      const rawCpf = String(data.cpf || '').replace(/\D/g, '');
-      const cpfMascarado = rawCpf.length === 11 
-        ? `***.${rawCpf.slice(3, 6)}.${rawCpf.slice(6, 9)}-**` 
-        : '***.***.***-**';
+      const cpfMascarado = '***.***.***-**';
 
       res.statusCode = 200;
       res.setHeader('Content-Type', 'application/json');
@@ -112,10 +109,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
           recStatus = String(statusLog.status).toUpperCase().trim();
         }
 
-        const rawCpf = String(parsed.cpf || '').replace(/\D/g, '');
-        const cpfMascarado = rawCpf.length === 11 
-          ? `***.${rawCpf.slice(3, 6)}.${rawCpf.slice(6, 9)}-**` 
-          : '***.***.***-**';
+        const cpfMascarado = '***.***.***-**';
 
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
@@ -145,7 +139,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     ok: true,
     atleta: {
       codigo: cleanCode,
-      cpf_mascarado: '***.XXX.XXX-**',
+      cpf_mascarado: '***.***.***-**',
       status: 'HOMOLOGADO'
     }
   }));

@@ -1218,13 +1218,8 @@
       feedback.classList.add('hidden');
       badgeArea.classList.remove('hidden');
 
-      // Mascaramento de Segurança LGPD (Art. 46 Lei nº 13.709/2018)
+      // Mascaramento Total de Segurança LGPD (Art. 46 Lei nº 13.709/2018 - 100% Protegido)
       function maskCpf(cpf) {
-        if (!cpf) return '***.***.***-**';
-        const digits = String(cpf).replace(/\D/g, '');
-        if (digits.length === 11) {
-          return `***.${digits.slice(3, 6)}.${digits.slice(6, 9)}-**`;
-        }
         return '***.***.***-**';
       }
 
