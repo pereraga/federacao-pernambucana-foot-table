@@ -37,6 +37,16 @@ export const GestaoAtletaSchema = z.object({
 export type GestaoAtletaInput = z.infer<typeof GestaoAtletaSchema>;
 
 /**
+ * Schema para alteração de status/homologação de atleta (isolado e estrito)
+ */
+export const StatusAtletaSchema = z.object({
+  codigo: z.string().trim().regex(/^\d{1,10}$/),
+  status: z.enum(['HOMOLOGADO', 'REGULAR', 'PENDENTE', 'SUSPENSO', 'DESABILITADO'])
+}).strict();
+
+export type StatusAtletaInput = z.infer<typeof StatusAtletaSchema>;
+
+/**
  * Utilitário seguro para validar entrada com Zod retornando mensagem genérica
  */
 export function safeValidate<T>(schema: z.ZodSchema<T>, data: unknown): { success: true; data: T } | { success: false; error: string } {

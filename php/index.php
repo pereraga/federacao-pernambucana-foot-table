@@ -1095,11 +1095,31 @@
               status: (data.status || 'PENDENTE').toUpperCase().trim(),
               foto: (data.foto_url && !data.foto_url.includes('unsplash.com')) ? data.foto_url : ''
             };
-            // O status oficial vem diretamente do banco de dados na nuvem Supabase
-            if (!data.status) {
+
+            // Consulta canal de nuvem de status caso o registro direto esteja pendente
+            if (athlete.status === 'PENDENTE') {
+              try {
+                const { data: statusLog } = await safeSupabaseCall(
+                  supabaseClient
+                    .from('keep_alive_logs')
+                    .select('status')
+                    .eq('source', 'athlete_status:' + code)
+                    .order('pinged_at', { ascending: false })
+                    .limit(1)
+                    .maybeSingle(),
+                  1500
+                );
+                if (statusLog && statusLog.status) {
+                  athlete.status = String(statusLog.status).toUpperCase().trim();
+                }
+              } catch (eCloud) {}
+            }
+
+            // O status oficial sincronizado localmente tem prioridade se estiver homologado
+            if (athlete.status === 'PENDENTE') {
               const localAthletes = getStoredAthletes();
               const localMatch = localAthletes.find(a => String(a.codigo) === String(code));
-              if (localMatch && localMatch.status) {
+              if (localMatch && localMatch.status && localMatch.status !== 'PENDENTE') {
                 athlete.status = localMatch.status;
               }
             }

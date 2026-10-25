@@ -8934,22 +8934,55 @@
 
         if (supabaseClient) {
           try {
-            const { data, error } = await safeSupabaseCall(
-              supabaseClient.from('atletas').select('*').order('created_at', { ascending: false }),
-              3500
-            );
-            if (!error && Array.isArray(data)) {
+            // Busca simultânea no Supabase: tabela atletas e canal de status em nuvem (keep_alive_logs)
+            const [atletasRes, statusLogsRes] = await Promise.all([
+              safeSupabaseCall(
+                supabaseClient.from('atletas').select('*').order('created_at', { ascending: false }),
+                3500
+              ),
+              safeSupabaseCall(
+                supabaseClient.from('keep_alive_logs').select('source, status').like('source', 'athlete_status:%').order('pinged_at', { ascending: false }),
+                3000
+              ).catch(() => ({ data: [] }))
+            ]);
+
+            const data = atletasRes ? atletasRes.data : null;
+            if (data && Array.isArray(data)) {
+              // Mapeia canal oficial de alta disponibilidade em nuvem (keep_alive_logs)
+              const cloudStatusMap = new Map();
+              if (statusLogsRes && Array.isArray(statusLogsRes.data)) {
+                statusLogsRes.data.forEach(log => {
+                  if (log && log.source && log.status) {
+                    const c = String(log.source).replace(/^athlete_status:/, '').trim();
+                    if (!cloudStatusMap.has(c)) {
+                      cloudStatusMap.set(c, String(log.status).toUpperCase().trim());
+                    }
+                  }
+                });
+              }
+
               const localMap = new Map(list.map(a => [String(a.codigo), a]));
               const cloudCodes = new Set();
               const cloudList = data.map(d => {
                 const cCode = String(d.codigo);
                 cloudCodes.add(cCode);
                 const localMatch = localMap.get(cCode);
-                let effectiveStatus = (d.status && String(d.status).trim()) ? d.status.trim().toUpperCase() : 'PENDENTE';
-                // O banco de dados oficial Supabase tem autoridade primária sobre o status do atleta
-                if (localMatch && localMatch.status_updated_at && localMatch.status_updated_at > (_lastAthletesFetchTime || 0)) {
+                const rawDbStatus = (d.status && String(d.status).trim()) ? d.status.trim().toUpperCase() : 'PENDENTE';
+                let effectiveStatus = rawDbStatus;
+
+                // 1. Prioridade máxima: canal de status em nuvem de alta disponibilidade (keep_alive_logs)
+                if (cloudStatusMap.has(cCode)) {
+                  effectiveStatus = cloudStatusMap.get(cCode);
+                }
+                // 2. Preserva status deliberado homologado ou desabilitado caso o registro Supabase ainda esteja com valor pendente inicial
+                else if (localMatch && localMatch.status && localMatch.status !== 'PENDENTE' && rawDbStatus === 'PENDENTE') {
                   effectiveStatus = localMatch.status;
                 }
+                // 3. Respeita timestamp de atualização local
+                else if (localMatch && localMatch.status_updated_at && localMatch.status_updated_at > (_lastAthletesFetchTime || 0)) {
+                  effectiveStatus = localMatch.status;
+                }
+
                 const photoVal = d.foto_url || d.foto || (localMatch ? (localMatch.foto_url || localMatch.foto) : '');
                 return {
                   id: d.id,
@@ -9366,8 +9399,7 @@
         a.status = normStatus;
         a.status_updated_at = Date.now();
         localStorage.setItem('pe_athletes_db', JSON.stringify(athletes));
-        currentCachedAthletes = athletes;
-        _lastAthletesFetchTime = Date.now();
+        currentCachedAthletes = [...athletes];
       }
 
       // Se o formulário ou a tela do Studio estiver com este atleta aberto, atualiza imediatamente
@@ -9396,9 +9428,26 @@
         }
       }
 
+      const cleanCode = String(codigo).trim();
+
+      // 1. Persistência imediata no canal de nuvem de alta disponibilidade (keep_alive_logs)
       if (supabaseClient) {
         try {
-          const cleanCode = String(codigo).trim();
+          const cloudKey = 'athlete_status:' + cleanCode;
+          try {
+            await supabaseClient.from('keep_alive_logs').delete().eq('source', cloudKey);
+          } catch (e1) {}
+          await supabaseClient.from('keep_alive_logs').insert([{
+            source: cloudKey,
+            status: normStatus,
+            pinged_at: new Date().toISOString()
+          }]);
+        } catch (e2) {
+          console.warn("Supabase keep_alive_logs notice:", e2);
+        }
+
+        // 2. Atualização direta na tabela atletas
+        try {
           const updateTask = async () => {
             let res = await supabaseClient.from('atletas').update({ status: normStatus }).eq('codigo', cleanCode);
             if (res.error || !res.data) {
@@ -9406,11 +9455,20 @@
             }
             return res;
           };
-          await safeSupabaseCall(updateTask(), 4500).catch(e => console.warn("Supabase update notice:", e));
+          await safeSupabaseCall(updateTask(), 3000).catch(e => console.warn("Supabase update notice:", e));
         } catch (e) {
           console.warn("Supabase update status error:", e);
         }
       }
+
+      // 3. Envio autoritativo para o backend Vercel (/api/gestao/operacao)
+      try {
+        fetch('/api/gestao/operacao', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ codigo: cleanCode, status: normStatus })
+        }).catch(e => console.warn("API gestao status notice:", e));
+      } catch (e) {}
 
       logAuditEvent('CHANGE_ATHLETE_STATUS', 'atletas', { codigo, status: normStatus });
       
@@ -9467,8 +9525,7 @@
       }
 
       localStorage.setItem('pe_athletes_db', JSON.stringify(localAthletes));
-      currentCachedAthletes = localAthletes;
-      _lastAthletesFetchTime = Date.now();
+      currentCachedAthletes = [...localAthletes];
 
       // Se o formulário ativo estiver com PENDENTE, atualiza para HOMOLOGADO
       const statusSelect = document.getElementById('athleteStatus');
@@ -9503,23 +9560,45 @@
         `;
       }
 
-      if (supabaseClient) {
-        try {
-          const pendentes = localAthletes
-            .filter(a => {
-              const s = (a.status || 'PENDENTE').toUpperCase().trim();
-              return s === 'HOMOLOGADO' && a.status_updated_at;
-            })
-            .map(a => String(a.codigo).trim());
-          if (pendentes.length > 0) {
+      const pendentes = localAthletes
+        .filter(a => {
+          const s = (a.status || 'PENDENTE').toUpperCase().trim();
+          return s === 'HOMOLOGADO' && a.status_updated_at;
+        })
+        .map(a => String(a.codigo).trim());
+
+      if (pendentes.length > 0) {
+        // 1. Grava no canal de nuvem keep_alive_logs para cada atleta homologado
+        if (supabaseClient) {
+          try {
+            const logEntries = pendentes.map(code => ({
+              source: 'athlete_status:' + code,
+              status: 'HOMOLOGADO',
+              pinged_at: new Date().toISOString()
+            }));
+            await safeSupabaseCall(
+              supabaseClient.from('keep_alive_logs').insert(logEntries),
+              3500
+            ).catch(() => null);
+
+            // 2. Atualização direta no Supabase
             await safeSupabaseCall(
               supabaseClient.from('atletas').update({ status: 'HOMOLOGADO' }).in('codigo', pendentes),
               4500
             ).catch(() => null);
+          } catch (e) {
+            console.warn("Supabase update all pendentes error:", e);
           }
-        } catch (e) {
-          console.warn("Supabase update all pendentes error:", e);
         }
+
+        // 3. Notifica backend Vercel para persistência autoritativa
+        pendentes.forEach(code => {
+          fetch('/api/gestao/operacao', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ codigo: code, status: 'HOMOLOGADO' })
+          }).catch(() => null);
+        });
       }
 
       logAuditEvent('HOMOLOGATE_ALL', 'atletas', { count: updatedCount });
@@ -9821,7 +9900,7 @@
         showToast('⚠️ Acesso Controlado: Seu cargo não possui permissão para alterar o status da carteira.', true);
         return;
       }
-      const btn = event ? event.currentTarget : null;
+      const btn = (typeof event !== 'undefined' && event && event.currentTarget) ? event.currentTarget : null;
       if (btn) {
         btn.disabled = true;
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-sm"></i> <span>Atualizando...</span>';

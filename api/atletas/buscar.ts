@@ -49,6 +49,22 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       .maybeSingle();
 
     if (!error && data) {
+      let finalStatus = (data.status || 'PENDENTE').toUpperCase().trim();
+      if (finalStatus === 'PENDENTE') {
+        try {
+          const { data: statusLog } = await supabase
+            .from('keep_alive_logs')
+            .select('status')
+            .eq('source', `athlete_status:${cleanCode}`)
+            .order('pinged_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          if (statusLog && statusLog.status) {
+            finalStatus = String(statusLog.status).toUpperCase().trim();
+          }
+        } catch {}
+      }
+
       const rawCpf = String(data.cpf || '').replace(/\D/g, '');
       const cpfMascarado = rawCpf.length === 11 
         ? `***.${rawCpf.slice(3, 6)}.${rawCpf.slice(6, 9)}-**` 
@@ -64,7 +80,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
           categoria: data.categoria || 'ASPIRANTE',
           modalidade: data.modalidade || 'SOLO (INDIVIDUAL)',
           municipio: data.municipio || 'RECIFE - PE',
-          status: (data.status || 'PENDENTE').toUpperCase().trim(),
+          status: finalStatus,
           cpf_mascarado: cpfMascarado
         }
       }));
