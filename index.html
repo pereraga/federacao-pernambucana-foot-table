@@ -126,8 +126,8 @@
     /* Rótulos Superiores e Tipografia das Informações da Carteira CR80 */
     .field-top-label {
       position: absolute;
-      top: -14px;
-      font-size: clamp(6.5px, 1.4vw, 9.5px);
+      bottom: calc(100% + 2px);
+      font-size: clamp(6px, 1.25vw, 9px);
       font-weight: 800;
       color: #ffffff;
       letter-spacing: 0.5px;
@@ -135,7 +135,7 @@
       pointer-events: none;
       white-space: nowrap;
       font-family: 'Montserrat', sans-serif;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.9);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.95);
       line-height: 1;
     }
     .field-top-label.label-align-center,
@@ -389,82 +389,82 @@
           </div>
 
           <!-- Nº do Federado -->
-          <div id="cardBadgeCodeBox" class="absolute left-[7.62%] top-[83.69%] w-[18.00%] h-[4.68%] bg-white rounded-full shadow flex items-center justify-center px-1">
+          <div id="cardBadgeCodeBox" class="absolute left-[7.62%] top-[84.59%] w-[18.00%] h-[4.83%] bg-white rounded-full shadow flex items-center justify-center px-1">
             <span class="field-top-label label-align-center select-none pointer-events-none">Nº DO FEDERADO</span>
-            <div class="w-full h-full flex items-center justify-center font-extrabold font-mono text-[8px] sm:text-[11px] text-[#00204a] truncate tracking-wider px-1" id="cardBadgeCode">
+            <div class="w-full h-full flex items-center justify-center font-extrabold font-mono text-[8px] sm:text-[11px] text-[#00204a] truncate tracking-wider px-1 leading-none" id="cardBadgeCode">
               ID: #548608
             </div>
           </div>
 
           <!-- Nome do Atleta (Linha 1) -->
-          <div id="cardBadgeNameBox" class="absolute left-[27.71%] top-[47.89%] w-[65.90%] h-[5.74%] bg-white rounded-full shadow flex items-center justify-start px-2.5 sm:px-3">
+          <div id="cardBadgeNameBox" class="absolute left-[27.71%] top-[48.94%] w-[65.90%] h-[5.74%] bg-white rounded-full shadow flex items-center justify-start px-2.5 sm:px-3">
             <span class="field-top-label label-align-left select-none pointer-events-none">NOME DO ATLETA</span>
-            <div class="w-full h-full flex items-center justify-start font-black font-oswald text-[10px] sm:text-[14px] uppercase tracking-wide truncate text-[#00204a]" id="cardBadgeName">
+            <div class="w-full h-full flex items-center justify-start font-black font-oswald text-[10px] sm:text-[14px] uppercase tracking-wide truncate text-[#00204a] leading-none" id="cardBadgeName">
               GABRIEL PEREIRA ALVES
             </div>
           </div>
 
           <!-- Linha 2: CPF | Ano Nasc. | Município -->
-          <div id="cardBadgeCPFBox" class="absolute left-[27.71%] top-[55.74%] w-[20.10%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-1">
+          <div id="cardBadgeCPFBox" class="absolute left-[27.71%] top-[58.01%] w-[20.10%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-1">
             <span class="field-top-label label-align-center select-none pointer-events-none">CPF</span>
-            <div class="w-full h-full flex items-center justify-center font-extrabold font-mono text-[8px] sm:text-[11px] text-[#00204a] truncate px-1" id="cardBadgeCPF">
+            <div class="w-full h-full flex items-center justify-center font-extrabold font-mono text-[8px] sm:text-[11px] text-[#00204a] truncate px-1 leading-none" id="cardBadgeCPF">
               714.***.***-**
             </div>
           </div>
 
-          <div id="cardBadgeBirthBox" class="absolute left-[49.33%] top-[55.74%] w-[19.62%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-1">
+          <div id="cardBadgeBirthBox" class="absolute left-[49.33%] top-[58.01%] w-[19.62%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-1">
             <span class="field-top-label label-align-center select-none pointer-events-none">Ano Nasc.</span>
-            <div class="w-full h-full flex items-center justify-center font-extrabold font-mono text-[8px] sm:text-[11px] text-[#00204a] truncate px-1" id="cardBadgeBirth">
+            <div class="w-full h-full flex items-center justify-center font-extrabold font-mono text-[8px] sm:text-[11px] text-[#00204a] truncate px-1 leading-none" id="cardBadgeBirth">
               2003
             </div>
           </div>
 
-          <div id="cardBadgeCityBox" class="absolute left-[71.05%] top-[55.74%] w-[22.10%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-1">
+          <div id="cardBadgeCityBox" class="absolute left-[71.05%] top-[58.01%] w-[22.10%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-1">
             <span class="field-top-label label-align-center select-none pointer-events-none">MUNICÍPIO</span>
-            <div class="w-full h-full flex items-center justify-center font-extrabold text-[8px] sm:text-[11px] text-[#00204a] uppercase truncate px-1" id="cardBadgeCity">
+            <div class="w-full h-full flex items-center justify-center font-extrabold text-[8px] sm:text-[11px] text-[#00204a] uppercase truncate px-1 leading-none" id="cardBadgeCity">
               RECIFE - PE
             </div>
           </div>
 
           <!-- Linha 3: Telefone/WhatsApp | Modalidade | Categoria -->
-          <div id="cardBadgePhoneBox" class="absolute left-[28.19%] top-[64.80%] w-[15.05%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-0.5">
+          <div id="cardBadgePhoneBox" class="absolute left-[28.19%] top-[67.07%] w-[15.05%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-0.5">
             <span class="field-top-label label-align-center select-none pointer-events-none">TELEFONE / WHATSAPP</span>
-            <div class="w-full h-full flex items-center justify-center font-extrabold font-mono text-[7px] sm:text-[9.5px] text-[#00204a] truncate px-0.5" id="cardBadgePhone">
+            <div class="w-full h-full flex items-center justify-center font-extrabold font-mono text-[7px] sm:text-[9.5px] text-[#00204a] truncate px-0.5 leading-none" id="cardBadgePhone">
               (XX) XXXXX-XXXX
             </div>
           </div>
 
-          <div id="cardBadgeModalityBox" class="absolute left-[44.29%] top-[64.80%] w-[17.33%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-0.5">
+          <div id="cardBadgeModalityBox" class="absolute left-[44.29%] top-[67.07%] w-[17.33%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-0.5">
             <span class="field-top-label label-align-center select-none pointer-events-none">MODALIDADE</span>
-            <div class="w-full h-full flex items-center justify-center font-extrabold text-[7px] sm:text-[9.5px] text-[#00204a] uppercase truncate px-0.5" id="cardBadgeModality">
+            <div class="w-full h-full flex items-center justify-center font-extrabold text-[7px] sm:text-[9.5px] text-[#00204a] uppercase truncate px-0.5 leading-none" id="cardBadgeModality">
               SOLO (INDIVIDUAL)
             </div>
           </div>
 
-          <div id="cardBadgeCategoryBox" class="absolute left-[63.14%] top-[64.80%] w-[16.86%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-0.5">
+          <div id="cardBadgeCategoryBox" class="absolute left-[63.14%] top-[67.07%] w-[16.86%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-0.5">
             <span class="field-top-label label-align-center select-none pointer-events-none">CATEGORIA</span>
-            <div class="w-full h-full flex items-center justify-center font-extrabold text-[7px] sm:text-[9.5px] text-[#00204a] uppercase truncate px-0.5" id="cardBadgeCategory">
+            <div class="w-full h-full flex items-center justify-center font-extrabold text-[7px] sm:text-[9.5px] text-[#00204a] uppercase truncate px-0.5 leading-none" id="cardBadgeCategory">
               AMADOR
             </div>
           </div>
 
           <!-- QR Code (Direita) -->
-          <div id="cardBadgeQrContainer" class="absolute left-[80.86%] top-[64.80%] w-[12.95%] h-[20.54%] bg-white rounded-lg sm:rounded-xl p-1 shadow-md flex items-center justify-center overflow-hidden">
+          <div id="cardBadgeQrContainer" class="absolute left-[80.86%] top-[67.07%] w-[12.95%] h-[20.54%] bg-white rounded-lg sm:rounded-xl p-1 shadow-md flex items-center justify-center overflow-hidden">
             <div id="cardBadgeQrBox" class="w-full h-full flex items-center justify-center">
               <i class="fa-solid fa-qrcode text-black text-xl sm:text-2xl"></i>
             </div>
           </div>
 
           <!-- Validade (Abaixo do QR Code) -->
-          <div id="cardBadgeValidityBox" class="absolute left-[81.71%] top-[88.97%] w-[11.71%] h-[4.68%] bg-white rounded-full shadow flex items-center justify-center px-0.5">
+          <div id="cardBadgeValidityBox" class="absolute left-[81.71%] top-[89.73%] w-[11.71%] h-[4.68%] bg-white rounded-full shadow flex items-center justify-center px-0.5">
             <span class="field-top-label label-align-center select-none pointer-events-none">VALIDADE</span>
-            <div class="w-full h-full flex items-center justify-center font-extrabold font-mono text-[7.5px] sm:text-[10px] text-[#00204a] truncate px-0.5" id="cardBadgeValidity">
+            <div class="w-full h-full flex items-center justify-center font-extrabold font-mono text-[7.5px] sm:text-[10px] text-[#00204a] truncate px-0.5 leading-none" id="cardBadgeValidity">
               12/2026
             </div>
           </div>
 
           <!-- Assinatura da Diretoria FPEFT (Centro Rodapé) -->
-          <div id="cardBadgeSignatureBox" class="absolute left-[32.95%] top-[88.37%] w-[37.62%] h-[4.23%] text-center">
+          <div id="cardBadgeSignatureBox" class="absolute left-[32.95%] top-[88.82%] w-[37.62%] h-[4.23%] text-center">
             <div class="w-full h-[1px] sm:h-[1.5px] bg-white/90 mx-auto mb-0.5"></div>
             <span class="text-[6px] sm:text-[8.5px] font-bold text-white uppercase tracking-wider block">
               ASSINATURA DA DIRETORIA FPEFT
@@ -1895,42 +1895,75 @@
         if (local) layoutData = JSON.parse(local);
       } catch (e) {}
 
+      let db1Layout = null;
+      let db2Layout = null;
+
+      const fetchPromises = [];
+
       if (typeof supabaseClient !== 'undefined' && supabaseClient) {
-        try {
-          const { data } = await supabaseClient
+        fetchPromises.push(
+          supabaseClient
             .from('configuracoes')
             .select('*')
             .eq('chave', 'carteira_studio_layout')
-            .maybeSingle();
-          if (data && data.valor) {
-            const parsed = typeof data.valor === 'string' ? JSON.parse(data.valor) : data.valor;
-            if (parsed && (parsed.elements || parsed.version)) {
-              layoutData = parsed;
-              localStorage.setItem('fpeft_studio_layout_data', JSON.stringify(parsed));
-            }
-          }
-        } catch (e) {}
+            .maybeSingle()
+            .then(({ data }) => {
+              if (data && data.valor) {
+                const parsed = typeof data.valor === 'string' ? JSON.parse(data.valor) : data.valor;
+                if (parsed && (parsed.elements || parsed.version)) {
+                  parsed.updated_at = parsed.updated_at || data.updated_at || '1970-01-01T00:00:00Z';
+                  db1Layout = parsed;
+                }
+              }
+            })
+            .catch(() => null)
+        );
       }
 
-      // Se falhou no primário, tenta buscar layout do banco reserva
-      if ((!layoutData || !layoutData.elements) && typeof supabaseSecondaryClient !== 'undefined' && supabaseSecondaryClient) {
-        try {
-          const { data: secData } = await safeSupabaseCall(
+      if (typeof supabaseSecondaryClient !== 'undefined' && supabaseSecondaryClient) {
+        fetchPromises.push(
+          safeSupabaseCall(
             supabaseSecondaryClient
               .from('configuracoes')
               .select('*')
               .eq('chave', 'carteira_studio_layout')
               .maybeSingle(),
-            2000
-          );
-          if (secData && secData.valor) {
-            const parsed = typeof secData.valor === 'string' ? JSON.parse(secData.valor) : secData.valor;
-            if (parsed && (parsed.elements || parsed.version)) {
-              layoutData = parsed;
-              localStorage.setItem('fpeft_studio_layout_data', JSON.stringify(parsed));
-            }
-          }
-        } catch (eSec) {}
+            2500
+          )
+            .then(({ data: secData }) => {
+              if (secData && secData.valor) {
+                const parsed = typeof secData.valor === 'string' ? JSON.parse(secData.valor) : secData.valor;
+                if (parsed && (parsed.elements || parsed.version)) {
+                  parsed.updated_at = parsed.updated_at || secData.updated_at || '1970-01-01T00:00:00Z';
+                  db2Layout = parsed;
+                }
+              }
+            })
+            .catch(() => null)
+        );
+      }
+
+      if (fetchPromises.length > 0) {
+        try {
+          await Promise.allSettled(fetchPromises);
+        } catch (e) {}
+      }
+
+      // Escolhe o layout mais recente entre os dois bancos (ou o disponível)
+      if (db1Layout && db2Layout) {
+        const t1 = new Date(db1Layout.updated_at || 0).getTime();
+        const t2 = new Date(db2Layout.updated_at || 0).getTime();
+        layoutData = t2 >= t1 ? db2Layout : db1Layout;
+      } else if (db2Layout) {
+        layoutData = db2Layout;
+      } else if (db1Layout) {
+        layoutData = db1Layout;
+      }
+
+      if (layoutData) {
+        try {
+          localStorage.setItem('fpeft_studio_layout_data', JSON.stringify(layoutData));
+        } catch (e) {}
       }
 
       const card = document.getElementById('athleteCredentialCard');
