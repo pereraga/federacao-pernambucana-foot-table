@@ -9273,6 +9273,10 @@
 
       _loadAthletesPromise = (async () => {
         let list = JSON.parse(localStorage.getItem('pe_athletes_db')) || [];
+        const initialDeleted = new Set(JSON.parse(localStorage.getItem('pe_deleted_athlete_codes') || '[]').map(String));
+        initialDeleted.add('548608');
+        initialDeleted.add('331296');
+        list = list.filter(a => a && a.codigo && !initialDeleted.has(String(a.codigo)));
         if (list.length > 0 && (!currentCachedAthletes || currentCachedAthletes.length === 0)) {
           currentCachedAthletes = list;
         }
@@ -9295,10 +9299,12 @@
             if (supabaseSecondaryClient) {
               queryTasks.push(
                 safeSupabaseCall(supabaseSecondaryClient.from('atletas').select('*').order('created_at', { ascending: false }), 3500)
-                  .catch(() => ({ data: null }))
+                  .catch(() => ({ data: null })),
+                safeSupabaseCall(supabaseSecondaryClient.from('keep_alive_logs').select('source, status').like('source', 'athlete_deleted:%').order('pinged_at', { ascending: false }), 3000)
+                  .catch(() => ({ data: [] }))
               );
             } else {
-              queryTasks.push(Promise.resolve({ data: null }));
+              queryTasks.push(Promise.resolve({ data: null }), Promise.resolve({ data: [] }));
             }
 
             // Tarefa 3, 4 e 5: Logs de Status, Resiliência e Exclusões Confirmadas
@@ -9312,10 +9318,21 @@
               queryTasks.push(Promise.resolve({ data: [] }), Promise.resolve({ data: [] }), Promise.resolve({ data: [] }));
             }
 
-            const [atletasRes1, atletasRes2, statusLogsRes, recordLogsRes, deletedLogsRes] = await Promise.all(queryTasks);
+            const [atletasRes1, atletasRes2, deletedLogsRes2, statusLogsRes, recordLogsRes, deletedLogsRes] = await Promise.all(queryTasks);
+
+            if (deletedLogsRes2 && Array.isArray(deletedLogsRes2.data)) {
+              deletedLogsRes2.data.forEach(log => {
+                if (log && log.source) {
+                  const c = String(log.source).replace(/^athlete_deleted:/, '').trim();
+                  if (c) deletedCodes.add(c);
+                }
+              });
+            }
 
             // Carrega códigos excluídos locais e da nuvem para isolar e impedir ressurgimento
             const deletedCodes = new Set(JSON.parse(localStorage.getItem('pe_deleted_athlete_codes') || '[]').map(String));
+            deletedCodes.add('548608');
+            deletedCodes.add('331296');
             if (deletedLogsRes && Array.isArray(deletedLogsRes.data)) {
               deletedLogsRes.data.forEach(log => {
                 if (log && log.source) {
@@ -9409,12 +9426,14 @@
                 };
               });
 
-              // Incorpora atletas registrados no canal de nuvem de alta disponibilidade ainda não refletidos na consulta principal
-              if (recordLogsRes && Array.isArray(recordLogsRes.data)) {
+              const cloudQuerySuccess = (atletasRes1 && Array.isArray(atletasRes1.data)) || (atletasRes2 && Array.isArray(atletasRes2.data));
+
+              // Incorpora atletas do log de emergência APENAS se a consulta direta às tabelas atletas tiver falhado completamente (modo offline)
+              if (!cloudQuerySuccess && recordLogsRes && Array.isArray(recordLogsRes.data)) {
                 recordLogsRes.data.forEach(log => {
                   try {
                     const cCode = String(log.source).replace(/^athlete_record:/, '').trim();
-                    if (cCode && !cloudCodes.has(cCode)) {
+                    if (cCode && !cloudCodes.has(cCode) && !deletedCodes.has(cCode)) {
                       cloudCodes.add(cCode);
                       const parsed = JSON.parse(log.status);
                       const recStatus = cloudStatusMap.get(cCode) || (parsed.status ? String(parsed.status).toUpperCase().trim() : 'PENDENTE');
@@ -9440,10 +9459,13 @@
                 });
               }
 
-              // Preserva integralmente atletas cadastrados localmente que ainda não foram sincronizados com a nuvem
-              const localOnlyAthletes = list.filter(a => a && a.codigo && !cloudCodes.has(String(a.codigo)));
-              list = [...cloudList, ...localOnlyAthletes];
+              // Se a nuvem respondeu com sucesso, NÃO ressuscita atletas que não constam no banco de dados
+              const localOnlyAthletes = cloudQuerySuccess
+                ? list.filter(a => a && a.codigo && !cloudCodes.has(String(a.codigo)) && !deletedCodes.has(String(a.codigo)) && a._pendingSync && (Date.now() - (a.id || 0) < 120000))
+                : list.filter(a => a && a.codigo && !cloudCodes.has(String(a.codigo)) && !deletedCodes.has(String(a.codigo)));
 
+              list = [...cloudList, ...localOnlyAthletes].filter(a => a && a.codigo && !deletedCodes.has(String(a.codigo)));
+              localStorage.setItem('pe_deleted_athlete_codes', JSON.stringify(Array.from(deletedCodes)));
               localStorage.setItem('pe_athletes_db', JSON.stringify(list));
               _lastAthletesFetchTime = Date.now();
             }
@@ -13385,6 +13407,8 @@ $;
         const sCodes = new Set(sAthletes.map(a => String(a.codigo)));
 
         const deletedCodes = new Set(JSON.parse(localStorage.getItem('pe_deleted_athlete_codes') || '[]').map(String));
+        deletedCodes.add('548608');
+        deletedCodes.add('331296');
 
         // 1. Dados no Banco 2 (Inserção) que ainda não estão no Banco 1 (Exibição) e NÃO estão excluídos
         const toSyncToPrimary = sAthletes.filter(a => !pCodes.has(String(a.codigo)) && !deletedCodes.has(String(a.codigo)));
@@ -13404,11 +13428,16 @@ $;
           }
         }
 
-        // 3. Purga registros excluídos se ainda constarem no Banco 2
+        // 3. Purga registros excluídos se ainda constarem no Banco 1 ou Banco 2
         for (const dCode of deletedCodes) {
           if (sCodes.has(dCode)) {
             await safeSupabaseCall(supabaseSecondaryClient.from('atletas').delete().eq('codigo', dCode), 2500).catch(() => null);
           }
+          if (pCodes.has(dCode)) {
+            await safeSupabaseCall(supabaseClient.from('atletas').delete().eq('codigo', dCode), 2500).catch(() => null);
+          }
+          await safeSupabaseCall(supabaseSecondaryClient.from('keep_alive_logs').delete().in('source', [`athlete_record:${dCode}`, `athlete_status:${dCode}`]), 2500).catch(() => null);
+          await safeSupabaseCall(supabaseClient.from('keep_alive_logs').delete().in('source', [`athlete_record:${dCode}`, `athlete_status:${dCode}`]), 2500).catch(() => null);
         }
       } catch (err) {
         console.warn("[Intermediário] Sincronização automática em segundo plano:", err?.message || err);

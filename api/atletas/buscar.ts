@@ -43,6 +43,14 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
 
   const cleanCode = validation.data.codigo;
 
+  // Bloqueio imediato para atletas excluídos do sistema
+  if (['548608', '331296'].includes(cleanCode)) {
+    res.statusCode = 404;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ error: 'Atleta não encontrado' }));
+    return;
+  }
+
   // Consulta somente leitura diretamente no banco de dados Supabase na nuvem
   try {
     const rawUrl = process.env.SUPABASE_URL || 'https://qvnsahvdjhimlmtqrnif.supabase.co';

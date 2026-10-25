@@ -845,7 +845,11 @@
     }
 
     function getStoredAthletes() {
-      return JSON.parse(localStorage.getItem('pe_athletes_db')) || [];
+      const deletedCodes = new Set(JSON.parse(localStorage.getItem('pe_deleted_athlete_codes') || '[]').map(String));
+      deletedCodes.add('548608');
+      deletedCodes.add('331296');
+      const list = JSON.parse(localStorage.getItem('pe_athletes_db')) || [];
+      return list.filter(a => a && a.codigo && !deletedCodes.has(String(a.codigo)));
     }
 
     /* =======================================================
@@ -1234,6 +1238,8 @@
       let athlete = null;
 
       const deletedCodes = new Set(JSON.parse(localStorage.getItem('pe_deleted_athlete_codes') || '[]').map(String));
+      deletedCodes.add('548608');
+      deletedCodes.add('331296');
       if (deletedCodes.has(code)) {
         feedback.innerHTML = `
           <div class="p-3 bg-red-950/40 border border-pe-red/40 rounded-xl text-xs text-red-300">
