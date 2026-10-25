@@ -3051,6 +3051,23 @@
         sidebar.classList.add('flex');
         if (icon) icon.className = 'fa-solid fa-xmark text-sm';
         if (text) text.textContent = 'Fechar';
+
+        // Exclusivo para Mobile e Tablet: ao abrir o MENU, rolar suavemente a barra de rolagem para o topo / área do menu
+        const isMobileOrTablet = window.innerWidth < 1024 || (window.matchMedia && window.matchMedia('(max-width: 1023px)').matches) || /Mobi|Android|iPhone|iPad|iPod|Tablet/i.test(navigator.userAgent || '');
+        if (isMobileOrTablet) {
+          try {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (document.documentElement) document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+            if (document.body) document.body.scrollTo({ top: 0, behavior: 'smooth' });
+            const mainContainer = document.querySelector('.flex-1.flex.flex-col.min-w-0.overflow-y-auto');
+            if (mainContainer) mainContainer.scrollTo({ top: 0, behavior: 'smooth' });
+            if (typeof sidebar.scrollIntoView === 'function') {
+              sidebar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          } catch (e) {
+            window.scrollTo(0, 0);
+          }
+        }
       } else {
         sidebar.classList.add('hidden');
         sidebar.classList.remove('flex');
@@ -4067,8 +4084,9 @@
         titleEl.textContent = TAB_TITLES[tabName];
       }
 
-      // No modo smartphone e tablet (< 768px), fecha automaticamente o menu lateral após o toque
-      if (window.innerWidth < 768) {
+      // No modo smartphone e tablet (< 1024px), fecha automaticamente o menu lateral após o toque e rola ao topo do conteúdo
+      const isMobileOrTablet = window.innerWidth < 1024 || (window.matchMedia && window.matchMedia('(max-width: 1023px)').matches) || /Mobi|Android|iPhone|iPad|iPod|Tablet/i.test(navigator.userAgent || '');
+      if (isMobileOrTablet) {
         const sidebar = document.getElementById('sidebar');
         const icon = document.getElementById('mobileMenuIcon');
         const text = document.getElementById('mobileMenuText');
@@ -4078,6 +4096,15 @@
         }
         if (icon) icon.className = 'fa-solid fa-bars text-sm';
         if (text) text.textContent = 'Menu';
+        try {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          if (document.documentElement) document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+          if (document.body) document.body.scrollTo({ top: 0, behavior: 'smooth' });
+          const mainContainer = document.querySelector('.flex-1.flex.flex-col.min-w-0.overflow-y-auto');
+          if (mainContainer) mainContainer.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (e) {
+          window.scrollTo(0, 0);
+        }
       }
       const mobileActiveLabel = document.getElementById('mobileActiveTabLabel');
       if (mobileActiveLabel) {

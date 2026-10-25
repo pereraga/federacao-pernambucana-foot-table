@@ -1859,6 +1859,21 @@
       if (isHidden) {
         drawer.classList.remove('hidden');
         if (icon) icon.className = 'fa-solid fa-xmark text-sm';
+
+        // Exclusivo para Mobile e Tablet: ao abrir o MENU, rolar suavemente a barra de rolagem para o topo / área do menu
+        const isMobileOrTablet = window.innerWidth < 1024 || (window.matchMedia && window.matchMedia('(max-width: 1023px)').matches) || /Mobi|Android|iPhone|iPad|iPod|Tablet/i.test(navigator.userAgent || '');
+        if (isMobileOrTablet) {
+          try {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (document.documentElement) document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+            if (document.body) document.body.scrollTo({ top: 0, behavior: 'smooth' });
+            if (typeof drawer.scrollIntoView === 'function') {
+              drawer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          } catch (e) {
+            window.scrollTo(0, 0);
+          }
+        }
       } else {
         drawer.classList.add('hidden');
         if (icon) icon.className = 'fa-solid fa-bars text-sm';
