@@ -137,7 +137,42 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       } catch {}
     }
   } catch (err) {
-    // Falha de rede ou timeout: prossegue para resposta padrão de segurança
+    // Falha de rede ou timeout no Supabase primário: tenta failover no banco de dados reserva
+    const secUrl = (process.env.SUPABASE_SECONDARY_URL || '').replace(/\/+$/, '');
+    const secKey = process.env.SUPABASE_SECONDARY_ANON_KEY || '';
+
+    if (secUrl && secKey) {
+      try {
+        const secSupabase = createClient(secUrl, secKey);
+        const { data: secData, error: secError } = await secSupabase
+          .from('atletas')
+          .select('codigo, nome, status, categoria, modalidade, municipio, cpf')
+          .eq('codigo', cleanCode)
+          .maybeSingle();
+
+        if (!secError && secData) {
+          const finalStatus = (secData.status || 'PENDENTE').toUpperCase().trim();
+          res.statusCode = 200;
+          res.setHeader('Content-Type', 'application/json');
+          res.setHeader('X-Failover-Database', 'secondary');
+          res.end(JSON.stringify({
+            ok: true,
+            atleta: {
+              codigo: secData.codigo,
+              nome: secData.nome,
+              status: finalStatus,
+              categoria: secData.categoria || 'AMADOR',
+              modalidade: secData.modalidade || 'SOLO (INDIVIDUAL)',
+              municipio: secData.municipio || 'RECIFE / PE',
+              cpf_mascarado: maskCpfFirst3(secData.cpf)
+            }
+          }));
+          return;
+        }
+      } catch (secErr) {
+        console.warn('Falha também no banco reserva:', secErr);
+      }
+    }
   }
 
   // Resposta padrão caso o atleta não seja localizado ou banco esteja inacessível

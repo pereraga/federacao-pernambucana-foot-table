@@ -720,6 +720,11 @@
     }
     let supabaseClient = null;
 
+    // Configurações do Banco Reserva (Failover Automático)
+    let SUPABASE_SECONDARY_URL = localStorage.getItem('pe_supabase_secondary_url') || '';
+    let SUPABASE_SECONDARY_ANON_KEY = localStorage.getItem('pe_supabase_secondary_anon_key') || '';
+    let supabaseSecondaryClient = null;
+
     function safeSupabaseCall(promise, timeoutMs = 2500) {
       return Promise.race([
         promise,
@@ -749,6 +754,15 @@
       if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.startsWith('http') || SUPABASE_ANON_KEY.length < 20) {
         SUPABASE_ANON_KEY = DEFAULT_SUPABASE_ANON_KEY;
         localStorage.setItem('pe_supabase_anon_key', SUPABASE_ANON_KEY);
+      }
+
+      // Inicializa cliente secundário / reserva se configurado
+      if (window.supabase && SUPABASE_SECONDARY_URL && SUPABASE_SECONDARY_ANON_KEY && !SUPABASE_SECONDARY_ANON_KEY.startsWith('http')) {
+        try {
+          supabaseSecondaryClient = window.supabase.createClient(SUPABASE_SECONDARY_URL, SUPABASE_SECONDARY_ANON_KEY);
+        } catch (eSec) {
+          console.warn("Aviso ao conectar banco reserva:", eSec);
+        }
       }
 
       if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.startsWith('http')) {
@@ -1255,6 +1269,35 @@
           }
         } catch (e) {
           console.warn("Falha na consulta remota do Supabase, buscando local:", e);
+        }
+      }
+
+      // 1.1 Se falhou ou não encontrou no Supabase primário, tenta failover no banco reserva
+      if (!athlete && supabaseSecondaryClient) {
+        try {
+          const { data: secData, error: secErr } = await safeSupabaseCall(
+            supabaseSecondaryClient
+              .from('atletas')
+              .select('*')
+              .eq('codigo', code)
+              .maybeSingle(),
+            2500
+          );
+          if (!secErr && secData) {
+            athlete = {
+              codigo: secData.codigo,
+              nome: secData.nome,
+              cpf: secData.cpf,
+              nascimento: secData.nascimento,
+              municipio: secData.municipio,
+              modalidade: secData.modalidade || 'SOLO (INDIVIDUAL)',
+              categoria: secData.categoria || 'ASPIRANTE',
+              status: (secData.status || 'PENDENTE').toUpperCase().trim(),
+              foto: (secData.foto_url && !secData.foto_url.includes('unsplash.com')) ? secData.foto_url : ''
+            };
+          }
+        } catch (eSec) {
+          console.warn("Falha na consulta ao banco reserva:", eSec);
         }
       }
 
@@ -1816,6 +1859,27 @@
             }
           }
         } catch (e) {}
+      }
+
+      // Se falhou no primário, tenta buscar layout do banco reserva
+      if ((!layoutData || !layoutData.elements) && typeof supabaseSecondaryClient !== 'undefined' && supabaseSecondaryClient) {
+        try {
+          const { data: secData } = await safeSupabaseCall(
+            supabaseSecondaryClient
+              .from('configuracoes')
+              .select('*')
+              .eq('chave', 'carteira_studio_layout')
+              .maybeSingle(),
+            2000
+          );
+          if (secData && secData.valor) {
+            const parsed = typeof secData.valor === 'string' ? JSON.parse(secData.valor) : secData.valor;
+            if (parsed && (parsed.elements || parsed.version)) {
+              layoutData = parsed;
+              localStorage.setItem('fpeft_studio_layout_data', JSON.stringify(parsed));
+            }
+          }
+        } catch (eSec) {}
       }
 
       const card = document.getElementById('athleteCredentialCard');

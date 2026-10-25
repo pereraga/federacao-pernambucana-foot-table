@@ -17,9 +17,15 @@ export default async function handler(req, res) {
     supabaseKey = "sb_publishable_vvqh9vB0Dr0EqR9JGhy4kA_XnJ-9h0z";
   }
 
+  const supabaseSecondaryUrl = process.env.SUPABASE_SECONDARY_URL || process.env.NEXT_PUBLIC_SUPABASE_SECONDARY_URL || "";
+  let supabaseSecondaryKey = process.env.SUPABASE_SECONDARY_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_SECONDARY_ANON_KEY || "";
+
   return res.status(200).json({
     supabaseUrl,
     supabaseAnonKey: supabaseKey,
-    hasValidKey: !!(supabaseKey && supabaseKey.length >= 20 && !supabaseKey.startsWith('http'))
+    hasValidKey: !!(supabaseKey && supabaseKey.length >= 20 && !supabaseKey.startsWith('http')),
+    supabaseSecondaryUrl,
+    supabaseSecondaryAnonKey: supabaseSecondaryKey,
+    hasSecondaryKey: !!(supabaseSecondaryKey && supabaseSecondaryKey.length >= 20 && !supabaseSecondaryKey.startsWith('http'))
   });
 }

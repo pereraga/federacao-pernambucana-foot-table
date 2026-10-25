@@ -2766,21 +2766,34 @@
         <!-- ===================================================== -->
         <div id="tabContent-config" class="space-y-8 hidden">
           <div>
-            <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Integração na Nuvem</span>
-            <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Configuração do Supabase & Keep-Alive</h2>
+            <span class="text-pe-gold text-xs font-bold uppercase tracking-wider block">Alta Disponibilidade & Tolerância a Falhas</span>
+            <h2 class="font-oswald text-2xl sm:text-3xl uppercase font-bold text-white">Bancos de Dados & Redundância Ativa</h2>
           </div>
 
+          <!-- BANCO DE DADOS PRINCIPAL -->
           <div class="max-w-3xl bg-[#0b101d] border border-[#1c253b] rounded-2xl p-6 sm:p-8 space-y-6 shadow-xl relative">
             <div class="pe-stripe-bar h-1.5 w-full absolute top-0 left-0 rounded-t-2xl"></div>
 
+            <div class="flex items-center justify-between pb-2 border-b border-[#1c253b]">
+              <div>
+                <h3 class="font-bold text-white text-sm sm:text-base flex items-center gap-2">
+                  <span>🏛️</span> Banco de Dados Primário (Oficial FPEFT)
+                </h3>
+                <span class="text-[11px] text-slate-400">Instância padrão para todas as consultas públicas e operações diárias.</span>
+              </div>
+              <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/50 text-[10px] text-emerald-300 font-mono">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Primário Ativo
+              </div>
+            </div>
+
             <div class="space-y-4 text-xs">
               <div>
-                <label class="block text-slate-300 font-bold mb-1">URL do Supabase (Project URL)</label>
+                <label class="block text-slate-300 font-bold mb-1">URL do Supabase Primário (Project URL)</label>
                 <input type="text" id="adminCfgUrl" value="https://qvnsahvdjhimlmtqrnif.supabase.co" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-4 py-3 text-slate-200 font-mono outline-none" />
               </div>
 
               <div>
-                <label class="block text-slate-300 font-bold mb-1">Chave Anon (anon public key)</label>
+                <label class="block text-slate-300 font-bold mb-1">Chave Anon Primária (anon public key)</label>
                 <input type="password" id="adminCfgKey" placeholder="Cole sua chave eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-4 py-3 text-slate-200 font-mono outline-none" />
               </div>
 
@@ -2788,10 +2801,74 @@
 
               <div class="flex flex-wrap items-center gap-3 pt-2">
                 <button onclick="handleSaveAdminConfig()" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase px-6 py-3 rounded-xl transition cursor-pointer">
-                  Salvar Credenciais
+                  Salvar Credenciais Primárias
                 </button>
                 <button onclick="testSupabaseConnection()" class="bg-pe-blue hover:bg-blue-600 text-white font-bold text-xs uppercase px-5 py-3 rounded-xl transition flex items-center gap-2 cursor-pointer">
-                  <span>📡</span> Testar Conexão com o Banco
+                  <span>📡</span> Testar Conexão Primária
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- BANCO DE DADOS RESERVA / FAILOVER (DUAL DATABASE) -->
+          <div class="max-w-3xl bg-[#0b101d] border-2 border-pe-gold/40 rounded-2xl p-6 sm:p-8 space-y-6 shadow-xl relative">
+            <div class="flex items-center justify-between pb-2 border-b border-[#1c253b]">
+              <div>
+                <h3 class="font-bold text-white text-sm sm:text-base flex items-center gap-2">
+                  <span class="text-pe-gold">🛡️</span> Banco de Dados Reserva / Failover (Segundo Supabase)
+                </h3>
+                <span class="text-[11px] text-slate-400">Espelhamento automático e redundância para caso o banco primário esgote limites ou fique offline.</span>
+              </div>
+              <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-900 border border-slate-700 text-[10px] text-slate-300 font-mono" id="secondaryDbStatusBadge">
+                <span class="w-2 h-2 rounded-full bg-slate-500" id="secondaryDbStatusDot"></span>
+                <span id="secondaryDbStatusText">Não Configurado</span>
+              </div>
+            </div>
+
+            <div class="space-y-4 text-xs">
+              <div>
+                <label class="block text-slate-300 font-bold mb-1">URL do Supabase Reserva (Project URL Secundário)</label>
+                <input type="text" id="adminCfgSecondaryUrl" placeholder="https://seu-segundo-projeto.supabase.co" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-4 py-3 text-slate-200 font-mono outline-none" />
+              </div>
+
+              <div>
+                <label class="block text-slate-300 font-bold mb-1">Chave Anon Reserva (anon public key do 2º projeto)</label>
+                <input type="password" id="adminCfgSecondaryKey" placeholder="Cole a anon key do seu segundo projeto Supabase..." class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-4 py-3 text-slate-200 font-mono outline-none" />
+              </div>
+
+              <!-- Opções de Operação da Redundância -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#05080e] border border-[#1c253b] cursor-pointer hover:border-pe-gold/50 transition">
+                  <input type="checkbox" id="adminCfgDualWrite" checked class="mt-0.5 accent-pe-gold rounded" />
+                  <div>
+                    <strong class="block text-slate-200 font-bold">Espelhamento Ativo (Dual-Write)</strong>
+                    <span class="text-slate-400 text-[10.5px] leading-tight block mt-0.5">Grava automaticamente em ambos os bancos sempre que cadastrar ou editar atletas e layouts.</span>
+                  </div>
+                </label>
+
+                <label class="flex items-start gap-2.5 p-3 rounded-xl bg-[#05080e] border border-[#1c253b] cursor-pointer hover:border-pe-gold/50 transition">
+                  <input type="checkbox" id="adminCfgAutoFailover" checked class="mt-0.5 accent-pe-gold rounded" />
+                  <div>
+                    <strong class="block text-slate-200 font-bold">Failover Automático</strong>
+                    <span class="text-slate-400 text-[10.5px] leading-tight block mt-0.5">Se o banco primário falhar ou der erro 429/timeout, lê os dados automaticamente do reserva.</span>
+                  </div>
+                </label>
+              </div>
+
+              <div id="adminSecondaryConfigFeedback" class="hidden p-3 rounded-xl text-xs font-bold"></div>
+
+              <div class="flex flex-wrap items-center gap-3 pt-2">
+                <button onclick="handleSaveAdminSecondaryConfig()" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase px-5 py-3 rounded-xl transition cursor-pointer">
+                  Salvar Banco Reserva
+                </button>
+                <button onclick="testSecondarySupabaseConnection()" class="bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs uppercase px-4 py-3 rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+                  <span>📡</span> Testar Conexão Reserva
+                </button>
+                <button onclick="syncAllDataToSecondary()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase px-4 py-3 rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+                  <span>🔄</span> Sincronizar Tudo Agora
+                </button>
+                <button onclick="openBackupSqlModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 font-bold text-xs uppercase px-4 py-3 rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+                  <span>📜</span> Ver Script SQL
                 </button>
               </div>
             </div>
@@ -2803,6 +2880,32 @@
               <p class="text-slate-400 leading-relaxed">
                 A rota <code class="text-pe-gold bg-black/50 px-1.5 py-0.5 rounded">/api/keep-alive</code> foi agendada na Vercel diariamente. Ela consulta a tabela <code class="text-slate-300">keep_alive_logs</code> do seu Supabase, garantindo que o banco de dados nunca seja pausado por inatividade.
               </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal para Visualização e Cópia do Script SQL do Banco Reserva -->
+        <div id="modalSecondarySql" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-5">
+          <div class="bg-[#0b101d] border border-pe-gold/50 rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between pb-3 border-b border-[#1c253b]">
+              <div class="flex items-center gap-2 text-pe-gold font-bold text-sm uppercase">
+                <span>📜</span> Script SQL para o Segundo Projeto Supabase (Reserva)
+              </div>
+              <button onclick="closeBackupSqlModal()" class="text-slate-400 hover:text-white p-1 rounded-lg cursor-pointer">
+                <i class="fa-solid fa-xmark text-lg"></i>
+              </button>
+            </div>
+            <p class="text-slate-300 text-xs leading-relaxed">
+              Copie o código SQL abaixo e cole no <strong>SQL Editor</strong> do seu novo projeto Supabase (ou banco reserva). Ele cria todas as tabelas (<code class="text-pe-gold">atletas</code>, <code class="text-pe-gold">configuracoes</code>, <code class="text-pe-gold">noticias</code>, <code class="text-pe-gold">keep_alive_logs</code>, <code class="text-pe-gold">admin_users</code>) com índices e permissões RLS.
+            </p>
+            <div class="flex-1 overflow-y-auto bg-[#05080e] border border-[#1c253b] rounded-xl p-3 text-[11px] font-mono text-slate-300 select-all max-h-[360px] whitespace-pre" id="secondarySqlCodeBlock"></div>
+            <div class="flex items-center justify-end gap-3 pt-2 border-t border-[#1c253b]">
+              <button onclick="copyBackupSqlToClipboard()" id="btnCopyBackupSql" class="bg-pe-gold hover:bg-pe-goldHover text-pe-dark font-extrabold text-xs uppercase px-5 py-2.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+                <span>📋</span> Copiar Código SQL
+              </button>
+              <button onclick="closeBackupSqlModal()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition cursor-pointer">
+                Fechar
+              </button>
             </div>
           </div>
         </div>
@@ -2870,6 +2973,13 @@
       localStorage.setItem('pe_supabase_anon_key', SUPABASE_ANON_KEY);
     }
     let supabaseClient = null;
+
+    // Configurações do Banco Reserva / Failover (Segundo Supabase)
+    let SUPABASE_SECONDARY_URL = localStorage.getItem('pe_supabase_secondary_url') || '';
+    let SUPABASE_SECONDARY_ANON_KEY = localStorage.getItem('pe_supabase_secondary_anon_key') || '';
+    let IS_DUAL_WRITE_ENABLED = localStorage.getItem('pe_supabase_dual_write') !== 'false';
+    let IS_AUTO_FAILOVER_ENABLED = localStorage.getItem('pe_supabase_auto_failover') !== 'false';
+    let supabaseSecondaryClient = null;
 
     function safeSupabaseCall(promise, timeoutMs = 3000) {
       return Promise.race([
@@ -2973,6 +3083,7 @@
           if (typeof updateDashboardData === 'function') {
             updateDashboardData();
           }
+          await initSecondarySupabase();
           return isCloudHealthy;
         } catch (e) {
           console.warn("Erro ao instanciar Supabase:", e);
@@ -2980,6 +3091,7 @@
       }
       if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
       if (text) text.textContent = "Modo Local (Offline)";
+      await initSecondarySupabase();
       return false;
     }
 
@@ -4687,6 +4799,13 @@
             3000
           );
         } catch (e2) {}
+
+        // Espelhamento no banco reserva (Dual-Write)
+        replicateToSecondary('configuracoes', 'upsert', [{
+          chave: 'carteira_studio_layout',
+          valor: payloadStr,
+          updated_at: payload.updated_at
+        }], 'chave');
 
         // 3. Persiste localmente com carimbo de tempo
         localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(studioState.elements));
@@ -8801,6 +8920,9 @@
         } catch (err) {
           console.warn("Falha ou timeout de rede Supabase:", err);
         }
+
+        // Espelhamento assíncrono no banco reserva (Dual-Write)
+        replicateToSecondary('atletas', 'upsert', supabasePayload, 'codigo', supabasePayload.codigo);
       }
 
       // 3. Notificação e persistência autorizada no backend oficial Vercel (/api/gestao/operacao)
@@ -9115,7 +9237,51 @@
             }
           } catch (e) {
             console.warn("Falha ao consultar Supabase:", e);
+            // FAILOVER AUTOMÁTICO PARA BANCO SECUNDÁRIO / RESERVA
+            if (supabaseSecondaryClient && IS_AUTO_FAILOVER_ENABLED) {
+              try {
+                const secAtletasRes = await safeSupabaseCall(
+                  supabaseSecondaryClient.from('atletas').select('*').order('created_at', { ascending: false }),
+                  3500
+                );
+                if (secAtletasRes && secAtletasRes.data && Array.isArray(secAtletasRes.data) && secAtletasRes.data.length > 0) {
+                  list = secAtletasRes.data.map(d => ({
+                    id: d.id,
+                    codigo: d.codigo,
+                    nome: d.nome,
+                    cpf: d.cpf,
+                    nascimento: d.nascimento,
+                    telefone: d.telefone,
+                    municipio: d.municipio,
+                    categoria: d.categoria || 'ASPIRANTE',
+                    modalidade: d.modalidade,
+                    status: (d.status || 'PENDENTE').toUpperCase().trim(),
+                    clube: d.clube,
+                    federado: d.federado || (String(d.codigo).startsWith('PE-') ? d.codigo : `PE-2026/${String(d.codigo).slice(-3)}`),
+                    validade: d.validade,
+                    foto: d.foto_url || d.foto || '',
+                    foto_url: d.foto_url || d.foto || ''
+                  }));
+                  localStorage.setItem('pe_athletes_db', JSON.stringify(list));
+                  _lastAthletesFetchTime = Date.now();
+                }
+              } catch (secErr) {
+                console.warn("Falha também no banco reserva:", secErr);
+              }
+            }
           }
+        } else if (supabaseSecondaryClient && IS_AUTO_FAILOVER_ENABLED) {
+          try {
+            const secAtletasRes = await safeSupabaseCall(
+              supabaseSecondaryClient.from('atletas').select('*').order('created_at', { ascending: false }),
+              3500
+            );
+            if (secAtletasRes && secAtletasRes.data && Array.isArray(secAtletasRes.data)) {
+              list = secAtletasRes.data;
+              localStorage.setItem('pe_athletes_db', JSON.stringify(list));
+              _lastAthletesFetchTime = Date.now();
+            }
+          } catch (secErr) {}
         }
         currentCachedAthletes = list;
         return list;
@@ -9562,6 +9728,9 @@
         } catch (e) {
           console.warn("Supabase update status error:", e);
         }
+
+        // Espelhamento no banco reserva (Dual-Write)
+        replicateToSecondary('atletas', 'update', { status: normStatus }, 'codigo', cleanCode);
       }
 
       // 3. Envio autoritativo para o backend Vercel (/api/gestao/operacao)
@@ -9723,6 +9892,8 @@
         } catch (e) {
           console.warn("Erro ao remover no Supabase:", e);
         }
+        // Espelhamento de exclusão no banco reserva (Dual-Write)
+        replicateToSecondary('atletas', 'delete', null, 'codigo', codigo);
       }
 
       logAuditEvent('DELETE_ATHLETE', 'atletas', { codigo });
@@ -12511,8 +12682,149 @@
     }
 
     /* =========================================================
-       CONFIGURAÇÃO DO BANCO & KEEP-ALIVE (ABA 4)
+       CONFIGURAÇÃO DOS BANCOS (PRIMÁRIO & RESERVA) E FAILOVER
        ========================================================= */
+    const SECONDARY_BACKUP_SQL_TEMPLATE = `-- ========================================================
+-- BANCO DE DADOS RESERVA / FAILOVER - FPEFT
+-- Federação Pernambucana de Foot Table
+--
+-- Execute este script no SQL Editor do seu SEGUNDO projeto Supabase.
+-- Ele cria todas as tabelas, índices e políticas de segurança RLS
+-- para suportar o espelhamento automático e failover do sistema.
+-- ========================================================
+
+-- 1. TABELA DE ATLETAS FEDERADOS
+CREATE TABLE IF NOT EXISTS public.atletas (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    codigo VARCHAR(10) UNIQUE NOT NULL,
+    nome TEXT NOT NULL,
+    cpf TEXT,
+    nascimento TEXT,
+    telefone TEXT,
+    municipio TEXT,
+    categoria TEXT DEFAULT 'AMADOR',
+    modalidade TEXT DEFAULT 'SOLO (INDIVIDUAL)',
+    status TEXT DEFAULT 'REGULAR',
+    clube TEXT,
+    federado TEXT,
+    validade TEXT DEFAULT '12/2026',
+    foto_url TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_backup_atletas_codigo ON public.atletas(codigo);
+
+-- 2. TABELA DE CONFIGURAÇÕES (LAYOUT DO STUDIO E GALERIA)
+CREATE TABLE IF NOT EXISTS public.configuracoes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    chave VARCHAR(100) UNIQUE NOT NULL,
+    valor TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_backup_configuracoes_chave ON public.configuracoes(chave);
+
+-- 3. TABELA DE NOTÍCIAS & TORNEIOS
+CREATE TABLE IF NOT EXISTS public.noticias (
+    id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+    titulo TEXT NOT NULL,
+    categoria TEXT DEFAULT 'INFORMATIVO',
+    conteudo TEXT NOT NULL,
+    data_publicacao TEXT,
+    imagem_url TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 4. TABELA DE KEEP-ALIVE (PING ANTI-PAUSA AUTOMÁTICO)
+CREATE TABLE IF NOT EXISTS public.keep_alive_logs (
+    id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+    pinged_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    source TEXT DEFAULT 'failover_backup',
+    status TEXT DEFAULT 'active',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 5. TABELA DE ADMINISTRADORES
+CREATE TABLE IF NOT EXISTS public.admin_users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    nome TEXT NOT NULL,
+    cargo TEXT DEFAULT 'Diretoria',
+    email TEXT UNIQUE NOT NULL,
+    senha TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- ========================================================
+-- POLÍTICAS DE SEGURANÇA (ROW LEVEL SECURITY - RLS)
+-- ========================================================
+
+ALTER TABLE public.atletas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.configuracoes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.noticias ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.keep_alive_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
+
+-- Políticas para Atletas (Leitura Pública e Gestão no Painel)
+DROP POLICY IF EXISTS "Permitir leitura publica atletas backup" ON public.atletas;
+CREATE POLICY "Permitir leitura publica atletas backup"
+ON public.atletas FOR SELECT
+TO anon, authenticated
+USING (true);
+
+DROP POLICY IF EXISTS "Permitir gestao atletas backup" ON public.atletas;
+CREATE POLICY "Permitir gestao atletas backup"
+ON public.atletas FOR ALL
+TO anon, authenticated
+USING (true)
+WITH CHECK (true);
+
+-- Políticas para Configurações (Layout do Studio da Carteira)
+DROP POLICY IF EXISTS "Permitir leitura configuracoes backup" ON public.configuracoes;
+CREATE POLICY "Permitir leitura configuracoes backup"
+ON public.configuracoes FOR SELECT
+TO anon, authenticated
+USING (true);
+
+DROP POLICY IF EXISTS "Permitir gestao configuracoes backup" ON public.configuracoes;
+CREATE POLICY "Permitir gestao configuracoes backup"
+ON public.configuracoes FOR ALL
+TO anon, authenticated
+USING (true)
+WITH CHECK (true);
+
+-- Políticas para Notícias
+DROP POLICY IF EXISTS "Permitir leitura noticias backup" ON public.noticias;
+CREATE POLICY "Permitir leitura noticias backup"
+ON public.noticias FOR SELECT
+TO anon, authenticated
+USING (true);
+
+DROP POLICY IF EXISTS "Permitir gestao noticias backup" ON public.noticias;
+CREATE POLICY "Permitir gestao noticias backup"
+ON public.noticias FOR ALL
+TO anon, authenticated
+USING (true)
+WITH CHECK (true);
+
+-- Políticas para Keep-Alive Logs
+DROP POLICY IF EXISTS "Permitir ping keep_alive backup" ON public.keep_alive_logs;
+CREATE POLICY "Permitir ping keep_alive backup"
+ON public.keep_alive_logs FOR ALL
+TO anon, authenticated
+USING (true)
+WITH CHECK (true);
+
+-- Políticas para Admin Users
+DROP POLICY IF EXISTS "Permitir gestao admin backup" ON public.admin_users;
+CREATE POLICY "Permitir gestao admin backup"
+ON public.admin_users FOR ALL
+TO anon, authenticated
+USING (true)
+WITH CHECK (true);
+`;
+
     function handleSaveAdminConfig() {
       if (!hasPermission('gestao_supabase') && !hasPermission('*')) {
         showToast("⚠️ Acesso Controlado: Sua conta não possui permissão para alterar configurações do banco.", true);
@@ -12531,7 +12843,7 @@
 
       feedback.classList.remove('hidden');
       feedback.className = "p-3 rounded-xl text-xs font-bold bg-emerald-950/40 border border-emerald-500/40 text-emerald-300";
-      feedback.textContent = "✓ Credenciais salvas com sucesso no painel administrativo!";
+      feedback.textContent = "✓ Credenciais primárias salvas com sucesso!";
       setTimeout(() => feedback.classList.add('hidden'), 3500);
     }
 
@@ -12542,11 +12854,11 @@
 
       feedback.classList.remove('hidden');
       feedback.className = "p-3 rounded-xl text-xs font-bold bg-blue-950/40 border border-blue-500/40 text-blue-300";
-      feedback.textContent = "Testando conexão com o banco de dados Supabase...";
+      feedback.textContent = "Testando conexão com o banco primário...";
 
       if (!url || !key) {
         feedback.className = "p-3 rounded-xl text-xs font-bold bg-amber-950/40 border border-amber-500/40 text-amber-300";
-        feedback.textContent = "Por favor, preencha a URL e a Anon Key antes de testar.";
+        feedback.textContent = "Por favor, preencha a URL e a Anon Key primária.";
         return;
       }
 
@@ -12556,14 +12868,312 @@
 
         if (error) {
           feedback.className = "p-3 rounded-xl text-xs font-bold bg-red-950/40 border border-red-500/40 text-red-300";
-          feedback.textContent = `❌ Erro do Supabase: ${error.message}`;
+          feedback.textContent = `❌ Erro do Supabase Primário: ${error.message}`;
         } else {
           feedback.className = "p-3 rounded-xl text-xs font-bold bg-emerald-950/40 border border-emerald-500/40 text-emerald-300";
-          feedback.textContent = "✓ Conexão bem-sucedida! O banco de dados Supabase respondeu com sucesso!";
+          feedback.textContent = "✓ Conexão primária bem-sucedida! Banco oficial respondendo.";
         }
       } catch (err) {
         feedback.className = "p-3 rounded-xl text-xs font-bold bg-red-950/40 border border-red-500/40 text-red-300";
-        feedback.textContent = `❌ Falha na conexão: ${err.message}`;
+        feedback.textContent = `❌ Falha na conexão primária: ${err.message}`;
+      }
+    }
+
+    /* INICIALIZAÇÃO DO BANCO RESERVA */
+    async function initSecondarySupabase() {
+      const badge = document.getElementById('secondaryDbStatusBadge');
+      const dot = document.getElementById('secondaryDbStatusDot');
+      const text = document.getElementById('secondaryDbStatusText');
+
+      SUPABASE_SECONDARY_URL = (localStorage.getItem('pe_supabase_secondary_url') || '').trim();
+      SUPABASE_SECONDARY_ANON_KEY = (localStorage.getItem('pe_supabase_secondary_anon_key') || '').trim();
+      IS_DUAL_WRITE_ENABLED = localStorage.getItem('pe_supabase_dual_write') !== 'false';
+      IS_AUTO_FAILOVER_ENABLED = localStorage.getItem('pe_supabase_auto_failover') !== 'false';
+
+      // Se não preenchido localmente, verifica se a Vercel forneceu via /api/config
+      if (!SUPABASE_SECONDARY_URL && typeof fetch === 'function') {
+        try {
+          const res = await fetch('/api/config');
+          if (res.ok) {
+            const data = await res.json();
+            if (data.supabaseSecondaryUrl && data.supabaseSecondaryAnonKey) {
+              SUPABASE_SECONDARY_URL = data.supabaseSecondaryUrl;
+              SUPABASE_SECONDARY_ANON_KEY = data.supabaseSecondaryAnonKey;
+            }
+          }
+        } catch (e) {}
+      }
+
+      if (!SUPABASE_SECONDARY_URL || !SUPABASE_SECONDARY_ANON_KEY) {
+        if (dot) dot.className = "w-2 h-2 rounded-full bg-slate-500";
+        if (text) text.textContent = "Não Configurado";
+        if (badge) badge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-900 border border-slate-700 text-[10px] text-slate-300 font-mono";
+        supabaseSecondaryClient = null;
+        return false;
+      }
+
+      try {
+        supabaseSecondaryClient = window.supabase.createClient(SUPABASE_SECONDARY_URL, SUPABASE_SECONDARY_ANON_KEY);
+        const ping = await safeSupabaseCall(
+          supabaseSecondaryClient.from('atletas').select('count', { count: 'exact', head: true }),
+          2500
+        );
+        if (!ping.error) {
+          if (dot) dot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse";
+          if (text) text.textContent = "Reserva Conectado (Online)";
+          if (badge) badge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/50 text-[10px] text-emerald-300 font-mono";
+          return true;
+        } else {
+          if (dot) dot.className = "w-2 h-2 rounded-full bg-amber-400";
+          if (text) text.textContent = "Reserva Instável";
+          if (badge) badge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-950/60 border border-amber-500/50 text-[10px] text-amber-300 font-mono";
+          return false;
+        }
+      } catch (err) {
+        if (dot) dot.className = "w-2 h-2 rounded-full bg-rose-500";
+        if (text) text.textContent = "Erro na Conexão";
+        if (badge) badge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-950/60 border border-rose-500/50 text-[10px] text-rose-300 font-mono";
+        return false;
+      }
+    }
+
+    /* SALVAR CONFIGURAÇÃO DO BANCO RESERVA */
+    function handleSaveAdminSecondaryConfig() {
+      if (!hasPermission('gestao_supabase') && !hasPermission('*')) {
+        showToast("⚠️ Acesso Controlado: Sua conta não possui permissão para alterar configurações do banco.", true);
+        return;
+      }
+      const url = (document.getElementById('adminCfgSecondaryUrl').value || '').trim();
+      const key = (document.getElementById('adminCfgSecondaryKey').value || '').trim();
+      const dualWrite = document.getElementById('adminCfgDualWrite').checked;
+      const failover = document.getElementById('adminCfgAutoFailover').checked;
+      const feedback = document.getElementById('adminSecondaryConfigFeedback');
+
+      localStorage.setItem('pe_supabase_secondary_url', url);
+      localStorage.setItem('pe_supabase_secondary_anon_key', key);
+      localStorage.setItem('pe_supabase_dual_write', dualWrite ? 'true' : 'false');
+      localStorage.setItem('pe_supabase_auto_failover', failover ? 'true' : 'false');
+
+      SUPABASE_SECONDARY_URL = url;
+      SUPABASE_SECONDARY_ANON_KEY = key;
+      IS_DUAL_WRITE_ENABLED = dualWrite;
+      IS_AUTO_FAILOVER_ENABLED = failover;
+
+      initSecondarySupabase();
+
+      if (feedback) {
+        feedback.classList.remove('hidden');
+        feedback.className = "p-3 rounded-xl text-xs font-bold bg-emerald-950/40 border border-emerald-500/40 text-emerald-300";
+        feedback.textContent = "✓ Configurações do Banco Reserva salvas com sucesso!";
+        setTimeout(() => feedback.classList.add('hidden'), 3500);
+      }
+      showToast("Configurações do banco reserva salvas!");
+    }
+
+    /* TESTAR CONEXÃO COM O BANCO RESERVA */
+    async function testSecondarySupabaseConnection() {
+      const url = (document.getElementById('adminCfgSecondaryUrl').value || '').trim();
+      const key = (document.getElementById('adminCfgSecondaryKey').value || '').trim();
+      const feedback = document.getElementById('adminSecondaryConfigFeedback');
+
+      if (!feedback) return;
+      feedback.classList.remove('hidden');
+      feedback.className = "p-3 rounded-xl text-xs font-bold bg-sky-950/40 border border-sky-500/40 text-sky-300";
+      feedback.textContent = "Testando conexão com o banco reserva...";
+
+      if (!url || !key) {
+        feedback.className = "p-3 rounded-xl text-xs font-bold bg-amber-950/40 border border-amber-500/40 text-amber-300";
+        feedback.textContent = "Por favor, preencha a URL e a Anon Key do segundo projeto Supabase.";
+        return;
+      }
+
+      try {
+        const testClient = window.supabase.createClient(url, key);
+        const { data, error } = await testClient.from('atletas').select('count', { count: 'exact', head: true });
+
+        if (error) {
+          feedback.className = "p-3 rounded-xl text-xs font-bold bg-red-950/40 border border-red-500/40 text-red-300";
+          feedback.textContent = `❌ Erro no Banco Reserva: ${error.message}. (Verifique se executou o script SQL das tabelas).`;
+        } else {
+          feedback.className = "p-3 rounded-xl text-xs font-bold bg-emerald-950/40 border border-emerald-500/40 text-emerald-300";
+          feedback.textContent = "✓ Conexão reserva bem-sucedida! Banco de failover pronto para operar.";
+        }
+      } catch (err) {
+        feedback.className = "p-3 rounded-xl text-xs font-bold bg-red-950/40 border border-red-500/40 text-red-300";
+        feedback.textContent = `❌ Falha ao conectar ao banco reserva: ${err.message}`;
+      }
+    }
+
+    /* MODAL DO SCRIPT SQL DO BANCO RESERVA */
+    function openBackupSqlModal() {
+      const modal = document.getElementById('modalSecondarySql');
+      const block = document.getElementById('secondarySqlCodeBlock');
+      if (block) {
+        block.textContent = SECONDARY_BACKUP_SQL_TEMPLATE;
+      }
+      if (modal) {
+        modal.classList.remove('hidden');
+      }
+    }
+
+    function closeBackupSqlModal() {
+      const modal = document.getElementById('modalSecondarySql');
+      if (modal) {
+        modal.classList.add('hidden');
+      }
+    }
+
+    async function copyBackupSqlToClipboard() {
+      const btn = document.getElementById('btnCopyBackupSql');
+      try {
+        await navigator.clipboard.writeText(SECONDARY_BACKUP_SQL_TEMPLATE);
+        if (btn) {
+          const original = btn.innerHTML;
+          btn.innerHTML = "<span>✓</span> Copiado para a Área de Transferência!";
+          setTimeout(() => { btn.innerHTML = original; }, 2500);
+        }
+        showToast("Código SQL copiado com sucesso!");
+      } catch (e) {
+        showToast("Selecione e copie o texto manualmente.");
+      }
+    }
+
+    /* ESPELHAMENTO ASSÍNCRONO NÃO-BLOQUEANTE (DUAL-WRITE) */
+    async function replicateToSecondary(table, action, payload, matchField = 'codigo', matchValue = null) {
+      if (!IS_DUAL_WRITE_ENABLED || !supabaseSecondaryClient) return;
+      try {
+        if (action === 'upsert') {
+          const records = Array.isArray(payload) ? payload : [payload];
+          await safeSupabaseCall(
+            supabaseSecondaryClient.from(table).upsert(records, { onConflict: matchField }),
+            4000
+          );
+        } else if (action === 'insert') {
+          const records = Array.isArray(payload) ? payload : [payload];
+          await safeSupabaseCall(
+            supabaseSecondaryClient.from(table).insert(records),
+            4000
+          );
+        } else if (action === 'update') {
+          const query = supabaseSecondaryClient.from(table).update(payload);
+          if (matchValue !== null && matchValue !== undefined) {
+            await safeSupabaseCall(query.eq(matchField, matchValue), 4000);
+          } else {
+            await safeSupabaseCall(query, 4000);
+          }
+        } else if (action === 'delete') {
+          if (matchValue !== null && matchValue !== undefined) {
+            await safeSupabaseCall(
+              supabaseSecondaryClient.from(table).delete().eq(matchField, matchValue),
+              4000
+            );
+          }
+        }
+      } catch (err) {
+        console.warn(`[Dual-Write] Aviso: espelhamento no banco reserva (${table}) falhou:`, err?.message || err);
+      }
+    }
+
+    /* 1-CLIQUE: SINCRONIZAR TODA A BASE DE DADOS PARA O BANCO RESERVA */
+    async function syncAllDataToSecondary() {
+      if (!hasPermission('gestao_supabase') && !hasPermission('*')) {
+        showToast("⚠️ Acesso Controlado: Permissão necessária para sincronizar bancos.", true);
+        return;
+      }
+      if (!supabaseSecondaryClient) {
+        showToast("⚠️ Configure e salve a URL e Anon Key do banco reserva primeiro.", true);
+        return;
+      }
+
+      const feedback = document.getElementById('adminSecondaryConfigFeedback');
+      if (feedback) {
+        feedback.classList.remove('hidden');
+        feedback.className = "p-3 rounded-xl text-xs font-bold bg-blue-950/40 border border-blue-500/40 text-blue-300";
+        feedback.textContent = "🔄 Sincronizando atletas, layouts e notícias para o banco reserva...";
+      }
+
+      try {
+        // 1. Obter todos os atletas atuais
+        let athletes = await loadAthletes(false);
+        if (!athletes || !athletes.length) {
+          athletes = JSON.parse(localStorage.getItem('pe_athletes_db')) || [];
+        }
+
+        // 2. Enviar atletas em lote para o banco reserva
+        if (athletes && athletes.length > 0) {
+          const payloadAthletes = athletes.map(a => ({
+            codigo: a.codigo,
+            nome: a.nome,
+            cpf: a.cpf || '',
+            nascimento: a.nascimento || '',
+            telefone: a.telefone || '',
+            municipio: a.municipio || 'RECIFE / PE',
+            categoria: a.categoria || 'ASPIRANTE',
+            modalidade: a.modalidade || 'SOLO (INDIVIDUAL)',
+            status: (a.status || 'PENDENTE').toUpperCase().trim(),
+            clube: a.clube || 'FEDERAÇÃO PERNAMBUCANA',
+            federado: a.federado || a.codigo,
+            validade: a.validade || '12/2026',
+            foto_url: a.foto_url || a.foto || ''
+          }));
+
+          // Upsert em lotes de 50
+          for (let i = 0; i < payloadAthletes.length; i += 50) {
+            const chunk = payloadAthletes.slice(i, i + 50);
+            await safeSupabaseCall(
+              supabaseSecondaryClient.from('atletas').upsert(chunk, { onConflict: 'codigo' }),
+              5000
+            );
+          }
+        }
+
+        // 3. Sincronizar layout do Studio
+        const studioLayout = localStorage.getItem('fpeft_studio_layout_data') || localStorage.getItem('fpeft_studio_custom_elements');
+        if (studioLayout) {
+          await safeSupabaseCall(
+            supabaseSecondaryClient.from('configuracoes').upsert([{
+              chave: 'carteira_studio_layout',
+              valor: typeof studioLayout === 'string' ? studioLayout : JSON.stringify(studioLayout),
+              updated_at: new Date().toISOString()
+            }], { onConflict: 'chave' }),
+            4000
+          );
+        }
+
+        // 4. Sincronizar galeria e notícias
+        const gallery = localStorage.getItem('pe_gallery_items_cloud');
+        if (gallery) {
+          await safeSupabaseCall(
+            supabaseSecondaryClient.from('configuracoes').upsert([{
+              chave: 'fpeft_gallery_items',
+              valor: gallery,
+              updated_at: new Date().toISOString()
+            }], { onConflict: 'chave' }),
+            4000
+          );
+        }
+
+        // 5. Ping no keep-alive do banco reserva
+        try {
+          await supabaseSecondaryClient.from('keep_alive_logs').insert([{
+            source: 'manual_full_sync',
+            status: `Atletas sincronizados: ${athletes.length}`
+          }]);
+        } catch (eLog) {}
+
+        if (feedback) {
+          feedback.className = "p-3 rounded-xl text-xs font-bold bg-emerald-950/40 border border-emerald-500/40 text-emerald-300";
+          feedback.textContent = `✓ Sincronização Concluída! ${athletes.length} atletas e layouts espelhados com sucesso no banco reserva.`;
+          setTimeout(() => feedback.classList.add('hidden'), 5000);
+        }
+        showToast(`✓ Sucesso: ${athletes.length} atletas espelhados no banco reserva!`);
+      } catch (err) {
+        console.error("Erro na sincronização completa:", err);
+        if (feedback) {
+          feedback.className = "p-3 rounded-xl text-xs font-bold bg-red-950/40 border border-red-500/40 text-red-300";
+          feedback.textContent = `❌ Falha durante a sincronização: ${err.message}`;
+        }
+        showToast("Erro durante a sincronização para o banco reserva.", true);
       }
     }
 
@@ -14524,6 +15134,15 @@
         if (urlInput) urlInput.value = localStorage.getItem('pe_supabase_url') || DEFAULT_SUPABASE_URL;
         const keyInput = document.getElementById('adminCfgKey');
         if (keyInput) keyInput.value = localStorage.getItem('pe_supabase_anon_key') || DEFAULT_SUPABASE_ANON_KEY;
+
+        const secUrlInput = document.getElementById('adminCfgSecondaryUrl');
+        if (secUrlInput) secUrlInput.value = localStorage.getItem('pe_supabase_secondary_url') || '';
+        const secKeyInput = document.getElementById('adminCfgSecondaryKey');
+        if (secKeyInput) secKeyInput.value = localStorage.getItem('pe_supabase_secondary_anon_key') || '';
+        const secDualWrite = document.getElementById('adminCfgDualWrite');
+        if (secDualWrite) secDualWrite.checked = localStorage.getItem('pe_supabase_dual_write') !== 'false';
+        const secFailover = document.getElementById('adminCfgAutoFailover');
+        if (secFailover) secFailover.checked = localStorage.getItem('pe_supabase_auto_failover') !== 'false';
 
         await initSupabase();
         loadGalleryFromCloud().catch(() => null);

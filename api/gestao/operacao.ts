@@ -127,6 +127,35 @@ export default async function handler(req: ExtendedRequest, res: ServerResponse)
     console.warn("Erro ao persistir status no Supabase:", dbErr);
   }
 
+  // Espelhamento assíncrono no banco de dados secundário/reserva (se configurado)
+  const secUrl = (process.env.SUPABASE_SECONDARY_URL || '').replace(/\/+$/, '');
+  const secKey = process.env.SUPABASE_SECONDARY_SERVICE_ROLE_KEY || process.env.SUPABASE_SECONDARY_ANON_KEY;
+  if (secUrl && secKey) {
+    (async () => {
+      try {
+        const secSupabase = createClient(secUrl, secKey);
+        const cleanCode = targetCodigo.trim();
+        const cleanStatus = targetStatus.trim().toUpperCase();
+        if (fullAthleteData) {
+          await secSupabase.from('atletas').upsert([{
+            codigo: fullAthleteData.codigo,
+            nome: fullAthleteData.nome,
+            cpf: fullAthleteData.cpf,
+            modalidade: fullAthleteData.modalidade,
+            categoria: fullAthleteData.categoria,
+            clube: fullAthleteData.clube,
+            municipio: fullAthleteData.municipio,
+            status: fullAthleteData.status
+          }], { onConflict: 'codigo' });
+        } else {
+          await secSupabase.from('atletas').update({ status: cleanStatus }).eq('codigo', cleanCode);
+        }
+      } catch (secErr) {
+        console.warn('[Serverless Dual-Write] Aviso ao replicar para banco reserva:', secErr);
+      }
+    })().catch(() => null);
+  }
+
   // Operação autorizada, validada e persistida
   res.statusCode = 200;
   res.setHeader('Content-Type', 'application/json');
