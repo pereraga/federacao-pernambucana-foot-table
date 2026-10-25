@@ -4414,7 +4414,7 @@
       }
     ];
 
-    const STUDIO_LAYOUT_VERSION = 'v2026_cr80_padrao_oficial_v8_preview_alinhado';
+    const STUDIO_LAYOUT_VERSION = 'v2026_cr80_padrao_oficial_v9_data_nascimento_completa';
 
     const studioState = {
       zoom: 0.8,
@@ -6713,7 +6713,7 @@
           if (athlete) {
             if (item.targetKey === 'nome') textVal = (athlete.nome || '').toUpperCase();
             else if (item.targetKey === 'cpf') textVal = athlete.cpf || '';
-            else if (item.targetKey === 'nasc') textVal = extractBirthYear(athlete.nascimento || '');
+            else if (item.targetKey === 'nasc') textVal = athlete.nascimento || 'XX/XX/XXXX';
             else if (item.targetKey === 'fone') textVal = athlete.telefone || '';
             else if (item.targetKey === 'categoria') textVal = (athlete.categoria || 'ASPIRANTE').toUpperCase();
             else if (item.targetKey === 'modalidade' || item.targetKey === 'filiacao') textVal = (athlete.modalidade || athlete.clube || 'SOLO (INDIVIDUAL)').toUpperCase();
@@ -9774,7 +9774,7 @@
 
       setElText('nome', (a.nome || '').toUpperCase());
       setElText('cpf', a.cpf || 'XXX.XXX.XXX-XX');
-      setElText('nasc', extractBirthYear(a.nascimento || 'XXXX'));
+      setElText('nasc', a.nascimento || 'XX/XX/XXXX');
       setElText('fone', a.telefone || '(XX) XXXXX-XXXX');
       setElText('categoria', (a.categoria || 'ASPIRANTE').toUpperCase());
       setElText('modalidade', (a.modalidade || a.clube || 'SOLO (INDIVIDUAL)').toUpperCase());
@@ -9903,8 +9903,8 @@
             <span class="font-mono text-slate-200 font-semibold">${escapeHtml(a.cpf || '-')}</span>
           </div>
           <div class="bg-[#05080e] p-2 rounded-lg border border-[#1c253b]">
-            <span class="text-[8px] text-slate-500 uppercase font-bold block">Ano Nasc.</span>
-            <span class="text-slate-200">${escapeHtml(extractBirthYear(a.nascimento) || '-')}</span>
+            <span class="text-[8px] text-slate-500 uppercase font-bold block">Data Nasc.</span>
+            <span class="text-slate-200">${escapeHtml(a.nascimento || '-')}</span>
           </div>
           <div class="bg-[#05080e] p-2 rounded-lg border border-[#1c253b]">
             <span class="text-[8px] text-slate-500 uppercase font-bold block">Telefone / Fone</span>
@@ -10121,8 +10121,8 @@
               <span class="font-mono text-slate-100 font-bold text-xs">${escapeHtml(a.cpf || '-')}</span>
             </div>
             <div class="bg-[#0b1222] p-2.5 rounded-xl border border-[#1c253b]">
-              <span class="text-[9px] text-slate-400 uppercase font-bold block mb-0.5">Ano Nasc.</span>
-              <span class="text-slate-100 font-semibold text-xs">${escapeHtml(extractBirthYear(a.nascimento) || '-')}</span>
+              <span class="text-[9px] text-slate-400 uppercase font-bold block mb-0.5">Data de Nascimento</span>
+              <span class="text-slate-100 font-semibold text-xs">${escapeHtml(a.nascimento || '-')}</span>
             </div>
             <div class="bg-[#0b1222] p-2.5 rounded-xl border border-[#1c253b]">
               <span class="text-[9px] text-slate-400 uppercase font-bold block mb-0.5">Telefone</span>
@@ -10264,7 +10264,7 @@
         } else if (item.targetKey === 'cpf') {
           item.text = athlete.cpf || '';
         } else if (item.targetKey === 'nasc') {
-          item.text = extractBirthYear(athlete.nascimento || '');
+          item.text = athlete.nascimento || 'XX/XX/XXXX';
         } else if (item.targetKey === 'fone') {
           item.text = athlete.telefone || '';
         } else if (item.targetKey === 'categoria') {
