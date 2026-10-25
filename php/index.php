@@ -770,6 +770,14 @@
         }
       } catch (eCache) {}
 
+      // Garante clientes Supabase ativos
+      if (!supabaseClient && window.supabase && DEFAULT_SUPABASE_URL) {
+        try { supabaseClient = window.supabase.createClient(DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_ANON_KEY); } catch (e) {}
+      }
+      if (!supabaseSecondaryClient && window.supabase && DEFAULT_SUPABASE_SECONDARY_URL) {
+        try { supabaseSecondaryClient = window.supabase.createClient(DEFAULT_SUPABASE_SECONDARY_URL, DEFAULT_SUPABASE_SECONDARY_ANON_KEY); } catch (e) {}
+      }
+
       let chunks = [];
 
       // 2. Consulta frações no Banco 1 (Principal)
@@ -830,7 +838,51 @@
         }
       }
 
-      return fallbackCompactUrl || '';
+      // 5. Fallback direto no Banco 2 (atletas.foto_url)
+      if (typeof supabaseSecondaryClient !== 'undefined' && supabaseSecondaryClient) {
+        try {
+          const { data: at2 } = await safeSupabaseCall(
+            supabaseSecondaryClient.from('atletas').select('foto_url').eq('codigo', code).maybeSingle(),
+            2000
+          );
+          if (at2 && at2.foto_url && at2.foto_url.startsWith('data:image/')) {
+            try { localStorage.setItem('pe_photo_full_' + code, at2.foto_url); } catch (e) {}
+            return at2.foto_url;
+          }
+        } catch (eAt2) {}
+      }
+
+      // 6. Fallback em athlete_record no Banco 1 (keep_alive_logs)
+      if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+        try {
+          const { data: recLog1 } = await safeSupabaseCall(
+            supabaseClient.from('keep_alive_logs').select('status').eq('source', 'athlete_record:' + code).limit(1).maybeSingle(),
+            2000
+          );
+          if (recLog1 && recLog1.status) {
+            const p = typeof recLog1.status === 'string' ? JSON.parse(recLog1.status) : recLog1.status;
+            const pPhoto = p.foto_url || p.foto;
+            if (pPhoto && pPhoto.startsWith('data:image/')) {
+              try { localStorage.setItem('pe_photo_full_' + code, pPhoto); } catch (e) {}
+              return pPhoto;
+            }
+          }
+        } catch (eRec1) {}
+      }
+
+      // 7. Fallback na API Serverless Oficial (/api/atletas/buscar)
+      try {
+        const apiRes = await safeSupabaseCall(fetch('/api/atletas/buscar?codigo=' + encodeURIComponent(code)), 2500);
+        if (apiRes && apiRes.ok) {
+          const apiJson = await apiRes.json();
+          if (apiJson && apiJson.atleta && apiJson.atleta.foto_url && apiJson.atleta.foto_url.startsWith('data:image/')) {
+            try { localStorage.setItem('pe_photo_full_' + code, apiJson.atleta.foto_url); } catch (e) {}
+            return apiJson.atleta.foto_url;
+          }
+        }
+      } catch (eApiCall) {}
+
+      return (fallbackCompactUrl && fallbackCompactUrl.startsWith('data:image/')) ? fallbackCompactUrl : '';
     }
     window.montarFotoCompletaFederado = montarFotoCompletaFederado;
 
@@ -1336,13 +1388,22 @@
         return;
       }
 
-      // 1. Tenta buscar no Supabase
+      feedback.innerHTML = `
+        <div class="p-3 bg-blue-950/40 border border-pe-blue/40 rounded-xl text-xs text-blue-300 flex items-center gap-2">
+          <span class="animate-spin">⏳</span> Consultando base oficial da Federação...
+        </div>
+      `;
+
+      // Assegura instâncias dos clientes Supabase
+      if (!supabaseClient && window.supabase && DEFAULT_SUPABASE_URL) {
+        try { supabaseClient = window.supabase.createClient(DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_ANON_KEY); } catch (e) {}
+      }
+      if (!supabaseSecondaryClient && window.supabase && DEFAULT_SUPABASE_SECONDARY_URL) {
+        try { supabaseSecondaryClient = window.supabase.createClient(DEFAULT_SUPABASE_SECONDARY_URL, DEFAULT_SUPABASE_SECONDARY_ANON_KEY); } catch (e) {}
+      }
+
+      // 1. Tenta buscar no Banco 1 (atletas)
       if (supabaseClient) {
-        feedback.innerHTML = `
-          <div class="p-3 bg-blue-950/40 border border-pe-blue/40 rounded-xl text-xs text-blue-300 flex items-center gap-2">
-            <span class="animate-spin">⏳</span> Consultando base oficial da Federação...
-          </div>
-        `;
         try {
           const { data, error } = await safeSupabaseCall(
             supabaseClient
@@ -1385,7 +1446,6 @@
               foto: (data.foto_url && !data.foto_url.includes('unsplash.com')) ? data.foto_url : ''
             };
 
-            // Consulta canal de nuvem de status caso o registro direto esteja pendente
             if (athlete.status === 'PENDENTE') {
               try {
                 const { data: statusLog } = await safeSupabaseCall(
@@ -1403,22 +1463,13 @@
                 }
               } catch (eCloud) {}
             }
-
-            // O status oficial sincronizado localmente tem prioridade se estiver homologado
-            if (athlete.status === 'PENDENTE') {
-              const localAthletes = getStoredAthletes();
-              const localMatch = localAthletes.find(a => String(a.codigo) === String(code));
-              if (localMatch && localMatch.status && localMatch.status !== 'PENDENTE') {
-                athlete.status = localMatch.status;
-              }
-            }
           }
         } catch (e) {
-          console.warn("Falha na consulta remota do Supabase, buscando local:", e);
+          console.warn("Falha na consulta remota do Supabase DB1:", e);
         }
       }
 
-      // 1.1 Se não encontrou no Supabase primário ou a foto precisa ser recuperada do banco de ingestão, consulta banco reserva
+      // 1.1 Consulta Banco 2 (atletas) - Prioritário para atletas e fotos gravadas no 2º banco
       if ((!athlete || !athlete.foto) && supabaseSecondaryClient) {
         try {
           const { data: secData, error: secErr } = await safeSupabaseCall(
@@ -1447,7 +1498,6 @@
               athlete.foto = secPhoto;
             }
 
-            // Se no Banco 2 estiver pendente, consulta o canal de status em nuvem do Banco 2
             if (athlete.status === 'PENDENTE') {
               try {
                 const { data: statusLog } = await safeSupabaseCall(
@@ -1467,8 +1517,107 @@
             }
           }
         } catch (eSec) {
-          console.warn("Falha na consulta ao banco reserva:", eSec);
+          console.warn("Falha na consulta ao banco reserva DB2:", eSec);
         }
+      }
+
+      // 1.2 Consulta athlete_record em Banco 1 (keep_alive_logs) caso não conste na tabela atletas
+      if ((!athlete || !athlete.foto) && supabaseClient) {
+        try {
+          const { data: recLog1 } = await safeSupabaseCall(
+            supabaseClient
+              .from('keep_alive_logs')
+              .select('status')
+              .eq('source', 'athlete_record:' + code)
+              .order('pinged_at', { ascending: false })
+              .limit(1)
+              .maybeSingle(),
+            2000
+          );
+          if (recLog1 && recLog1.status) {
+            const parsed = typeof recLog1.status === 'string' ? JSON.parse(recLog1.status) : recLog1.status;
+            const pPhoto = (parsed.foto_url && !parsed.foto_url.includes('unsplash.com')) ? parsed.foto_url : (parsed.foto || '');
+            if (!athlete) {
+              athlete = {
+                codigo: parsed.codigo || code,
+                nome: parsed.nome || 'Atleta Oficial',
+                cpf: parsed.cpf || '',
+                nascimento: parsed.nascimento || '',
+                municipio: parsed.municipio || 'RECIFE - PE',
+                modalidade: parsed.modalidade || 'SOLO (INDIVIDUAL)',
+                categoria: parsed.categoria || 'ASPIRANTE',
+                status: (parsed.status || 'PENDENTE').toUpperCase().trim(),
+                foto: pPhoto
+              };
+            } else if (!athlete.foto && pPhoto) {
+              athlete.foto = pPhoto;
+            }
+          }
+        } catch (eLog1) {}
+      }
+
+      // 1.3 Consulta athlete_record em Banco 2 (keep_alive_logs)
+      if ((!athlete || !athlete.foto) && supabaseSecondaryClient) {
+        try {
+          const { data: recLog2 } = await safeSupabaseCall(
+            supabaseSecondaryClient
+              .from('keep_alive_logs')
+              .select('status')
+              .eq('source', 'athlete_record:' + code)
+              .order('pinged_at', { ascending: false })
+              .limit(1)
+              .maybeSingle(),
+            2000
+          );
+          if (recLog2 && recLog2.status) {
+            const parsed2 = typeof recLog2.status === 'string' ? JSON.parse(recLog2.status) : recLog2.status;
+            const pPhoto2 = (parsed2.foto_url && !parsed2.foto_url.includes('unsplash.com')) ? parsed2.foto_url : (parsed2.foto || '');
+            if (!athlete) {
+              athlete = {
+                codigo: parsed2.codigo || code,
+                nome: parsed2.nome || 'Atleta Oficial',
+                cpf: parsed2.cpf || '',
+                nascimento: parsed2.nascimento || '',
+                municipio: parsed2.municipio || 'RECIFE - PE',
+                modalidade: parsed2.modalidade || 'SOLO (INDIVIDUAL)',
+                categoria: parsed2.categoria || 'ASPIRANTE',
+                status: (parsed2.status || 'PENDENTE').toUpperCase().trim(),
+                foto: pPhoto2
+              };
+            } else if (!athlete.foto && pPhoto2) {
+              athlete.foto = pPhoto2;
+            }
+          }
+        } catch (eLog2) {}
+      }
+
+      // 1.4 Consulta API Serverless Oficial (/api/atletas/buscar) com bypass seguro
+      if (!athlete || !athlete.foto) {
+        try {
+          const apiRes = await safeSupabaseCall(fetch('/api/atletas/buscar?codigo=' + encodeURIComponent(code)), 2500);
+          if (apiRes && apiRes.ok) {
+            const apiJson = await apiRes.json();
+            if (apiJson && apiJson.atleta) {
+              const a = apiJson.atleta;
+              const aPhoto = a.foto_url || a.foto_completa || a.foto_compacta || '';
+              if (!athlete) {
+                athlete = {
+                  codigo: a.codigo || code,
+                  nome: a.nome,
+                  cpf: a.cpf || a.cpf_mascarado || '',
+                  nascimento: a.nascimento || '',
+                  municipio: a.municipio || 'RECIFE - PE',
+                  modalidade: a.modalidade || 'SOLO (INDIVIDUAL)',
+                  categoria: a.categoria || 'ASPIRANTE',
+                  status: (a.status || 'PENDENTE').toUpperCase().trim(),
+                  foto: aPhoto
+                };
+              } else if (!athlete.foto && aPhoto) {
+                athlete.foto = aPhoto;
+              }
+            }
+          }
+        } catch (eApiCall) {}
       }
 
       // 2. Se não encontrou no Supabase, consulta na base local
@@ -1507,6 +1656,11 @@
       if (typeof resetDownloadLockNotice === 'function') {
         resetDownloadLockNotice();
       }
+
+      // Verifica status de homologação
+      const upperStatus = (athlete.status || 'PENDENTE').toUpperCase().trim();
+      const isHomologado = upperStatus === 'HOMOLOGADO' || upperStatus === 'REGULAR';
+      const isDesabilitado = upperStatus === 'DESABILITADO' || upperStatus === 'SUSPENSO' || upperStatus === 'INATIVO';
 
       feedback.classList.add('hidden');
       badgeArea.classList.remove('hidden');
@@ -1600,7 +1754,7 @@
 
       // MONTAGEM DA FOTO POR COMPLETO A PARTIR DAS FRAÇÕES GRAVADAS NOS DOIS BANCOS DE DADOS
       montarFotoCompletaFederado(athlete.codigo, cleanPhoto).then(assembledPhoto => {
-        if (assembledPhoto && assembledPhoto !== cleanPhoto && assembledPhoto.startsWith('data:image/')) {
+        if (assembledPhoto && assembledPhoto.startsWith('data:image/')) {
           athlete.foto = assembledPhoto;
           athlete.foto_completa = assembledPhoto;
           if (window._currentSearchedAthlete) {
@@ -1617,11 +1771,6 @@
         }
       }).catch(err => console.warn('Montagem da foto fracionada:', err));
 
-      // Verifica status de homologação
-      const upperStatus = (athlete.status || 'PENDENTE').toUpperCase().trim();
-      const isHomologado = upperStatus === 'HOMOLOGADO' || upperStatus === 'REGULAR';
-      const isDesabilitado = upperStatus === 'DESABILITADO' || upperStatus === 'SUSPENSO' || upperStatus === 'INATIVO';
-      
       // Atualiza Painel de Validação Digital do QR Code
       const qrFullName = document.getElementById('qrAthleteFullName');
       const qrFedNum = document.getElementById('qrFederatedNumText');

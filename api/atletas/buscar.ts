@@ -13,27 +13,55 @@ function maskCpfFirst3(cpf?: string | null): string {
 
 
 // Função auxiliar para montagem de foto por completo a partir das frações (chunks) gravadas no banco
-async function assemblePhotoFromChunks(supabaseClient: any, code: string, fallbackUrl: string): Promise<string> {
-  if (!supabaseClient || !code) return fallbackUrl || '';
-  try {
-    const { data: chunks } = await supabaseClient
-      .from('keep_alive_logs')
-      .select('source, status')
-      .like('source', `athlete_photo_chunk:${code}:%`)
-      .order('source', { ascending: true });
+async function assemblePhotoFromChunks(supabaseClient: any, code: string, fallbackUrl: string, secondaryClient?: any): Promise<string> {
+  if (!code) return fallbackUrl || '';
 
-    if (chunks && Array.isArray(chunks) && chunks.length > 0) {
-      chunks.sort((a: any, b: any) => {
-        const idxA = parseInt((a.source || '').split(':')[2] || '0', 10);
-        const idxB = parseInt((b.source || '').split(':')[2] || '0', 10);
-        return idxA - idxB;
-      });
-      const assembled = chunks.map((c: any) => c.status).join('');
-      if (assembled.startsWith('data:image/')) {
-        return assembled;
+  // 1. Tenta recuperar do cliente primário
+  if (supabaseClient) {
+    try {
+      const { data: chunks } = await supabaseClient
+        .from('keep_alive_logs')
+        .select('source, status')
+        .like('source', `athlete_photo_chunk:${code}:%`)
+        .order('source', { ascending: true });
+
+      if (chunks && Array.isArray(chunks) && chunks.length > 0) {
+        chunks.sort((a: any, b: any) => {
+          const idxA = parseInt((a.source || '').split(':')[2] || '0', 10);
+          const idxB = parseInt((b.source || '').split(':')[2] || '0', 10);
+          return idxA - idxB;
+        });
+        const assembled = chunks.map((c: any) => c.status).join('');
+        if (assembled.startsWith('data:image/')) {
+          return assembled;
+        }
       }
-    }
-  } catch (err) {}
+    } catch (err) {}
+  }
+
+  // 2. Se não encontrou no primário, tenta recuperar do cliente secundário
+  if (secondaryClient) {
+    try {
+      const { data: secChunks } = await secondaryClient
+        .from('keep_alive_logs')
+        .select('source, status')
+        .like('source', `athlete_photo_chunk:${code}:%`)
+        .order('source', { ascending: true });
+
+      if (secChunks && Array.isArray(secChunks) && secChunks.length > 0) {
+        secChunks.sort((a: any, b: any) => {
+          const idxA = parseInt((a.source || '').split(':')[2] || '0', 10);
+          const idxB = parseInt((b.source || '').split(':')[2] || '0', 10);
+          return idxA - idxB;
+        });
+        const assembled = secChunks.map((c: any) => c.status).join('');
+        if (assembled.startsWith('data:image/')) {
+          return assembled;
+        }
+      }
+    } catch (err2) {}
+  }
+
   return fallbackUrl || '';
 }
 
@@ -77,20 +105,51 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     return;
   }
 
-  // Consulta somente leitura diretamente no banco de dados Supabase na nuvem
+  // Consulta somente leitura diretamente no banco de dados Supabase na nuvem (Dual Database com Failover Automático)
   try {
     const rawUrl = process.env.SUPABASE_URL || 'https://qvnsahvdjhimlmtqrnif.supabase.co';
     const supabaseUrl = rawUrl.replace(/\/+$/, '');
     let supabaseKey = process.env.SUPABASE_ANON_KEY || 'sb_publishable_vvqh9vB0Dr0EqR9JGhy4kA_XnJ-9h0z';
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { data, error } = await supabase
-      .from('atletas')
-      .select('codigo, nome, status, categoria, modalidade, municipio, cpf, foto_url')
-      .eq('codigo', cleanCode)
-      .maybeSingle();
+    const secUrl = (process.env.SUPABASE_SECONDARY_URL || 'https://xvqsysfqbkfsogkwtbal.supabase.co').replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '');
+    const secKey = process.env.SUPABASE_SECONDARY_ANON_KEY || 'sb_publishable_2T1UD0EYvVBlIqCvnX5VHw_K6mmAn3M';
+    const secSupabase = (secUrl && secKey) ? createClient(secUrl, secKey) : null;
 
-    if (!error && data) {
+    let athleteFound: any = null;
+    let isFailover = false;
+
+    // 1. Tenta buscar no Banco 1 (atletas)
+    try {
+      const { data, error } = await supabase
+        .from('atletas')
+        .select('codigo, nome, status, categoria, modalidade, municipio, cpf, foto_url')
+        .eq('codigo', cleanCode)
+        .maybeSingle();
+
+      if (!error && data) {
+        athleteFound = data;
+      }
+    } catch (e1) {}
+
+    // 1.1 Se não encontrou no Banco 1, consulta Banco 2 (atletas)
+    if (!athleteFound && secSupabase) {
+      try {
+        const { data: secData, error: secError } = await secSupabase
+          .from('atletas')
+          .select('codigo, nome, status, categoria, modalidade, municipio, cpf, foto_url')
+          .eq('codigo', cleanCode)
+          .maybeSingle();
+
+        if (!secError && secData) {
+          athleteFound = secData;
+          isFailover = true;
+        }
+      } catch (eSec) {}
+    }
+
+    // 1.2 Se encontrou na tabela atletas (seja Banco 1 ou Banco 2)
+    if (athleteFound) {
       // Verifica se o atleta foi marcado como excluído
       try {
         const { data: delLog } = await supabase
@@ -107,7 +166,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         }
       } catch {}
 
-      let finalStatus = (data.status || 'PENDENTE').toUpperCase().trim();
+      let finalStatus = (athleteFound.status || 'PENDENTE').toUpperCase().trim();
       if (finalStatus === 'PENDENTE') {
         try {
           const { data: statusLog } = await supabase
@@ -123,22 +182,25 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         } catch {}
       }
 
-      const cpfMascarado = maskCpfFirst3(data.cpf);
-      const rawFoto = (data.foto_url && !data.foto_url.includes('unsplash.com')) ? data.foto_url : '';
-      const assembledFoto = await assemblePhotoFromChunks(supabase, cleanCode, rawFoto);
+      const cpfMascarado = maskCpfFirst3(athleteFound.cpf);
+      const rawFoto = (athleteFound.foto_url && !athleteFound.foto_url.includes('unsplash.com')) ? athleteFound.foto_url : '';
+      const assembledFoto = await assemblePhotoFromChunks(supabase, cleanCode, rawFoto, secSupabase);
 
       res.statusCode = 200;
       res.setHeader('Content-Type', 'application/json');
+      if (isFailover) {
+        res.setHeader('X-Failover-Database', 'secondary');
+      }
       res.end(JSON.stringify({
         ok: true,
         atleta: {
-          codigo: data.codigo,
-          nome: data.nome,
-          categoria: data.categoria || 'ASPIRANTE',
-          modalidade: data.modalidade || 'SOLO (INDIVIDUAL)',
-          municipio: data.municipio || 'RECIFE - PE',
+          codigo: athleteFound.codigo,
+          nome: athleteFound.nome,
+          categoria: athleteFound.categoria || 'ASPIRANTE',
+          modalidade: athleteFound.modalidade || 'SOLO (INDIVIDUAL)',
+          municipio: athleteFound.municipio || 'RECIFE - PE',
           status: finalStatus,
-          foto_url: assembledFoto,
+          foto_url: assembledFoto || rawFoto,
           foto_compacta: rawFoto,
           cpf_mascarado: cpfMascarado
         }
@@ -146,7 +208,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       return;
     }
 
-    // Consulta canal de nuvem de alta disponibilidade caso o atleta não conste na tabela atletas
+    // 2. Consulta canal de nuvem de alta disponibilidade em Banco 1 (keep_alive_logs)
     const { data: recordLog } = await supabase
       .from('keep_alive_logs')
       .select('status')
@@ -172,6 +234,8 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         }
 
         const cpfMascarado = maskCpfFirst3(parsed.cpf);
+        const rawFoto = (parsed.foto_url && !parsed.foto_url.includes('unsplash.com')) ? parsed.foto_url : (parsed.foto || '');
+        const assembledFoto = await assemblePhotoFromChunks(supabase, cleanCode, rawFoto, secSupabase);
 
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
@@ -184,11 +248,52 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
             modalidade: parsed.modalidade || 'SOLO (INDIVIDUAL)',
             municipio: parsed.municipio || 'RECIFE - PE',
             status: recStatus,
-            foto_url: (parsed.foto_url && !parsed.foto_url.includes('unsplash.com')) ? parsed.foto_url : (parsed.foto || ''),
+            foto_url: assembledFoto || rawFoto,
+            foto_compacta: rawFoto,
             cpf_mascarado: cpfMascarado
           }
         }));
         return;
+      } catch {}
+    }
+
+    // 2.1 Consulta canal de nuvem de alta disponibilidade em Banco 2 (keep_alive_logs)
+    if (secSupabase) {
+      try {
+        const { data: secRecordLog } = await secSupabase
+          .from('keep_alive_logs')
+          .select('status')
+          .eq('source', `athlete_record:${cleanCode}`)
+          .order('pinged_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (secRecordLog && secRecordLog.status) {
+          const parsedSec = typeof secRecordLog.status === 'string' ? JSON.parse(secRecordLog.status) : secRecordLog.status;
+          let recStatusSec = (parsedSec.status || 'PENDENTE').toUpperCase().trim();
+          const cpfMascarado = maskCpfFirst3(parsedSec.cpf);
+          const rawFotoSec = (parsedSec.foto_url && !parsedSec.foto_url.includes('unsplash.com')) ? parsedSec.foto_url : (parsedSec.foto || '');
+          const assembledFotoSec = await assemblePhotoFromChunks(supabase, cleanCode, rawFotoSec, secSupabase);
+
+          res.statusCode = 200;
+          res.setHeader('Content-Type', 'application/json');
+          res.setHeader('X-Failover-Database', 'secondary');
+          res.end(JSON.stringify({
+            ok: true,
+            atleta: {
+              codigo: parsedSec.codigo || cleanCode,
+              nome: parsedSec.nome || 'Atleta Oficial',
+              categoria: parsedSec.categoria || 'ASPIRANTE',
+              modalidade: parsedSec.modalidade || 'SOLO (INDIVIDUAL)',
+              municipio: parsedSec.municipio || 'RECIFE - PE',
+              status: recStatusSec,
+              foto_url: assembledFotoSec || rawFotoSec,
+              foto_compacta: rawFotoSec,
+              cpf_mascarado: cpfMascarado
+            }
+          }));
+          return;
+        }
       } catch {}
     }
   } catch (err) {

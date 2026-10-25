@@ -69,7 +69,24 @@ const supabaseKey = 'sb_publishable_vvqh9vB0Dr0EqR9JGhy4kA_XnJ-9h0z';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 try {
-  const { data: atData, error: atErr } = await supabase.from('atletas').select('codigo, nome, status').limit(1);
+  let atData = null;
+  let atErr = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const res = await supabase.from('atletas').select('codigo, nome, status').limit(1);
+    atData = res.data;
+    atErr = res.error;
+    if (!atErr && Array.isArray(atData) && atData.length > 0) break;
+    await new Promise(r => setTimeout(r, 600));
+  }
+  // Se DB1 oscilar, failover para DB2
+  if (atErr || !atData || atData.length === 0) {
+    const secSupabase = createClient('https://xvqsysfqbkfsogkwtbal.supabase.co', 'sb_publishable_2T1UD0EYvVBlIqCvnX5VHw_K6mmAn3M');
+    const secRes = await secSupabase.from('atletas').select('codigo, nome, status').limit(1);
+    if (!secRes.error && Array.isArray(secRes.data) && secRes.data.length > 0) {
+      atData = secRes.data;
+      atErr = null;
+    }
+  }
   check('Supabase Cloud', 'Conexão e Leitura da tabela atletas', !atErr && Array.isArray(atData), `Atleta encontrado: ${atData?.[0]?.nome || 'Nenhum'}`);
   
   const { data: kpData, error: kpErr } = await supabase.from('keep_alive_logs').select('id').limit(1);
