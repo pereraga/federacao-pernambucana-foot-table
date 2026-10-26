@@ -476,13 +476,13 @@
             </div>
           </div>
 
-          <!-- Assinatura do Diretor FPEFT (Centro Rodapé) -->
-          <div id="cardBadgeSignatureBox" class="absolute left-[32.38%] top-[86.86%] w-[40.00%] h-[4.83%] text-center flex flex-col items-center justify-end">
-            <div id="cardBadgeSignatureImgContainer" class="flex justify-center -mb-1 pointer-events-none select-none">
-              <img id="cardBadgeSignatureImg" src="" alt="Assinatura" class="hidden max-h-5 sm:max-h-7 object-contain drop-shadow" />
+          <!-- Assinatura da Diretoria FPEFT (Centro Rodapé - Padrão Oficial Studio) -->
+          <div id="cardBadgeSignatureBox" class="absolute left-[32.38%] top-[86.86%] w-[40.00%] h-[4.83%] text-center flex flex-col items-center justify-center pointer-events-none select-none overflow-visible">
+            <div id="cardBadgeSignatureImgContainer" class="flex justify-center -mb-0.5 sm:-mb-1 pointer-events-none select-none overflow-visible">
+              <img id="cardBadgeSignatureImg" src="" alt="Assinatura" class="hidden object-contain drop-shadow" />
             </div>
-            <div class="w-full h-[1px] sm:h-[1.5px] bg-white/90 mx-auto mb-0.5"></div>
-            <span id="cardBadgeSignatureText" class="text-[6px] sm:text-[8.5px] font-bold text-white uppercase tracking-wider block font-fpeft">
+            <div class="w-full h-[1px] sm:h-[1.5px] bg-white/90 mx-auto mb-0.5 sm:mb-1"></div>
+            <span id="cardBadgeSignatureText" class="text-[6.5px] sm:text-[9.5px] font-extrabold text-white uppercase tracking-wider block font-fpeft leading-tight">
               ASSINATURA DA DIRETORIA FPEFT
             </span>
           </div>
@@ -2403,12 +2403,19 @@
           if (el) {
             const sigUrl = item.signatureUrl || (layoutData && layoutData.signatureUrl) || (typeof window !== 'undefined' ? window.OFFICIAL_DIRECTOR_SIGNATURE_DATA_URL : '');
             const sigScale = (item.signatureScale !== undefined ? item.signatureScale : (layoutData && layoutData.signatureScale ? layoutData.signatureScale : 100)) / 100;
-            const sigText = item.text || 'ASSINATURA DO DIRETOR FPEFT';
+            const sigText = item.text || 'ASSINATURA DA DIRETORIA FPEFT';
             const sigImg = document.getElementById('cardBadgeSignatureImg');
             if (sigImg) {
               if (sigUrl) {
                 sigImg.src = sigUrl;
-                sigImg.style.maxHeight = `${Math.round(26 * sigScale)}px`;
+                // Calibração proporcional idêntica ao Studio de Emissão (base 56px de altura x 320px de largura em CR80 1050x662)
+                const cardRef = document.getElementById('athleteCredentialCard');
+                const cardH = (cardRef && cardRef.clientHeight > 0) ? cardRef.clientHeight : ((cardRef && cardRef.clientWidth > 0 ? cardRef.clientWidth : 620) * 662 / 1050);
+                const scaleFactor = cardH / 662;
+                const calcMaxH = Math.max(28, Math.round(56 * scaleFactor * sigScale));
+                const calcMaxW = Math.max(150, Math.round(320 * scaleFactor * sigScale));
+                sigImg.style.maxHeight = `${calcMaxH}px`;
+                sigImg.style.maxWidth = `${calcMaxW}px`;
                 sigImg.classList.remove('hidden');
               } else {
                 sigImg.classList.add('hidden');
@@ -2426,6 +2433,7 @@
           el.style.top = `${(item.y / CARD_H) * 100}%`;
           if (item.width) el.style.width = `${(item.width / CARD_W) * 100}%`;
           if (item.height) el.style.height = `${(item.height / CARD_H) * 100}%`;
+          if (el.id === 'cardBadgeSignatureBox') el.style.overflow = 'visible';
           if (item.borderRadius !== undefined) el.style.borderRadius = `${item.borderRadius}px`;
           if (item.backgroundColor && el.id !== 'cardBadgePhotoBox' && el.id !== 'cardBadgeSignatureBox') {
             el.style.backgroundColor = item.backgroundColor;

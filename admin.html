@@ -5737,6 +5737,7 @@
           div.style.flexDirection = 'column';
           div.style.alignItems = 'center';
           div.style.justifyContent = 'center';
+          div.style.overflow = 'visible';
           const sigUrl = item.signatureUrl || (typeof window !== 'undefined' ? window.OFFICIAL_DIRECTOR_SIGNATURE_DATA_URL : '');
           const scalePercent = (item.signatureScale !== undefined ? item.signatureScale : 100) / 100;
           const baseMaxH = Math.round(56 * scalePercent);
@@ -5747,7 +5748,7 @@
           div.innerHTML = `
             ${signatureImgHtml}
             <div class="w-full h-[1.5px] bg-white/90 mb-1"></div>
-            <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-200 select-none pointer-events-none leading-tight font-fpeft">${escapeHtml(item.text || 'ASSINATURA DO DIRETOR FPEFT')}</span>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-200 select-none pointer-events-none leading-tight font-fpeft">${escapeHtml(item.text || 'ASSINATURA DA DIRETORIA FPEFT')}</span>
           `;
         } else {
           if (item.backgroundColor) {
@@ -7054,18 +7055,23 @@
             ctx.restore();
           }
         } else if (item.type === 'signature-line' || item.type === 'text-line') {
-          // Imagem da Assinatura do Diretor posicionada em cima da linha/nome oficial
+          // Imagem da Assinatura do Diretor posicionada em cima da linha/nome oficial (Padrão Studio Oficial: max-height 56px, max-width 320px em escala CR80)
           const sigUrl = item.signatureUrl || (typeof window !== 'undefined' ? window.OFFICIAL_DIRECTOR_SIGNATURE_DATA_URL : '');
           if (sigUrl && !isSafeOnly) {
             const sigImg = await loadImageAsync(sigUrl, 2500);
             if (sigImg) {
               ctx.save();
               const scalePercent = (item.signatureScale !== undefined ? item.signatureScale : 100) / 100;
-              const maxSigW = item.width * scale * 0.85 * scalePercent;
+              const maxSigH = 56 * scale * scalePercent;
+              const maxSigW = 320 * scale * scalePercent;
               const ratio = (sigImg.naturalWidth && sigImg.naturalHeight) ? (sigImg.naturalHeight / sigImg.naturalWidth) : 0.35;
-              const sigW = Math.min(maxSigW, 360 * scale * scalePercent);
-              const sigH = sigW * ratio;
-              ctx.drawImage(sigImg, (item.x + item.width / 2) * scale - sigW / 2, item.y * scale - sigH + (3 * scale), sigW, sigH);
+              let sigH = maxSigH;
+              let sigW = sigH / ratio;
+              if (sigW > maxSigW) {
+                sigW = maxSigW;
+                sigH = sigW * ratio;
+              }
+              ctx.drawImage(sigImg, (item.x + item.width / 2) * scale - sigW / 2, item.y * scale - sigH + (2 * scale), sigW, sigH);
               ctx.restore();
             }
           }
@@ -7084,7 +7090,7 @@
           ctx.font = `800 ${Math.round((item.fontSize || 10.5) * scale)}px 'Montserrat', sans-serif`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'top';
-          ctx.fillText(item.text || 'ASSINATURA DO DIRETOR FPEFT', (item.x + item.width / 2) * scale, (item.y + 6) * scale);
+          ctx.fillText(item.text || 'ASSINATURA DA DIRETORIA FPEFT', (item.x + item.width / 2) * scale, (item.y + 6) * scale);
           ctx.restore();
         } else {
           // A) Rótulo Superior (Tag)
