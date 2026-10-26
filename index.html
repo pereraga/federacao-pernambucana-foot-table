@@ -40,6 +40,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
   <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Template Oficial e Assinatura do Diretor -->
+  <script src="assets/carteira_template.js"></script>
 
   <script>
     tailwind.config = {
@@ -474,11 +476,14 @@
             </div>
           </div>
 
-          <!-- Assinatura da Diretoria FPEFT (Centro Rodapé) -->
-          <div id="cardBadgeSignatureBox" class="absolute left-[32.95%] top-[88.82%] w-[37.62%] h-[4.23%] text-center">
+          <!-- Assinatura do Diretor FPEFT (Centro Rodapé) -->
+          <div id="cardBadgeSignatureBox" class="absolute left-[32.95%] top-[86.5%] w-[37.62%] h-[6.5%] text-center flex flex-col items-center justify-end">
+            <div id="cardBadgeSignatureImgContainer" class="flex justify-center -mb-1 pointer-events-none select-none">
+              <img id="cardBadgeSignatureImg" src="" alt="Assinatura" class="hidden max-h-5 sm:max-h-7 object-contain drop-shadow" />
+            </div>
             <div class="w-full h-[1px] sm:h-[1.5px] bg-white/90 mx-auto mb-0.5"></div>
-            <span class="text-[6px] sm:text-[8.5px] font-bold text-white uppercase tracking-wider block">
-              ASSINATURA DA DIRETORIA FPEFT
+            <span id="cardBadgeSignatureText" class="text-[6px] sm:text-[8.5px] font-bold text-white uppercase tracking-wider block font-fpeft">
+              ASSINATURA DO DIRETOR FPEFT
             </span>
           </div>
 
@@ -2342,6 +2347,25 @@
           el = document.getElementById('cardBadgeValidityBox');
         } else if (item.type === 'text-line' || item.targetKey === 'assinatura' || item.id === 'field-assinatura') {
           el = document.getElementById('cardBadgeSignatureBox');
+          if (el) {
+            const sigUrl = item.signatureUrl || (layoutData && layoutData.signatureUrl) || (typeof window !== 'undefined' ? window.OFFICIAL_DIRECTOR_SIGNATURE_DATA_URL : '');
+            const sigScale = (item.signatureScale !== undefined ? item.signatureScale : (layoutData && layoutData.signatureScale ? layoutData.signatureScale : 100)) / 100;
+            const sigText = item.text || 'ASSINATURA DO DIRETOR FPEFT';
+            const sigImg = document.getElementById('cardBadgeSignatureImg');
+            if (sigImg) {
+              if (sigUrl) {
+                sigImg.src = sigUrl;
+                sigImg.style.maxHeight = `${Math.round(26 * sigScale)}px`;
+                sigImg.classList.remove('hidden');
+              } else {
+                sigImg.classList.add('hidden');
+              }
+            }
+            const sigTxtEl = document.getElementById('cardBadgeSignatureText');
+            if (sigTxtEl) {
+              sigTxtEl.textContent = sigText;
+            }
+          }
         }
 
         if (el && item.x !== undefined && item.y !== undefined) {

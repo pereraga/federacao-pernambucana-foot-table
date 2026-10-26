@@ -47,6 +47,14 @@ const syncPairs = [
       'C:/Users/PC/Desktop/php/carteira_template.js',
       'C:/Users/PC/Desktop/php/assets/carteira_template.js'
     ]
+  },
+  {
+    source: path.join(repoRoot, 'assets', 'assinatura_diretor.png'),
+    targets: [
+      path.join(repoRoot, 'php', 'assets', 'assinatura_diretor.png'),
+      'C:/Users/PC/Desktop/assets/assinatura_diretor.png',
+      'C:/Users/PC/Desktop/federacao-foot-table/php/assets/assinatura_diretor.png'
+    ]
   }
 ];
 
