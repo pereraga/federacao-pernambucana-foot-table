@@ -4340,10 +4340,10 @@
     "targetKey": "federado",
     "text": "ID: #548608",
     "x": 69,
-    "y": 550,
+    "y": 552,
     "width": 192,
-    "height": 30,
-    "borderRadius": 15,
+    "height": 32,
+    "borderRadius": 16,
     "backgroundColor": "#ffffff",
     "textColor": "#00204a",
     "fontSize": 13,
@@ -4363,10 +4363,10 @@
     "targetKey": "nome",
     "text": "GABRIEL PEREIRA ALVES",
     "x": 285,
-    "y": 317,
-    "width": 713,
-    "height": 32,
-    "borderRadius": 16,
+    "y": 315,
+    "width": 715,
+    "height": 34,
+    "borderRadius": 17,
     "backgroundColor": "#ffffff",
     "textColor": "#00204a",
     "fontSize": 15,
@@ -4386,10 +4386,10 @@
     "targetKey": "cpf",
     "text": "714.***.***-**",
     "x": 285,
-    "y": 369,
-    "width": 217,
-    "height": 30,
-    "borderRadius": 15,
+    "y": 378,
+    "width": 215,
+    "height": 32,
+    "borderRadius": 16,
     "backgroundColor": "#ffffff",
     "textColor": "#00204a",
     "fontSize": 13,
@@ -4397,8 +4397,8 @@
     "fontFamily": "Montserrat",
     "textAlign": "center",
     "labelAlign": "center",
-    "paddingLeft": 10,
-    "paddingRight": 10,
+    "paddingLeft": 8,
+    "paddingRight": 8,
     "locked": false
   },
   {
@@ -4408,11 +4408,11 @@
     "type": "text-box",
     "targetKey": "nasc",
     "text": "2003",
-    "x": 519,
-    "y": 369,
-    "width": 213,
-    "height": 30,
-    "borderRadius": 15,
+    "x": 515,
+    "y": 378,
+    "width": 155,
+    "height": 32,
+    "borderRadius": 16,
     "backgroundColor": "#ffffff",
     "textColor": "#00204a",
     "fontSize": 13,
@@ -4420,8 +4420,8 @@
     "fontFamily": "Montserrat",
     "textAlign": "center",
     "labelAlign": "center",
-    "paddingLeft": 10,
-    "paddingRight": 10,
+    "paddingLeft": 8,
+    "paddingRight": 8,
     "locked": false
   },
   {
@@ -4431,11 +4431,11 @@
     "type": "text-box",
     "targetKey": "municipio",
     "text": "RECIFE - PE",
-    "x": 757,
-    "y": 369,
-    "width": 236,
-    "height": 30,
-    "borderRadius": 15,
+    "x": 685,
+    "y": 378,
+    "width": 155,
+    "height": 32,
+    "borderRadius": 16,
     "backgroundColor": "#ffffff",
     "textColor": "#00204a",
     "fontSize": 13,
@@ -4454,11 +4454,11 @@
     "type": "text-box",
     "targetKey": "fone",
     "text": "(XX) XXXXX-XXXX",
-    "x": 291,
-    "y": 427,
-    "width": 163,
-    "height": 30,
-    "borderRadius": 15,
+    "x": 285,
+    "y": 446,
+    "width": 175,
+    "height": 32,
+    "borderRadius": 16,
     "backgroundColor": "#ffffff",
     "textColor": "#00204a",
     "fontSize": 12,
@@ -4477,11 +4477,11 @@
     "type": "text-box",
     "targetKey": "modalidade",
     "text": "SOLO (INDIVIDUAL)",
-    "x": 466,
-    "y": 427,
-    "width": 188,
-    "height": 30,
-    "borderRadius": 15,
+    "x": 475,
+    "y": 446,
+    "width": 190,
+    "height": 32,
+    "borderRadius": 16,
     "backgroundColor": "#ffffff",
     "textColor": "#00204a",
     "fontSize": 12,
@@ -4500,11 +4500,11 @@
     "type": "text-box",
     "targetKey": "categoria",
     "text": "AMADOR",
-    "x": 671,
-    "y": 427,
-    "width": 182,
-    "height": 30,
-    "borderRadius": 15,
+    "x": 680,
+    "y": 446,
+    "width": 160,
+    "height": 32,
+    "borderRadius": 16,
     "backgroundColor": "#ffffff",
     "textColor": "#00204a",
     "fontSize": 12,
@@ -4522,10 +4522,10 @@
     "labelTag": "",
     "type": "qrcode",
     "targetKey": "qr",
-    "x": 862,
-    "y": 427,
-    "width": 138,
-    "height": 134,
+    "x": 860,
+    "y": 378,
+    "width": 140,
+    "height": 140,
     "borderRadius": 14,
     "backgroundColor": "#ffffff",
     "locked": false
@@ -4537,7 +4537,7 @@
     "type": "text-box",
     "targetKey": "validade",
     "text": "12/2026",
-    "x": 872,
+    "x": 868,
     "y": 585,
     "width": 125,
     "height": 28,
@@ -4555,13 +4555,13 @@
   },
   {
     "id": "field-assinatura",
-    "label": "Assinatura do Diretor",
+    "label": "Assinatura da Diretoria",
     "labelTag": "",
     "type": "text-line",
     "targetKey": "assinatura",
     "text": "ASSINATURA DA DIRETORIA FPEFT",
     "x": 340,
-    "y": 575,
+    "y": 585,
     "width": 420,
     "height": 32,
     "textColor": "#ffffff",
@@ -4574,7 +4574,7 @@
   }
 ];
 
-    const STUDIO_LAYOUT_VERSION = 'v2026_cr80_padrao_oficial_v13_user_layout';
+    const STUDIO_LAYOUT_VERSION = 'v2026_cr80_padrao_oficial_v14_espacamento_perfeito';
 
     const studioState = {
       zoom: 0.8,
@@ -5740,8 +5740,8 @@
           div.style.overflow = 'visible';
           const sigUrl = item.signatureUrl || (typeof window !== 'undefined' ? window.OFFICIAL_DIRECTOR_SIGNATURE_DATA_URL : '');
           const scalePercent = (item.signatureScale !== undefined ? item.signatureScale : 100) / 100;
-          const baseMaxH = Math.round(56 * scalePercent);
-          const baseMaxW = Math.round(320 * scalePercent);
+          const baseMaxH = Math.round(75 * scalePercent);
+          const baseMaxW = Math.round(180 * scalePercent);
           const signatureImgHtml = sigUrl 
             ? `<img src="${sigUrl}" style="max-height: ${baseMaxH}px; max-width: ${baseMaxW}px;" class="object-contain -mb-1 pointer-events-none select-none drop-shadow" />` 
             : '';
@@ -7062,8 +7062,8 @@
             if (sigImg) {
               ctx.save();
               const scalePercent = (item.signatureScale !== undefined ? item.signatureScale : 100) / 100;
-              const maxSigH = 56 * scale * scalePercent;
-              const maxSigW = 320 * scale * scalePercent;
+              const maxSigH = 75 * scale * scalePercent;
+              const maxSigW = 180 * scale * scalePercent;
               const ratio = (sigImg.naturalWidth && sigImg.naturalHeight) ? (sigImg.naturalHeight / sigImg.naturalWidth) : 0.35;
               let sigH = maxSigH;
               let sigW = sigH / ratio;

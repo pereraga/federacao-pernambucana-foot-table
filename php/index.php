@@ -418,9 +418,9 @@
           </div>
 
           <!-- Linha 2: CPF | Ano Nasc. | Município -->
-          <div id="cardBadgeCPFBox" class="absolute left-[27.14%] top-[55.74%] w-[20.67%] h-[4.53%] bg-white rounded-full shadow flex items-center justify-center px-1">
+          <div id="cardBadgeCPFBox" class="absolute left-[27.14%] top-[57.10%] w-[20.48%] h-[4.83%] bg-white rounded-full shadow flex items-center justify-center px-1">
             <span class="field-top-label label-align-center select-none pointer-events-none">CPF</span>
-            <div class="w-full h-full flex items-center justify-center font-extrabold font-mono text-[8px] sm:text-[11px] text-[#00204a] truncate px-1 leading-none" id="cardBadgeCPF">
+            <div class="w-full h-full flex items-center justify-center font-black font-mono text-[9px] sm:text-[11.5px] text-[#00204a] whitespace-nowrap overflow-visible px-1 leading-none tracking-normal" id="cardBadgeCPF">
               714.***.***-**
             </div>
           </div>
@@ -2412,8 +2412,8 @@
                 const cardRef = document.getElementById('athleteCredentialCard');
                 const cardH = (cardRef && cardRef.clientHeight > 0) ? cardRef.clientHeight : ((cardRef && cardRef.clientWidth > 0 ? cardRef.clientWidth : 620) * 662 / 1050);
                 const scaleFactor = cardH / 662;
-                const calcMaxH = Math.max(28, Math.round(56 * scaleFactor * sigScale));
-                const calcMaxW = Math.max(150, Math.round(320 * scaleFactor * sigScale));
+                const calcMaxH = Math.max(38, Math.round(75 * scaleFactor * sigScale));
+                const calcMaxW = Math.max(90, Math.round(180 * scaleFactor * sigScale));
                 sigImg.style.maxHeight = `${calcMaxH}px`;
                 sigImg.style.maxWidth = `${calcMaxW}px`;
                 sigImg.classList.remove('hidden');
@@ -2434,6 +2434,7 @@
           if (item.width) el.style.width = `${(item.width / CARD_W) * 100}%`;
           if (item.height) el.style.height = `${(item.height / CARD_H) * 100}%`;
           if (el.id === 'cardBadgeSignatureBox') el.style.overflow = 'visible';
+          if (el.id === 'cardBadgeCPFBox') { el.style.overflow = 'visible'; const t = el.querySelector('#cardBadgeCPF'); if (t) { t.style.overflow = 'visible'; t.style.whiteSpace = 'nowrap'; } }
           if (item.borderRadius !== undefined) el.style.borderRadius = `${item.borderRadius}px`;
           if (item.backgroundColor && el.id !== 'cardBadgePhotoBox' && el.id !== 'cardBadgeSignatureBox') {
             el.style.backgroundColor = item.backgroundColor;
