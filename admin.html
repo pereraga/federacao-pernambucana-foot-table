@@ -984,10 +984,17 @@
                   <h3 class="font-oswald text-base uppercase font-bold text-white flex items-center gap-2">
                     <i class="fa-solid fa-user-pen text-pe-gold"></i> Dados do Atleta
                   </h3>
-                  <span class="text-[10px] text-slate-400 font-mono">Sincronizado</span>
+                  <div class="flex items-center gap-2">
+                    <span id="studioModeIndicator" class="text-[9px] uppercase tracking-wider text-emerald-400 font-extrabold bg-emerald-950/80 border border-emerald-500/30 px-2.5 py-0.5 rounded-md flex items-center gap-1.5 shadow-sm">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Novo Cadastro
+                    </span>
+                    <button type="button" onclick="prepararStudioNovoAtleta()" class="text-[10px] text-slate-400 hover:text-white hover:underline transition flex items-center gap-1 cursor-pointer" title="Limpar todas as barras para novo cadastro">
+                      <i class="fa-solid fa-rotate-left text-[9px]"></i> Limpar
+                    </button>
+                  </div>
                 </div>
 
-                <form id="athleteForm" onsubmit="handleSaveAthlete(event)" class="space-y-3.5 text-xs">
+                <form id="athleteForm" autocomplete="off" onsubmit="handleSaveAthlete(event)" class="space-y-3.5 text-xs">
                   <!-- Nº do Federado e Status Federativo -->
                   <div class="grid grid-cols-2 gap-3">
                     <div>
@@ -1021,25 +1028,25 @@
                       <label class="block text-slate-300 font-bold">Nome do Atleta *</label>
                       <button type="button" class="text-sky-400 hover:underline text-[10px]" onclick="selectElement('field-nome')">Selecionar no cartão</button>
                     </div>
-                    <input type="text" id="athleteName" required value="" placeholder="NOME DO ATLETA" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-white uppercase font-bold outline-none font-fpeft" />
+                    <input type="text" id="athleteName" required value="" placeholder="NOME DO ATLETA" autocomplete="off" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-white uppercase font-bold outline-none font-fpeft" />
                   </div>
 
                   <!-- CPF e Data de Nascimento -->
                   <div class="grid grid-cols-2 gap-3">
                     <div>
                       <label class="block text-slate-300 font-bold mb-1">CPF</label>
-                      <input type="text" id="athleteCpf" maxlength="14" value="XXX.XXX.XXX-XX" placeholder="XXX.XXX.XXX-XX" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-slate-200 font-mono outline-none" />
+                      <input type="text" id="athleteCpf" maxlength="14" value="" placeholder="XXX.XXX.XXX-XX" autocomplete="off" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-slate-200 font-mono outline-none" />
                     </div>
                     <div>
                       <label class="block text-slate-300 font-bold mb-1">Nascimento</label>
-                      <input type="text" id="athleteBirth" value="XX/XX/XXXX" placeholder="XX/XX/XXXX" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-slate-200 font-mono outline-none" />
+                      <input type="text" id="athleteBirth" value="" placeholder="XX/XX/XXXX" autocomplete="off" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-slate-200 font-mono outline-none" />
                     </div>
                   </div>
 
                   <!-- Telefone / WhatsApp -->
                   <div>
                     <label class="block text-slate-300 font-bold mb-1">Telefone / WhatsApp</label>
-                    <input type="text" id="athletePhone" maxlength="15" value="(XX) XXXXX-XXXX" placeholder="(XX) XXXXX-XXXX" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-slate-200 font-mono outline-none" />
+                    <input type="text" id="athletePhone" maxlength="15" value="" placeholder="(XX) XXXXX-XXXX" autocomplete="off" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-slate-200 font-mono outline-none" />
                   </div>
 
                   <!-- Modalidade & Categoria -->
@@ -4232,6 +4239,9 @@
         if (tabName === 'inicio') {
           updateDashboardData();
         } else if (tabName === 'atletas') {
+          if (!window._openingAthleteInStudio) {
+            prepararStudioNovoAtleta(true);
+          }
           applyCurrentSvgBackground();
           renderInteractiveElements();
           setTimeout(() => {
@@ -4537,7 +4547,7 @@
   }
 ];
 
-    const STUDIO_LAYOUT_VERSION = 'v2026_cr80_padrao_oficial_v10_clear_labels';
+    const STUDIO_LAYOUT_VERSION = 'v2026_cr80_padrao_oficial_v11_clean_studio';
 
     const studioState = {
       zoom: 0.8,
@@ -4598,6 +4608,10 @@
           item.text = '(XX) XXXXX-XXXX';
         } else if (item.id === 'field-municipio' || item.targetKey === 'municipio') {
           item.text = '- PE';
+        } else if (item.id === 'field-federado' || item.targetKey === 'federado') {
+          item.text = 'ID: #548608';
+        } else if (item.id === 'field-qrcode' || item.targetKey === 'qr') {
+          item.text = 'https://fpeft.vercel.app/';
         } else if (item.type === 'photo') {
           item.photoUrl = '';
         }
@@ -4910,28 +4924,30 @@
         };
 
         // Purga qualquer resquício de dados de atletas fictícios/hardcoded do design oficial:
-        if (item.id === 'field-nome' || item.targetKey === 'nome') {
-          if (!item.text || item.text.toUpperCase().includes('GABRIEL') || item.text.toUpperCase().includes('PEREIRA')) {
+        if (!window._lastActiveAthlete) {
+          if (item.id === 'field-nome' || item.targetKey === 'nome') {
             item.text = '';
-          }
-        } else if (item.id === 'field-cpf' || item.targetKey === 'cpf') {
-          if (!item.text || item.text.includes('714.309') || item.text.includes('123.456')) {
+          } else if (item.id === 'field-cpf' || item.targetKey === 'cpf') {
             item.text = 'XXX.XXX.XXX-XX';
-          }
-        } else if (item.id === 'field-nasc' || item.targetKey === 'nasc') {
-          if (!item.text || item.text.includes('24/03/2003') || item.text.includes('18/05/1996')) {
+          } else if (item.id === 'field-nasc' || item.targetKey === 'nasc') {
             item.text = 'XX/XX/XXXX';
-          }
-        } else if (item.id === 'field-fone' || item.targetKey === 'fone') {
-          if (!item.text || item.text.includes('98463-4126') || item.text.includes('98765-4321')) {
+          } else if (item.id === 'field-fone' || item.targetKey === 'fone') {
             item.text = '(XX) XXXXX-XXXX';
-          }
-        } else if (item.id === 'field-municipio' || item.targetKey === 'municipio') {
-          if (!item.text || item.text.includes('RECIFE') || item.text.trim() === '') {
+          } else if (item.id === 'field-municipio' || item.targetKey === 'municipio') {
             item.text = '- PE';
+          } else if (item.id === 'field-federado' || item.targetKey === 'federado') {
+            const currentFed = (document.getElementById('athleteFederatedNum')?.value || '').trim();
+            item.text = currentFed || item.text || 'ID: #548608';
+          } else if (item.id === 'field-qrcode' || item.targetKey === 'qr') {
+            const currentFed = (document.getElementById('athleteFederatedNum')?.value || '').trim();
+            item.text = currentFed ? `https://fpeft.vercel.app/?id=${currentFed}` : 'https://fpeft.vercel.app/';
+          } else if (item.type === 'photo') {
+            if (!item.photoUrl || item.photoUrl.length < 50 || !item.photoUrl.startsWith('data:image/')) {
+              item.photoUrl = '';
+            }
           }
-        } else if (item.type === 'photo') {
-          if (!item.photoUrl || item.photoUrl.length < 50) {
+        } else {
+          if (item.type === 'photo' && (!item.photoUrl || item.photoUrl.length < 50)) {
             item.photoUrl = '';
           }
         }
@@ -10430,21 +10446,118 @@
       return;
     }
 
+    function updateStudioModeBadge(isEditing, athlete = null) {
+      const badge = document.getElementById('studioModeIndicator');
+      if (!badge) return;
+      if (isEditing && athlete) {
+        badge.className = "text-[9px] uppercase tracking-wider text-sky-300 font-extrabold bg-sky-950/90 border border-sky-500/40 px-2.5 py-0.5 rounded-md flex items-center gap-1.5 shadow-sm";
+        badge.innerHTML = `<i class="fa-solid fa-pen-to-square text-[9px] text-sky-400"></i> Editando #${escapeHtml(athlete.codigo)} (${escapeHtml((athlete.nome || 'Atleta').slice(0, 15))})`;
+      } else {
+        badge.className = "text-[9px] uppercase tracking-wider text-emerald-400 font-extrabold bg-emerald-950/80 border border-emerald-500/30 px-2.5 py-0.5 rounded-md flex items-center gap-1.5 shadow-sm";
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Novo Cadastro`;
+      }
+    }
+    window.updateStudioModeBadge = updateStudioModeBadge;
+
+    function prepararStudioNovoAtleta(silent = false) {
+      window._lastActiveAthlete = null;
+      window._currentAthletePhoto = '';
+
+      // 1. Gera código único e novo sem repetição
+      generateFederatedNumber(true);
+      const newFedCode = (document.getElementById('athleteFederatedNum')?.value || '').trim() || '973321';
+
+      // 2. Limpa todas as barras de dados do formulário
+      const nameInp = document.getElementById('athleteName');
+      if (nameInp) nameInp.value = '';
+
+      const cpfInp = document.getElementById('athleteCpf');
+      if (cpfInp) cpfInp.value = '';
+
+      const birthInp = document.getElementById('athleteBirth');
+      if (birthInp) birthInp.value = '';
+
+      const phoneInp = document.getElementById('athletePhone');
+      if (phoneInp) phoneInp.value = '';
+
+      const cityInp = document.getElementById('athleteCity');
+      if (cityInp) cityInp.value = '- PE';
+
+      const statusSelect = document.getElementById('athleteStatus');
+      if (statusSelect) statusSelect.value = 'PENDENTE';
+
+      setAthleteModalityValue('SOLO (INDIVIDUAL)');
+      setAthleteCategoryValue('AMADOR');
+      const clubInp = document.getElementById('athleteClub');
+      if (clubInp) clubInp.value = 'SOLO (INDIVIDUAL)';
+
+      const valInp = document.getElementById('athleteValidity');
+      if (valInp) valInp.value = '12/2026';
+
+      const photoValInp = document.getElementById('athletePhotoVal');
+      if (photoValInp) photoValInp.value = '';
+      if (typeof updateAthleteFormPhotoPreview === 'function') updateAthleteFormPhotoPreview('');
+
+      // 3. Limpa QR Code
+      const qrLink = `https://fpeft.vercel.app/?id=${newFedCode}`;
+      const qrInp = document.getElementById('inputQrText');
+      if (qrInp) qrInp.value = qrLink;
+
+      // 4. Limpa e reseta os textos das camadas da carteira oficial no Studio
+      if (studioState && Array.isArray(studioState.elements)) {
+        const setEl = (key, val) => {
+          const item = studioState.elements.find(i => i.targetKey === key || i.id === `field-${key}`);
+          if (item) item.text = val;
+        };
+        setEl('nome', '');
+        setEl('cpf', 'XXX.XXX.XXX-XX');
+        setEl('nasc', 'XX/XX/XXXX');
+        setEl('fone', '(XX) XXXXX-XXXX');
+        setEl('federado', newFedCode);
+        setEl('categoria', 'AMADOR');
+        setEl('modalidade', 'SOLO (INDIVIDUAL)');
+        setEl('filiacao', 'SOLO (INDIVIDUAL)');
+        setEl('municipio', '- PE');
+        setEl('validade', '12/2026');
+        setEl('qr', qrLink);
+        const photoTarget = studioState.elements.find(item => item.id === 'field-foto' || item.type === 'photo');
+        if (photoTarget) photoTarget.photoUrl = '';
+      }
+
+      // 5. Oculta feedback de salvamento anterior
+      const feedback = document.getElementById('athleteFeedback');
+      if (feedback) feedback.classList.add('hidden');
+
+      // 6. Atualiza etiqueta de modo para Novo Cadastro
+      updateStudioModeBadge(false);
+
+      renderInteractiveElements();
+      if (!silent) {
+        showToast('Studio limpo: todas as barras prontas para novo federado!');
+      }
+    }
+    window.prepararStudioNovoAtleta = prepararStudioNovoAtleta;
+
     async function fillFormWithAthlete(codigo) {
       const athletes = await loadAthletes();
-      const a = athletes.find(item => String(item.codigo) === String(codigo));
-      if (!a) return;
+      const a = athletes.find(item => String(item.codigo) === String(codigo) || String(item.federado) === String(codigo));
+      if (!a) {
+        showToast('Atleta não encontrado no sistema.');
+        return;
+      }
 
+      window._openingAthleteInStudio = true;
       switchTab('atletas');
+      window._openingAthleteInStudio = false;
 
-      // Preenche os inputs do formulário
+      // Preenche os inputs do formulário com os dados do federado selecionado
       const fedVal = a.federado || (String(a.codigo).startsWith('PE-') ? a.codigo : `PE-2026/${String(a.codigo).slice(-3)}`);
       document.getElementById('athleteCode').value = fedVal;
       document.getElementById('athleteFederatedNum').value = fedVal;
       document.getElementById('athleteName').value = a.nome;
-      document.getElementById('athleteCpf').value = a.cpf || 'XXX.XXX.XXX-XX';
-      document.getElementById('athleteBirth').value = a.nascimento || 'XX/XX/XXXX';
-      document.getElementById('athletePhone').value = a.telefone || '(XX) XXXXX-XXXX';
+      document.getElementById('athleteCpf').value = a.cpf || '';
+      document.getElementById('athleteBirth').value = a.nascimento || '';
+      document.getElementById('athletePhone').value = a.telefone || '';
       document.getElementById('athleteCity').value = a.municipio || '- PE';
       setAthleteModalityValue(a.modalidade || a.clube || 'SOLO (INDIVIDUAL)');
       setAthleteCategoryValue(a.categoria || 'ASPIRANTE');
@@ -10475,7 +10588,7 @@
       if (qrInp) qrInp.value = qrLink;
       setElText('qr', qrLink);
 
-      const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
+      const photoTarget = studioState.elements.find(item => item.id === 'field-foto' || item.type === 'photo');
       const rawPhoto = a.foto_url || a.foto || '';
       window._currentAthletePhoto = rawPhoto;
       const photoInp = document.getElementById('athletePhotoVal');
@@ -10487,62 +10600,17 @@
       }
 
       window._lastActiveAthlete = a;
+      updateStudioModeBadge(true, a);
       renderInteractiveElements();
       selectElement('field-nome');
-      showToast(`Atleta #${a.codigo} (${a.nome}) carregado no Studio!`);
+      showToast(`Atleta #${a.codigo} (${a.nome}) carregado no Studio para edição!`);
 
       const vArea = document.getElementById('viewportArea');
       if (vArea) vArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     function clearAthleteForm() {
-      document.getElementById('athleteForm').reset();
-      generateRandomAthleteCode();
-      const statusSelect = document.getElementById('athleteStatus');
-      if (statusSelect) statusSelect.value = 'PENDENTE';
-      setAthleteModalityValue('SOLO (INDIVIDUAL)');
-      setAthleteCategoryValue('AMADOR');
-      
-      const nameTarget = studioState.elements.find(item => item.id === 'field-nome' || item.targetKey === 'nome');
-      if (nameTarget) nameTarget.text = '';
-      const cpfTarget = studioState.elements.find(item => item.id === 'field-cpf' || item.targetKey === 'cpf');
-      if (cpfTarget) cpfTarget.text = 'XXX.XXX.XXX-XX';
-      const nascTarget = studioState.elements.find(item => item.id === 'field-nasc' || item.targetKey === 'nasc');
-      if (nascTarget) nascTarget.text = 'XX/XX/XXXX';
-      const foneTarget = studioState.elements.find(item => item.id === 'field-fone' || item.targetKey === 'fone');
-      if (foneTarget) foneTarget.text = '(XX) XXXXX-XXXX';
-      const cityTarget = studioState.elements.find(item => item.id === 'field-municipio' || item.targetKey === 'municipio');
-      if (cityTarget) cityTarget.text = '- PE';
-      const cityInp = document.getElementById('athleteCity');
-      if (cityInp) cityInp.value = '- PE';
-      const foneInp = document.getElementById('athletePhone');
-      if (foneInp) foneInp.value = '(XX) XXXXX-XXXX';
-      const cpfInpElem = document.getElementById('athleteCpf');
-      if (cpfInpElem) cpfInpElem.value = 'XXX.XXX.XXX-XX';
-      const nascInp = document.getElementById('athleteBirth');
-      if (nascInp) nascInp.value = 'XX/XX/XXXX';
-      const nameInp = document.getElementById('athleteName');
-      if (nameInp) nameInp.value = '';
-      const catTarget = studioState.elements.find(item => item.targetKey === 'categoria');
-      if (catTarget) catTarget.text = 'AMADOR';
-      
-      window._currentAthletePhoto = '';
-      const photoInp = document.getElementById('athletePhotoVal');
-      if (photoInp) photoInp.value = '';
-      if (typeof updateAthleteFormPhotoPreview === 'function') updateAthleteFormPhotoPreview('');
-
-      const photoTarget = studioState.elements.find(item => item.id === 'field-foto');
-      if (photoTarget) photoTarget.photoUrl = '';
-      
-      const fedCode = (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '') || '973321';
-      const qrLink = `https://fpeft.vercel.app/?id=${fedCode}`;
-      const qrInp = document.getElementById('inputQrText');
-      if (qrInp) qrInp.value = qrLink;
-      const qrTarget = studioState.elements.find(item => item.targetKey === 'qr' || item.id === 'field-qrcode');
-      if (qrTarget) qrTarget.text = qrLink;
-
-      renderInteractiveElements();
-      showToast('Formulário limpo. Pronto para novo atleta.');
+      prepararStudioNovoAtleta(false);
     }
 
     /* =========================================================
@@ -15749,7 +15817,7 @@ $;
 
         // Inicialização do Studio CR80 Interativo Oficial
         initStudioEvents();
-        syncStudioElementsWithForm();
+        prepararStudioNovoAtleta(true);
         updateGuidesButtonUI();
         applyCurrentSvgBackground();
         renderInteractiveElements();
@@ -15852,8 +15920,10 @@ $;
 
     window.addEventListener('load', () => {
       setTimeout(() => {
-        // Assegura renovação do código único após carregamento completo
-        generateFederatedNumber(true);
+        // Assegura renovação do código único e barras limpas para novo federado após carregamento completo
+        if (!window._lastActiveAthlete) {
+          prepararStudioNovoAtleta(true);
+        }
       }, 80);
     });
   </script>
