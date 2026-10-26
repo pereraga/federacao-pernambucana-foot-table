@@ -394,7 +394,7 @@
           </div>
 
           <!-- Foto 3x4 do Atleta -->
-          <div id="cardBadgePhotoBox" class="absolute left-[7.62%] top-[47.13%] w-[18.76%] h-[34.89%] rounded-xl sm:rounded-2xl border-2 sm:border-[3px] border-white overflow-hidden bg-[#09152e] shadow-md flex items-center justify-center cursor-pointer group" onclick="abrirFotoTamanhoRealPublica()" title="Clique para ver a foto em tamanho real original">
+          <div id="cardBadgePhotoBox" class="absolute left-[6.57%] top-[47.43%] w-[18.29%] h-[33.23%] rounded-xl sm:rounded-2xl border-2 sm:border-[3px] border-white overflow-hidden bg-[#09152e] shadow-md flex items-center justify-center cursor-pointer group" onclick="abrirFotoTamanhoRealPublica()" title="Clique para ver a foto em tamanho real original">
             <img id="cardBadgePhoto" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2364748b'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="Foto Atleta" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%2364748b\'%3E%3Cpath d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/%3E%3C/svg%3E'" />
             <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-[8px] font-bold pointer-events-none">
               <i class="fa-solid fa-expand text-xs text-pe-gold"></i>
@@ -402,7 +402,7 @@
           </div>
 
           <!-- Nº do Federado -->
-          <div id="cardBadgeCodeBox" class="absolute left-[7.62%] top-[84.59%] w-[18.00%] h-[4.83%] bg-white rounded-full shadow flex items-center justify-center px-1">
+          <div id="cardBadgeCodeBox" class="absolute left-[6.57%] top-[83.08%] w-[18.29%] h-[4.53%] bg-white rounded-full shadow flex items-center justify-center px-1">
             <span class="field-top-label label-align-center select-none pointer-events-none">Nº DO FEDERADO</span>
             <div class="w-full h-full flex items-center justify-center font-extrabold font-mono text-[8px] sm:text-[11px] text-[#00204a] truncate tracking-wider px-1 leading-none" id="cardBadgeCode">
               ID: #548608
@@ -410,7 +410,7 @@
           </div>
 
           <!-- Nome do Atleta (Linha 1) -->
-          <div id="cardBadgeNameBox" class="absolute left-[27.71%] top-[48.94%] w-[65.90%] h-[5.74%] bg-white rounded-full shadow flex items-center justify-start px-2.5 sm:px-3">
+          <div id="cardBadgeNameBox" class="absolute left-[27.14%] top-[47.89%] w-[67.90%] h-[4.83%] bg-white rounded-full shadow flex items-center justify-start px-2.5 sm:px-3">
             <span class="field-top-label label-align-left select-none pointer-events-none">NOME DO ATLETA</span>
             <div class="w-full h-full flex items-center justify-start font-black font-oswald text-[10px] sm:text-[14px] uppercase tracking-wide truncate text-[#00204a] leading-none" id="cardBadgeName">
               GABRIEL PEREIRA ALVES
@@ -418,21 +418,21 @@
           </div>
 
           <!-- Linha 2: CPF | Ano Nasc. | Município -->
-          <div id="cardBadgeCPFBox" class="absolute left-[27.71%] top-[58.01%] w-[20.10%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-1">
+          <div id="cardBadgeCPFBox" class="absolute left-[27.14%] top-[55.74%] w-[20.67%] h-[4.53%] bg-white rounded-full shadow flex items-center justify-center px-1">
             <span class="field-top-label label-align-center select-none pointer-events-none">CPF</span>
             <div class="w-full h-full flex items-center justify-center font-extrabold font-mono text-[8px] sm:text-[11px] text-[#00204a] truncate px-1 leading-none" id="cardBadgeCPF">
               714.***.***-**
             </div>
           </div>
 
-          <div id="cardBadgeBirthBox" class="absolute left-[49.33%] top-[58.01%] w-[19.62%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-1">
+          <div id="cardBadgeBirthBox" class="absolute left-[49.43%] top-[55.74%] w-[20.29%] h-[4.53%] bg-white rounded-full shadow flex items-center justify-center px-1">
             <span class="field-top-label label-align-center select-none pointer-events-none">Ano Nasc.</span>
             <div class="w-full h-full flex items-center justify-center font-extrabold font-mono text-[8px] sm:text-[11px] text-[#00204a] truncate px-1 leading-none" id="cardBadgeBirth">
               2003
             </div>
           </div>
 
-          <div id="cardBadgeCityBox" class="absolute left-[71.05%] top-[58.01%] w-[22.10%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-1">
+          <div id="cardBadgeCityBox" class="absolute left-[72.10%] top-[55.74%] w-[22.48%] h-[4.53%] bg-white rounded-full shadow flex items-center justify-center px-1">
             <span class="field-top-label label-align-center select-none pointer-events-none">MUNICÍPIO</span>
             <div class="w-full h-full flex items-center justify-center font-extrabold text-[8px] sm:text-[11px] text-[#00204a] uppercase truncate px-1 leading-none" id="cardBadgeCity">
               RECIFE - PE
@@ -440,21 +440,21 @@
           </div>
 
           <!-- Linha 3: Telefone/WhatsApp | Modalidade | Categoria -->
-          <div id="cardBadgePhoneBox" class="absolute left-[28.19%] top-[67.07%] w-[15.05%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-0.5">
+          <div id="cardBadgePhoneBox" class="absolute left-[27.71%] top-[64.50%] w-[15.52%] h-[4.53%] bg-white rounded-full shadow flex items-center justify-center px-0.5">
             <span class="field-top-label label-align-center select-none pointer-events-none">TELEFONE / WHATSAPP</span>
             <div class="w-full h-full flex items-center justify-center font-extrabold font-mono text-[7px] sm:text-[9.5px] text-[#00204a] truncate px-0.5 leading-none" id="cardBadgePhone">
               (XX) XXXXX-XXXX
             </div>
           </div>
 
-          <div id="cardBadgeModalityBox" class="absolute left-[44.29%] top-[67.07%] w-[17.33%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-0.5">
+          <div id="cardBadgeModalityBox" class="absolute left-[44.38%] top-[64.50%] w-[17.90%] h-[4.53%] bg-white rounded-full shadow flex items-center justify-center px-0.5">
             <span class="field-top-label label-align-center select-none pointer-events-none">MODALIDADE</span>
             <div class="w-full h-full flex items-center justify-center font-extrabold text-[7px] sm:text-[9.5px] text-[#00204a] uppercase truncate px-0.5 leading-none" id="cardBadgeModality">
               SOLO (INDIVIDUAL)
             </div>
           </div>
 
-          <div id="cardBadgeCategoryBox" class="absolute left-[63.14%] top-[67.07%] w-[16.86%] h-[5.14%] bg-white rounded-full shadow flex items-center justify-center px-0.5">
+          <div id="cardBadgeCategoryBox" class="absolute left-[63.90%] top-[64.50%] w-[17.33%] h-[4.53%] bg-white rounded-full shadow flex items-center justify-center px-0.5">
             <span class="field-top-label label-align-center select-none pointer-events-none">CATEGORIA</span>
             <div class="w-full h-full flex items-center justify-center font-extrabold text-[7px] sm:text-[9.5px] text-[#00204a] uppercase truncate px-0.5 leading-none" id="cardBadgeCategory">
               AMADOR
@@ -462,14 +462,14 @@
           </div>
 
           <!-- QR Code (Direita) -->
-          <div id="cardBadgeQrContainer" class="absolute left-[80.86%] top-[67.07%] w-[12.95%] h-[20.54%] bg-white rounded-lg sm:rounded-xl p-1 shadow-md flex items-center justify-center overflow-hidden">
+          <div id="cardBadgeQrContainer" class="absolute left-[82.10%] top-[64.50%] w-[13.14%] h-[20.24%] bg-white rounded-lg sm:rounded-xl p-1 shadow-md flex items-center justify-center overflow-hidden">
             <div id="cardBadgeQrBox" class="w-full h-full flex items-center justify-center">
               <i class="fa-solid fa-qrcode text-black text-xl sm:text-2xl"></i>
             </div>
           </div>
 
           <!-- Validade (Abaixo do QR Code) -->
-          <div id="cardBadgeValidityBox" class="absolute left-[81.71%] top-[89.73%] w-[11.71%] h-[4.68%] bg-white rounded-full shadow flex items-center justify-center px-0.5">
+          <div id="cardBadgeValidityBox" class="absolute left-[83.05%] top-[88.37%] w-[11.90%] h-[4.23%] bg-white rounded-full shadow flex items-center justify-center px-0.5">
             <span class="field-top-label label-align-center select-none pointer-events-none">VALIDADE</span>
             <div class="w-full h-full flex items-center justify-center font-extrabold font-mono text-[7.5px] sm:text-[10px] text-[#00204a] truncate px-0.5 leading-none" id="cardBadgeValidity">
               12/2026
@@ -477,13 +477,13 @@
           </div>
 
           <!-- Assinatura do Diretor FPEFT (Centro Rodapé) -->
-          <div id="cardBadgeSignatureBox" class="absolute left-[32.95%] top-[86.5%] w-[37.62%] h-[6.5%] text-center flex flex-col items-center justify-end">
+          <div id="cardBadgeSignatureBox" class="absolute left-[32.38%] top-[86.86%] w-[40.00%] h-[4.83%] text-center flex flex-col items-center justify-end">
             <div id="cardBadgeSignatureImgContainer" class="flex justify-center -mb-1 pointer-events-none select-none">
               <img id="cardBadgeSignatureImg" src="" alt="Assinatura" class="hidden max-h-5 sm:max-h-7 object-contain drop-shadow" />
             </div>
             <div class="w-full h-[1px] sm:h-[1.5px] bg-white/90 mx-auto mb-0.5"></div>
             <span id="cardBadgeSignatureText" class="text-[6px] sm:text-[8.5px] font-bold text-white uppercase tracking-wider block font-fpeft">
-              ASSINATURA DO DIRETOR FPEFT
+              ASSINATURA DA DIRETORIA FPEFT
             </span>
           </div>
 
@@ -2228,21 +2228,42 @@
     /* =======================================================
        APLICAR PERSONALIZAÇÃO DE LAYOUT DA CARTEIRA VINCULADO AO BANCO DE DADOS
        Lê os elementos da tabela configuracoes ('carteira_studio_layout')
-       ou do cache local ('fpeft_studio_layout_data') e aplica
-       perfeitamente as posições geométricas no #consulta
+       ou dos logs em ambos os bancos e cache local com resolução
+       por carimbo de tempo (o mais recente sempre tem prioridade).
        ======================================================= */
+    function extractLayoutCandidate(raw, fallbackTimestamp) {
+      if (!raw) return null;
+      let parsed = (typeof raw === 'object' && raw !== null) ? raw : null;
+      if (!parsed) {
+        try { parsed = JSON.parse(raw); } catch (e) { return null; }
+      }
+      if (!parsed) return null;
+      const elements = Array.isArray(parsed) ? parsed : parsed.elements;
+      if (!Array.isArray(elements) || elements.length === 0) return null;
+      const ts = parsed.updated_at || fallbackTimestamp || '1970-01-01T00:00:00Z';
+      const time = new Date(ts).getTime();
+      return {
+        layout: parsed,
+        elements: elements,
+        timestamp: isNaN(time) ? 0 : time
+      };
+    }
+
     async function applySavedBadgeLayout() {
-      let layoutData = null;
+      const candidates = [];
+
+      // 0. Cache local
       try {
         const local = localStorage.getItem('fpeft_studio_layout_data');
-        if (local) layoutData = JSON.parse(local);
+        if (local) {
+          const cLocal = extractLayoutCandidate(local);
+          if (cLocal) candidates.push(cLocal);
+        }
       } catch (e) {}
-
-      let db1Layout = null;
-      let db2Layout = null;
 
       const fetchPromises = [];
 
+      // 1. Banco 1 - configuracoes
       if (typeof supabaseClient !== 'undefined' && supabaseClient) {
         fetchPromises.push(
           supabaseClient
@@ -2250,19 +2271,34 @@
             .select('*')
             .eq('chave', 'carteira_studio_layout')
             .maybeSingle()
-            .then(({ data }) => {
-              if (data && data.valor) {
-                const parsed = typeof data.valor === 'string' ? JSON.parse(data.valor) : data.valor;
-                if (parsed && (parsed.elements || parsed.version)) {
-                  parsed.updated_at = parsed.updated_at || data.updated_at || '1970-01-01T00:00:00Z';
-                  db1Layout = parsed;
-                }
+            .then(({ data, error }) => {
+              if (!error && data && data.valor) {
+                const c = extractLayoutCandidate(data.valor, data.updated_at);
+                if (c) candidates.push(c);
+              }
+            })
+            .catch(() => null)
+        );
+
+        // 2. Banco 1 - keep_alive_logs
+        fetchPromises.push(
+          supabaseClient
+            .from('keep_alive_logs')
+            .select('*')
+            .eq('source', 'studio_layout_sync')
+            .order('pinged_at', { ascending: false })
+            .limit(1)
+            .then(({ data, error }) => {
+              if (!error && data && data.length > 0 && data[0].status) {
+                const c = extractLayoutCandidate(data[0].status, data[0].pinged_at);
+                if (c) candidates.push(c);
               }
             })
             .catch(() => null)
         );
       }
 
+      // 3. Banco 2 - configuracoes
       if (typeof supabaseSecondaryClient !== 'undefined' && supabaseSecondaryClient) {
         fetchPromises.push(
           safeSupabaseCall(
@@ -2273,13 +2309,30 @@
               .maybeSingle(),
             2500
           )
-            .then(({ data: secData }) => {
-              if (secData && secData.valor) {
-                const parsed = typeof secData.valor === 'string' ? JSON.parse(secData.valor) : secData.valor;
-                if (parsed && (parsed.elements || parsed.version)) {
-                  parsed.updated_at = parsed.updated_at || secData.updated_at || '1970-01-01T00:00:00Z';
-                  db2Layout = parsed;
-                }
+            .then(({ data: secData, error: secErr }) => {
+              if (!secErr && secData && secData.valor) {
+                const c = extractLayoutCandidate(secData.valor, secData.updated_at);
+                if (c) candidates.push(c);
+              }
+            })
+            .catch(() => null)
+        );
+
+        // 4. Banco 2 - keep_alive_logs
+        fetchPromises.push(
+          safeSupabaseCall(
+            supabaseSecondaryClient
+              .from('keep_alive_logs')
+              .select('*')
+              .eq('source', 'studio_layout_sync')
+              .order('pinged_at', { ascending: false })
+              .limit(1),
+            2000
+          )
+            .then(({ data: secLog, error: secLogErr }) => {
+              if (!secLogErr && secLog && secLog.length > 0 && secLog[0].status) {
+                const c = extractLayoutCandidate(secLog[0].status, secLog[0].pinged_at);
+                if (c) candidates.push(c);
               }
             })
             .catch(() => null)
@@ -2292,16 +2345,16 @@
         } catch (e) {}
       }
 
-      // Escolhe o layout mais recente entre os dois bancos (ou o disponível)
-      if (db1Layout && db2Layout) {
-        const t1 = new Date(db1Layout.updated_at || 0).getTime();
-        const t2 = new Date(db2Layout.updated_at || 0).getTime();
-        layoutData = t2 >= t1 ? db2Layout : db1Layout;
-      } else if (db2Layout) {
-        layoutData = db2Layout;
-      } else if (db1Layout) {
-        layoutData = db1Layout;
+      // Escolhe o candidato mais recente (timestamp mais alto)
+      let bestCandidate = null;
+      for (const cand of candidates) {
+        if (!cand) continue;
+        if (!bestCandidate || cand.timestamp > bestCandidate.timestamp) {
+          bestCandidate = cand;
+        }
       }
+
+      const layoutData = bestCandidate ? bestCandidate.layout : null;
 
       if (layoutData) {
         try {

@@ -157,8 +157,11 @@
         }
 
         // Alteração de Layout Studio e Nuvem
+        if (!perms.includes('gestao_supabase') && !perms.includes('carteira_studio') && !perms.includes('atletas_editar')) {
+          hideSelectors.push('#btnSaveOfficialCloud', '#btnModeDesign', 'button[onclick*="restoreOfficialElementPositions"]');
+        }
         if (!perms.includes('gestao_supabase')) {
-          hideSelectors.push('#btnSaveOfficialCloud', '#btnModeDesign', 'button[onclick*="restoreOfficialElementPositions"]', '#btnSaveSupabaseCfg');
+          hideSelectors.push('#btnSaveSupabaseCfg');
         }
 
         // Jogadores actions
@@ -3995,7 +3998,7 @@
       }
 
       // 3.2. Bloqueio de Alteração de Layout do Studio (Padrão Fixo e Modo Design)
-      const canEditLayout = hasPermission('gestao_supabase') || isMaster;
+      const canEditLayout = hasPermission('gestao_supabase') || hasPermission('carteira_studio') || hasPermission('atletas_editar') || isMaster;
       const btnSaveCloud = document.getElementById('btnSaveOfficialCloud');
       if (btnSaveCloud) {
         if (!canEditLayout) {
@@ -4318,10 +4321,10 @@
     "label": "Foto 3x4 do Atleta",
     "labelTag": "",
     "type": "photo",
-    "x": 80,
-    "y": 312,
-    "width": 197,
-    "height": 231,
+    "x": 69,
+    "y": 314,
+    "width": 192,
+    "height": 220,
     "borderRadius": 20,
     "borderWidth": 4,
     "borderColor": "#ffffff",
@@ -4336,11 +4339,11 @@
     "type": "text-box",
     "targetKey": "federado",
     "text": "ID: #548608",
-    "x": 80,
-    "y": 560,
-    "width": 189,
-    "height": 32,
-    "borderRadius": 16,
+    "x": 69,
+    "y": 550,
+    "width": 192,
+    "height": 30,
+    "borderRadius": 15,
     "backgroundColor": "#ffffff",
     "textColor": "#00204a",
     "fontSize": 13,
@@ -4359,20 +4362,20 @@
     "type": "text-box",
     "targetKey": "nome",
     "text": "GABRIEL PEREIRA ALVES",
-    "x": 291,
-    "y": 324,
-    "width": 692,
-    "height": 38,
-    "borderRadius": 19,
+    "x": 285,
+    "y": 317,
+    "width": 713,
+    "height": 32,
+    "borderRadius": 16,
     "backgroundColor": "#ffffff",
     "textColor": "#00204a",
-    "fontSize": 16,
+    "fontSize": 15,
     "fontWeight": "800",
     "fontFamily": "Montserrat",
     "textAlign": "left",
     "labelAlign": "left",
-    "paddingLeft": 18,
-    "paddingRight": 18,
+    "paddingLeft": 16,
+    "paddingRight": 16,
     "locked": false
   },
   {
@@ -4382,11 +4385,11 @@
     "type": "text-box",
     "targetKey": "cpf",
     "text": "714.***.***-**",
-    "x": 291,
-    "y": 384,
-    "width": 211,
-    "height": 34,
-    "borderRadius": 17,
+    "x": 285,
+    "y": 369,
+    "width": 217,
+    "height": 30,
+    "borderRadius": 15,
     "backgroundColor": "#ffffff",
     "textColor": "#00204a",
     "fontSize": 13,
@@ -4405,11 +4408,11 @@
     "type": "text-box",
     "targetKey": "nasc",
     "text": "2003",
-    "x": 518,
-    "y": 384,
-    "width": 206,
-    "height": 34,
-    "borderRadius": 17,
+    "x": 519,
+    "y": 369,
+    "width": 213,
+    "height": 30,
+    "borderRadius": 15,
     "backgroundColor": "#ffffff",
     "textColor": "#00204a",
     "fontSize": 13,
@@ -4428,11 +4431,11 @@
     "type": "text-box",
     "targetKey": "municipio",
     "text": "RECIFE - PE",
-    "x": 746,
-    "y": 384,
-    "width": 232,
-    "height": 34,
-    "borderRadius": 17,
+    "x": 757,
+    "y": 369,
+    "width": 236,
+    "height": 30,
+    "borderRadius": 15,
     "backgroundColor": "#ffffff",
     "textColor": "#00204a",
     "fontSize": 13,
@@ -4451,11 +4454,11 @@
     "type": "text-box",
     "targetKey": "fone",
     "text": "(XX) XXXXX-XXXX",
-    "x": 296,
-    "y": 444,
-    "width": 158,
-    "height": 34,
-    "borderRadius": 17,
+    "x": 291,
+    "y": 427,
+    "width": 163,
+    "height": 30,
+    "borderRadius": 15,
     "backgroundColor": "#ffffff",
     "textColor": "#00204a",
     "fontSize": 12,
@@ -4474,11 +4477,11 @@
     "type": "text-box",
     "targetKey": "modalidade",
     "text": "SOLO (INDIVIDUAL)",
-    "x": 465,
-    "y": 444,
-    "width": 182,
-    "height": 34,
-    "borderRadius": 17,
+    "x": 466,
+    "y": 427,
+    "width": 188,
+    "height": 30,
+    "borderRadius": 15,
     "backgroundColor": "#ffffff",
     "textColor": "#00204a",
     "fontSize": 12,
@@ -4497,11 +4500,11 @@
     "type": "text-box",
     "targetKey": "categoria",
     "text": "AMADOR",
-    "x": 663,
-    "y": 444,
-    "width": 177,
-    "height": 34,
-    "borderRadius": 17,
+    "x": 671,
+    "y": 427,
+    "width": 182,
+    "height": 30,
+    "borderRadius": 15,
     "backgroundColor": "#ffffff",
     "textColor": "#00204a",
     "fontSize": 12,
@@ -4519,11 +4522,11 @@
     "labelTag": "",
     "type": "qrcode",
     "targetKey": "qr",
-    "x": 849,
-    "y": 444,
-    "width": 136,
-    "height": 136,
-    "borderRadius": 16,
+    "x": 862,
+    "y": 427,
+    "width": 138,
+    "height": 134,
+    "borderRadius": 14,
     "backgroundColor": "#ffffff",
     "locked": false
   },
@@ -4534,11 +4537,11 @@
     "type": "text-box",
     "targetKey": "validade",
     "text": "12/2026",
-    "x": 858,
-    "y": 594,
-    "width": 123,
-    "height": 31,
-    "borderRadius": 16,
+    "x": 872,
+    "y": 585,
+    "width": 125,
+    "height": 28,
+    "borderRadius": 14,
     "backgroundColor": "#ffffff",
     "textColor": "#00204a",
     "fontSize": 13,
@@ -4556,11 +4559,11 @@
     "labelTag": "",
     "type": "text-line",
     "targetKey": "assinatura",
-    "text": "ASSINATURA DO DIRETOR FPEFT",
-    "x": 346,
-    "y": 588,
-    "width": 395,
-    "height": 28,
+    "text": "ASSINATURA DA DIRETORIA FPEFT",
+    "x": 340,
+    "y": 575,
+    "width": 420,
+    "height": 32,
     "textColor": "#ffffff",
     "fontSize": 11,
     "fontWeight": "700",
@@ -4571,7 +4574,7 @@
   }
 ];
 
-    const STUDIO_LAYOUT_VERSION = 'v2026_cr80_padrao_oficial_v12_signature_director';
+    const STUDIO_LAYOUT_VERSION = 'v2026_cr80_padrao_oficial_v13_user_layout';
 
     const studioState = {
       zoom: 0.8,
@@ -4828,54 +4831,74 @@
       updateCloudSyncStatus('syncing');
       const payload = buildStudioPayload();
       const payloadStr = JSON.stringify(payload);
+      const nowIso = payload.updated_at || new Date().toISOString();
 
-            try {
+      try {
+        const syncPromises = [];
+
         // 1. GRAVA NO BANCO 2 (SECUNDÁRIO - ARMAZENAMENTO & INGESTÃO SEGURA)
-        // O Banco 2 supre qualquer falha, lentidão ou limite de cota do Banco 1
         if (supabaseSecondaryClient) {
-          try {
-            await safeSupabaseCall(
+          syncPromises.push(
+            safeSupabaseCall(
               supabaseSecondaryClient.from('configuracoes').upsert([{
                 chave: 'carteira_studio_layout',
                 valor: payloadStr,
-                updated_at: payload.updated_at
+                updated_at: nowIso
               }], { onConflict: 'chave' }),
               3000
-            );
-            supabaseSecondaryClient.from('keep_alive_logs').insert([{
-              source: 'studio_layout_sync',
-              status: payloadStr,
-              pinged_at: new Date().toISOString()
-            }]).catch(() => null);
-          } catch (errSec) {
-            console.warn('[Studio Sync] Inserção Banco 2:', errSec);
-          }
+            ).catch(err => console.warn('[Studio Sync] Inserção DB2 configuracoes:', err))
+          );
+          syncPromises.push(
+            safeSupabaseCall(
+              supabaseSecondaryClient.from('keep_alive_logs').insert([{
+                source: 'studio_layout_sync',
+                status: payloadStr,
+                pinged_at: nowIso
+              }]),
+              3000
+            ).catch(err => console.warn('[Studio Sync] Inserção DB2 keep_alive_logs:', err))
+          );
         }
 
-        // 2. ATUALIZA NO BANCO 1 (PRINCIPAL - EXIBIÇÃO CONTÍNUA)
+        // 2. ATUALIZA NO BANCO 1 (LOGS E CONFIGURAÇÕES)
         if (supabaseClient) {
-          try {
-            await safeSupabaseCall(
+          syncPromises.push(
+            safeSupabaseCall(
+              supabaseClient.from('keep_alive_logs').insert([{
+                source: 'studio_layout_sync',
+                status: payloadStr,
+                pinged_at: nowIso
+              }]),
+              3000
+            ).catch(err => console.warn('[Studio Sync] Inserção DB1 keep_alive_logs:', err))
+          );
+          syncPromises.push(
+            safeSupabaseCall(
               supabaseClient.from('configuracoes').upsert([{
                 chave: 'carteira_studio_layout',
                 valor: payloadStr,
-                updated_at: payload.updated_at
+                updated_at: nowIso
               }], { onConflict: 'chave' }),
               3000
-            );
-            supabaseClient.from('keep_alive_logs').insert([{
-              source: 'studio_layout_sync',
-              status: payloadStr,
-              pinged_at: new Date().toISOString()
-            }]).catch(() => null);
-          } catch (errPrim) {
-            console.warn('[Studio Sync] Banco 1 ocupado/cheio; layout protegido no Banco 2:', errPrim);
-          }
+            ).catch(err => console.warn('[Studio Sync] DB1 configuracoes (esperado RLS se anon):', err))
+          );
         }
 
-        // 3. Persiste localmente com carimbo de tempo
+        // 3. SERVERLESS ENDPOINT DE OPERAÇÃO (Garante gravação no DB1 e DB2 com Service Role Key)
+        syncPromises.push(
+          fetch('/api/gestao/operacao', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'save_studio_layout', layout: payload })
+          }).catch(err => console.warn('[Studio Sync] Erro na rota api/gestao/operacao:', err))
+        );
+
+        await Promise.allSettled(syncPromises);
+
+        // 4. Persiste localmente com carimbo de tempo
         localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(studioState.elements));
         localStorage.setItem('fpeft_studio_layout_data', payloadStr);
+        localStorage.setItem('fpeft_studio_layout_version', STUDIO_LAYOUT_VERSION);
         if (studioState.bgTransform) {
           localStorage.setItem('fpeft_studio_bg_transform', JSON.stringify(studioState.bgTransform));
         }
@@ -4899,7 +4922,8 @@
     /* Grava explicitamente o design atual da carteira no Banco de Dados em tempo real */
     async function saveOfficialLayoutToCloud() {
       const isMaster = (typeof isMasterAdminUser === 'function' && isMasterAdminUser()) || hasPermission('*');
-      if (!hasPermission('gestao_supabase') && !isMaster) {
+      const canEditLayout = hasPermission('gestao_supabase') || hasPermission('carteira_studio') || hasPermission('atletas_editar') || isMaster;
+      if (!canEditLayout) {
         showToast('⚠️ Acesso Controlado: Você não possui permissão para alterar o Padrão da Carteira no banco de dados.', true);
         return;
       }
@@ -4917,7 +4941,7 @@
           localStorage.setItem('fpeft_studio_bg_transform', JSON.stringify(studioState.bgTransform));
         }
 
-        // Envia imediatamente para o banco de dados na nuvem (tabela configuracoes + keep_alive_logs)
+        // Envia imediatamente para o banco de dados na nuvem (tabela configuracoes + keep_alive_logs em ambos os bancos e API)
         await syncStudioDesignToSupabase(true);
 
         showToast('✅ Carteira salva com sucesso! Layout atualizado em tempo real no banco de dados para todos os novos cadastros.');
@@ -4983,33 +5007,65 @@
       });
     }
 
+    /* Auxiliar para extrair dados válidos de layout com carimbo de tempo */
+    function extractLayoutCandidate(raw, fallbackTimestamp) {
+      if (!raw) return null;
+      let parsed = (typeof raw === 'object' && raw !== null) ? raw : null;
+      if (!parsed) {
+        try { parsed = JSON.parse(raw); } catch (e) { return null; }
+      }
+      if (!parsed) return null;
+      const elements = Array.isArray(parsed) ? parsed : parsed.elements;
+      if (!Array.isArray(elements) || elements.length === 0) return null;
+      const ts = parsed.updated_at || fallbackTimestamp || '1970-01-01T00:00:00Z';
+      const time = new Date(ts).getTime();
+      return {
+        layout: parsed,
+        elements: elements,
+        timestamp: isNaN(time) ? 0 : time
+      };
+    }
+
     /* Busca e aplica o design oficial na nuvem Supabase ao inicializar em QUALQUER computador */
     async function fetchStudioDesignFromSupabase(force = false) {
       if (typeof supabaseClient === 'undefined' || !supabaseClient) return false;
       updateCloudSyncStatus('loading');
 
       try {
-        let cloudData = null;
+        const candidates = [];
 
-        // 1. Tenta carregar da tabela configuracoes com timeout seguro
+        // 0. Cache local
         try {
-          const { data, error } = await safeSupabaseCall(
-            supabaseClient
-              .from('configuracoes')
-              .select('*')
-              .eq('chave', 'carteira_studio_layout')
-              .maybeSingle(),
-            3000
-          );
-          if (!error && data && data.valor) {
-            cloudData = typeof data.valor === 'string' ? JSON.parse(data.valor) : data.valor;
+          const localStr = localStorage.getItem('fpeft_studio_layout_data');
+          if (localStr) {
+            const cLocal = extractLayoutCandidate(localStr);
+            if (cLocal) candidates.push(cLocal);
           }
-        } catch (e1) {}
+        } catch (eLocal) {}
 
-        // 2. Se não encontrou, busca do log central mais recente com timeout seguro
-        if (!cloudData && supabaseClient) {
-          try {
-            const { data, error } = await safeSupabaseCall(
+        const queryPromises = [];
+
+        // 1. Banco 1 - configuracoes
+        if (supabaseClient) {
+          queryPromises.push(
+            safeSupabaseCall(
+              supabaseClient
+                .from('configuracoes')
+                .select('*')
+                .eq('chave', 'carteira_studio_layout')
+                .maybeSingle(),
+              3000
+            ).then(({ data, error }) => {
+              if (!error && data && data.valor) {
+                const c = extractLayoutCandidate(data.valor, data.updated_at);
+                if (c) candidates.push(c);
+              }
+            }).catch(() => null)
+          );
+
+          // 2. Banco 1 - keep_alive_logs
+          queryPromises.push(
+            safeSupabaseCall(
               supabaseClient
                 .from('keep_alive_logs')
                 .select('*')
@@ -5017,47 +5073,66 @@
                 .order('pinged_at', { ascending: false })
                 .limit(1),
               3000
-            );
-            if (!error && data && data.length > 0 && data[0].status) {
-              cloudData = typeof data[0].status === 'string' ? JSON.parse(data[0].status) : data[0].status;
-            }
-          } catch (e2) {}
+            ).then(({ data, error }) => {
+              if (!error && data && data.length > 0 && data[0].status) {
+                const c = extractLayoutCandidate(data[0].status, data[0].pinged_at);
+                if (c) candidates.push(c);
+              }
+            }).catch(() => null)
+          );
         }
 
-        // 3. SE O BANCO 1 FALHOU OU NÃO RESPONDEU, O BANCO 2 SUPRE O LAYOUT IMEDIATAMENTE
-        if (!cloudData && supabaseSecondaryClient) {
-          try {
-            const { data: secData, error: secErr } = await safeSupabaseCall(
+        // 3. Banco 2 - configuracoes
+        if (supabaseSecondaryClient) {
+          queryPromises.push(
+            safeSupabaseCall(
               supabaseSecondaryClient
                 .from('configuracoes')
                 .select('*')
                 .eq('chave', 'carteira_studio_layout')
                 .maybeSingle(),
               2500
-            );
-            if (!secErr && secData && secData.valor) {
-              cloudData = typeof secData.valor === 'string' ? JSON.parse(secData.valor) : secData.valor;
-            }
-          } catch (eSecCfg) {}
-
-          if (!cloudData) {
-            try {
-              const { data: secLog } = await safeSupabaseCall(
-                supabaseSecondaryClient
-                  .from('keep_alive_logs')
-                  .select('*')
-                  .eq('source', 'studio_layout_sync')
-                  .order('pinged_at', { ascending: false })
-                  .limit(1),
-                2000
-              );
-              if (secLog && secLog.length > 0 && secLog[0].status) {
-                cloudData = typeof secLog[0].status === 'string' ? JSON.parse(secLog[0].status) : secLog[0].status;
+            ).then(({ data, error }) => {
+              if (!error && data && data.valor) {
+                const c = extractLayoutCandidate(data.valor, data.updated_at);
+                if (c) candidates.push(c);
               }
-            } catch (eSecLog) {}
+            }).catch(() => null)
+          );
+
+          // 4. Banco 2 - keep_alive_logs
+          queryPromises.push(
+            safeSupabaseCall(
+              supabaseSecondaryClient
+                .from('keep_alive_logs')
+                .select('*')
+                .eq('source', 'studio_layout_sync')
+                .order('pinged_at', { ascending: false })
+                .limit(1),
+              2000
+            ).then(({ data, error }) => {
+              if (!error && data && data.length > 0 && data[0].status) {
+                const c = extractLayoutCandidate(data[0].status, data[0].pinged_at);
+                if (c) candidates.push(c);
+              }
+            }).catch(() => null)
+          );
+        }
+
+        if (queryPromises.length > 0) {
+          await Promise.allSettled(queryPromises);
+        }
+
+        // Escolhe o candidato mais recente (timestamp mais alto)
+        let bestCandidate = null;
+        for (const cand of candidates) {
+          if (!cand) continue;
+          if (!bestCandidate || cand.timestamp > bestCandidate.timestamp) {
+            bestCandidate = cand;
           }
         }
 
+        let cloudData = bestCandidate ? bestCandidate.layout : null;
         if (cloudData) {
           const rawElements = Array.isArray(cloudData) ? cloudData : cloudData.elements;
           if (Array.isArray(rawElements) && rawElements.length > 0) {

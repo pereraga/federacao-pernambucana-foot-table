@@ -47,6 +47,41 @@ export default async function handler(req: ExtendedRequest, res: ServerResponse)
     return;
   }
 
+  // 2.0 Suporte ao salvamento de layout oficial do Studio nos dois bancos de dados
+  if (typeof parsedJson === 'object' && parsedJson !== null && (parsedJson as any).action === 'save_studio_layout') {
+    const layout = (parsedJson as any).layout;
+    if (layout && typeof layout === 'object') {
+      const payloadStr = JSON.stringify(layout);
+      const nowIso = layout.updated_at || new Date().toISOString();
+
+      // Grava no Banco 1
+      try {
+        const rawUrl = process.env.SUPABASE_URL || 'https://qvnsahvdjhimlmtqrnif.supabase.co';
+        const supabaseUrl = rawUrl.replace(/\/+$/, '');
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'sb_publishable_vvqh9vB0Dr0EqR9JGhy4kA_XnJ-9h0z';
+        const supabase = createClient(supabaseUrl, supabaseKey);
+        await supabase.from('configuracoes').upsert([{ chave: 'carteira_studio_layout', valor: payloadStr, updated_at: nowIso }], { onConflict: 'chave' }).catch(() => null);
+        await supabase.from('keep_alive_logs').insert([{ source: 'studio_layout_sync', status: payloadStr, pinged_at: nowIso }]).catch(() => null);
+      } catch (e1) {}
+
+      // Grava no Banco 2
+      try {
+        const secUrl = (process.env.SUPABASE_SECONDARY_URL || 'https://xvqsysfqbkfsogkwtbal.supabase.co').replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '');
+        const secKey = process.env.SUPABASE_SECONDARY_SERVICE_ROLE_KEY || process.env.SUPABASE_SECONDARY_ANON_KEY || 'sb_publishable_2T1UD0EYvVBlIqCvnX5VHw_K6mmAn3M';
+        if (secUrl && secKey) {
+          const secSupabase = createClient(secUrl, secKey);
+          await secSupabase.from('configuracoes').upsert([{ chave: 'carteira_studio_layout', valor: payloadStr, updated_at: nowIso }], { onConflict: 'chave' }).catch(() => null);
+          await secSupabase.from('keep_alive_logs').insert([{ source: 'studio_layout_sync', status: payloadStr, pinged_at: nowIso }]).catch(() => null);
+        }
+      } catch (e2) {}
+
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify({ success: true, saved: true, updated_at: nowIso }));
+      return;
+    }
+  }
+
   // 2.1 Suporte a exclusão de atleta
   const delVal = safeValidate(ExcluirAtletaSchema, parsedJson);
   if (delVal.success) {
