@@ -984,14 +984,7 @@
                   <h3 class="font-oswald text-base uppercase font-bold text-white flex items-center gap-2">
                     <i class="fa-solid fa-user-pen text-pe-gold"></i> Dados do Atleta
                   </h3>
-                  <div class="flex items-center gap-2">
-                    <span id="studioModeIndicator" class="text-[9px] uppercase tracking-wider text-emerald-400 font-extrabold bg-emerald-950/80 border border-emerald-500/30 px-2.5 py-0.5 rounded-md flex items-center gap-1.5 shadow-sm">
-                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Novo Cadastro
-                    </span>
-                    <button type="button" onclick="prepararStudioNovoAtleta()" class="text-[10px] text-slate-400 hover:text-white hover:underline transition flex items-center gap-1 cursor-pointer" title="Limpar todas as barras para novo cadastro">
-                      <i class="fa-solid fa-rotate-left text-[9px]"></i> Limpar
-                    </button>
-                  </div>
+                  <span class="text-[10px] text-slate-400 font-mono">Sincronizado</span>
                 </div>
 
                 <form id="athleteForm" autocomplete="off" onsubmit="handleSaveAthlete(event)" class="space-y-3.5 text-xs">

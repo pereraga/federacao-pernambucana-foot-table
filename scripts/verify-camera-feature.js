@@ -1,6 +1,11 @@
 import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const html = fs.readFileSync('C:/Users/PC/Desktop/federacao-foot-table/admin.html', 'utf8');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const ROOT_DIR = path.resolve(__dirname, '..');
+const html = fs.readFileSync(path.join(ROOT_DIR, 'admin.html'), 'utf8');
 
 const checks = [
   ['modalWebcamAthlete exists', html.includes('id="modalWebcamAthlete"')],

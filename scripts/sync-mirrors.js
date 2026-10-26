@@ -1,33 +1,45 @@
 import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const repoRoot = path.resolve(__dirname, '..');
 
 const syncPairs = [
   {
-    source: 'C:/Users/PC/Desktop/federacao-foot-table/admin.html',
+    source: path.join(repoRoot, 'admin.html'),
     targets: [
+      path.join(repoRoot, 'php', 'admin.php'),
       'C:/Users/PC/Desktop/federacao-foot-table/php/admin.php',
       'C:/Users/PC/Desktop/admin.html',
       'C:/Users/PC/Desktop/php/admin.php'
     ]
   },
   {
-    source: 'C:/Users/PC/Desktop/federacao-foot-table/login.html',
+    source: path.join(repoRoot, 'login.html'),
     targets: [
+      path.join(repoRoot, 'php', 'login.php'),
       'C:/Users/PC/Desktop/federacao-foot-table/php/login.php',
       'C:/Users/PC/Desktop/login.html',
       'C:/Users/PC/Desktop/php/login.php'
     ]
   },
   {
-    source: 'C:/Users/PC/Desktop/federacao-foot-table/index.html',
+    source: path.join(repoRoot, 'index.html'),
     targets: [
+      path.join(repoRoot, 'php', 'index.php'),
       'C:/Users/PC/Desktop/federacao-foot-table/php/index.php',
       'C:/Users/PC/Desktop/index.html',
       'C:/Users/PC/Desktop/php/index.php'
     ]
   },
   {
-    source: 'C:/Users/PC/Desktop/federacao-foot-table/assets/carteira_template.js',
+    source: path.join(repoRoot, 'assets', 'carteira_template.js'),
     targets: [
+      path.join(repoRoot, 'carteira_template.js'),
+      path.join(repoRoot, 'php', 'carteira_template.js'),
+      path.join(repoRoot, 'php', 'assets', 'carteira_template.js'),
       'C:/Users/PC/Desktop/assets/carteira_template.js',
       'C:/Users/PC/Desktop/federacao-foot-table/carteira_template.js',
       'C:/Users/PC/Desktop/federacao-foot-table/php/carteira_template.js',
@@ -35,47 +47,22 @@ const syncPairs = [
       'C:/Users/PC/Desktop/php/carteira_template.js',
       'C:/Users/PC/Desktop/php/assets/carteira_template.js'
     ]
-  },
-  {
-    source: 'C:/Users/PC/Desktop/federacao-foot-table/assets/Carteira_Atleta_HD.png',
-    targets: [
-      'C:/Users/PC/Desktop/assets/Carteira_Atleta_HD.png',
-      'C:/Users/PC/Desktop/federacao-foot-table/Carteira_Atleta_HD.png',
-      'C:/Users/PC/Desktop/federacao-foot-table/php/assets/Carteira_Atleta_HD.png',
-      'C:/Users/PC/Desktop/php/assets/Carteira_Atleta_HD.png'
-    ]
-  },
-  {
-    source: 'C:/Users/PC/Desktop/federacao-foot-table/assets/Carteira_Atleta_1050x662.png',
-    targets: [
-      'C:/Users/PC/Desktop/assets/Carteira_Atleta_1050x662.png',
-      'C:/Users/PC/Desktop/federacao-foot-table/php/assets/Carteira_Atleta_1050x662.png',
-      'C:/Users/PC/Desktop/php/assets/Carteira_Atleta_1050x662.png'
-    ]
-  },
-  {
-    source: 'C:/Users/PC/Desktop/federacao-foot-table/assets/Carteira_Atleta_Template_1050x662.svg',
-    targets: [
-      'C:/Users/PC/Desktop/assets/Carteira_Atleta_Template_1050x662.svg',
-      'C:/Users/PC/Desktop/federacao-foot-table/Carteira_Atleta_Template_1050x662.svg',
-      'C:/Users/PC/Desktop/federacao-foot-table/php/assets/Carteira_Atleta_Template_1050x662.svg',
-      'C:/Users/PC/Desktop/php/assets/Carteira_Atleta_Template_1050x662.svg'
-    ]
-  },
-  {
-    source: 'C:/Users/PC/Desktop/federacao-foot-table/assets/Carteira Atleta.pdf',
-    targets: [
-      'C:/Users/PC/Desktop/federacao-foot-table/php/assets/Carteira Atleta.pdf',
-      'C:/Users/PC/Desktop/php/assets/Carteira Atleta.pdf'
-    ]
   }
 ];
 
 for (const pair of syncPairs) {
-  const content = fs.readFileSync(pair.source, 'utf8');
+  if (!fs.existsSync(pair.source)) {
+    console.warn(`Source file not found: ${pair.source}`);
+    continue;
+  }
+  const content = fs.readFileSync(pair.source);
   for (const target of pair.targets) {
     try {
-      fs.writeFileSync(target, content, 'utf8');
+      const targetDir = path.dirname(target);
+      if (!fs.existsSync(targetDir)) {
+        continue;
+      }
+      fs.writeFileSync(target, content);
       console.log(`✔ Synced mirror: ${target}`);
     } catch (err) {
       console.warn(`✖ Failed to sync ${target}:`, err.message);
