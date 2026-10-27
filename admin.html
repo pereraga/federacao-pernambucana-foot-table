@@ -1154,63 +1154,82 @@
                     </div>
                   </div>
 
-                  <!-- QR Code e Assinatura -->
-                  <div class="grid grid-cols-2 gap-3 pt-2 border-t border-[#1c253b]">
-                    <div>
-                      <label class="block text-slate-400 font-bold mb-1 text-[10px]">Texto / Link do QR Code</label>
-                      <input type="text" id="inputQrText" value="https://fpeft.vercel.app/" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-2.5 py-1.5 text-[11px] font-mono text-white outline-none" />
+                  <!-- Linha de Serviço: Autenticidade & QR Code -->
+                  <div class="pt-2.5 border-t border-[#1c253b]">
+                    <div class="flex items-center justify-between mb-1.5">
+                      <label class="text-slate-300 font-bold text-[11px] flex items-center gap-1.5">
+                        <i class="fa-solid fa-qrcode text-pe-gold"></i> Texto / Link do QR Code
+                      </label>
+                      <span class="text-[9px] text-slate-400 font-mono">Autenticidade Oficial</span>
                     </div>
-                    <div>
-                      <div class="flex items-center justify-between mb-1">
-                        <label class="block text-slate-300 font-bold text-[10px] flex items-center gap-1">
-                          <i class="fa-solid fa-signature text-pe-gold"></i> Assinatura do Diretor
+                    <input type="text" id="inputQrText" value="https://fpeft.vercel.app/" placeholder="https://fpeft.vercel.app/?id=973321" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-xs font-mono text-pe-gold/90 outline-none" />
+                  </div>
+
+                  <!-- Linha de Serviço: Assinatura da Diretoria FPEFT -->
+                  <div class="pt-2.5 border-t border-[#1c253b] space-y-2">
+                    <!-- Cabeçalho da Assinatura com Ações Rápidas -->
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                      <label class="text-slate-300 font-bold text-[11px] flex items-center gap-1.5 shrink-0">
+                        <i class="fa-solid fa-signature text-pe-gold"></i> Assinatura do Diretor
+                      </label>
+                      <div class="flex items-center gap-1.5 shrink-0">
+                        <button type="button" onclick="loadDesktopBrancoSignature()" class="px-2.5 py-1 bg-[#0b101d] hover:bg-[#151f36] text-sky-400 hover:text-sky-300 border border-[#1c253b] hover:border-sky-500/40 rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer transition select-none shadow-sm" title="Restaurar assinatura padrão (Área de Trabalho/branco)">
+                          <i class="fa-solid fa-rotate text-[9px]"></i> <span>Padrão</span>
+                        </button>
+                        <label for="inputSignatureFile" class="px-2.5 py-1 bg-[#0b101d] hover:bg-[#1a1705] text-pe-gold hover:text-amber-300 border border-[#1c253b] hover:border-pe-gold/40 rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer transition select-none shadow-sm" title="Upar nova imagem transparente da assinatura (PNG/SVG)">
+                          <i class="fa-solid fa-file-arrow-up text-[9px]"></i> <span>Upar Imagem</span>
                         </label>
-                        <div class="flex items-center gap-2">
-                          <button type="button" onclick="loadDesktopBrancoSignature()" class="text-[9px] font-bold text-sky-400 hover:text-sky-300 flex items-center gap-0.5 cursor-pointer transition select-none" title="Recarregar assinatura oficial de Área de Trabalho/branco">
-                            <i class="fa-solid fa-rotate"></i> Padrão
-                          </button>
-                          <label for="inputSignatureFile" class="text-[9px] font-bold text-pe-gold hover:text-amber-300 flex items-center gap-1 cursor-pointer transition select-none" title="Upar nova imagem transparente da assinatura (PNG/SVG)">
-                            <i class="fa-solid fa-file-arrow-up"></i> Upar Imagem
-                          </label>
-                          <input type="file" id="inputSignatureFile" accept="image/*" class="hidden" style="display: none !important; position: absolute !important; left: -9999px !important; width: 0 !important; height: 0 !important; opacity: 0 !important; pointer-events: none !important;" onchange="handlePresidentSignatureUpload(event)" />
-                        </div>
+                        <input type="file" id="inputSignatureFile" accept="image/*" class="hidden" style="display: none !important; position: absolute !important; left: -9999px !important; width: 0 !important; height: 0 !important; opacity: 0 !important; pointer-events: none !important;" onchange="handlePresidentSignatureUpload(event)" />
                       </div>
-                      <div class="flex items-center gap-1.5">
-                        <input type="text" id="inputAssinatura" value="ASSINATURA DO DIRETOR FPEFT" class="flex-1 bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-2.5 py-1.5 text-[10px] uppercase text-white outline-none font-fpeft" />
-                        <button type="button" id="btnRemoveSignatureImg" onclick="removePresidentSignatureImage()" class="hidden px-2 py-1.5 bg-rose-950/60 hover:bg-rose-900/80 border border-rose-700/50 text-rose-300 rounded-xl text-[10px] transition cursor-pointer" title="Remover imagem da assinatura">
-                          <i class="fa-solid fa-trash-can"></i>
-                        </button>
+                    </div>
+
+                    <!-- Texto Subtítulo da Assinatura + Botão Lixeira -->
+                    <div class="flex items-center gap-2">
+                      <div class="relative flex-1">
+                        <input type="text" id="inputAssinatura" value="ASSINATURA DO DIRETOR FPEFT" class="w-full bg-[#05080e] border border-[#1c253b] focus:border-pe-gold rounded-xl px-3 py-2 text-[10px] sm:text-[11px] uppercase text-white outline-none font-fpeft font-bold tracking-wider" placeholder="TEXTO DA ASSINATURA" />
                       </div>
-                      <div id="signatureImgPreviewContainer" class="hidden mt-1.5 flex items-center justify-between px-2 py-1 bg-[#05080e] border border-emerald-500/40 rounded-lg text-[10px] text-emerald-400">
-                        <span class="flex items-center gap-1.5 truncate">
-                          <i class="fa-solid fa-circle-check text-xs"></i>
-                          <span>Assinatura do Diretor ativa</span>
+                      <button type="button" id="btnRemoveSignatureImg" onclick="removePresidentSignatureImage()" class="hidden px-3 py-2 bg-rose-950/60 hover:bg-rose-900/80 border border-rose-700/50 text-rose-300 rounded-xl text-xs transition cursor-pointer shrink-0 shadow-sm" title="Remover imagem da assinatura">
+                        <i class="fa-solid fa-trash-can"></i>
+                      </button>
+                    </div>
+
+                    <!-- Indicador Visual de Assinatura Ativa -->
+                    <div id="signatureImgPreviewContainer" class="hidden flex items-center justify-between px-3 py-1.5 bg-[#05080e] border border-emerald-500/40 rounded-xl text-xs text-emerald-400 shadow-sm">
+                      <span class="flex items-center gap-1.5 font-bold truncate">
+                        <i class="fa-solid fa-circle-check text-xs"></i>
+                        <span>Assinatura do Diretor ativa</span>
+                      </span>
+                      <button type="button" onclick="removePresidentSignatureImage()" class="text-rose-400 hover:text-rose-300 p-1 rounded transition cursor-pointer" title="Remover imagem da assinatura">
+                        <i class="fa-solid fa-xmark text-xs"></i>
+                      </button>
+                    </div>
+
+                    <!-- Caixa de Ajuste e Escala da Assinatura -->
+                    <div id="signatureScaleControls" class="p-3 bg-[#05080e] border border-[#1c253b] rounded-xl space-y-2.5 shadow-inner">
+                      <!-- Título e Valor Percentual -->
+                      <div class="flex items-center justify-between text-xs">
+                        <span class="text-slate-300 font-bold flex items-center gap-1.5">
+                          <i class="fa-solid fa-maximize text-pe-gold text-[10px]"></i> Tamanho da Assinatura
                         </span>
-                        <button type="button" onclick="removePresidentSignatureImage()" class="text-rose-400 hover:text-rose-300 text-xs cursor-pointer ml-1" title="Remover imagem">
-                          <i class="fa-solid fa-xmark"></i>
-                        </button>
+                        <span id="signatureScaleValue" class="text-pe-gold font-mono font-bold text-xs bg-pe-gold/15 px-2 py-0.5 rounded border border-pe-gold/30">100%</span>
                       </div>
 
-                      <!-- Controle Interativo de Tamanho da Assinatura -->
-                      <div id="signatureScaleControls" class="mt-2 p-2 bg-[#05080e] border border-[#1c253b] rounded-xl space-y-1.5">
-                        <div class="flex items-center justify-between text-[10px]">
-                          <span class="text-slate-300 font-bold flex items-center gap-1">
-                            <i class="fa-solid fa-maximize text-pe-gold text-[9px]"></i> Tamanho da Assinatura
-                          </span>
-                          <span id="signatureScaleValue" class="text-pe-gold font-mono font-bold text-[10px]">100%</span>
-                        </div>
-                        <div class="flex items-center gap-1.5">
-                          <button type="button" onclick="adjustSignatureScale(-5)" class="px-2 py-1 bg-[#0b101d] hover:bg-slate-800 text-slate-200 border border-[#1c253b] rounded-lg text-xs font-bold transition cursor-pointer" title="Diminuir tamanho">-</button>
-                          <input type="range" id="inputSignatureScale" min="40" max="250" value="100" step="2" oninput="handleSignatureScaleChange(this.value)" onchange="confirmAndSaveSignatureScale(false)" class="flex-1 accent-pe-gold cursor-pointer h-1.5 bg-slate-800 rounded-lg" />
-                          <button type="button" onclick="adjustSignatureScale(5)" class="px-2 py-1 bg-[#0b101d] hover:bg-slate-800 text-slate-200 border border-[#1c253b] rounded-lg text-xs font-bold transition cursor-pointer" title="Aumentar tamanho">+</button>
-                          <button type="button" onclick="resetSignatureScale()" class="px-2 py-1 bg-amber-950/40 hover:bg-amber-900/60 text-pe-gold border border-amber-500/30 rounded-lg text-[9px] font-bold transition cursor-pointer" title="Redefinir tamanho para 100%">100%</button>
-                        </div>
-                        <div class="flex items-center justify-between text-[9px] text-slate-400 pt-1 border-t border-[#1c253b]/60">
-                          <span class="text-[9px] text-slate-400">Em cima do nome do presidente</span>
-                          <button type="button" onclick="confirmAndSaveSignatureScale(true)" class="text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1 cursor-pointer text-[9px]" title="Salvar tamanho no sistema para todas as carteiras">
-                            <i class="fa-solid fa-check"></i> Salvar Tamanho
-                          </button>
-                        </div>
+                      <!-- Controle Deslizante com Botões Rápidos -->
+                      <div class="flex items-center gap-2">
+                        <button type="button" onclick="adjustSignatureScale(-5)" class="w-8 h-8 flex items-center justify-center bg-[#0b101d] hover:bg-[#18233c] text-slate-200 border border-[#1c253b] hover:border-slate-500 rounded-lg text-sm font-bold transition cursor-pointer shrink-0 shadow-sm active:scale-95" title="Diminuir tamanho (-5%)">-</button>
+                        <input type="range" id="inputSignatureScale" min="40" max="250" value="100" step="2" oninput="handleSignatureScaleChange(this.value)" onchange="confirmAndSaveSignatureScale(false)" class="flex-1 accent-pe-gold cursor-pointer h-2 bg-slate-800 rounded-lg min-w-0" />
+                        <button type="button" onclick="adjustSignatureScale(5)" class="w-8 h-8 flex items-center justify-center bg-[#0b101d] hover:bg-[#18233c] text-slate-200 border border-[#1c253b] hover:border-slate-500 rounded-lg text-sm font-bold transition cursor-pointer shrink-0 shadow-sm active:scale-95" title="Aumentar tamanho (+5%)">+</button>
+                        <button type="button" onclick="resetSignatureScale()" class="px-2.5 py-1.5 bg-amber-950/40 hover:bg-amber-900/60 text-pe-gold border border-amber-500/30 rounded-lg text-[10px] font-bold transition cursor-pointer shrink-0 shadow-sm active:scale-95 whitespace-nowrap" title="Redefinir tamanho para 100%">100%</button>
+                      </div>
+
+                      <!-- Rodapé Informativo e Botão de Salvar -->
+                      <div class="flex items-center justify-between text-[10px] text-slate-400 pt-2 border-t border-[#1c253b]/80 gap-2 flex-wrap">
+                        <span class="text-slate-400 flex items-center gap-1 truncate">
+                          <i class="fa-solid fa-arrow-up text-[9px] text-slate-500"></i> Em cima do nome do presidente
+                        </span>
+                        <button type="button" onclick="confirmAndSaveSignatureScale(true)" class="px-2.5 py-1 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 hover:text-emerald-300 border border-emerald-500/30 rounded-lg font-bold flex items-center gap-1 cursor-pointer text-[10px] transition shrink-0 shadow-sm active:scale-95" title="Salvar tamanho no sistema para todas as carteiras">
+                          <i class="fa-solid fa-check"></i> <span>Salvar Tamanho</span>
+                        </button>
                       </div>
                     </div>
                   </div>
