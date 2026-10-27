@@ -2488,8 +2488,9 @@
         }
 
         if (el && item.x !== undefined && item.y !== undefined) {
+          const itemY = (el.id === 'cardBadgeSignatureBox' && item.y > 540) ? 521 : item.y;
           el.style.left = `${(item.x / CARD_W) * 100}%`;
-          el.style.top = `${(item.y / CARD_H) * 100}%`;
+          el.style.top = `${(itemY / CARD_H) * 100}%`;
           if (item.width) el.style.width = `${(item.width / CARD_W) * 100}%`;
           if (el.id === 'cardBadgeSignatureBox') {
             el.style.overflow = 'visible';

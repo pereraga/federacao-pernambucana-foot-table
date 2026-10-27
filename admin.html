@@ -4596,10 +4596,10 @@
     "type": "text-line",
     "targetKey": "assinatura",
     "text": "ASSINATURA DA DIRETORIA FPEFT",
-    "x": 340,
-    "y": 585,
-    "width": 420,
-    "height": 32,
+    "x": 317,
+    "y": 521,
+    "width": 505,
+    "height": 93,
     "textColor": "#ffffff",
     "fontSize": 11,
     "fontWeight": "700",
@@ -6723,18 +6723,36 @@
           overlayGroup.appendChild(gQr);
         } else if (item.type === 'text-line') {
           const gLine = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+          const sigUrl = item.signatureUrl || (typeof window !== 'undefined' ? window.OFFICIAL_DIRECTOR_SIGNATURE_DATA_URL : '');
+          const scalePercent = (item.signatureScale !== undefined ? item.signatureScale : 100) / 100;
+          const baseY = (item.y > 540 && sigUrl) ? 521 : item.y;
+          const sigH = sigUrl ? Math.round(85 * scalePercent) : 0;
+          const sigW = sigUrl ? Math.round(190 * scalePercent) : 0;
+          const lineY = baseY + (sigH ? sigH - 1.5 : 0);
+
+          if (sigUrl) {
+            const imgEl = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'image');
+            imgEl.setAttribute('x', item.x + (item.width - sigW) / 2);
+            imgEl.setAttribute('y', baseY);
+            imgEl.setAttribute('width', sigW);
+            imgEl.setAttribute('height', sigH);
+            imgEl.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+            imgEl.setAttribute('href', sigUrl);
+            gLine.appendChild(imgEl);
+          }
+
           const line = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'line');
           line.setAttribute('x1', item.x);
-          line.setAttribute('y1', item.y);
+          line.setAttribute('y1', lineY);
           line.setAttribute('x2', item.x + item.width);
-          line.setAttribute('y2', item.y);
+          line.setAttribute('y2', lineY);
           line.setAttribute('stroke', '#ffffff');
           line.setAttribute('stroke-width', '1.5');
           gLine.appendChild(line);
 
           const signText = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'text');
           signText.setAttribute('x', item.x + item.width / 2);
-          signText.setAttribute('y', item.y + 16);
+          signText.setAttribute('y', lineY + 14);
           signText.setAttribute('fill', '#e2e8f0');
           signText.setAttribute('font-family', "'Montserrat', sans-serif");
           signText.setAttribute('font-size', '10.5');
@@ -7121,15 +7139,20 @@
             ctx.restore();
           }
         } else if (item.type === 'signature-line' || item.type === 'text-line') {
-          // Imagem da Assinatura do Diretor posicionada em cima da linha/nome oficial (Padrão Studio Oficial: max-height 56px, max-width 320px em escala CR80)
+          // Imagem da Assinatura do Diretor posicionada no padrão exato do Studio de Emissão
           const sigUrl = item.signatureUrl || (typeof window !== 'undefined' ? window.OFFICIAL_DIRECTOR_SIGNATURE_DATA_URL : '');
+          const scalePercent = (item.signatureScale !== undefined ? item.signatureScale : 100) / 100;
+          const maxSigH = 85 * scale * scalePercent;
+          const maxSigW = 190 * scale * scalePercent;
+
+          // Compatibilidade inteligente: no Studio o elemento inicia em item.y (padrão 521)
+          const baseY = (item.y > 540 && sigUrl) ? 521 : item.y;
+          let lineY = baseY * scale;
+
           if (sigUrl && !isSafeOnly) {
             const sigImg = await loadImageAsync(sigUrl, 2500);
             if (sigImg) {
               ctx.save();
-              const scalePercent = (item.signatureScale !== undefined ? item.signatureScale : 100) / 100;
-              const maxSigH = 85 * scale * scalePercent;
-              const maxSigW = 190 * scale * scalePercent;
               const ratio = (sigImg.naturalWidth && sigImg.naturalHeight) ? (sigImg.naturalHeight / sigImg.naturalWidth) : 0.87;
               let sigH = maxSigH;
               let sigW = sigH / ratio;
@@ -7137,26 +7160,28 @@
                 sigW = maxSigW;
                 sigH = sigW * ratio;
               }
-              ctx.drawImage(sigImg, (item.x + item.width / 2) * scale - sigW / 2, item.y * scale - sigH + (3 * scale), sigW, sigH);
+              const sigY = baseY * scale;
+              ctx.drawImage(sigImg, (item.x + item.width / 2) * scale - sigW / 2, sigY, sigW, sigH);
               ctx.restore();
+              lineY = sigY + sigH - (1.5 * scale);
             }
           }
 
-          // Traço branco de assinatura oficial
+          // Traço branco de assinatura oficial (posicionado logo abaixo da assinatura)
           ctx.save();
           ctx.strokeStyle = '#ffffff';
           ctx.lineWidth = 1.5 * scale;
           ctx.beginPath();
-          ctx.moveTo(item.x * scale, item.y * scale);
-          ctx.lineTo((item.x + item.width) * scale, item.y * scale);
+          ctx.moveTo(item.x * scale, lineY);
+          ctx.lineTo((item.x + item.width) * scale, lineY);
           ctx.stroke();
 
-          // Texto oficial da assinatura
+          // Texto oficial da assinatura abaixo da linha
           ctx.fillStyle = '#e2e8f0';
           ctx.font = `800 ${Math.round((item.fontSize || 10.5) * scale)}px 'Montserrat', sans-serif`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'top';
-          ctx.fillText(item.text || 'ASSINATURA DA DIRETORIA FPEFT', (item.x + item.width / 2) * scale, (item.y + 6) * scale);
+          ctx.fillText(item.text || 'ASSINATURA DA DIRETORIA FPEFT', (item.x + item.width / 2) * scale, lineY + (5 * scale));
           ctx.restore();
         } else {
           // A) Rótulo Superior (Tag)
