@@ -487,9 +487,9 @@
           </div>
 
           <!-- Assinatura da Diretoria FPEFT (Centro Rodapé - Padrão Oficial Studio) -->
-          <div id="cardBadgeSignatureBox" class="absolute left-[32.38%] top-[86.86%] w-[40.00%] h-[4.83%] text-center flex flex-col items-center justify-center pointer-events-none select-none overflow-visible">
-            <div id="cardBadgeSignatureImgContainer" class="flex justify-center -mb-0.5 sm:-mb-1 pointer-events-none select-none overflow-visible">
-              <img id="cardBadgeSignatureImg" src="" alt="Assinatura" class="hidden object-contain drop-shadow" />
+          <div id="cardBadgeSignatureBox" class="absolute left-[32.38%] top-[86.86%] w-[40.00%] text-center flex flex-col items-center justify-end pointer-events-none select-none overflow-visible z-20">
+            <div id="cardBadgeSignatureImgContainer" class="flex justify-center -mb-1 sm:-mb-1.5 pointer-events-none select-none overflow-visible shrink-0">
+              <img id="cardBadgeSignatureImg" src="" alt="Assinatura" class="hidden object-contain drop-shadow shrink-0" />
             </div>
             <div class="w-full h-[1px] sm:h-[1.5px] bg-white/90 mx-auto mb-0.5 sm:mb-1"></div>
             <span id="cardBadgeSignatureText" class="text-[6.5px] sm:text-[9.5px] font-extrabold text-white uppercase tracking-wider block font-fpeft leading-tight">
@@ -2468,10 +2468,13 @@
                 const cardRef = document.getElementById('athleteCredentialCard');
                 const cardH = (cardRef && cardRef.clientHeight > 0) ? cardRef.clientHeight : ((cardRef && cardRef.clientWidth > 0 ? cardRef.clientWidth : 620) * 662 / 1050);
                 const scaleFactor = cardH / 662;
-                const calcMaxH = Math.max(38, Math.round(75 * scaleFactor * sigScale));
-                const calcMaxW = Math.max(90, Math.round(180 * scaleFactor * sigScale));
-                sigImg.style.maxHeight = `${calcMaxH}px`;
+                const calcH = Math.max(44, Math.round(85 * scaleFactor * sigScale));
+                const calcMaxW = Math.max(90, Math.round(190 * scaleFactor * sigScale));
+                sigImg.style.height = `${calcH}px`;
+                sigImg.style.maxHeight = `${calcH}px`;
+                sigImg.style.width = 'auto';
                 sigImg.style.maxWidth = `${calcMaxW}px`;
+                sigImg.style.flexShrink = '0';
                 sigImg.classList.remove('hidden');
               } else {
                 sigImg.classList.add('hidden');
@@ -2488,8 +2491,16 @@
           el.style.left = `${(item.x / CARD_W) * 100}%`;
           el.style.top = `${(item.y / CARD_H) * 100}%`;
           if (item.width) el.style.width = `${(item.width / CARD_W) * 100}%`;
-          if (item.height) el.style.height = `${(item.height / CARD_H) * 100}%`;
-          if (el.id === 'cardBadgeSignatureBox') el.style.overflow = 'visible';
+          if (el.id === 'cardBadgeSignatureBox') {
+            el.style.overflow = 'visible';
+            el.style.height = 'auto';
+            el.style.display = 'flex';
+            el.style.flexDirection = 'column';
+            el.style.alignItems = 'center';
+            el.style.justifyContent = 'flex-end';
+          } else {
+            if (item.height) el.style.height = `${(item.height / CARD_H) * 100}%`;
+          }
           if (el.id === 'cardBadgeQrContainer') {
             el.style.display = 'flex';
             el.style.visibility = 'visible';

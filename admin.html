@@ -5749,14 +5749,17 @@
           div.style.display = 'flex';
           div.style.flexDirection = 'column';
           div.style.alignItems = 'center';
-          div.style.justifyContent = 'center';
+          div.style.justifyContent = 'flex-end';
           div.style.overflow = 'visible';
+          div.style.height = 'auto';
           const sigUrl = item.signatureUrl || (typeof window !== 'undefined' ? window.OFFICIAL_DIRECTOR_SIGNATURE_DATA_URL : '');
           const scalePercent = (item.signatureScale !== undefined ? item.signatureScale : 100) / 100;
-          const baseMaxH = Math.round(75 * scalePercent);
-          const baseMaxW = Math.round(180 * scalePercent);
+          const baseH = Math.round(85 * scalePercent);
+          const baseMaxW = Math.round(190 * scalePercent);
           const signatureImgHtml = sigUrl 
-            ? `<img src="${sigUrl}" style="max-height: ${baseMaxH}px; max-width: ${baseMaxW}px;" class="object-contain -mb-1 pointer-events-none select-none drop-shadow" />` 
+            ? `<div class="flex justify-center shrink-0 overflow-visible -mb-1.5 pointer-events-none select-none">
+                 <img src="${sigUrl}" style="height: ${baseH}px; max-height: ${baseH}px; width: auto; max-width: ${baseMaxW}px; flex-shrink: 0;" class="object-contain drop-shadow pointer-events-none select-none" />
+               </div>` 
             : '';
           div.innerHTML = `
             ${signatureImgHtml}
@@ -7075,16 +7078,16 @@
             if (sigImg) {
               ctx.save();
               const scalePercent = (item.signatureScale !== undefined ? item.signatureScale : 100) / 100;
-              const maxSigH = 75 * scale * scalePercent;
-              const maxSigW = 180 * scale * scalePercent;
-              const ratio = (sigImg.naturalWidth && sigImg.naturalHeight) ? (sigImg.naturalHeight / sigImg.naturalWidth) : 0.35;
+              const maxSigH = 85 * scale * scalePercent;
+              const maxSigW = 190 * scale * scalePercent;
+              const ratio = (sigImg.naturalWidth && sigImg.naturalHeight) ? (sigImg.naturalHeight / sigImg.naturalWidth) : 0.87;
               let sigH = maxSigH;
               let sigW = sigH / ratio;
               if (sigW > maxSigW) {
                 sigW = maxSigW;
                 sigH = sigW * ratio;
               }
-              ctx.drawImage(sigImg, (item.x + item.width / 2) * scale - sigW / 2, item.y * scale - sigH + (2 * scale), sigW, sigH);
+              ctx.drawImage(sigImg, (item.x + item.width / 2) * scale - sigW / 2, item.y * scale - sigH + (3 * scale), sigW, sigH);
               ctx.restore();
             }
           }
