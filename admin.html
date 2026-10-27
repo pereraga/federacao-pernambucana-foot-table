@@ -4976,6 +4976,18 @@
       const elementMap = new Map();
       elements.forEach(el => { if (el && el.id) elementMap.set(el.id, el); });
 
+      // Preserva e prioriza valores ativos digitados no formulário ou do atleta ativo:
+      const curFormName = (document.getElementById('athleteName')?.value || '').trim().toUpperCase();
+      const curFormCpf = (document.getElementById('athleteCpf')?.value || '').trim();
+      const curFormNasc = (document.getElementById('athleteBirth')?.value || '').trim();
+      const curFormFone = (document.getElementById('athletePhone')?.value || '').trim();
+      const curFormCity = (document.getElementById('athleteCity')?.value || '').trim().toUpperCase();
+      const curFormFed = (document.getElementById('athleteFederatedNum')?.value || '').trim();
+      const curFormMod = (document.getElementById('athleteModality')?.value || '').trim().toUpperCase();
+      const curFormCat = (document.getElementById('athleteCategory')?.value || '').trim().toUpperCase();
+      const curFormVal = (document.getElementById('athleteValidity')?.value || '').trim();
+      const curFormPhoto = (document.getElementById('athletePhotoVal')?.value || window._currentAthletePhoto || '').trim();
+
       return OFFICIAL_DEFAULT_ELEMENTS.map(def => {
         const found = elementMap.get(def.id) || elements.find(el => def.targetKey && el.targetKey === def.targetKey) || {};
         const item = {
@@ -5000,31 +5012,38 @@
           item.backgroundColor = item.backgroundColor || '#ffffff';
         }
 
-        // Purga qualquer resquício de dados de atletas fictícios/hardcoded do design oficial:
-        if (!window._lastActiveAthlete) {
-          if (item.id === 'field-nome' || item.targetKey === 'nome') {
-            item.text = '';
-          } else if (item.id === 'field-cpf' || item.targetKey === 'cpf') {
-            item.text = 'XXX.XXX.XXX-XX';
-          } else if (item.id === 'field-nasc' || item.targetKey === 'nasc') {
-            item.text = 'XX/XX/XXXX';
-          } else if (item.id === 'field-fone' || item.targetKey === 'fone') {
-            item.text = '(XX) XXXXX-XXXX';
-          } else if (item.id === 'field-municipio' || item.targetKey === 'municipio') {
-            item.text = '- PE';
-          } else if (item.id === 'field-federado' || item.targetKey === 'federado') {
-            const currentFed = (document.getElementById('athleteFederatedNum')?.value || '').trim();
-            item.text = currentFed || item.text || 'ID: #548608';
-          } else if (item.id === 'field-qrcode' || item.targetKey === 'qr') {
-            const currentFed = (document.getElementById('athleteFederatedNum')?.value || '').trim();
-            item.text = currentFed ? `https://fpeft.vercel.app/?id=${currentFed}` : 'https://fpeft.vercel.app/';
-          } else if (item.type === 'photo') {
-            if (!item.photoUrl || item.photoUrl.length < 50 || !item.photoUrl.startsWith('data:image/')) {
-              item.photoUrl = '';
-            }
+        // Sincroniza e preserva dados ativos do atleta / formulário em tempo real:
+        if (item.id === 'field-nome' || item.targetKey === 'nome') {
+          item.text = curFormName || (window._lastActiveAthlete?.nome || '').toUpperCase() || '';
+        } else if (item.id === 'field-cpf' || item.targetKey === 'cpf') {
+          item.text = curFormCpf || window._lastActiveAthlete?.cpf || 'XXX.XXX.XXX-XX';
+        } else if (item.id === 'field-nasc' || item.targetKey === 'nasc') {
+          item.text = curFormNasc || window._lastActiveAthlete?.nascimento || window._lastActiveAthlete?.nasc || 'XX/XX/XXXX';
+        } else if (item.id === 'field-fone' || item.targetKey === 'fone') {
+          item.text = curFormFone || window._lastActiveAthlete?.telefone || '(XX) XXXXX-XXXX';
+        } else if (item.id === 'field-municipio' || item.targetKey === 'municipio') {
+          item.text = curFormCity || window._lastActiveAthlete?.municipio || '- PE';
+        } else if (item.id === 'field-federado' || item.targetKey === 'federado') {
+          item.text = curFormFed || window._lastActiveAthlete?.federado || window._lastActiveAthlete?.codigo || 'ID: #548608';
+        } else if (item.id === 'field-validade' || item.targetKey === 'validade') {
+          item.text = curFormVal || window._lastActiveAthlete?.validade || '12/2026';
+        } else if (item.id === 'field-modalidade' || item.targetKey === 'modalidade' || item.targetKey === 'filiacao') {
+          if (curFormMod || window._lastActiveAthlete?.modalidade) {
+            item.text = curFormMod || window._lastActiveAthlete?.modalidade;
           }
-        } else {
-          if (item.type === 'photo' && (!item.photoUrl || item.photoUrl.length < 50)) {
+        } else if (item.id === 'field-categoria' || item.targetKey === 'categoria') {
+          if (curFormCat || window._lastActiveAthlete?.categoria) {
+            item.text = curFormCat || window._lastActiveAthlete?.categoria;
+          }
+        } else if (item.id === 'field-qrcode' || item.targetKey === 'qr') {
+          const fed = curFormFed || window._lastActiveAthlete?.federado || window._lastActiveAthlete?.codigo || '973321';
+          item.text = `https://fpeft.vercel.app/?id=${fed}`;
+        } else if (item.type === 'photo') {
+          if (curFormPhoto && curFormPhoto.length > 50) {
+            item.photoUrl = curFormPhoto;
+          } else if (window._lastActiveAthlete && (window._lastActiveAthlete.foto_url || window._lastActiveAthlete.foto)) {
+            item.photoUrl = window._lastActiveAthlete.foto_url || window._lastActiveAthlete.foto;
+          } else if (!item.photoUrl || item.photoUrl.length < 50 || !item.photoUrl.startsWith('data:image/')) {
             item.photoUrl = '';
           }
         }
@@ -7624,23 +7643,21 @@
     /* Gestão das 4 Bases de Categoria: Aspirante, Iniciante, Amador, Profissional */
     function selectCategoryBase(cat) {
       setAthleteCategoryValue(cat);
-      const target = studioState.elements.find(item => item.targetKey === 'categoria');
+      const target = studioState.elements.find(item => item.targetKey === 'categoria' || item.id === 'field-categoria');
       if (target) {
         target.text = (cat || 'ASPIRANTE').toUpperCase();
         renderInteractiveElements();
       }
-      autoSaveStudioDesign();
       showToast(`Categoria selecionada: ${cat}`);
     }
 
     function onCategorySelectChange(val) {
       setAthleteCategoryValue(val);
-      const target = studioState.elements.find(item => item.targetKey === 'categoria');
+      const target = studioState.elements.find(item => item.targetKey === 'categoria' || item.id === 'field-categoria');
       if (target) {
         target.text = (val || 'ASPIRANTE').toUpperCase();
         renderInteractiveElements();
       }
-      autoSaveStudioDesign();
     }
 
     function setAthleteCategoryValue(cat) {
@@ -7658,6 +7675,11 @@
       }
       sel.value = upper;
       updateCategoryPillsUI(upper);
+      const target = studioState.elements.find(item => item.targetKey === 'categoria' || item.id === 'field-categoria');
+      if (target) {
+        target.text = upper;
+        renderInteractiveElements();
+      }
     }
 
     function updateCategoryPillsUI(selectedCat) {
@@ -7704,7 +7726,6 @@
         target.text = finalVal;
         renderInteractiveElements();
       }
-      autoSaveStudioDesign();
       broadcastLiveDesignChange(true);
       showToast(`Modalidade definida: ${finalVal}`);
     }
@@ -7720,7 +7741,6 @@
         target.text = (val || 'SOLO (INDIVIDUAL)').toUpperCase();
         renderInteractiveElements();
       }
-      autoSaveStudioDesign();
       broadcastLiveDesignChange(true);
     }
 
@@ -7752,6 +7772,11 @@
       }
       sel.value = matchedVal;
       updateModalityPillsUI(matchedVal);
+      const target = studioState.elements.find(item => item.targetKey === 'modalidade' || item.targetKey === 'filiacao' || item.id === 'field-modalidade');
+      if (target) {
+        target.text = matchedVal;
+        renderInteractiveElements();
+      }
     }
 
     function updateModalityPillsUI(selectedMod) {
@@ -7790,19 +7815,27 @@
       setEl('cpf', cpfVal || 'XXX.XXX.XXX-XX');
       setEl('nasc', birthVal || 'XX/XX/XXXX');
       setEl('fone', phoneVal || '(XX) XXXXX-XXXX');
-      if (fedVal) setEl('federado', fedVal);
+      if (fedVal) {
+        setEl('federado', fedVal);
+        const qrItem = studioState.elements.find(i => i.targetKey === 'qr' || i.id === 'field-qrcode');
+        if (qrItem) {
+          qrItem.text = `https://fpeft.vercel.app/?id=${fedVal}`;
+        }
+      }
       if (modVal) {
         setEl('modalidade', modVal);
         setEl('filiacao', modVal);
       }
-      const effCity = (!cityVal || cityVal === 'RECIFE - PE') ? '- PE' : cityVal;
-      setEl('municipio', effCity);
+      if (catVal) {
+        setEl('categoria', catVal);
+      }
+      setEl('municipio', cityVal || '- PE');
       if (valVal) setEl('validade', valVal);
 
       // Preserva e sincroniza a foto ativa do atleta no Studio
       const activePhoto = (document.getElementById('athletePhotoVal') ? document.getElementById('athletePhotoVal').value : '') || window._currentAthletePhoto || '';
       const photoItem = studioState.elements.find(i => i.id === 'field-foto' || i.type === 'photo');
-      if (photoItem && activePhoto) {
+      if (photoItem && activePhoto && activePhoto !== OFFICIAL_DEFAULT_PHOTO_SVG) {
         photoItem.photoUrl = activePhoto;
       }
     }
@@ -7811,7 +7844,18 @@
        INICIALIZAÇÃO DOS EVENTOS DO STUDIO CR80
        ========================================================= */
     function initStudioEvents() {
-      // Sincronização dos campos do formulário com o Studio
+      // Sincronização unificada em tempo real de qualquer digitação ou mudança no formulário com o Studio CR80
+      const athleteForm = document.getElementById('athleteForm');
+      if (athleteForm) {
+        const handleLiveFormSync = () => {
+          syncStudioElementsWithForm();
+          renderInteractiveElements();
+        };
+        athleteForm.addEventListener('input', handleLiveFormSync);
+        athleteForm.addEventListener('change', handleLiveFormSync);
+      }
+
+      // Sincronização direta por input
       const bindSync = (id, targetKey, uppercase = false) => {
         const el = document.getElementById(id);
         if (!el) return;
@@ -7833,13 +7877,16 @@
           if (id === 'athleteModality') {
             updateModalityPillsUI(val);
           }
-          autoSaveStudioDesign();
         };
         el.addEventListener('input', handler);
         el.addEventListener('change', handler);
       };
 
       bindSync('athleteName', 'nome', true);
+      bindSync('athleteBirth', 'nasc', false);
+      bindSync('athleteCity', 'municipio', true);
+      bindSync('athletePhone', 'fone', false);
+      bindSync('athleteCpf', 'cpf', false);
       bindSync('athleteModality', 'modalidade', true);
       bindSync('athleteCategory', 'categoria', true);
       bindSync('athleteClub', 'modalidade', true);
@@ -7867,7 +7914,6 @@
           if (qrTarget) qrTarget.text = qrLink;
 
           renderInteractiveElements();
-          autoSaveStudioDesign();
         });
       }
 
@@ -7890,7 +7936,6 @@
           if (qrTarget) qrTarget.text = qrLink;
 
           renderInteractiveElements();
-          autoSaveStudioDesign();
         });
       }
 
@@ -7929,7 +7974,6 @@
             target.text = v || 'XXX.XXX.XXX-XX';
             renderInteractiveElements();
           }
-          autoSaveStudioDesign();
         });
       }
 
@@ -7970,7 +8014,6 @@
             target.text = v || '(XX) XXXXX-XXXX';
             renderInteractiveElements();
           }
-          autoSaveStudioDesign();
         });
       }
 
@@ -8007,7 +8050,6 @@
             target.text = v || 'XX/XX/XXXX';
             renderInteractiveElements();
           }
-          autoSaveStudioDesign();
         });
       }
 
@@ -8015,7 +8057,7 @@
       const cityInp = document.getElementById('athleteCity');
       if (cityInp) {
         cityInp.addEventListener('focus', (e) => {
-          if (e.target.value === '- PE' || e.target.value === 'RECIFE - PE') {
+          if (e.target.value === '- PE') {
             e.target.value = '';
           }
         });
@@ -8037,7 +8079,6 @@
             target.text = e.target.value;
             renderInteractiveElements();
           }
-          autoSaveStudioDesign();
         });
         cityInp.addEventListener('input', (e) => {
           let val = e.target.value.toUpperCase();
@@ -8046,7 +8087,6 @@
             target.text = val || '- PE';
             renderInteractiveElements();
           }
-          autoSaveStudioDesign();
         });
       }
 
@@ -9371,7 +9411,6 @@
       if (qrTarget) qrTarget.text = qrLink;
 
       renderInteractiveElements();
-      autoSaveStudioDesign();
       if (!silent) {
         showToast(`Código 6D único gerado: #${uniqueCode}`);
       }
@@ -9562,6 +9601,7 @@
       }
       localStorage.setItem('pe_athletes_db', JSON.stringify(localAthletes));
       currentCachedAthletes = localAthletes;
+      window._lastActiveAthlete = athleteObj;
 
       if (feedback) {
         const isHomolog = status === 'HOMOLOGADO';
@@ -9596,8 +9636,9 @@
       const statusSelect = document.getElementById('athleteStatus');
       if (statusSelect) statusSelect.value = 'PENDENTE';
 
-      // Salva o design automaticamente
-      autoSaveStudioDesign();
+      // Sincroniza formulário com a prévia da carteira
+      syncStudioElementsWithForm();
+      renderInteractiveElements();
 
       const btn = document.getElementById('btnConcluirCadastro');
       const originalHtml = btn ? btn.innerHTML : '';
@@ -16098,6 +16139,9 @@ $;
                       const pEl = studioState.elements.find(i => i.id === 'field-foto');
                       if (pEl) pEl.photoUrl = curPhoto;
                     }
+                    if (typeof syncStudioElementsWithForm === 'function') {
+                      syncStudioElementsWithForm();
+                    }
                     if (data.bgTransform) studioState.bgTransform = data.bgTransform;
                     localStorage.setItem('fpeft_studio_custom_elements', JSON.stringify(studioState.elements));
                     renderInteractiveElements();
@@ -16126,6 +16170,9 @@ $;
                 const pEl = studioState.elements.find(i => i.id === 'field-foto');
                 if (pEl) pEl.photoUrl = curPhoto;
               }
+              if (typeof syncStudioElementsWithForm === 'function') {
+                syncStudioElementsWithForm();
+              }
               if (payload.bgTransform) studioState.bgTransform = payload.bgTransform;
               renderInteractiveElements();
               applyCurrentSvgBackground();
@@ -16136,10 +16183,11 @@ $;
       } catch (e) {}
     }
 
-    // Ao focar a janela, sincroniza nuvem somente se não houver cadastro com foto ativa em edição
+    // Ao focar a janela, sincroniza nuvem somente se não houver cadastro ou foto ativa em edição
     window.addEventListener('focus', () => {
       const activePhoto = document.getElementById('athletePhotoVal')?.value || window._currentAthletePhoto;
-      if (activePhoto) return;
+      const activeName = (document.getElementById('athleteName')?.value || '').trim();
+      if (activePhoto || activeName) return;
       if (typeof fetchStudioDesignFromSupabase === 'function' && typeof supabaseClient !== 'undefined' && supabaseClient) {
         fetchStudioDesignFromSupabase(false);
       }
