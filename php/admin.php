@@ -200,6 +200,11 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <!-- QR Code Generator -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+  <script>
+    if (typeof qrcode === 'undefined') {
+      document.write('<script src="assets/qrcode.min.js"><\/script>');
+    }
+  </script>
   <!-- html2canvas for instant HD PNG badge export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- JSZip for Bulk CR80 Badge Export -->
@@ -1309,7 +1314,7 @@
                 <div id="cardScaleWrapper" class="relative transition-transform duration-150 ease-out origin-center">
                   
                   <!-- Canvas CR80 (1050 x 662 px) -->
-                  <div id="creditCardCanvas" class="relative w-[1050px] h-[662px] bg-slate-950 rounded-[34px] shadow-2xl overflow-hidden border border-slate-700/80 select-none">
+                  <div id="creditCardCanvas" class="relative w-[1050px] h-[662px] bg-slate-950 rounded-[34px] shadow-2xl overflow-hidden border border-slate-700/80 select-none" style="background-image: url('assets/Carteira_Atleta_HD.png'), url('Carteira_Atleta_HD.png'); background-size: cover; background-position: center;">
                     
                     <!-- Camada de Fundo SVG Vetorial Oficial FPEFT -->
                     <div id="svgBackgroundContainer" class="absolute inset-0 w-full h-full pointer-events-none">
@@ -5485,28 +5490,17 @@
 </svg>`;
       }
 
-      // Fallback de segurança elegante
-      return `
-      <svg id="fpeftSvgTemplate" width="1050" height="662" viewBox="0 0 1050 662" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#00183b"/>
-            <stop offset="45%" stop-color="#003580"/>
-            <stop offset="100%" stop-color="#001a42"/>
-          </linearGradient>
-          <clipPath id="cardRoundedClip">
-            <rect width="1050" height="662" rx="34" />
-          </clipPath>
-        </defs>
-        <g clip-path="url(#cardRoundedClip)">
-          <rect width="1050" height="662" fill="url(#bgGrad)"/>
-          <g transform="translate(62, 28)">
-            <text x="0" y="32" font-family="'Montserrat', sans-serif" font-size="28" font-weight="900" fill="#ffffff" letter-spacing="1">CARTEIRA DO ATLETA</text>
-            <text x="0" y="52" font-family="'Montserrat', sans-serif" font-size="14" font-weight="800" fill="#38bdf8" letter-spacing="1.5">ATLETA OFICIAL</text>
-          </g>
-        </g>
-      </svg>
-      `;
+      // Retorna sempre a arte oficial HD da FPEFT (Carteira_Atleta_HD.png) como imagem SVG caso nenhum outro carregue
+      return `<svg id="fpeftSvgTemplate" width="1050" height="662" viewBox="0 0 1050 662" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <clipPath id="cardRoundedClip">
+      <rect width="1050" height="662" rx="34" />
+    </clipPath>
+  </defs>
+  <g clip-path="url(#cardRoundedClip)">
+    <image width="1050" height="662" preserveAspectRatio="none" href="assets/Carteira_Atleta_HD.png" xlink:href="assets/Carteira_Atleta_HD.png" />
+  </g>
+</svg>`;
     }
 
     /* Retorna o SVG exato do fundo atual para exibição e exportações (SVG, PNG, ZIP) sem perda de qualidade */
@@ -5568,8 +5562,9 @@
         `;
       } else {
         container.innerHTML = `
-          <div class="w-full h-full overflow-hidden" style="${transformStyle}">
+          <div class="w-full h-full overflow-hidden relative" style="${transformStyle}">
             ${getFpeftTemplateSvg(studioState.showBgLabels)}
+            <img src="assets/Carteira_Atleta_HD.png" onerror="this.onerror=null;this.src='Carteira_Atleta_HD.png'" class="absolute inset-0 w-full h-full object-cover pointer-events-none select-none -z-10" />
           </div>
         `;
       }
@@ -5706,59 +5701,50 @@
             `;
           }
         } else if (item.type === 'qrcode') {
-          const safeQx = (typeof item.x === 'number' && item.x >= 750 && item.x <= 950) ? item.x : 860;
-          const safeQy = (typeof item.y === 'number' && item.y >= 300 && item.y <= 520) ? item.y : 425;
-          const safeQw = (typeof item.width === 'number' && item.width >= 100 && item.width <= 200) ? item.width : 140;
-          const safeQh = (typeof item.height === 'number' && item.height >= 100 && item.height <= 200) ? item.height : 140;
+          div.style.backgroundColor = item.backgroundColor || '#ffffff';
+          div.style.overflow = 'visible';
+          div.style.padding = '8px';
+          div.style.display = 'flex';
+          div.style.flexDirection = 'column';
+          div.style.alignItems = 'center';
+          div.style.justifyContent = 'center';
+          div.style.boxShadow = '0 8px 24px rgba(0,0,0,0.45)';
 
-          // A) Caixa de fundo branca com cantos arredondados
-          ctx.save();
-          ctx.fillStyle = item.backgroundColor || '#ffffff';
-          drawRoundedRectPath(ctx, safeQx * scale, safeQy * scale, safeQw * scale, safeQh * scale, (item.borderRadius || 14) * scale);
-          ctx.fill();
-          ctx.restore();
+          const athleteCode = (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '') || (document.getElementById('athleteCode') ? document.getElementById('athleteCode').value : '') || (window._lastActiveAthlete ? (window._lastActiveAthlete.codigo || window._lastActiveAthlete.federado) : '') || '973321';
+          const cleanCode = String(athleteCode).replace(/\D/g, '').slice(0, 6) || '973321';
+          const qrUrl = `https://fpeft.vercel.app/?id=${cleanCode}`;
 
-          // B) Gera QR Code Real e 100% Escaneável
-          const athleteObj = athlete || window._lastActiveAthlete || {};
-          const athleteCode = (athleteObj.codigo || athleteObj.federado || '973321').replace(/\D/g, '').slice(0, 6) || '973321';
-          const qrUrl = `https://fpeft.vercel.app/?id=${athleteCode}`;
-
-          const qrMatrix = generateQrMatrix(qrUrl);
+          let qrContentHtml = '';
+          const qrMatrix = (typeof generateQrMatrix === 'function') ? generateQrMatrix(qrUrl) : null;
           if (qrMatrix && qrMatrix.length > 0) {
-            ctx.save();
             const moduleCount = qrMatrix.length;
-            const pad = 12;
-            const qrSize = Math.min(safeQw - pad * 2, safeQh - pad * 2);
-            const cell = qrSize / moduleCount;
-            const startX = safeQx + (safeQw - qrSize) / 2;
-            const startY = safeQy + (safeQh - qrSize) / 2;
-
-            ctx.fillStyle = '#000000';
+            const size = Math.min(item.width - 16, item.height - 16);
+            const cell = size / moduleCount;
+            let svgCells = '';
             for (let r = 0; r < moduleCount; r++) {
               for (let c = 0; c < moduleCount; c++) {
                 if (qrMatrix[r][c]) {
-                  ctx.fillRect(
-                    (startX + c * cell) * scale,
-                    (startY + r * cell) * scale,
-                    cell * scale + 0.3,
-                    cell * scale + 0.3
-                  );
+                  svgCells += `<rect x="${c * cell}" y="${r * cell}" width="${cell + 0.2}" height="${cell + 0.2}" fill="#000000"/>`;
                 }
               }
             }
-            ctx.restore();
+            qrContentHtml = `
+              <div class="w-full h-full flex flex-col items-center justify-center bg-white pointer-events-none rounded-[8px] overflow-hidden" title="${escapeHtml(qrUrl)}">
+                <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" class="pointer-events-none select-none">${svgCells}</svg>
+              </div>
+            `;
+          } else {
+            qrContentHtml = `
+              <div class="w-full h-full flex flex-col items-center justify-center bg-white pointer-events-none rounded-[8px] overflow-hidden">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrUrl)}" alt="QR Code" class="w-full h-full object-contain pointer-events-none select-none" onerror="this.onerror=null;this.parentElement.innerHTML='<i class=\\'fa-solid fa-qrcode text-slate-950 text-5xl\\'></i>';" />
+              </div>
+            `;
           }
 
-          // C) Legenda inferior do QR Code ("VERIFICAÇÃO DE AUTENTICIDADE")
-          if (item.labelTag) {
-            ctx.save();
-            ctx.fillStyle = '#94a3b8';
-            ctx.font = `bold ${10 * scale}px Montserrat, sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'top';
-            ctx.fillText(item.labelTag, (safeQx + safeQw / 2) * scale, (safeQy + safeQh + 6) * scale);
-            ctx.restore();
-          }
+          div.innerHTML = `
+            ${qrContentHtml}
+            ${item.labelTag ? `<span class="field-bottom-label select-none pointer-events-none">${escapeHtml(item.labelTag)}</span>` : ''}
+          `;
         } else if (item.type === 'text-line') {
           div.style.display = 'flex';
           div.style.flexDirection = 'column';

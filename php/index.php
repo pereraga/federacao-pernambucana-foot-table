@@ -38,10 +38,20 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- qrcode-generator for generating verified QR codes -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+  <script>
+    if (typeof qrcode === 'undefined') {
+      document.write('<script src="assets/qrcode.min.js"><\/script>');
+    }
+  </script>
   <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Template Oficial e Assinatura do Diretor -->
   <script src="assets/carteira_template.js"></script>
+  <script>
+    if (!window.OFFICIAL_FPEFT_BG_DATA_URL) {
+      document.write('<script src="carteira_template.js"><\/script>');
+    }
+  </script>
 
   <script>
     tailwind.config = {
