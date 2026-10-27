@@ -9786,6 +9786,10 @@
 
             const [atletasRes1, atletasRes2, deletedLogsRes2, statusLogsRes, recordLogsRes, deletedLogsRes] = await Promise.all(queryTasks);
 
+            // Carrega códigos excluídos locais e da nuvem para isolar e impedir ressurgimento
+            const deletedCodes = new Set(JSON.parse(localStorage.getItem('pe_deleted_athlete_codes') || '[]').map(String));
+            deletedCodes.add('331296');
+
             if (deletedLogsRes2 && Array.isArray(deletedLogsRes2.data)) {
               deletedLogsRes2.data.forEach(log => {
                 if (log && log.source) {
@@ -9794,11 +9798,6 @@
                 }
               });
             }
-
-            // Carrega códigos excluídos locais e da nuvem para isolar e impedir ressurgimento
-            const deletedCodes = new Set(JSON.parse(localStorage.getItem('pe_deleted_athlete_codes') || '[]').map(String));
-            deletedCodes.add('548608');
-            deletedCodes.add('331296');
             if (deletedLogsRes && Array.isArray(deletedLogsRes.data)) {
               deletedLogsRes.data.forEach(log => {
                 if (log && log.source) {
