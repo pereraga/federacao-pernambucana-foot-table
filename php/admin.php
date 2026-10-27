@@ -1272,56 +1272,68 @@
             <div class="flex flex-col space-y-4 min-w-0">
               
               <!-- Toolbar Superior do Canvas (Zoom e Padrão CR80) -->
-              <div class="flex items-center justify-between bg-[#0b101d] border border-[#1c253b] px-3 sm:px-4 py-2.5 rounded-2xl shadow flex-wrap gap-2.5">
-                <!-- Lado Esquerdo: Identificação & Seletor de Modo -->
-                <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
-                  <div class="flex items-center gap-2 text-xs">
-                    <span class="w-2.5 h-2.5 rounded-full bg-pe-gold animate-pulse"></span>
-                    <span class="font-bold text-white uppercase tracking-wide text-[11px] sm:text-xs">Padrão CR80 Oficial</span>
-                    <span class="text-slate-400 hidden xl:inline text-[11px]">(85.6mm × 53.98mm • 1050 × 662 px)</span>
+              <div class="bg-[#0b101d] border border-[#1c253b] px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl shadow-xl space-y-2">
+                <!-- Linha Principal de Controle: Ajustada em UMA linha só -->
+                <div class="flex items-center justify-between gap-2 sm:gap-3 flex-nowrap min-w-0 overflow-x-auto custom-scroll pb-1 sm:pb-0">
+                  <!-- Lado Esquerdo: Identificação & Seletor de Modo -->
+                  <div class="flex items-center gap-2 sm:gap-3 shrink-0 min-w-0">
+                    <div class="flex items-center gap-1.5 sm:gap-2 text-xs shrink-0">
+                      <span class="w-2.5 h-2.5 rounded-full bg-pe-gold animate-pulse"></span>
+                      <span class="font-bold text-white uppercase tracking-wide text-[11px] sm:text-xs whitespace-nowrap">Padrão CR80</span>
+                    </div>
+
+                    <!-- SELETOR DE MODO: FIXO vs DESIGN -->
+                    <div class="inline-flex items-center bg-[#05080e] p-1 rounded-xl border border-[#1c253b] shadow-inner shrink-0">
+                      <button type="button" id="btnModeFixed" onclick="toggleDesignLock(true)" title="Modo Fixo: Layout travado para emissão rápida sem risco de mover campos" class="flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-extrabold bg-emerald-600 text-white shadow transition cursor-pointer whitespace-nowrap">
+                        <i class="fa-solid fa-lock text-[11px]"></i>
+                        <span>Modo Fixo</span>
+                      </button>
+                      <button type="button" id="btnModeDesign" onclick="toggleDesignLock(false)" title="Modo Design: Desbloqueia arrastar, redimensionar e editar posições livremente" class="flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition cursor-pointer whitespace-nowrap">
+                        <i class="fa-solid fa-pen-ruler text-[11px]"></i>
+                        <span>Modo Design</span>
+                      </button>
+                    </div>
                   </div>
 
-                  <!-- SELETOR DE MODO: FIXO vs DESIGN -->
-                  <div class="inline-flex items-center bg-[#05080e] p-1 rounded-xl border border-[#1c253b] shadow-inner">
-                    <button type="button" id="btnModeFixed" onclick="toggleDesignLock(true)" title="Modo Fixo: Layout travado para emissão rápida sem risco de mover campos" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-extrabold bg-emerald-600 text-white shadow transition cursor-pointer">
-                      <i class="fa-solid fa-lock text-[11px]"></i>
-                      <span>Modo Fixo</span>
+                  <!-- Lado Direito: Salvar Carteira & Zoom -->
+                  <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                    <!-- Botão Salvar Carteira em Tempo Real -->
+                    <button type="button" id="btnSaveOfficialCloud" onclick="saveOfficialLayoutToCloud()" title="Salvar alterações da carteira em tempo real no banco de dados para novos cadastros" class="px-2.5 sm:px-3.5 py-1 sm:py-1.5 bg-gradient-to-r from-amber-500 via-pe-gold to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black rounded-xl text-xs flex items-center gap-1.5 sm:gap-2 transition cursor-pointer shadow-lg hover:scale-[1.02] active:scale-[0.98] min-h-[32px] sm:min-h-[36px] whitespace-nowrap shrink-0">
+                      <i class="fa-solid fa-floppy-disk text-slate-950 text-xs sm:text-sm"></i>
+                      <span>Salvar Carteira</span>
                     </button>
-                    <button type="button" id="btnModeDesign" onclick="toggleDesignLock(false)" title="Modo Design: Desbloqueia arrastar, redimensionar e editar posições livremente" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition cursor-pointer">
-                      <i class="fa-solid fa-pen-ruler text-[11px]"></i>
-                      <span>Modo Design</span>
-                    </button>
+
+                    <!-- Zoom Controls -->
+                    <div class="flex items-center space-x-1 sm:space-x-1.5 bg-[#05080e] px-1.5 sm:px-2 py-1 rounded-xl border border-[#1c253b] min-h-[32px] sm:min-h-[36px] shrink-0">
+                      <button type="button" id="zoomOutBtn" title="Reduzir Visualização" class="w-6 sm:w-7 h-6 sm:h-7 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition text-xs cursor-pointer">
+                        <i class="fa-solid fa-minus text-[11px]"></i>
+                      </button>
+                      <span id="zoomDisplay" class="text-xs font-mono font-bold text-pe-gold w-9 sm:w-11 text-center">80%</span>
+                      <button type="button" id="zoomInBtn" title="Aumentar Visualização" class="w-6 sm:w-7 h-6 sm:h-7 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition text-xs cursor-pointer">
+                        <i class="fa-solid fa-plus text-[11px]"></i>
+                      </button>
+                      <div class="w-[1px] h-3.5 sm:h-4 bg-slate-700 mx-0.5 sm:mx-1"></div>
+                      <button type="button" id="zoomFitBtn" title="Enquadrar à Tela" class="px-1.5 sm:px-2 py-1 text-xs text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition flex items-center gap-1 sm:gap-1.5 cursor-pointer whitespace-nowrap">
+                        <i class="fa-solid fa-expand text-[10px]"></i> <span class="hidden sm:inline">Enquadrar</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
 
-                <!-- Lado Direito: Ações & Zoom -->
-                <div class="flex items-center gap-2 flex-wrap">
-                  <!-- Botão Linhas Guia Inteligentes de Alinhamento -->
-                  <button type="button" id="btnToggleGuides" onclick="toggleAlignmentGuides()" title="Ativar/Desativar Linhas Guia e Limites de Alinhamento" class="px-2.5 sm:px-3 py-1.5 bg-[#05080e] hover:bg-[#121c32] text-slate-300 hover:text-pe-gold border border-[#1c253b] rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer min-h-[36px]">
-                    <i class="fa-solid fa-ruler-combined text-pe-gold"></i>
-                    <span>Linhas Guia</span>
-                    <span id="guidesStateBadge" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">ON</span>
-                  </button>
-
-                  <!-- Botão Salvar Carteira em Tempo Real -->
-                  <button type="button" id="btnSaveOfficialCloud" onclick="saveOfficialLayoutToCloud()" title="Salvar alterações da carteira em tempo real no banco de dados para novos cadastros" class="px-3 sm:px-3.5 py-1.5 bg-gradient-to-r from-amber-500 via-pe-gold to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black rounded-xl text-xs flex items-center gap-1.5 sm:gap-2 transition cursor-pointer shadow-lg hover:scale-[1.02] active:scale-[0.98] min-h-[36px]">
-                    <i class="fa-solid fa-floppy-disk text-slate-950 text-xs sm:text-sm"></i>
-                    <span>Salvar Carteira</span>
-                  </button>
-
-                  <!-- Zoom Controls -->
-                  <div class="flex items-center space-x-1 sm:space-x-1.5 bg-[#05080e] px-2 py-1 rounded-xl border border-[#1c253b] min-h-[36px]">
-                    <button type="button" id="zoomOutBtn" title="Reduzir Visualização" class="w-6 sm:w-7 h-6 sm:h-7 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition text-xs cursor-pointer">
-                      <i class="fa-solid fa-minus text-[11px]"></i>
+                <!-- Linha de Guia em Baixo: Alinhamento, Grade Inteligente e Dimensões Oficiais -->
+                <div class="flex items-center justify-between text-xs pt-1.5 border-t border-[#1c253b]/60 gap-2 flex-wrap sm:flex-nowrap">
+                  <div class="flex items-center gap-2 min-w-0">
+                    <button type="button" id="btnToggleGuides" onclick="toggleAlignmentGuides()" title="Ativar/Desativar Linhas Guia e Limites de Alinhamento" class="px-2.5 sm:px-3 py-1 bg-[#05080e] hover:bg-[#121c32] text-slate-300 hover:text-pe-gold border border-[#1c253b] rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer min-h-[30px] whitespace-nowrap shrink-0">
+                      <i class="fa-solid fa-ruler-combined text-pe-gold text-xs"></i>
+                      <span>Linhas Guia</span>
+                      <span id="guidesStateBadge" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">ON</span>
                     </button>
-                    <span id="zoomDisplay" class="text-xs font-mono font-bold text-pe-gold w-10 sm:w-11 text-center">80%</span>
-                    <button type="button" id="zoomInBtn" title="Aumentar Visualização" class="w-6 sm:w-7 h-6 sm:h-7 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition text-xs cursor-pointer">
-                      <i class="fa-solid fa-plus text-[11px]"></i>
-                    </button>
-                    <div class="w-[1px] h-4 bg-slate-700 mx-0.5 sm:mx-1"></div>
-                    <button type="button" id="zoomFitBtn" title="Enquadrar à Tela" class="px-1.5 sm:px-2 py-1 text-xs text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition flex items-center gap-1 sm:gap-1.5 cursor-pointer">
-                      <i class="fa-solid fa-expand text-[10px]"></i> <span class="hidden sm:inline">Enquadrar</span>
-                    </button>
+                    <span class="text-[10px] text-slate-400 hidden md:flex items-center gap-1 truncate">
+                      <i class="fa-solid fa-circle-info text-slate-500 text-[9px]"></i> Grade magnética de alinhamento e limites CR80
+                    </span>
+                  </div>
+                  <div class="text-[10px] text-slate-400 font-mono tracking-tight shrink-0">
+                    <span class="text-pe-gold/80 font-bold">CR80 HD:</span> 85.6mm × 53.98mm • 1050 × 662 px
                   </div>
                 </div>
               </div>
@@ -6312,20 +6324,20 @@
 
       if (studioState.isDesignLocked) {
         if (btnFixed) {
-          btnFixed.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-extrabold bg-emerald-600 text-white shadow transition cursor-pointer';
+          btnFixed.className = 'flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-extrabold bg-emerald-600 text-white shadow transition cursor-pointer whitespace-nowrap';
         }
         if (btnDesign) {
-          btnDesign.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition cursor-pointer';
+          btnDesign.className = 'flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition cursor-pointer whitespace-nowrap';
         }
         if (floatingPanel) {
           floatingPanel.style.display = 'none';
         }
       } else {
         if (btnFixed) {
-          btnFixed.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition cursor-pointer';
+          btnFixed.className = 'flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition cursor-pointer whitespace-nowrap';
         }
         if (btnDesign) {
-          btnDesign.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-extrabold bg-pe-gold text-pe-dark shadow transition cursor-pointer';
+          btnDesign.className = 'flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-extrabold bg-pe-gold text-pe-dark shadow transition cursor-pointer whitespace-nowrap';
         }
         if (floatingPanel && studioState.selectedId) {
           floatingPanel.style.display = 'flex';
