@@ -4523,7 +4523,7 @@
     "type": "qrcode",
     "targetKey": "qr",
     "x": 860,
-    "y": 378,
+    "y": 425,
     "width": 140,
     "height": 140,
     "borderRadius": 14,
@@ -4968,12 +4968,32 @@
       if (!Array.isArray(elements) || elements.length === 0) {
         return JSON.parse(JSON.stringify(OFFICIAL_DEFAULT_ELEMENTS));
       }
-      return elements.map(el => {
-        const defaultMatch = OFFICIAL_DEFAULT_ELEMENTS.find(d => d.id === el.id) || {};
+      const elementMap = new Map();
+      elements.forEach(el => { if (el && el.id) elementMap.set(el.id, el); });
+
+      return OFFICIAL_DEFAULT_ELEMENTS.map(def => {
+        const found = elementMap.get(def.id) || elements.find(el => def.targetKey && el.targetKey === def.targetKey) || {};
         const item = {
-          ...defaultMatch,
-          ...el // Posições (x, y, width, height, etc) salvas pelo usuário têm prioridade TOTAL
+          ...def,
+          ...found
         };
+
+        // Clamping estrito e correção de integridade para field-qrcode (proteção contra y: 1165 e outros desvios)
+        if (item.id === 'field-qrcode' || item.type === 'qrcode' || item.targetKey === 'qr') {
+          if (typeof item.y !== 'number' || item.y > 520 || item.y < 300 || isNaN(item.y)) {
+            item.y = 425;
+          }
+          if (typeof item.x !== 'number' || item.x > 950 || item.x < 750 || isNaN(item.x)) {
+            item.x = 860;
+          }
+          if (typeof item.width !== 'number' || item.width < 100 || item.width > 200 || isNaN(item.width)) {
+            item.width = 140;
+          }
+          if (typeof item.height !== 'number' || item.height < 100 || item.height > 200 || isNaN(item.height)) {
+            item.height = 140;
+          }
+          item.backgroundColor = item.backgroundColor || '#ffffff';
+        }
 
         // Purga qualquer resquício de dados de atletas fictícios/hardcoded do design oficial:
         if (!window._lastActiveAthlete) {
@@ -5686,52 +5706,59 @@
             `;
           }
         } else if (item.type === 'qrcode') {
-          div.style.backgroundColor = item.backgroundColor || '#ffffff';
-          div.style.overflow = 'visible';
-          div.style.padding = '8px';
-          div.style.display = 'flex';
-          div.style.flexDirection = 'column';
-          div.style.alignItems = 'center';
-          div.style.justifyContent = 'center';
-          div.style.boxShadow = '0 8px 24px rgba(0,0,0,0.45)';
+          const safeQx = (typeof item.x === 'number' && item.x >= 750 && item.x <= 950) ? item.x : 860;
+          const safeQy = (typeof item.y === 'number' && item.y >= 300 && item.y <= 520) ? item.y : 425;
+          const safeQw = (typeof item.width === 'number' && item.width >= 100 && item.width <= 200) ? item.width : 140;
+          const safeQh = (typeof item.height === 'number' && item.height >= 100 && item.height <= 200) ? item.height : 140;
 
-          const athleteCode = (document.getElementById('athleteFederatedNum') ? document.getElementById('athleteFederatedNum').value : '') || (document.getElementById('athleteCode') ? document.getElementById('athleteCode').value : '') || '973321';
-          let qrUrl = (item.text && item.text.startsWith('http')) ? item.text : `https://fpeft.vercel.app/?id=${athleteCode}`;
-          if (qrUrl === 'https://fpeft.vercel.app/' || qrUrl === 'https://fpeft.vercel.app') {
-            qrUrl = `https://fpeft.vercel.app/?id=${athleteCode}`;
-          }
+          // A) Caixa de fundo branca com cantos arredondados
+          ctx.save();
+          ctx.fillStyle = item.backgroundColor || '#ffffff';
+          drawRoundedRectPath(ctx, safeQx * scale, safeQy * scale, safeQw * scale, safeQh * scale, (item.borderRadius || 14) * scale);
+          ctx.fill();
+          ctx.restore();
 
-          let qrContentHtml = '';
+          // B) Gera QR Code Real e 100% Escaneável
+          const athleteObj = athlete || window._lastActiveAthlete || {};
+          const athleteCode = (athleteObj.codigo || athleteObj.federado || '973321').replace(/\D/g, '').slice(0, 6) || '973321';
+          const qrUrl = `https://fpeft.vercel.app/?id=${athleteCode}`;
+
           const qrMatrix = generateQrMatrix(qrUrl);
           if (qrMatrix && qrMatrix.length > 0) {
+            ctx.save();
             const moduleCount = qrMatrix.length;
-            const size = Math.min(item.width - 16, item.height - 16);
-            const cell = size / moduleCount;
-            let svgCells = '';
+            const pad = 12;
+            const qrSize = Math.min(safeQw - pad * 2, safeQh - pad * 2);
+            const cell = qrSize / moduleCount;
+            const startX = safeQx + (safeQw - qrSize) / 2;
+            const startY = safeQy + (safeQh - qrSize) / 2;
+
+            ctx.fillStyle = '#000000';
             for (let r = 0; r < moduleCount; r++) {
               for (let c = 0; c < moduleCount; c++) {
                 if (qrMatrix[r][c]) {
-                  svgCells += `<rect x="${c * cell}" y="${r * cell}" width="${cell + 0.2}" height="${cell + 0.2}" fill="#000000"/>`;
+                  ctx.fillRect(
+                    (startX + c * cell) * scale,
+                    (startY + r * cell) * scale,
+                    cell * scale + 0.3,
+                    cell * scale + 0.3
+                  );
                 }
               }
             }
-            qrContentHtml = `
-              <div class="w-full h-full flex flex-col items-center justify-center bg-white pointer-events-none rounded-[8px] overflow-hidden" title="${escapeHtml(qrUrl)}">
-                <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" class="pointer-events-none select-none">${svgCells}</svg>
-              </div>
-            `;
-          } else {
-            qrContentHtml = `
-              <div class="w-full h-full flex flex-col items-center justify-center bg-white pointer-events-none rounded-[8px] overflow-hidden">
-                <i class="fa-solid fa-qrcode text-slate-950 text-5xl"></i>
-              </div>
-            `;
+            ctx.restore();
           }
 
-          div.innerHTML = `
-            ${qrContentHtml}
-            ${item.labelTag ? `<span class="field-bottom-label select-none pointer-events-none">${escapeHtml(item.labelTag)}</span>` : ''}
-          `;
+          // C) Legenda inferior do QR Code ("VERIFICAÇÃO DE AUTENTICIDADE")
+          if (item.labelTag) {
+            ctx.save();
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = `bold ${10 * scale}px Montserrat, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.fillText(item.labelTag, (safeQx + safeQw / 2) * scale, (safeQy + safeQh + 6) * scale);
+            ctx.restore();
+          }
         } else if (item.type === 'text-line') {
           div.style.display = 'flex';
           div.style.flexDirection = 'column';

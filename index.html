@@ -462,7 +462,7 @@
           </div>
 
           <!-- QR Code (Direita) -->
-          <div id="cardBadgeQrContainer" class="absolute left-[82.10%] top-[64.50%] w-[13.14%] h-[20.24%] bg-white rounded-lg sm:rounded-xl p-1 shadow-md flex items-center justify-center overflow-hidden">
+          <div id="cardBadgeQrContainer" class="absolute left-[81.90%] top-[64.20%] w-[13.33%] h-[21.15%] bg-white rounded-xl sm:rounded-2xl p-1 sm:p-1.5 shadow-md flex items-center justify-center overflow-hidden z-20">
             <div id="cardBadgeQrBox" class="w-full h-full flex items-center justify-center">
               <i class="fa-solid fa-qrcode text-black text-xl sm:text-2xl"></i>
             </div>
@@ -1812,18 +1812,8 @@
       // 5. EXIBE A ÁREA DO RESULTADO COM TODOS OS DADOS PREENCHIDOS
       badgeArea.classList.remove('hidden');
 
-      // 6. GERA O QR CODE OFICIAL ESCANEÁVEL
-      const qrBox = document.getElementById('cardBadgeQrBox');
-      if (qrBox && typeof qrcode !== 'undefined') {
-        try {
-          const qr = qrcode(0, 'M');
-          qr.addData(`https://fpeft.vercel.app/?id=${athlete.codigo || '000000'}`);
-          qr.make();
-          qrBox.innerHTML = qr.createSvgTag({ scalable: true, margin: 0 });
-        } catch (e) {
-          qrBox.innerHTML = '<i class="fa-solid fa-qrcode text-black text-2xl"></i>';
-        }
-      }
+      // 6. GERA O QR CODE OFICIAL ESCANEÁVEL QUE VAI DIRETO PRO SITE DA CARTEIRA
+      renderOfficialPublicQrCode(athlete);
 
       // 7. AVISOS DE PENDÊNCIA E CONTROLE DOS BOTÕES DE DOWNLOAD
       const pendingWarning = document.getElementById('cardPendingWarning');
@@ -1947,6 +1937,48 @@
       const athlete = window._currentSearchedAthlete;
       if (!athlete) return false;
       return _isAthleteDownloadUnlocked && String(_unlockedAthleteCode) === String(athlete.codigo);
+    }
+
+    function renderOfficialPublicQrCode(athlete) {
+      const qrBox = document.getElementById('cardBadgeQrBox');
+      const qrContainer = document.getElementById('cardBadgeQrContainer');
+      if (qrContainer) {
+        qrContainer.style.display = 'flex';
+        qrContainer.style.visibility = 'visible';
+        qrContainer.style.opacity = '1';
+        qrContainer.style.zIndex = '20';
+        qrContainer.classList.remove('hidden');
+      }
+      if (!qrBox) return;
+
+      const athleteObj = athlete || window._currentSearchedAthlete || {};
+      const athleteCodeRaw = String(athleteObj.codigo || athleteObj.federado || '000000').replace(/\D/g, '').slice(0, 6) || String(athleteObj.codigo || '000000');
+      const directCardUrl = `https://fpeft.vercel.app/?id=${athleteCodeRaw}`;
+
+      let qrDone = false;
+      if (typeof qrcode !== 'undefined') {
+        try {
+          const qr = qrcode(0, 'M');
+          qr.addData(directCardUrl);
+          qr.make();
+          qrBox.innerHTML = qr.createSvgTag({ scalable: true, margin: 0 });
+          const svgEl = qrBox.querySelector('svg');
+          if (svgEl) {
+            svgEl.setAttribute('width', '100%');
+            svgEl.setAttribute('height', '100%');
+            svgEl.style.width = '100%';
+            svgEl.style.height = '100%';
+            svgEl.style.display = 'block';
+            svgEl.classList.add('w-full', 'h-full', 'object-contain', 'pointer-events-none');
+          }
+          qrDone = true;
+        } catch (e) {
+          console.warn('Erro ao gerar SVG do QR Code:', e);
+        }
+      }
+      if (!qrDone) {
+        qrBox.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(directCardUrl)}" alt="QR Code" class="w-full h-full object-contain pointer-events-none select-none" />`;
+      }
     }
 
     function openCpfDownloadGateModal(action) {
@@ -2396,6 +2428,20 @@
           el = document.getElementById('cardBadgeCategoryBox');
         } else if (item.type === 'qrcode' || item.targetKey === 'qr' || item.id === 'field-qrcode') {
           el = document.getElementById('cardBadgeQrContainer');
+          // Proteção estrita contra coordenadas corrompidas ou out-of-bounds (ex: y: 1165 no DB2)
+          if (typeof item.y !== 'number' || item.y > 520 || item.y < 300 || isNaN(item.y)) {
+            item.y = 425;
+          }
+          if (typeof item.x !== 'number' || item.x > 950 || item.x < 750 || isNaN(item.x)) {
+            item.x = 860;
+          }
+          if (typeof item.width !== 'number' || item.width < 100 || item.width > 200 || isNaN(item.width)) {
+            item.width = 140;
+          }
+          if (typeof item.height !== 'number' || item.height < 100 || item.height > 200 || isNaN(item.height)) {
+            item.height = 140;
+          }
+          item.backgroundColor = item.backgroundColor || '#ffffff';
         } else if (item.targetKey === 'validade' || item.id === 'field-validade') {
           el = document.getElementById('cardBadgeValidityBox');
         } else if (item.type === 'text-line' || item.targetKey === 'assinatura' || item.id === 'field-assinatura') {
@@ -2434,6 +2480,13 @@
           if (item.width) el.style.width = `${(item.width / CARD_W) * 100}%`;
           if (item.height) el.style.height = `${(item.height / CARD_H) * 100}%`;
           if (el.id === 'cardBadgeSignatureBox') el.style.overflow = 'visible';
+          if (el.id === 'cardBadgeQrContainer') {
+            el.style.display = 'flex';
+            el.style.visibility = 'visible';
+            el.style.opacity = '1';
+            el.style.zIndex = '20';
+            el.classList.remove('hidden');
+          }
           if (el.id === 'cardBadgeCPFBox') { el.style.overflow = 'visible'; const t = el.querySelector('#cardBadgeCPF'); if (t) { t.style.overflow = 'visible'; t.style.whiteSpace = 'nowrap'; } }
           if (item.borderRadius !== undefined) el.style.borderRadius = `${item.borderRadius}px`;
           if (item.backgroundColor && el.id !== 'cardBadgePhotoBox' && el.id !== 'cardBadgeSignatureBox') {
@@ -2451,6 +2504,20 @@
           }
         }
       });
+      const qrCont = document.getElementById('cardBadgeQrContainer');
+      if (qrCont && (!qrCont.style.top || parseFloat(qrCont.style.top) > 85)) {
+        qrCont.style.left = `${(860 / CARD_W) * 100}%`;
+        qrCont.style.top = `${(425 / CARD_H) * 100}%`;
+        qrCont.style.width = `${(140 / CARD_W) * 100}%`;
+        qrCont.style.height = `${(140 / CARD_H) * 100}%`;
+        qrCont.style.display = 'flex';
+        qrCont.style.visibility = 'visible';
+        qrCont.style.opacity = '1';
+        qrCont.style.zIndex = '20';
+      }
+      if (window._currentSearchedAthlete) {
+        renderOfficialPublicQrCode(window._currentSearchedAthlete);
+      }
     }
 
     /* =======================================================
@@ -2534,7 +2601,11 @@
       // Detecta leitura de QR Code via parâmetro de URL (?id=... / ?codigo=...)
       try {
         const urlParams = new URLSearchParams(window.location.search);
-        const queryId = urlParams.get('id') || urlParams.get('codigo') || urlParams.get('federado') || urlParams.get('atleta');
+        let queryId = urlParams.get('id') || urlParams.get('codigo') || urlParams.get('federado') || urlParams.get('atleta');
+        if (!queryId && window.location.hash.includes('?')) {
+          const hashParams = new URLSearchParams(window.location.hash.split('?')[1]);
+          queryId = hashParams.get('id') || hashParams.get('codigo') || hashParams.get('federado') || hashParams.get('atleta');
+        }
         if (queryId) {
           const sanitized = String(queryId).replace(/\D/g, '').slice(0, 6);
           if (sanitized && sanitized.length === 6) {
