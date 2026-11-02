@@ -1217,7 +1217,7 @@
                       <!-- Controle Deslizante com Botões Rápidos -->
                       <div class="flex items-center gap-2">
                         <button type="button" onclick="adjustSignatureScale(-5)" class="w-8 h-8 flex items-center justify-center bg-[#0b101d] hover:bg-[#18233c] text-slate-200 border border-[#1c253b] hover:border-slate-500 rounded-lg text-sm font-bold transition cursor-pointer shrink-0 shadow-sm active:scale-95" title="Diminuir tamanho (-5%)">-</button>
-                        <input type="range" id="inputSignatureScale" min="40" max="250" value="100" step="2" oninput="handleSignatureScaleChange(this.value)" onchange="confirmAndSaveSignatureScale(false)" class="flex-1 accent-pe-gold cursor-pointer h-2 bg-slate-800 rounded-lg min-w-0" />
+                        <input type="range" id="inputSignatureScale" min="60" max="130" value="100" step="2" oninput="handleSignatureScaleChange(this.value)" onchange="confirmAndSaveSignatureScale(false)" class="flex-1 accent-pe-gold cursor-pointer h-2 bg-slate-800 rounded-lg min-w-0" />
                         <button type="button" onclick="adjustSignatureScale(5)" class="w-8 h-8 flex items-center justify-center bg-[#0b101d] hover:bg-[#18233c] text-slate-200 border border-[#1c253b] hover:border-slate-500 rounded-lg text-sm font-bold transition cursor-pointer shrink-0 shadow-sm active:scale-95" title="Aumentar tamanho (+5%)">+</button>
                         <button type="button" onclick="resetSignatureScale()" class="px-2.5 py-1.5 bg-amber-950/40 hover:bg-amber-900/60 text-pe-gold border border-amber-500/30 rounded-lg text-[10px] font-bold transition cursor-pointer shrink-0 shadow-sm active:scale-95 whitespace-nowrap" title="Redefinir tamanho para 100%">100%</button>
                       </div>
@@ -4596,10 +4596,10 @@
     "type": "text-line",
     "targetKey": "assinatura",
     "text": "ASSINATURA DA DIRETORIA FPEFT",
-    "x": 317,
-    "y": 521,
-    "width": 505,
-    "height": 93,
+    "x": 340,
+    "y": 585,
+    "width": 420,
+    "height": 32,
     "textColor": "#ffffff",
     "fontSize": 11,
     "fontWeight": "700",
@@ -5043,6 +5043,23 @@
           item.backgroundColor = item.backgroundColor || '#ffffff';
         }
 
+        // Padronização e blindagem da assinatura oficial (garante padrão oficial estável: y: 585, escala 100%)
+        if (item.id === 'field-assinatura' || item.targetKey === 'assinatura' || item.type === 'text-line' || item.type === 'signature-line') {
+          item.x = 340;
+          item.y = 585;
+          item.width = 420;
+          item.height = 32;
+          if (item.signatureScale === undefined || item.signatureScale > 130 || item.signatureScale < 60) {
+            item.signatureScale = 100;
+          }
+          if (!item.text || item.text.includes('ADJUNTA')) {
+            item.text = 'ASSINATURA DA DIRETORIA FPEFT';
+          }
+          if (!item.signatureUrl && window.OFFICIAL_DIRECTOR_SIGNATURE_DATA_URL) {
+            item.signatureUrl = window.OFFICIAL_DIRECTOR_SIGNATURE_DATA_URL;
+          }
+        }
+
         // Sincroniza e preserva dados ativos do atleta / formulário em tempo real:
         if (item.id === 'field-nome' || item.targetKey === 'nome') {
           item.text = curFormName || (window._lastActiveAthlete?.nome || '').toUpperCase() || '';
@@ -5379,7 +5396,7 @@
     window.loadDesktopBrancoSignature = loadDesktopBrancoSignature;
 
     function handleSignatureScaleChange(val, save = false) {
-      const scale = parseInt(val, 10) || 100;
+      const scale = Math.max(60, Math.min(130, parseInt(val, 10) || 100));
       const label = document.getElementById('signatureScaleValue');
       if (label) label.textContent = `${scale}%`;
       const range = document.getElementById('inputSignatureScale');
@@ -5403,7 +5420,7 @@
     function adjustSignatureScale(delta) {
       const range = document.getElementById('inputSignatureScale');
       const current = range ? parseInt(range.value, 10) || 100 : 100;
-      const next = Math.max(40, Math.min(250, current + delta));
+      const next = Math.max(60, Math.min(130, current + delta));
       handleSignatureScaleChange(next, true);
     }
     window.adjustSignatureScale = adjustSignatureScale;
@@ -5795,7 +5812,7 @@
             ${qrContentHtml}
             ${item.labelTag ? `<span class="field-bottom-label select-none pointer-events-none">${escapeHtml(item.labelTag)}</span>` : ''}
           `;
-        } else if (item.type === 'text-line') {
+        } else if (item.type === 'text-line' || item.type === 'signature-line' || item.id === 'field-assinatura' || item.targetKey === 'assinatura') {
           div.style.display = 'flex';
           div.style.flexDirection = 'column';
           div.style.alignItems = 'center';
@@ -5803,9 +5820,13 @@
           div.style.overflow = 'visible';
           div.style.height = 'auto';
           const sigUrl = item.signatureUrl || (typeof window !== 'undefined' ? window.OFFICIAL_DIRECTOR_SIGNATURE_DATA_URL : '');
-          const scalePercent = (item.signatureScale !== undefined ? item.signatureScale : 100) / 100;
+          const rawScale = item.signatureScale !== undefined ? item.signatureScale : 100;
+          const scalePercent = Math.min(1.3, Math.max(0.6, (rawScale > 0 ? rawScale : 100) / 100));
           const baseH = Math.round(85 * scalePercent);
           const baseMaxW = Math.round(190 * scalePercent);
+          div.style.left = '340px';
+          div.style.width = '420px';
+          div.style.top = `${585 - baseH}px`;
           const signatureImgHtml = sigUrl 
             ? `<div class="flex justify-center shrink-0 overflow-visible -mb-1.5 pointer-events-none select-none">
                  <img src="${sigUrl}" style="height: ${baseH}px; max-height: ${baseH}px; width: auto; max-width: ${baseMaxW}px; flex-shrink: 0;" class="object-contain drop-shadow pointer-events-none select-none" />
@@ -6721,19 +6742,20 @@
           }
 
           overlayGroup.appendChild(gQr);
-        } else if (item.type === 'text-line') {
+        } else if (item.type === 'text-line' || item.type === 'signature-line' || item.id === 'field-assinatura' || item.targetKey === 'assinatura') {
           const gLine = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
           const sigUrl = item.signatureUrl || (typeof window !== 'undefined' ? window.OFFICIAL_DIRECTOR_SIGNATURE_DATA_URL : '');
-          const scalePercent = (item.signatureScale !== undefined ? item.signatureScale : 100) / 100;
-          const baseY = (item.y > 540 && sigUrl) ? 521 : item.y;
+          const rawScale = item.signatureScale !== undefined ? item.signatureScale : 100;
+          const scalePercent = Math.min(1.3, Math.max(0.6, (rawScale > 0 ? rawScale : 100) / 100));
+          const lineY = 585;
           const sigH = sigUrl ? Math.round(85 * scalePercent) : 0;
           const sigW = sigUrl ? Math.round(190 * scalePercent) : 0;
-          const lineY = baseY + (sigH ? sigH - 1.5 : 0);
+          const sigY = lineY - sigH + 3;
 
           if (sigUrl) {
             const imgEl = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'image');
             imgEl.setAttribute('x', item.x + (item.width - sigW) / 2);
-            imgEl.setAttribute('y', baseY);
+            imgEl.setAttribute('y', sigY);
             imgEl.setAttribute('width', sigW);
             imgEl.setAttribute('height', sigH);
             imgEl.setAttribute('preserveAspectRatio', 'xMidYMid meet');
@@ -7138,16 +7160,14 @@
             ctx.fillText(item.labelTag, (item.x + item.width / 2) * scale, (item.y + item.height + 4) * scale);
             ctx.restore();
           }
-        } else if (item.type === 'signature-line' || item.type === 'text-line') {
+        } else if (item.type === 'signature-line' || item.type === 'text-line' || item.id === 'field-assinatura' || item.targetKey === 'assinatura') {
           // Imagem da Assinatura do Diretor posicionada no padrão exato do Studio de Emissão
           const sigUrl = item.signatureUrl || (typeof window !== 'undefined' ? window.OFFICIAL_DIRECTOR_SIGNATURE_DATA_URL : '');
-          const scalePercent = (item.signatureScale !== undefined ? item.signatureScale : 100) / 100;
+          const rawScale = item.signatureScale !== undefined ? item.signatureScale : 100;
+          const scalePercent = Math.min(1.3, Math.max(0.6, (rawScale > 0 ? rawScale : 100) / 100));
           const maxSigH = 85 * scale * scalePercent;
           const maxSigW = 190 * scale * scalePercent;
-
-          // Compatibilidade inteligente: no Studio o elemento inicia em item.y (padrão 521)
-          const baseY = (item.y > 540 && sigUrl) ? 521 : item.y;
-          let lineY = baseY * scale;
+          const lineY = 585 * scale;
 
           if (sigUrl && !isSafeOnly) {
             const sigImg = await loadImageAsync(sigUrl, 2500);
@@ -7160,14 +7180,13 @@
                 sigW = maxSigW;
                 sigH = sigW * ratio;
               }
-              const sigY = baseY * scale;
+              const sigY = lineY - sigH + (3 * scale);
               ctx.drawImage(sigImg, (item.x + item.width / 2) * scale - sigW / 2, sigY, sigW, sigH);
               ctx.restore();
-              lineY = sigY + sigH - (1.5 * scale);
             }
           }
 
-          // Traço branco de assinatura oficial (posicionado logo abaixo da assinatura)
+          // Traço branco de assinatura oficial (posicionado na linha oficial fixa 585)
           ctx.save();
           ctx.strokeStyle = '#ffffff';
           ctx.lineWidth = 1.5 * scale;

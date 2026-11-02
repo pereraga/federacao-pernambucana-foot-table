@@ -487,7 +487,7 @@
           </div>
 
           <!-- Assinatura da Diretoria FPEFT (Centro Rodapé - Padrão Oficial Studio) -->
-          <div id="cardBadgeSignatureBox" class="absolute left-[32.38%] top-[86.86%] w-[40.00%] text-center flex flex-col items-center justify-end pointer-events-none select-none overflow-visible z-20">
+          <div id="cardBadgeSignatureBox" class="absolute left-[32.38%] top-[75.5%] w-[40.00%] text-center flex flex-col items-center justify-end pointer-events-none select-none overflow-visible z-20">
             <div id="cardBadgeSignatureImgContainer" class="flex justify-center -mb-1 sm:-mb-1.5 pointer-events-none select-none overflow-visible shrink-0">
               <img id="cardBadgeSignatureImg" src="" alt="Assinatura" class="hidden object-contain drop-shadow shrink-0" />
             </div>
@@ -2454,22 +2454,23 @@
           item.backgroundColor = item.backgroundColor || '#ffffff';
         } else if (item.targetKey === 'validade' || item.id === 'field-validade') {
           el = document.getElementById('cardBadgeValidityBox');
-        } else if (item.type === 'text-line' || item.targetKey === 'assinatura' || item.id === 'field-assinatura') {
+        } else if (item.type === 'text-line' || item.type === 'signature-line' || item.targetKey === 'assinatura' || item.id === 'field-assinatura') {
           el = document.getElementById('cardBadgeSignatureBox');
           if (el) {
             const sigUrl = item.signatureUrl || (layoutData && layoutData.signatureUrl) || (typeof window !== 'undefined' ? window.OFFICIAL_DIRECTOR_SIGNATURE_DATA_URL : '');
-            const sigScale = (item.signatureScale !== undefined ? item.signatureScale : (layoutData && layoutData.signatureScale ? layoutData.signatureScale : 100)) / 100;
+            const rawScale = item.signatureScale !== undefined ? item.signatureScale : (layoutData && layoutData.signatureScale ? layoutData.signatureScale : 100);
+            const sigScale = Math.min(1.3, Math.max(0.6, (rawScale > 0 ? rawScale : 100) / 100));
             const sigText = item.text || 'ASSINATURA DA DIRETORIA FPEFT';
             const sigImg = document.getElementById('cardBadgeSignatureImg');
             if (sigImg) {
               if (sigUrl) {
                 sigImg.src = sigUrl;
-                // Calibração proporcional idêntica ao Studio de Emissão (base 56px de altura x 320px de largura em CR80 1050x662)
+                // Calibração proporcional idêntica ao Studio de Emissão (base 85px de altura x 190px de largura em CR80 1050x662)
                 const cardRef = document.getElementById('athleteCredentialCard');
                 const cardH = (cardRef && cardRef.clientHeight > 0) ? cardRef.clientHeight : ((cardRef && cardRef.clientWidth > 0 ? cardRef.clientWidth : 620) * 662 / 1050);
                 const scaleFactor = cardH / 662;
-                const calcH = Math.max(44, Math.round(85 * scaleFactor * sigScale));
-                const calcMaxW = Math.max(90, Math.round(190 * scaleFactor * sigScale));
+                const calcH = Math.max(30, Math.min(110, Math.round(85 * scaleFactor * sigScale)));
+                const calcMaxW = Math.max(70, Math.min(250, Math.round(190 * scaleFactor * sigScale)));
                 sigImg.style.height = `${calcH}px`;
                 sigImg.style.maxHeight = `${calcH}px`;
                 sigImg.style.width = 'auto';
@@ -2488,11 +2489,15 @@
         }
 
         if (el && item.x !== undefined && item.y !== undefined) {
-          const itemY = (el.id === 'cardBadgeSignatureBox' && item.y > 540) ? 521 : item.y;
-          el.style.left = `${(item.x / CARD_W) * 100}%`;
-          el.style.top = `${(itemY / CARD_H) * 100}%`;
-          if (item.width) el.style.width = `${(item.width / CARD_W) * 100}%`;
           if (el.id === 'cardBadgeSignatureBox') {
+            const rawScale = item.signatureScale !== undefined ? item.signatureScale : (layoutData && layoutData.signatureScale ? layoutData.signatureScale : 100);
+            const sigScale = Math.min(1.3, Math.max(0.6, (rawScale > 0 ? rawScale : 100) / 100));
+            const baseSigH = Math.round(85 * sigScale);
+            const lineY = 585;
+            const topY = lineY - baseSigH;
+            el.style.left = `${(item.x / CARD_W) * 100}%`;
+            el.style.top = `${(topY / CARD_H) * 100}%`;
+            if (item.width) el.style.width = `${(item.width / CARD_W) * 100}%`;
             el.style.overflow = 'visible';
             el.style.height = 'auto';
             el.style.display = 'flex';
@@ -2500,6 +2505,9 @@
             el.style.alignItems = 'center';
             el.style.justifyContent = 'flex-end';
           } else {
+            el.style.left = `${(item.x / CARD_W) * 100}%`;
+            el.style.top = `${(item.y / CARD_H) * 100}%`;
+            if (item.width) el.style.width = `${(item.width / CARD_W) * 100}%`;
             if (item.height) el.style.height = `${(item.height / CARD_H) * 100}%`;
           }
           if (el.id === 'cardBadgeQrContainer') {
