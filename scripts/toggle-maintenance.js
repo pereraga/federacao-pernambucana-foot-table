@@ -8,29 +8,31 @@ const rootDir = path.resolve(__dirname, '..');
 const middlewarePath = path.join(rootDir, 'middleware.ts');
 
 const arg = (process.argv[2] || '').toLowerCase();
-const enableMaintenance = arg !== 'off' && arg !== 'disable' && arg !== 'reativar';
+const enableMaintenance = arg !== 'off' && arg !== 'disable' && arg !== 'reativar' && arg !== 'habilitar' && arg !== 'on';
+const isEnabling = arg === 'on' || arg === 'desabilitar' || (arg !== 'off' && arg !== 'disable' && arg !== 'reativar' && arg !== 'habilitar');
 
 let content = fs.readFileSync(middlewarePath, 'utf-8');
+const timestamp = new Date().toISOString();
 
-if (enableMaintenance) {
+if (isEnabling) {
   content = content.replace(
-    /export const MAINTENANCE_MODE = (true|false);/g,
-    'export const MAINTENANCE_MODE = true;'
+    /export const MAINTENANCE_MODE = (true|false)(;.*)?/g,
+    `export const MAINTENANCE_MODE = true; // status: DESABILITADO em ${timestamp}`
   );
   fs.writeFileSync(middlewarePath, content, 'utf-8');
   console.log('------------------------------------------------------------');
-  console.log(' [OK] MODO MANUTENÇÃO ATIVADO!');
+  console.log(' [OK] MODO MANUTENÇÃO ATIVADO (SITE DESABILITADO)!');
   console.log(' - Site online (Vercel): OFFLINE temporário (Aviso 503)');
   console.log(' - Localhost (127.0.0.1:3000): 100% LIBERADO para testes');
   console.log('------------------------------------------------------------');
 } else {
   content = content.replace(
-    /export const MAINTENANCE_MODE = (true|false);/g,
-    'export const MAINTENANCE_MODE = false;'
+    /export const MAINTENANCE_MODE = (true|false)(;.*)?/g,
+    `export const MAINTENANCE_MODE = false; // status: HABILITADO em ${timestamp}`
   );
   fs.writeFileSync(middlewarePath, content, 'utf-8');
   console.log('------------------------------------------------------------');
-  console.log(' [OK] MODO MANUTENÇÃO DESATIVADO!');
+  console.log(' [OK] MODO MANUTENÇÃO DESATIVADO (SITE HABILITADO)!');
   console.log(' - Site online (Vercel): REATIVADO e online para o público!');
   console.log('------------------------------------------------------------');
 }
