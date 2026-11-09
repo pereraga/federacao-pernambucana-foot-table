@@ -6,7 +6,7 @@ import { getSessionFromCookieHeader } from './api/lib/session.js';
 //          O ambiente local (localhost / 127.0.0.1) continua 100% liberado!
 // - false: Portal ativo e online para todo o público.
 // ==============================================================================
-export const MAINTENANCE_MODE = true; // status: DESABILITADO em 2026-11-09T23:50:04.706Z
+export const MAINTENANCE_MODE = true; // status: DESABILITADO em 2026-11-09T23:58:02.739Z
 
 // Rotas restritas que exigem sessão administrativa válida
 const RESTRICTED_ROUTES = ['/admin', '/admin.html', '/painel', '/api/gestao'];
@@ -227,7 +227,10 @@ export default function middleware(request: Request) {
   // 1. MODO DE MANUTENÇÃO ATIVO:
   // Se estiver ativado e NÃO for localhost (nem ambiente de teste),
   // bloqueia o acesso externo com a página institucional 503
-  if (MAINTENANCE_MODE && !isLocalhost && !isTest) {
+  // Permite acesso ininterrupto ao Painel Administrativo (/admin, /login, /api, /painel)
+  const isAdmRoute = pathname.startsWith('/admin') || pathname.startsWith('/login') || pathname.startsWith('/api/') || pathname.startsWith('/painel');
+
+  if (MAINTENANCE_MODE && !isLocalhost && !isTest && !isAdmRoute) {
     securityHeaders.set('Content-Type', 'text/html; charset=utf-8');
     securityHeaders.set('Retry-After', '3600');
     return new Response(MAINTENANCE_HTML, {

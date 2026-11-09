@@ -34,7 +34,8 @@ async function updateDatabaseStatus(status) {
 
 if (isDisable) {
   console.log('============================================================');
-  console.log(' DERRUBANDO O SITE EXCLUSIVO: https://fpeft.vercel.app/');
+  console.log(' DERRUBANDO O SITE PUBLICO: https://fpeft.vercel.app/');
+  console.log(' (PAINEL ADMINISTRATIVO E LOGIN CONTINUAM 100% LIBERADOS)');
   console.log('============================================================');
 
   // 1. Salva cópia de segurança de index.html se ainda não existir
@@ -51,7 +52,8 @@ if (isDisable) {
     fs.writeFileSync(indexHtmlPath, manutencaoHtml, 'utf-8');
   }
 
-  // 3. Atualiza vercel.json com redirecionamento forçado para /manutencao.html
+  // 3. Atualiza vercel.json: redireciona apenas rotas públicas para /manutencao.html
+  // EXCLUI explicitamente admin, login, api e assets para o ADM continuar funcionando!
   if (fs.existsSync(vercelJsonPath)) {
     try {
       const vJson = JSON.parse(fs.readFileSync(vercelJsonPath, 'utf-8'));
@@ -62,7 +64,7 @@ if (isDisable) {
           permanent: false
         },
         {
-          source: '/((?!manutencao\\.html|assets/).*)',
+          source: '/((?!admin|login|api|assets|manutencao|favicon\\.ico).*)',
           destination: '/manutencao.html',
           permanent: false
         }
@@ -73,7 +75,7 @@ if (isDisable) {
     }
   }
 
-  // 4. Ativa modo manutenção em middleware.ts
+  // 4. Ativa modo manutenção em middleware.ts (mantendo ADM liberado)
   if (fs.existsSync(middlewarePath)) {
     let mw = fs.readFileSync(middlewarePath, 'utf-8');
     mw = mw.replace(/export const MAINTENANCE_MODE = (true|false)(;.*)?/g, `export const MAINTENANCE_MODE = true; // status: DESABILITADO em ${timestamp}`);
@@ -83,12 +85,12 @@ if (isDisable) {
   // 5. Registra status no banco de dados (sem alterar atletas)
   await updateDatabaseStatus('desabilitado');
 
-  console.log(' - index.html: ALTERADO para tela de manutenção');
-  console.log(' - vercel.json: REDIRECIONAMENTO ATIVADO (qualquer rota -> manutenção)');
-  console.log(' - middleware.ts: MAINTENANCE_MODE = true');
+  console.log(' - index.html: ALTERADO para tela de manutenção institucional');
+  console.log(' - vercel.json: REDIRECIONA apenas rotas públicas (ADM e Login LIBERADOS)');
+  console.log(' - middleware.ts: MAINTENANCE_MODE = true (rotas de ADM isentas)');
   console.log(' - Supabase: status marcado como "desabilitado"');
   console.log('============================================================');
-  console.log(' [OK] CONFIGURAÇÃO CONCLUÍDA: https://fpeft.vercel.app/ está pronto para ser publicado como DESABILITADO.');
+  console.log(' [OK] Site público desabilitado! O painel ADM continua 100% acessível.');
   console.log('============================================================');
 } else {
   console.log('============================================================');
