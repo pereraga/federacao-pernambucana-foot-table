@@ -3,12 +3,7 @@
   "redirects": [
     {
       "source": "/php/(.*)",
-      "destination": "/manutencao.html",
-      "permanent": false
-    },
-    {
-      "source": "/((?!admin|login|api|assets|manutencao|favicon\\.ico).*)",
-      "destination": "/manutencao.html",
+      "destination": "/",
       "permanent": false
     }
   ],
